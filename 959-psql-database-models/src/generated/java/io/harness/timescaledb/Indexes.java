@@ -11,6 +11,8 @@
 package io.harness.timescaledb;
 
 import io.harness.timescaledb.tables.Anomalies;
+import io.harness.timescaledb.tables.BackstageCatalog;
+import io.harness.timescaledb.tables.BackstageScaffolderTasks;
 import io.harness.timescaledb.tables.BillingData;
 import io.harness.timescaledb.tables.CeRecommendations;
 import io.harness.timescaledb.tables.Environments;
@@ -49,6 +51,27 @@ public class Indexes {
   public static final Index ANOMALY_ACCOUNTID_INDEX =
       Internal.createIndex(DSL.name("anomaly_accountid_index"), Anomalies.ANOMALIES,
           new OrderField[] {Anomalies.ANOMALIES.ACCOUNTID, Anomalies.ANOMALIES.ANOMALYTIME.desc()}, false);
+  public static final Index BACKSTAGE_CATALOG_ACCOUNT_IDENTIFIER_CREATED_AT_IDX = Internal.createIndex(
+      DSL.name("backstage_catalog_account_identifier_created_at_idx"), BackstageCatalog.BACKSTAGE_CATALOG,
+      new OrderField[] {
+          BackstageCatalog.BACKSTAGE_CATALOG.ACCOUNT_IDENTIFIER, BackstageCatalog.BACKSTAGE_CATALOG.CREATED_AT},
+      false);
+  public static final Index BACKSTAGE_CATALOG_UNIQUE_IDX =
+      Internal.createIndex(DSL.name("backstage_catalog_unique_idx"), BackstageCatalog.BACKSTAGE_CATALOG,
+          new OrderField[] {
+              BackstageCatalog.BACKSTAGE_CATALOG.ACCOUNT_IDENTIFIER, BackstageCatalog.BACKSTAGE_CATALOG.IDENTIFIER},
+          true);
+  public static final Index BACKSTAGE_SCAFFOLDER_TASKS_ACCOUNT_IDENTIFIER_CREATED_AT_IDX =
+      Internal.createIndex(DSL.name("backstage_scaffolder_tasks_account_identifier_created_at_idx"),
+          BackstageScaffolderTasks.BACKSTAGE_SCAFFOLDER_TASKS,
+          new OrderField[] {BackstageScaffolderTasks.BACKSTAGE_SCAFFOLDER_TASKS.ACCOUNT_IDENTIFIER,
+              BackstageScaffolderTasks.BACKSTAGE_SCAFFOLDER_TASKS.CREATED_AT},
+          false);
+  public static final Index BACKSTAGE_SCAFFOLDER_TASKS_UNIQUE_IDX = Internal.createIndex(
+      DSL.name("backstage_scaffolder_tasks_unique_idx"), BackstageScaffolderTasks.BACKSTAGE_SCAFFOLDER_TASKS,
+      new OrderField[] {BackstageScaffolderTasks.BACKSTAGE_SCAFFOLDER_TASKS.ACCOUNT_IDENTIFIER,
+          BackstageScaffolderTasks.BACKSTAGE_SCAFFOLDER_TASKS.IDENTIFIER},
+      true);
   public static final Index BILLING_DATA_ACCOUNTID_INDEX =
       Internal.createIndex(DSL.name("billing_data_accountid_index"), BillingData.BILLING_DATA,
           new OrderField[] {BillingData.BILLING_DATA.ACCOUNTID, BillingData.BILLING_DATA.STARTTIME.desc()}, false);

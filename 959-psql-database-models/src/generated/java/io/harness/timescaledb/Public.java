@@ -11,6 +11,8 @@
 package io.harness.timescaledb;
 
 import io.harness.timescaledb.tables.Anomalies;
+import io.harness.timescaledb.tables.BackstageCatalog;
+import io.harness.timescaledb.tables.BackstageScaffolderTasks;
 import io.harness.timescaledb.tables.BillingData;
 import io.harness.timescaledb.tables.CeRecommendations;
 import io.harness.timescaledb.tables.Environments;
@@ -53,6 +55,17 @@ public class Public extends SchemaImpl {
    * The table <code>public.anomalies</code>.
    */
   public final Anomalies ANOMALIES = Anomalies.ANOMALIES;
+
+  /**
+   * The table <code>public.backstage_catalog</code>.
+   */
+  public final BackstageCatalog BACKSTAGE_CATALOG = BackstageCatalog.BACKSTAGE_CATALOG;
+
+  /**
+   * The table <code>public.backstage_scaffolder_tasks</code>.
+   */
+  public final BackstageScaffolderTasks BACKSTAGE_SCAFFOLDER_TASKS =
+      BackstageScaffolderTasks.BACKSTAGE_SCAFFOLDER_TASKS;
 
   /**
    * The table <code>public.billing_data</code>.
@@ -168,11 +181,12 @@ public class Public extends SchemaImpl {
 
   @Override
   public final List<Table<?>> getTables() {
-    return Arrays.<Table<?>>asList(Anomalies.ANOMALIES, BillingData.BILLING_DATA, CeRecommendations.CE_RECOMMENDATIONS,
-        Environments.ENVIRONMENTS, KubernetesUtilizationData.KUBERNETES_UTILIZATION_DATA,
-        ModuleLicenses.MODULE_LICENSES, NgInstanceStats.NG_INSTANCE_STATS, NgInstanceStats.NG_INSTANCE_STATS,
-        NodeInfo.NODE_INFO, NodePoolAggregated.NODE_POOL_AGGREGATED,
-        PipelineExecutionSummaryCd.PIPELINE_EXECUTION_SUMMARY_CD,
+    return Arrays.<Table<?>>asList(Anomalies.ANOMALIES, BackstageCatalog.BACKSTAGE_CATALOG,
+        BackstageScaffolderTasks.BACKSTAGE_SCAFFOLDER_TASKS, BillingData.BILLING_DATA,
+        CeRecommendations.CE_RECOMMENDATIONS, Environments.ENVIRONMENTS,
+        KubernetesUtilizationData.KUBERNETES_UTILIZATION_DATA, ModuleLicenses.MODULE_LICENSES,
+        NgInstanceStats.NG_INSTANCE_STATS, NgInstanceStats.NG_INSTANCE_STATS, NodeInfo.NODE_INFO,
+        NodePoolAggregated.NODE_POOL_AGGREGATED, PipelineExecutionSummaryCd.PIPELINE_EXECUTION_SUMMARY_CD,
         PipelineExecutionSummaryCi.PIPELINE_EXECUTION_SUMMARY_CI, Pipelines.PIPELINES, PodInfo.POD_INFO,
         ServiceInfraInfo.SERVICE_INFRA_INFO, Services.SERVICES,
         ServiceInstancesLicenseDailyReport.SERVICE_INSTANCES_LICENSE_DAILY_REPORT,

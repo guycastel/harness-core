@@ -7,6 +7,8 @@
 
 package io.harness.ssca.search;
 
+import static io.harness.spec.server.ssca.v1.model.Operator.EQUALS;
+
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.exception.InvalidArgumentsException;
@@ -16,6 +18,7 @@ import io.harness.ssca.search.entities.Component.ComponentKeys;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import lombok.experimental.UtilityClass;
 
@@ -61,6 +64,9 @@ public class ComponentVersionQueryBuilder {
   public Query buildComponentVersionQuery(ComponentFilter filter) {
     List<Integer> versions = VersionField.getVersion(filter.getValue());
     if (versions.size() != 3 || versions.get(0) == -1) {
+      if (filter.getOperator() == EQUALS) {
+        return ElasticSearchQueryBuilder.matchFieldValue(ComponentKeys.packageVersion, filter.getValue());
+      }
       throw new InvalidArgumentsException("Unsupported Version Format");
     }
     Integer majorVersion = versions.get(0);
@@ -69,7 +75,10 @@ public class ComponentVersionQueryBuilder {
 
     switch (filter.getOperator()) {
       case EQUALS:
-        return buildEqualsQuery(majorVersion, minorVersion, patchVersion);
+        List<Query> equalQueries =
+            new ArrayList<>((Collection) buildEqualsQuery(majorVersion, minorVersion, patchVersion));
+        equalQueries.add(ElasticSearchQueryBuilder.matchFieldValue(ComponentKeys.packageVersion, filter.getValue()));
+        return ElasticSearchQueryBuilder.shouldMatchAtleastOne(equalQueries);
       case NOTEQUALS:
         return buildNotEqualsQuery(majorVersion, minorVersion, patchVersion);
       case GREATERTHAN:

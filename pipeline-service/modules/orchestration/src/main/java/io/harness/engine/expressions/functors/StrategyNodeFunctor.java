@@ -12,6 +12,7 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.beans.FeatureName;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.engine.expressions.NodeExecutionsCache;
 import io.harness.engine.expressions.OrchestrationConstants;
@@ -108,7 +109,9 @@ public class StrategyNodeFunctor extends LateBindingMap {
     if (childLevel == null) {
       return Collections.emptyMap();
     }
-    return nodeExecutionInfoService.fetchStrategyObjectMap(
-        Collections.singletonList(childLevel), AmbianceUtils.shouldUseMatrixFieldName(ambiance));
+    return nodeExecutionInfoService.fetchStrategyObjectMap(Collections.singletonList(childLevel),
+        AmbianceUtils.shouldUseMatrixFieldName(ambiance),
+        AmbianceUtils.checkIfFeatureFlagEnabled(
+            ambiance, FeatureName.CDS_NG_STRATEGY_IDENTIFIER_POSTFIX_TRUNCATION_REFACTOR.name()));
   }
 }

@@ -64,6 +64,7 @@ public class AmbianceUtils {
   public static final String SPECIAL_CHARACTER_REGEX = "[^a-zA-Z0-9]";
   public static final String PIE_SIMPLIFY_LOG_BASE_KEY = "PIE_SIMPLIFY_LOG_BASE_KEY";
   public static final String PIE_SECRETS_OBSERVER = "PIE_SECRETS_OBSERVER";
+  public static final int MAX_CHARACTERS_FOR_IDENTIFIER_POSTFIX = 127;
 
   public static Ambiance cloneForFinish(@NonNull Ambiance ambiance) {
     return clone(ambiance, ambiance.getLevelsList().size() - 1);
@@ -305,14 +306,20 @@ public class AmbianceUtils {
     return ambiance.getLevels(ambiance.getLevelsCount() - 2).getRuntimeId();
   }
 
-  public static String modifyIdentifier(StrategyMetadata metadata, String identifier, Ambiance ambiance) {
-    return modifyIdentifier(metadata, identifier, shouldUseMatrixFieldName(ambiance));
+  public static String modifyIdentifier(
+      StrategyMetadata metadata, String identifier, Ambiance ambiance, boolean useNewStrategyPostFixTruncation) {
+    return modifyIdentifier(metadata, identifier, shouldUseMatrixFieldName(ambiance), useNewStrategyPostFixTruncation);
   }
 
-  public static String modifyIdentifier(
-      StrategyMetadata strategyMetadata, String identifier, boolean useMatrixFieldName) {
-    return identifier.replaceAll(StrategyValidationUtils.STRATEGY_IDENTIFIER_POSTFIX_ESCAPED,
-        getStrategyPostFixUsingMetadata(strategyMetadata, useMatrixFieldName));
+  public static String modifyIdentifier(StrategyMetadata strategyMetadata, String identifier,
+      boolean useMatrixFieldName, boolean useNewStrategyPostFixTruncation) {
+    String strategyPostFix;
+    if (useNewStrategyPostFixTruncation) {
+      strategyPostFix = strategyMetadata.getIdentifierPostFix();
+    } else {
+      strategyPostFix = getStrategyPostFixUsingMetadata(strategyMetadata, useMatrixFieldName);
+    }
+    return identifier.replaceAll(StrategyValidationUtils.STRATEGY_IDENTIFIER_POSTFIX_ESCAPED, strategyPostFix);
   }
 
   // Todo: Use metadata.getIdentifierPostfix going forward.
@@ -370,8 +377,10 @@ public class AmbianceUtils {
           + strategyMetadata.getMatrixMetadata().getMatrixValuesMap().get(MATRIX_IDENTIFIER_POSTFIX_FOR_DUPLICATES);
     }
 
-    String modifiedString =
-        "_" + (levelIdentifier.length() <= 126 ? levelIdentifier : levelIdentifier.substring(0, 126));
+    String modifiedString = "_"
+        + (levelIdentifier.length() <= MAX_CHARACTERS_FOR_IDENTIFIER_POSTFIX - 1
+                ? levelIdentifier
+                : levelIdentifier.substring(0, MAX_CHARACTERS_FOR_IDENTIFIER_POSTFIX - 1));
 
     return modifiedString.replaceAll(SPECIAL_CHARACTER_REGEX, "_");
   }

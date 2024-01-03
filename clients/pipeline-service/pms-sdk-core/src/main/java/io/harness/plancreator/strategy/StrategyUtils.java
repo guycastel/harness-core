@@ -8,6 +8,7 @@
 package io.harness.plancreator.strategy;
 
 import static io.harness.plancreator.strategy.StrategyConstants.CURRENT_GLOBAL_ITERATION;
+import static io.harness.plancreator.strategy.StrategyConstants.IDENTIFIER_POSTFIX;
 import static io.harness.plancreator.strategy.StrategyConstants.ITEM;
 import static io.harness.plancreator.strategy.StrategyConstants.ITERATION;
 import static io.harness.plancreator.strategy.StrategyConstants.ITERATIONS;
@@ -360,7 +361,7 @@ public class StrategyUtils {
   @Deprecated
   // pass flag
   public Map<String, Object> fetchStrategyObjectMap(
-      List<Level> levelsWithStrategyMetadata, boolean useMatrixFieldName) {
+      List<Level> levelsWithStrategyMetadata, boolean useMatrixFieldName, boolean useNewStrategyPostFixTruncation) {
     Map<String, Object> strategyObjectMap = new HashMap<>();
     Map<String, Object> matrixValuesMap = new HashMap<>();
     Map<String, Object> repeatValuesMap = new HashMap<>();
@@ -389,8 +390,12 @@ public class StrategyUtils {
       strategyObjectMap.put(ITERATION, level.getStrategyMetadata().getCurrentIteration());
       strategyObjectMap.put(ITERATIONS, level.getStrategyMetadata().getTotalIterations());
       strategyObjectMap.put(TOTAL_ITERATIONS, level.getStrategyMetadata().getTotalIterations());
-      strategyObjectMap.put("identifierPostFix",
-          AmbianceUtils.getStrategyPostFixUsingMetadata(level.getStrategyMetadata(), useMatrixFieldName));
+      if (useNewStrategyPostFixTruncation) {
+        strategyObjectMap.put(IDENTIFIER_POSTFIX, level.getStrategyMetadata().getIdentifierPostFix());
+      } else {
+        strategyObjectMap.put(IDENTIFIER_POSTFIX,
+            AmbianceUtils.getStrategyPostFixUsingMetadata(level.getStrategyMetadata(), useMatrixFieldName));
+      }
     }
     strategyObjectMap.put(MATRIX, matrixValuesMap);
     strategyObjectMap.put(REPEAT, repeatValuesMap);

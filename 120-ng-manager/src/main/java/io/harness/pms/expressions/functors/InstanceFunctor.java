@@ -15,6 +15,7 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.beans.FeatureName;
 import io.harness.cdng.instance.outcome.InstanceOutcome;
 import io.harness.cdng.instance.outcome.InstancesOutcome;
 import io.harness.exception.InvalidArgumentsException;
@@ -95,8 +96,10 @@ public class InstanceFunctor implements SdkFunctor {
             .filter(level -> AmbianceUtils.hasStrategyMetadata(level) && level.hasStepType())
             .collect(Collectors.toList());
 
-    Map<String, Object> strategyObjectMap = StrategyUtils.fetchStrategyObjectMap(
-        stepLevelsWithStrategyMetadata, AmbianceUtils.shouldUseMatrixFieldName(ambiance));
+    Map<String, Object> strategyObjectMap = StrategyUtils.fetchStrategyObjectMap(stepLevelsWithStrategyMetadata,
+        AmbianceUtils.shouldUseMatrixFieldName(ambiance),
+        AmbianceUtils.checkIfFeatureFlagEnabled(
+            ambiance, FeatureName.CDS_NG_STRATEGY_IDENTIFIER_POSTFIX_TRUNCATION_REFACTOR.name()));
     if (strategyObjectMap == null) {
       throw new InvalidRequestException("Not found step level strategy");
     }

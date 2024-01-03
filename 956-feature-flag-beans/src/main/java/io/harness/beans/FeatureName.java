@@ -713,6 +713,7 @@ public enum FeatureName {
   STOP_INSTANCE_SYNC_VIA_ITERATOR_FOR_PDC_DEPLOYMENTS,
   STOP_SHOWING_RUNNING_EXECUTIONS,
   STO_ALL_ISSUES_PAGE("Enable all issues page for STO", HarnessTeam.STO),
+  STO_BASELINE_DEFAULTING("Enable defaulting of Security Test Target baselines by matching against customer-configurable RegEx's", HarnessTeam.STO),
   STO_JIRA_INTEGRATION("Enable Jira integration for STO", HarnessTeam.STO),
   STO_STEPS_TEST_MODE(
       "Enable the rest of STO Steps Q3 2023 and beyond, NOT READY for use in PRODUCTION", HarnessTeam.STO),

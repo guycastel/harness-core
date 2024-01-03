@@ -95,7 +95,8 @@ public enum ResourceType {
   IDP_CHECKS(ResourceTypeConstants.IDP_CHECKS),
   IDP_ALLOW_LIST(ResourceTypeConstants.IDP_ALLOW_LIST),
   IDP_OAUTH_CONFIG(ResourceTypeConstants.IDP_OAUTH_CONFIG),
-  IDP_CATALOG_CONNECTOR(ResourceTypeConstants.IDP_CATALOG_CONNECTOR);
+  IDP_CATALOG_CONNECTOR(ResourceTypeConstants.IDP_CATALOG_CONNECTOR),
+  IDP_PERMISSIONS(ResourceTypeConstants.IDP_PERMISSIONS);
 
   ResourceType(String resourceType) {
     if (!this.name().equals(resourceType)) {

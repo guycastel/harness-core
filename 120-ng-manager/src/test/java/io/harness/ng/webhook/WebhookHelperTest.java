@@ -17,12 +17,15 @@ import static io.harness.eventsframework.EventsFrameworkConstants.GIT_BRANCH_HOO
 import static io.harness.eventsframework.EventsFrameworkConstants.GIT_PR_EVENT_STREAM;
 import static io.harness.eventsframework.EventsFrameworkConstants.GIT_PUSH_EVENT_STREAM;
 import static io.harness.eventsframework.EventsFrameworkConstants.WEBHOOK_EVENTS_STREAM;
+import static io.harness.rule.OwnerRule.ADITHYA;
 import static io.harness.rule.OwnerRule.MEET;
 import static io.harness.rule.OwnerRule.VINICIUS;
 import static io.harness.security.PrincipalProtoMapper.toPrincipalProto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 import io.harness.CategoryTest;
 import io.harness.beans.HeaderConfig;
@@ -45,6 +48,7 @@ import io.harness.rule.Owner;
 import io.harness.security.dto.Principal;
 import io.harness.security.dto.UserPrincipal;
 import io.harness.service.WebhookParserSCMService;
+import io.harness.utils.featureflaghelper.NGFeatureFlagHelperService;
 
 import com.google.inject.name.Named;
 import io.grpc.Status;
@@ -70,6 +74,7 @@ public class WebhookHelperTest extends CategoryTest {
   @Mock @Named(GIT_PR_EVENT_STREAM) private Producer gitPrEventProducer;
   @Mock @Named(GIT_BRANCH_HOOK_EVENT_STREAM) private Producer gitBranchHookEventProducer;
   @Mock WebhookParserSCMService webhookParserSCMService;
+  @Mock NGFeatureFlagHelperService ngFeatureFlagHelperService;
   private String accountId = "accountId";
   private String payload = "payload";
 
@@ -142,6 +147,7 @@ public class WebhookHelperTest extends CategoryTest {
   @Owner(developers = MEET)
   @Category(UnitTests.class)
   public void testGetProducerListForEvent() {
+    when(ngFeatureFlagHelperService.isEnabled(any(), any())).thenReturn(false);
     List<Producer> producers = new ArrayList<>();
     WebhookDTO webhookDTO = WebhookDTO.newBuilder()
                                 .setParsedResponse(ParseWebhookResponse.newBuilder().build())
@@ -168,6 +174,53 @@ public class WebhookHelperTest extends CategoryTest {
     assertThat(webhookHelper.getProducerListForEvent(webhookDTO)).isEqualTo(producers);
 
     producers.remove(gitPushEventProducer);
+    webhookDTO = WebhookDTO.newBuilder()
+                     .setParsedResponse(ParseWebhookResponse.newBuilder().build())
+                     .setGitDetails(GitDetails.newBuilder().setEvent(WebhookEventType.CREATE_BRANCH).build())
+                     .build();
+    producers.add(gitBranchHookEventProducer);
+    assertThat(webhookHelper.getProducerListForEvent(webhookDTO)).isEqualTo(producers);
+
+    webhookDTO = WebhookDTO.newBuilder()
+                     .setParsedResponse(ParseWebhookResponse.newBuilder().build())
+                     .setGitDetails(GitDetails.newBuilder().setEvent(WebhookEventType.DELETE_BRANCH).build())
+                     .build();
+    assertThat(webhookHelper.getProducerListForEvent(webhookDTO)).isEqualTo(producers);
+  }
+
+  @Test
+  @Owner(developers = ADITHYA)
+  @Category(UnitTests.class)
+  public void testGetProducerListForEventWhenTriggerExecutedSequentially() {
+    when(ngFeatureFlagHelperService.isEnabled(any(), any())).thenReturn(true);
+    List<Producer> producers = new ArrayList<>();
+    WebhookDTO webhookDTO = WebhookDTO.newBuilder()
+                                .setParsedResponse(ParseWebhookResponse.newBuilder().build())
+                                .setGitDetails(GitDetails.newBuilder().setEvent(WebhookEventType.PR).build())
+                                .build();
+    producers.add(webhookEventProducer);
+    producers.add(gitPrEventProducer);
+    assertThat(webhookHelper.getProducerListForEvent(webhookDTO)).isEqualTo(producers);
+
+    producers.remove(gitPrEventProducer);
+    producers.remove(webhookEventProducer);
+    webhookDTO = WebhookDTO.newBuilder()
+                     .setParsedResponse(ParseWebhookResponse.newBuilder().build())
+                     .setGitDetails(GitDetails.newBuilder().setEvent(WebhookEventType.PUSH).build())
+                     .build();
+    producers.add(gitPushEventProducer);
+    assertThat(webhookHelper.getProducerListForEvent(webhookDTO)).isEqualTo(producers);
+
+    producers.remove(gitPushEventProducer);
+    webhookDTO = WebhookDTO.newBuilder()
+                     .setParsedResponse(ParseWebhookResponse.newBuilder().build())
+                     .setGitDetails(GitDetails.newBuilder().setEvent(WebhookEventType.PUSH).build())
+                     .build();
+    producers.add(gitPushEventProducer);
+    assertThat(webhookHelper.getProducerListForEvent(webhookDTO)).isEqualTo(producers);
+
+    producers.remove(gitPushEventProducer);
+    producers.add(webhookEventProducer);
     webhookDTO = WebhookDTO.newBuilder()
                      .setParsedResponse(ParseWebhookResponse.newBuilder().build())
                      .setGitDetails(GitDetails.newBuilder().setEvent(WebhookEventType.CREATE_BRANCH).build())

@@ -32,4 +32,5 @@ import lombok.experimental.FieldDefaults;
 public class GitXEventUpdateRequestDTO {
   List<String> processedFilePaths;
   GitXWebhookEventStatus gitXWebhookEventStatus;
+  AdditionalParams additionalParams;
 }

@@ -16,6 +16,7 @@ import io.harness.gitsync.common.dtos.ScmGetBatchFileRequestIdentifier;
 import io.harness.gitsync.common.dtos.ScmGetFileByBranchRequestDTO;
 import io.harness.gitsync.common.dtos.ScmUpdateGitCacheRequestDTO;
 import io.harness.gitsync.common.service.ScmFacilitatorService;
+import io.harness.gitsync.gitxwebhooks.dtos.AdditionalParams;
 import io.harness.gitsync.gitxwebhooks.dtos.GitXCacheUpdateRunnableRequestDTO;
 import io.harness.gitsync.gitxwebhooks.dtos.GitXEventUpdateRequestDTO;
 import io.harness.gitsync.gitxwebhooks.loggers.GitXWebhookCacheUpdateLogContext;
@@ -53,7 +54,12 @@ public class GitXWebhookCacheUpdateRunnable implements Runnable {
       scmFacilitatorService.updateGitCache(buildScmUpdateGitCacheRequestDTO(gitXCacheUpdateRunnableRequestDTO));
       gitXWebhookEventService.updateEvent(gitXCacheUpdateRunnableRequestDTO.getScope().getAccountIdentifier(),
           eventIdentifier,
-          GitXEventUpdateRequestDTO.builder().gitXWebhookEventStatus(GitXWebhookEventStatus.SUCCESSFUL).build());
+          GitXEventUpdateRequestDTO.builder()
+              .additionalParams(AdditionalParams.builder()
+                                    .webhookDTO(gitXCacheUpdateRunnableRequestDTO.getAdditionalParams().getWebhookDTO())
+                                    .build())
+              .gitXWebhookEventStatus(GitXWebhookEventStatus.SUCCESSFUL)
+              .build());
       log.info(String.format("In the account %s, successfully updated the git cache for the event %s",
           gitXCacheUpdateRunnableRequestDTO.getScope().getAccountIdentifier(),
           gitXCacheUpdateRunnableRequestDTO.getEventIdentifier()));
@@ -62,7 +68,12 @@ public class GitXWebhookCacheUpdateRunnable implements Runnable {
           eventIdentifier, exception);
       gitXWebhookEventService.updateEvent(gitXCacheUpdateRunnableRequestDTO.getScope().getAccountIdentifier(),
           eventIdentifier,
-          GitXEventUpdateRequestDTO.builder().gitXWebhookEventStatus(GitXWebhookEventStatus.FAILED).build());
+          GitXEventUpdateRequestDTO.builder()
+              .additionalParams(AdditionalParams.builder()
+                                    .webhookDTO(gitXCacheUpdateRunnableRequestDTO.getAdditionalParams().getWebhookDTO())
+                                    .build())
+              .gitXWebhookEventStatus(GitXWebhookEventStatus.FAILED)
+              .build());
     }
   }
 

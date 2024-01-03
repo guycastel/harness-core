@@ -28,10 +28,7 @@ import io.harness.gitsync.common.dtos.GitDiffResultFileListDTO;
 import io.harness.gitsync.common.helper.GitRepoHelper;
 import io.harness.gitsync.common.service.GitSyncConnectorService;
 import io.harness.gitsync.common.service.ScmOrchestratorService;
-import io.harness.gitsync.gitxwebhooks.dtos.GitXCacheUpdateHelperRequestDTO;
-import io.harness.gitsync.gitxwebhooks.dtos.GitXEventUpdateRequestDTO;
-import io.harness.gitsync.gitxwebhooks.dtos.ModifiedFilePathsResponseDTO;
-import io.harness.gitsync.gitxwebhooks.dtos.ProcessingFilePathResponseDTO;
+import io.harness.gitsync.gitxwebhooks.dtos.*;
 import io.harness.gitsync.gitxwebhooks.entity.GitXWebhook;
 import io.harness.gitsync.gitxwebhooks.entity.GitXWebhookEvent;
 import io.harness.gitsync.gitxwebhooks.loggers.GitXWebhookEventLogContext;
@@ -60,6 +57,7 @@ public class GitXWebhookEventProcessServiceImpl implements GitXWebhookEventProce
   @Inject private ScmOrchestratorService scmOrchestratorService;
   @Inject private GitSyncConnectorService gitSyncConnectorService;
   @Inject private GitRepoHelper gitRepoHelper;
+  public static final List<String> EMPTY_PROCESSING_FILES = new ArrayList<>();
 
   @Override
   public void processEvent(WebhookDTO webhookDTO) {
@@ -67,7 +65,7 @@ public class GitXWebhookEventProcessServiceImpl implements GitXWebhookEventProce
       try {
         GitXWebhookEvent gitXWebhookEvent = gitXWebhookEventsRepository.findByAccountIdentifierAndEventIdentifier(
             webhookDTO.getAccountId(), webhookDTO.getEventId());
-        processQueuedEvent(gitXWebhookEvent);
+        processQueuedEvent(gitXWebhookEvent, webhookDTO);
       } catch (Exception exception) {
         log.error("Exception occurred while processing the event {}", webhookDTO.getEventId(), exception);
         throw exception;
@@ -75,7 +73,7 @@ public class GitXWebhookEventProcessServiceImpl implements GitXWebhookEventProce
     }
   }
 
-  private void processQueuedEvent(GitXWebhookEvent gitXWebhookEvent) {
+  private void processQueuedEvent(GitXWebhookEvent gitXWebhookEvent, WebhookDTO webhookDTO) {
     try (GitXWebhookEventLogContext context = new GitXWebhookEventLogContext(gitXWebhookEvent)) {
       try {
         SecurityContextBuilder.setContext(new ServicePrincipal(NG_MANAGER.getServiceId()));
@@ -85,7 +83,7 @@ public class GitXWebhookEventProcessServiceImpl implements GitXWebhookEventProce
           log.info(String.format("The webhook event %s will be SKIPPED as there is no webhook(s) configured.",
               gitXWebhookEvent.getEventIdentifier()));
           updateEventStatus(gitXWebhookEvent.getAccountIdentifier(), gitXWebhookEvent.getEventIdentifier(),
-              GitXWebhookEventStatus.SKIPPED);
+              GitXWebhookEventStatus.SKIPPED, EMPTY_PROCESSING_FILES, webhookDTO);
           return;
         }
         ProcessingFilePathResponseDTO processingFilePathResponseDTO =
@@ -95,33 +93,34 @@ public class GitXWebhookEventProcessServiceImpl implements GitXWebhookEventProce
               "The webhook event %s will be SKIPPED as the webhook(s) is disabled or the folder paths don't match.",
               gitXWebhookEvent.getEventIdentifier()));
           updateEventStatus(gitXWebhookEvent.getAccountIdentifier(), gitXWebhookEvent.getEventIdentifier(),
-              GitXWebhookEventStatus.SKIPPED);
+              GitXWebhookEventStatus.SKIPPED, EMPTY_PROCESSING_FILES, webhookDTO);
         } else {
           log.info(String.format(
               "Submitting the task for PROCESSING the webhook event %s as the webhook(s) is enabled and the folder paths match.",
               gitXWebhookEvent.getEventIdentifier()));
           gitXWebhookCacheUpdateHelper.submitTask(gitXWebhookEvent.getEventIdentifier(),
               buildGitXWebhookRunnableRequest(processingFilePathResponseDTO.getGitXWebhook(), gitXWebhookEvent,
-                  processingFilePathResponseDTO.getModifiedFilePaths(),
-                  processingFilePathResponseDTO.getScmConnector()));
+                  processingFilePathResponseDTO.getModifiedFilePaths(), processingFilePathResponseDTO.getScmConnector(),
+                  webhookDTO));
           updateEventStatus(gitXWebhookEvent.getAccountIdentifier(), gitXWebhookEvent.getEventIdentifier(),
-              GitXWebhookEventStatus.PROCESSING, processingFilePathResponseDTO.getProcessingFilePaths());
+              GitXWebhookEventStatus.PROCESSING, processingFilePathResponseDTO.getProcessingFilePaths(), webhookDTO);
         }
       } catch (ConnectorNotFoundException connectorNotFoundException) {
         log.error(String.format("Connector not found for event %s in the account %s.",
                       gitXWebhookEvent.getEventIdentifier(), gitXWebhookEvent.getAccountIdentifier()),
             connectorNotFoundException);
-        markEventFailed(gitXWebhookEvent);
+        markEventFailed(gitXWebhookEvent, webhookDTO);
       } catch (Exception exception) {
         log.error(
             "Exception occurred while processing the event {} ", gitXWebhookEvent.getEventIdentifier(), exception);
-        markEventFailed(gitXWebhookEvent);
+        markEventFailed(gitXWebhookEvent, webhookDTO);
       }
     }
   }
 
   private GitXCacheUpdateHelperRequestDTO buildGitXWebhookRunnableRequest(GitXWebhook gitXWebhook,
-      GitXWebhookEvent gitXWebhookEvent, List<String> modifiedFilePaths, ScmConnector scmConnector) {
+      GitXWebhookEvent gitXWebhookEvent, List<String> modifiedFilePaths, ScmConnector scmConnector,
+      WebhookDTO webhookDTO) {
     return GitXCacheUpdateHelperRequestDTO.builder()
         .scope(Scope.of(
             gitXWebhook.getAccountIdentifier(), gitXWebhook.getOrgIdentifier(), gitXWebhook.getProjectIdentifier()))
@@ -131,6 +130,7 @@ public class GitXWebhookEventProcessServiceImpl implements GitXWebhookEventProce
         .eventIdentifier(gitXWebhookEvent.getEventIdentifier())
         .modifiedFilePaths(modifiedFilePaths)
         .scmConnector(scmConnector)
+        .additionalParams(AdditionalParams.builder().webhookDTO(webhookDTO).build())
         .build();
   }
 
@@ -259,25 +259,20 @@ public class GitXWebhookEventProcessServiceImpl implements GitXWebhookEventProce
         gitXWebhook.getOrgIdentifier(), gitXWebhook.getProjectIdentifier(), scmConnector);
   }
 
-  private void updateEventStatus(
-      String accountIdentifier, String eventIdentifier, GitXWebhookEventStatus gitXWebhookEventStatus) {
-    gitXWebhookEventService.updateEvent(accountIdentifier, eventIdentifier,
-        GitXEventUpdateRequestDTO.builder().gitXWebhookEventStatus(gitXWebhookEventStatus).build());
-  }
-
   private void updateEventStatus(String accountIdentifier, String eventIdentifier,
-      GitXWebhookEventStatus gitXWebhookEventStatus, List<String> processingFilePaths) {
+      GitXWebhookEventStatus gitXWebhookEventStatus, List<String> processingFilePaths, WebhookDTO webhookDTO) {
     gitXWebhookEventService.updateEvent(accountIdentifier, eventIdentifier,
         GitXEventUpdateRequestDTO.builder()
             .gitXWebhookEventStatus(gitXWebhookEventStatus)
             .processedFilePaths(processingFilePaths)
+            .additionalParams(AdditionalParams.builder().webhookDTO(webhookDTO).build())
             .build());
   }
 
-  private void markEventFailed(GitXWebhookEvent gitXWebhookEvent) {
+  private void markEventFailed(GitXWebhookEvent gitXWebhookEvent, WebhookDTO webhookDTO) {
     try {
       updateEventStatus(gitXWebhookEvent.getAccountIdentifier(), gitXWebhookEvent.getEventIdentifier(),
-          GitXWebhookEventStatus.FAILED);
+          GitXWebhookEventStatus.FAILED, EMPTY_PROCESSING_FILES, webhookDTO);
     } catch (Exception ex) {
       log.error("Exception occurred while changing the state of the event {} to Failed",
           gitXWebhookEvent.getEventIdentifier(), ex);

@@ -38,4 +38,5 @@ public class GitXCacheUpdateHelperRequestDTO {
   String eventIdentifier;
   List<String> modifiedFilePaths;
   ScmConnector scmConnector;
+  AdditionalParams additionalParams;
 }

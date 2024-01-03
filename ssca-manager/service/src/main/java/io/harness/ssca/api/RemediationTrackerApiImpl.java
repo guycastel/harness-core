@@ -105,7 +105,7 @@ public class RemediationTrackerApiImpl implements RemediationApi {
   public Response listRemediations(@OrgIdentifier String org, @ProjectIdentifier String project,
       @Valid RemediationListingRequestBody body, @AccountIdentifier String harnessAccount,
       @Min(1L) @Max(1000L) Integer limit, String order, @Min(0L) Integer page, String sort) {
-    sort = RemediationTrackerApiUtils.getSortFieldMapping(sort);
+    sort = RemediationTrackerApiMapperUtils.getSortFieldMapping(sort);
     Pageable pageable = PageResponseUtils.getPageable(page, limit, sort, order);
     Page<RemediationListingResponse> artifactEntities =
         remediationTrackerService.listRemediations(harnessAccount, org, project, body, pageable);
@@ -160,7 +160,7 @@ public class RemediationTrackerApiImpl implements RemediationApi {
       @ResourceIdentifier String remediation, String artifact, @AccountIdentifier String harnessAccount,
       String envType) {
     EnvType env = RemediationTrackerMapper.mapEnvType(envType);
-    List<EnvironmentInfo> response = remediationTrackerService.getAllEnvironmentsInArtifact(
+    List<EnvironmentInfo> response = remediationTrackerService.getAllEnvironmentsForArtifact(
         harnessAccount, org, project, remediation, artifact, env);
     return Response.ok().entity(response).build();
   }

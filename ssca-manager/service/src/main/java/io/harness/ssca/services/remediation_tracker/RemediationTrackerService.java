@@ -64,6 +64,6 @@ public interface RemediationTrackerService {
   Page<RemediationArtifactDeploymentsListingResponse> listRemediationArtifactDeployments(String accountId, String orgId,
       String projectId, String remediationTrackerId, String artifactId,
       RemediationArtifactDeploymentsListingRequestBody body, Pageable pageable);
-  List<EnvironmentInfo> getAllEnvironmentsInArtifact(String accountId, String orgId, String projectId,
+  List<EnvironmentInfo> getAllEnvironmentsForArtifact(String accountId, String orgId, String projectId,
       String remediationTrackerId, String artifactId, EnvType environmentType);
 }

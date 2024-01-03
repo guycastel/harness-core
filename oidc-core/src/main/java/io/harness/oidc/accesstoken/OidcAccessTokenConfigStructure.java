@@ -9,7 +9,6 @@ package io.harness.oidc.accesstoken;
 
 import static io.harness.oidc.accesstoken.OidcAccessTokenConstants.ACCESS_TOKEN_IAM_SA_CREDENTIALS_ENDPOINT;
 import static io.harness.oidc.accesstoken.OidcAccessTokenConstants.ACCESS_TOKEN_STS_ENDPOINT;
-import static io.harness.oidc.accesstoken.OidcAccessTokenConstants.END_POINT;
 import static io.harness.oidc.accesstoken.OidcAccessTokenConstants.WORKLOAD_ACCESS_TOKEN_CONFIG;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

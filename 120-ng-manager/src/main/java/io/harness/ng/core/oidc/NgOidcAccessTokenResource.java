@@ -14,6 +14,10 @@ import io.harness.ng.core.dto.ErrorDTO;
 import io.harness.ng.core.dto.FailureDTO;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.oidc.accesstoken.OidcWorkloadAccessTokenResponse;
+import io.harness.oidc.aws.credential.AwsOidcCredentialUtility;
+import io.harness.oidc.aws.dto.AwsOidcCredentialRequestDto;
+import io.harness.oidc.aws.dto.AwsOidcCredentialResponseDto;
+import io.harness.oidc.aws.utility.AwsOidcTokenUtility;
 import io.harness.oidc.gcp.constants.GcpOidcServiceAccountAccessTokenResponse;
 import io.harness.oidc.gcp.dto.GcpOidcAccessTokenRequestDTO;
 import io.harness.oidc.gcp.utility.GcpOidcTokenUtility;
@@ -73,6 +77,8 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class NgOidcAccessTokenResource {
   GcpOidcTokenUtility gcpOidcTokenUtility;
+  AwsOidcCredentialUtility awsOidcCredentialUtility;
+  AwsOidcTokenUtility awsOidcTokenUtility;
 
   @POST
   @Path("gcp/workload-access")
@@ -123,5 +129,29 @@ public class NgOidcAccessTokenResource {
         gcpOidcTokenUtility.exchangeOidcWorkloadAccessToken(gcpOidcAccessTokenRequestDTO);
     return ResponseDTO.newResponse(gcpOidcTokenUtility.exchangeOidcServiceAccountAccessToken(
         oidcWorkloadAccessTokenResponse.getAccess_token(), gcpOidcAccessTokenRequestDTO));
+  }
+
+  @POST
+  @Path("aws/webidentity-session-access")
+  @Consumes({"application/json", "application/yaml"})
+  @ApiOperation(
+      value = "Generate an OIDC IAM Role Credential for AWS", nickname = "generateOidcIAMRoleCredentialForAws")
+  @Operation(operationId = "generateOidcIAMRoleCredentialForAws",
+      summary = "Generate an OIDC IAM Role Credential for AWS",
+      responses =
+      {
+        @io.swagger.v3.oas.annotations.responses.
+        ApiResponse(responseCode = "default", description = "Generate an OIDC IAM Role Credential for AWS")
+      })
+  public ResponseDTO<AwsOidcCredentialResponseDto>
+  getOidcIamRoleCredentialForAws(@RequestBody(required = true, description = "Details of AWS WebIdentity credential")
+      @Valid AwsOidcCredentialRequestDto awsOidcCredentialRequestDto) {
+    // Check if the ID Token is empty.
+    String oidcToken = awsOidcCredentialRequestDto.getOidcIdToken();
+    if (StringUtils.isEmpty(oidcToken)) {
+      oidcToken = awsOidcTokenUtility.generateAwsOidcIdToken(awsOidcCredentialRequestDto.getAwsOidcTokenRequestDto());
+    }
+    return ResponseDTO.newResponse(
+        awsOidcCredentialUtility.getOidcIamRoleCredential(oidcToken, awsOidcCredentialRequestDto));
   }
 }

@@ -41,6 +41,15 @@ public interface PluginDetailedInfoMapper<S extends PluginDetailedInfo, T extend
     } else {
       config = (isConfigSaved && appConfig.getConfigs() != null) ? appConfig.getConfigs() : entity.getConfig();
     }
+    Exports exports = buildExportsFromEntity(entity);
+    dto.setSaved(isConfigSaved);
+    dto.setExports(exports);
+    dto.setConfig(config);
+    dto.setEnvVariables(secrets);
+    dto.setProxy(hostDetails);
+  }
+
+  default Exports buildExportsFromEntity(PluginInfoEntity entity) {
     Exports exports = new Exports();
     ExportsData exportsFromDb = entity.getExports();
     if (exportsFromDb != null && exportsFromDb.getExportDetails() != null) {
@@ -60,11 +69,7 @@ public interface PluginDetailedInfoMapper<S extends PluginDetailedInfo, T extend
       }
       exports.setExportDetails(exportDetailsList);
     }
-    dto.setSaved(isConfigSaved);
-    dto.setExports(exports);
-    dto.setConfig(config);
-    dto.setEnvVariables(secrets);
-    dto.setProxy(hostDetails);
+    return exports;
   }
 
   default void setCommonFieldsEntity(PluginDetailedInfo dto, PluginInfoEntity entity, String accountIdentifier) {

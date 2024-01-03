@@ -3871,6 +3871,10 @@ components:
           properties:
             artifact:
               $ref: '#/components/schemas/Artifact'
+            package_name:
+              type: string
+              x-stoplight:
+                id: 6tclf6gflwbnm
     Artifact:
       title: Artifact
       x-stoplight:

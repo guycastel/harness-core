@@ -39,6 +39,7 @@ import org.springframework.data.annotation.TypeAlias;
 public class CustomPluginInfoEntity
     extends PluginInfoEntity implements CreatedAtAware, CreatedByAware, UpdatedAtAware, UpdatedByAware {
   private Artifact artifact;
+  private String packageName;
   @SchemaIgnore @CreatedBy private EmbeddedUser createdBy;
   @CreatedDate private long createdAt;
   @SchemaIgnore @LastModifiedBy private EmbeddedUser lastUpdatedBy;

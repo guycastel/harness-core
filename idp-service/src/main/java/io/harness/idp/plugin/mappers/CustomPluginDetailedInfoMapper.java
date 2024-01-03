@@ -33,6 +33,7 @@ public class CustomPluginDetailedInfoMapper
     CustomPluginDetailedInfo dto = new CustomPluginDetailedInfo();
     setCommonFieldsDto(entity, dto, appConfig, secrets, hostDetails);
     dto.setArtifact(entity.getArtifact());
+    dto.setPackageName(entity.getPackageName());
     return dto;
   }
 
@@ -42,6 +43,7 @@ public class CustomPluginDetailedInfoMapper
     setCommonFieldsEntity(dto, entity, accountIdentifier);
     entity.setType(PluginInfo.PluginTypeEnum.CUSTOM);
     entity.setArtifact(dto.getArtifact());
+    entity.setPackageName(dto.getPackageName());
     return entity;
   }
 
@@ -104,6 +106,8 @@ public class CustomPluginDetailedInfoMapper
     pluginDetails.setEnabled(isEnabled);
     info.setPluginDetails(pluginDetails);
     info.setArtifact(entity.getArtifact());
+    info.setPackageName(entity.getPackageName());
+    info.setExports(buildExportsFromEntity(entity));
     return info;
   }
 }

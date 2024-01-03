@@ -13,6 +13,7 @@ import static io.harness.springdata.PersistenceUtils.DEFAULT_RETRY_POLICY;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.exception.InvalidRequestException;
+import io.harness.idp.common.CommonUtils;
 import io.harness.idp.configmanager.beans.entity.PluginConfigEnvVariablesEntity;
 import io.harness.idp.configmanager.events.envvariables.BackstageEnvSecretCreateEvent;
 import io.harness.idp.configmanager.events.envvariables.BackstageEnvSecretDeleteEvent;
@@ -324,12 +325,16 @@ public class ConfigEnvVariablesServiceImpl implements ConfigEnvVariablesService 
 
       for (BackstageEnvSecretVariable newBackstageEnvSecretVariable : newBackstageEnvVariables) {
         String newEnvVariableIdentifier = newBackstageEnvSecretVariable.getIdentifier();
-        if (!newBackstageEnvSecretVariable.getEnvName().equals(
-                oldBackstageEnvVariableMap.get(newEnvVariableIdentifier).getEnvName())
+        BackstageEnvSecretVariable oldBackstageEnvSecretVariable =
+            oldBackstageEnvVariableMap.get(newEnvVariableIdentifier);
+        oldBackstageEnvSecretVariable.setHarnessSecretIdentifier(
+            CommonUtils.addAccountScopeInIdentifier(oldBackstageEnvSecretVariable.getHarnessSecretIdentifier()));
+
+        if (!newBackstageEnvSecretVariable.getEnvName().equals(oldBackstageEnvSecretVariable.getEnvName())
             || !newBackstageEnvSecretVariable.getHarnessSecretIdentifier().equals(
-                oldBackstageEnvVariableMap.get(newEnvVariableIdentifier).getHarnessSecretIdentifier())) {
-          outboxService.save(new BackstageEnvSecretUpdateEvent(accountIdentifier, newBackstageEnvSecretVariable,
-              oldBackstageEnvVariableMap.get(newBackstageEnvSecretVariable.getIdentifier())));
+                oldBackstageEnvSecretVariable.getHarnessSecretIdentifier())) {
+          outboxService.save(new BackstageEnvSecretUpdateEvent(
+              accountIdentifier, newBackstageEnvSecretVariable, oldBackstageEnvSecretVariable));
         }
       }
 

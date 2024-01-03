@@ -33,5 +33,5 @@ import lombok.experimental.SuperBuilder;
 @Schema(name = "IDPLicenseSummary",
     description = "This contains details of the Internal Developer Portal License Summary in Harness")
 public class IDPLicenseSummaryDTO extends LicensesWithSummaryDTO {
-  private int numberOfDevelopers;
+  private int totalDevelopers;
 }

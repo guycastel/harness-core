@@ -205,8 +205,8 @@ public class ModuleLicenseSummaryHelper {
           IDPModuleLicenseDTO idpModuleLicenseDTO = (IDPModuleLicenseDTO) moduleLicenseDTO;
           IDPLicenseSummaryDTO idpLicenseSummaryDTO = (IDPLicenseSummaryDTO) summaryDTO;
           if (current < idpModuleLicenseDTO.getExpiryTime() && idpModuleLicenseDTO.getNumberOfDevelopers() != null) {
-            idpLicenseSummaryDTO.setNumberOfDevelopers(ModuleLicenseUtils.computeAdd(
-                idpLicenseSummaryDTO.getNumberOfDevelopers(), idpModuleLicenseDTO.getNumberOfDevelopers()));
+            idpLicenseSummaryDTO.setTotalDevelopers(ModuleLicenseUtils.computeAdd(
+                idpLicenseSummaryDTO.getTotalDevelopers(), idpModuleLicenseDTO.getNumberOfDevelopers()));
           }
         };
         break;

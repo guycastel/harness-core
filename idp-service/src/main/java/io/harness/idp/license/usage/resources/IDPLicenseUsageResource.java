@@ -22,11 +22,14 @@ import io.harness.accesscontrol.AccountIdentifier;
 import io.harness.accesscontrol.NGAccessControlCheck;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
+import io.harness.exception.InvalidRequestException;
 import io.harness.idp.license.usage.dto.ActiveDevelopersTrendCountDTO;
 import io.harness.idp.license.usage.dto.IDPActiveDevelopersDTO;
+import io.harness.idp.license.usage.dto.IDPLicenseUsageDTO;
 import io.harness.idp.license.usage.service.IDPModuleLicenseUsage;
 import io.harness.licensing.usage.interfaces.LicenseUsageInterface;
 import io.harness.licensing.usage.params.DefaultPageableUsageRequestParams;
+import io.harness.licensing.usage.params.UsageRequestParams;
 import io.harness.licensing.usage.params.filter.ActiveDevelopersFilterParams;
 import io.harness.licensing.usage.params.filter.IDPLicenseDateUsageParams;
 import io.harness.licensing.usage.utils.PageableUtils;
@@ -46,6 +49,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -54,8 +58,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-@Api("/usage")
-@Path("/usage")
+@Api("/idp/api/usage")
+@Path("/idp/api/usage")
 @Produces("application/json")
 @NextGenManagerAuth
 @Tag(name = "IDPLicenseUsage", description = "This contains APIs related to IDP License Usage.")
@@ -63,6 +67,27 @@ import org.springframework.data.domain.Sort;
 public class IDPLicenseUsageResource {
   @Inject LicenseUsageInterface licenseUsageInterface;
   @Inject IDPModuleLicenseUsage idpModuleLicenseUsage;
+
+  @GET
+  @Path("/IDP")
+  @ApiOperation(value = "Gets License Usage for IDP", nickname = "getIDPLicenseUsage")
+  @Operation(operationId = "getIDPLicenseUsage",
+      summary = "Gets License Usage for IDP Module by Account Identifier and Timestamp",
+      responses =
+      { @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Returns an idp license usage object") })
+  @NGAccessControlCheck(resourceType = "LICENSE", permission = "core_license_view")
+  public ResponseDTO<IDPLicenseUsageDTO>
+  getIDPLicenseUsage(@Parameter(description = "Account identifier to get the idp license usage.") @QueryParam(
+                         "accountIdentifier") @AccountIdentifier String accountIdentifier,
+      @QueryParam("timestamp") long timestamp) {
+    try {
+      ModuleType moduleType = ModuleType.fromString("IDP");
+      return ResponseDTO.newResponse((IDPLicenseUsageDTO) licenseUsageInterface.getLicenseUsage(
+          accountIdentifier, moduleType, timestamp, UsageRequestParams.builder().build()));
+    } catch (IllegalArgumentException e) {
+      throw new InvalidRequestException("Module is invalid", e);
+    }
+  }
 
   @POST
   @Path("/IDP/active-developers")

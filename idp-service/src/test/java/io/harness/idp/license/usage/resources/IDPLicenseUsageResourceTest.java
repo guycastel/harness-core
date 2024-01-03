@@ -16,13 +16,17 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import io.harness.CategoryTest;
+import io.harness.ModuleType;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.category.element.UnitTests;
 import io.harness.idp.license.usage.dto.ActiveDevelopersTrendCountDTO;
 import io.harness.idp.license.usage.dto.IDPActiveDevelopersDTO;
+import io.harness.idp.license.usage.dto.IDPLicenseUsageDTO;
 import io.harness.idp.license.usage.service.IDPModuleLicenseUsage;
+import io.harness.licensing.usage.beans.UsageDataDTO;
 import io.harness.licensing.usage.interfaces.LicenseUsageInterface;
+import io.harness.licensing.usage.params.UsageRequestParams;
 import io.harness.licensing.usage.params.filter.ActiveDevelopersFilterParams;
 import io.harness.licensing.usage.params.filter.IDPLicenseDateUsageParams;
 import io.harness.licensing.usage.params.filter.LicenseDateUsageReportType;
@@ -49,6 +53,9 @@ import org.springframework.data.domain.Page;
 @OwnedBy(HarnessTeam.IDP)
 public class IDPLicenseUsageResourceTest extends CategoryTest {
   static final String TEST_ACCOUNT_IDENTIFIER = "testAccount123";
+  static final String TEST_IDP_MODULE_TYPE = "IDP";
+  static long TEST_IDP_MODULE_LICENSE_ACTIVE_DEVELOPERS = 1;
+  static final String TEST_IDP_MODULE_LICENSE_DISPLAY_NAME = "Total active IDP users";
   static final String TEST_USER_IDENTIFIER = "testUser123";
   static final String TEST_USER_EMAIL = "testEmail123";
   static final String TEST_USER_NAME = "testName123";
@@ -62,6 +69,33 @@ public class IDPLicenseUsageResourceTest extends CategoryTest {
   @Before
   public void setUp() {
     openMocks = MockitoAnnotations.openMocks(this);
+  }
+
+  @Test
+  @Owner(developers = SATHISH)
+  @Category(UnitTests.class)
+  public void testGetIDPLicenseUsage() {
+    IDPLicenseUsageDTO idpLicenseUsageDTO = IDPLicenseUsageDTO.builder()
+                                                .activeDevelopers(UsageDataDTO.builder()
+                                                                      .count(TEST_IDP_MODULE_LICENSE_ACTIVE_DEVELOPERS)
+                                                                      .displayName(TEST_IDP_MODULE_LICENSE_DISPLAY_NAME)
+                                                                      .build())
+                                                .accountIdentifier(TEST_ACCOUNT_IDENTIFIER)
+                                                .module(TEST_IDP_MODULE_TYPE)
+                                                .timestamp(System.currentTimeMillis())
+                                                .build();
+    when(licenseUsageInterface.getLicenseUsage(
+             TEST_ACCOUNT_IDENTIFIER, ModuleType.IDP, 0, UsageRequestParams.builder().build()))
+        .thenReturn(idpLicenseUsageDTO);
+    final ResponseDTO<IDPLicenseUsageDTO> result =
+        idpLicenseUsageResource.getIDPLicenseUsage(TEST_ACCOUNT_IDENTIFIER, 0);
+    assertThat(result.getStatus()).isEqualTo(Status.SUCCESS);
+    assertThat(result.getData()).isNotNull();
+    assertThat(result.getData().getAccountIdentifier()).isEqualTo(TEST_ACCOUNT_IDENTIFIER);
+    assertThat(result.getData().getModule()).isEqualTo(TEST_IDP_MODULE_TYPE);
+    assertThat(result.getData().getActiveDevelopers()).isNotNull();
+    assertThat(result.getData().getActiveDevelopers().getCount()).isEqualTo(TEST_IDP_MODULE_LICENSE_ACTIVE_DEVELOPERS);
+    assertThat(result.getData().getActiveDevelopers().getDisplayName()).isEqualTo(TEST_IDP_MODULE_LICENSE_DISPLAY_NAME);
   }
 
   @Test

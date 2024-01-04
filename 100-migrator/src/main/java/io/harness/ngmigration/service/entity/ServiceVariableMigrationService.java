@@ -30,6 +30,10 @@ import io.harness.ng.core.serviceoverride.beans.ServiceOverrideRequestDTO;
 import io.harness.ng.core.serviceoverride.beans.ServiceOverrideResponseDTO;
 import io.harness.ng.core.serviceoverride.yaml.NGServiceOverrideConfig;
 import io.harness.ng.core.serviceoverride.yaml.NGServiceOverrideInfoConfig;
+import io.harness.ng.core.serviceoverridev2.beans.ServiceOverrideRequestDTOV2;
+import io.harness.ng.core.serviceoverridev2.beans.ServiceOverridesResponseDTOV2;
+import io.harness.ng.core.serviceoverridev2.beans.ServiceOverridesSpec;
+import io.harness.ng.core.serviceoverridev2.beans.ServiceOverridesType;
 import io.harness.ngmigration.beans.MigrationContext;
 import io.harness.ngmigration.beans.MigrationInputDTO;
 import io.harness.ngmigration.beans.NGYamlFile;
@@ -39,6 +43,7 @@ import io.harness.ngmigration.beans.summary.BaseSummary;
 import io.harness.ngmigration.client.NGClient;
 import io.harness.ngmigration.client.PmsClient;
 import io.harness.ngmigration.client.TemplateClient;
+import io.harness.ngmigration.dto.Flag;
 import io.harness.ngmigration.dto.MigrationImportSummaryDTO;
 import io.harness.ngmigration.expressions.MigratorExpressionUtils;
 import io.harness.ngmigration.service.NgMigrationService;
@@ -135,6 +140,54 @@ public class ServiceVariableMigrationService extends NgMigrationService {
     NGServiceOverrideInfoConfig serviceOverrideInfoConfig =
         ((NGServiceOverrideConfig) yamlFile.getYaml()).getServiceOverrideInfoConfig();
     String yaml = getYamlString(yamlFile);
+    if (isEnabled(Flag.ENV_AT_DIFFERENT_LEVEL)) {
+      ServiceOverrideRequestDTOV2 requestDTO =
+          ServiceOverrideRequestDTOV2.builder()
+              .serviceRef(serviceOverrideInfoConfig.getServiceRef())
+              .environmentRef(serviceOverrideInfoConfig.getEnvironmentRef())
+              .orgIdentifier(yamlFile.getNgEntityDetail().getOrgIdentifier())
+              .projectIdentifier(yamlFile.getNgEntityDetail().getProjectIdentifier())
+              .type(ServiceOverridesType.ENV_SERVICE_OVERRIDE)
+              .spec(ServiceOverridesSpec.builder()
+                        .variables(serviceOverrideInfoConfig.getVariables())
+                        .manifests(serviceOverrideInfoConfig.getManifests())
+                        .configFiles(serviceOverrideInfoConfig.getConfigFiles())
+                        .applicationSettings(serviceOverrideInfoConfig.getApplicationSettings())
+                        .connectionStrings(serviceOverrideInfoConfig.getConnectionStrings())
+                        .build())
+              .yaml(yaml)
+              .build();
+
+      Response<ResponseDTO<ServiceOverridesResponseDTOV2>> resp =
+          ngClient.upsert(inputDTO.getDestinationAuthToken(), inputDTO.getDestinationAccountIdentifier(), requestDTO)
+              .execute();
+
+      if (!(resp.code() >= 200 && resp.code() < 300)) {
+        yaml = getYamlStringV2(yamlFile);
+        requestDTO = ServiceOverrideRequestDTOV2.builder()
+                         .serviceRef(serviceOverrideInfoConfig.getServiceRef())
+                         .environmentRef(serviceOverrideInfoConfig.getEnvironmentRef())
+                         .orgIdentifier(yamlFile.getNgEntityDetail().getOrgIdentifier())
+                         .projectIdentifier(yamlFile.getNgEntityDetail().getProjectIdentifier())
+                         .type(ServiceOverridesType.ENV_SERVICE_OVERRIDE)
+                         .spec(ServiceOverridesSpec.builder()
+                                   .variables(serviceOverrideInfoConfig.getVariables())
+                                   .manifests(serviceOverrideInfoConfig.getManifests())
+                                   .configFiles(serviceOverrideInfoConfig.getConfigFiles())
+                                   .applicationSettings(serviceOverrideInfoConfig.getApplicationSettings())
+                                   .connectionStrings(serviceOverrideInfoConfig.getConnectionStrings())
+                                   .build())
+                         .yaml(yaml)
+                         .build();
+        resp =
+            ngClient.upsert(inputDTO.getDestinationAuthToken(), inputDTO.getDestinationAccountIdentifier(), requestDTO)
+                .execute();
+      }
+
+      log.info("Service variables creation Response details {} {}", resp.code(), resp.message());
+      return handleResp(yamlFile, resp);
+    }
+
     ServiceOverrideRequestDTO requestDTO = ServiceOverrideRequestDTO.builder()
                                                .serviceIdentifier(serviceOverrideInfoConfig.getServiceRef())
                                                .environmentIdentifier(serviceOverrideInfoConfig.getEnvironmentRef())

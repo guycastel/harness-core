@@ -23,6 +23,8 @@ import io.harness.ng.core.dto.secrets.SecretResponseWrapper;
 import io.harness.ng.core.filestore.dto.FileDTO;
 import io.harness.ng.core.service.dto.ServiceResponse;
 import io.harness.ng.core.serviceoverride.beans.ServiceOverrideResponseDTO;
+import io.harness.ng.core.serviceoverridev2.beans.ServiceOverrideRequestDTOV2;
+import io.harness.ng.core.serviceoverridev2.beans.ServiceOverridesResponseDTOV2;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import okhttp3.RequestBody;
@@ -88,6 +90,11 @@ public interface NGClient {
   @POST("environmentsV2/serviceOverrides")
   Call<ResponseDTO<ServiceOverrideResponseDTO>> upsertServiceOverride(@Header(X_API_KEY) String auth,
       @Query(NGCommonEntityConstants.ACCOUNT_KEY) String accountIdentifier, @Body JsonNode serviceOverrides);
+
+  @POST("serviceOverrides/upsert")
+  Call<ResponseDTO<ServiceOverridesResponseDTOV2>> upsert(@Header(X_API_KEY) String auth,
+      @Query(NGCommonEntityConstants.ACCOUNT_KEY) String accountIdentifier,
+      @Body ServiceOverrideRequestDTOV2 serviceOverrideRequestDTOV2);
 
   @POST("infrastructures")
   Call<ResponseDTO<ConnectorResponseDTO>> createInfrastructure(@Header(X_API_KEY) String auth,

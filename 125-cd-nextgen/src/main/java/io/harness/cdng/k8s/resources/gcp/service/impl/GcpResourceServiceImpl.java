@@ -65,6 +65,8 @@ public class GcpResourceServiceImpl implements GcpResourceService {
             .useDelegate(INHERIT_FROM_DELEGATE == connector.getCredential().getGcpCredentialType())
             .delegateSelectors(connector.getDelegateSelectors())
             .encryptionDetails(encryptionDetails)
+            .gcpOidcDetailsDTO(gcpHelperService.getOidcDetailsDTO(connector))
+            .gcpOidcTokenExchangeDetailsForDelegate(gcpOidcTokenExchangeDetailsForDelegate)
             .build();
 
     GcpClusterListTaskResponse gcpClusterListTaskResponse =

@@ -20,6 +20,9 @@ import io.harness.category.element.UnitTests;
 import io.harness.delegate.task.gcp.helpers.GcpHelperService;
 import io.harness.exception.InvalidRequestException;
 import io.harness.gcp.helpers.GcpCredentialsHelperService;
+import io.harness.oidc.exception.OidcException;
+import io.harness.oidc.gcp.constants.GcpOidcServiceAccountAccessTokenResponse;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 import io.harness.rule.OwnerRule;
 
@@ -40,6 +43,8 @@ public class GcpHelperServiceTest extends WingsBaseTest {
   @Mock private EncryptionService encryptionService;
   @Mock private GcpCredentialsHelperService gcpCredentialsHelperService;
   @Spy @InjectMocks private GcpHelperService gcpHelperService;
+
+  @Mock private GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate;
 
   @Test
   @Owner(developers = OwnerRule.YOGESH)
@@ -75,7 +80,37 @@ public class GcpHelperServiceTest extends WingsBaseTest {
         .getGoogleCredentialWithProxyConfiguredHttpTransport(gcpConfig.getServiceAccountKeyFileContent());
     System.clearProperty("http.proxyHost");
   }
+  @Test
+  @Owner(developers = OwnerRule.TARUN_UBA)
+  @Category(UnitTests.class)
+  public void checkOidcConfiguredCredentials() throws IOException {
+    GcpConfig gcpConfig = GcpConfig.builder().serviceAccountKeyFileContent(getServiceAccountKeyContent()).build();
+    String accessToken = "sampleAccessToken";
+    GcpOidcServiceAccountAccessTokenResponse gcpOidcServiceAccountAccessTokenResponse =
+        new GcpOidcServiceAccountAccessTokenResponse(accessToken, 123L);
+    when(gcpOidcTokenExchangeDetailsForDelegate.exchangeOidcServiceAccountAccessToken())
+        .thenReturn(gcpOidcServiceAccountAccessTokenResponse);
+    GoogleCredential googleCredential = gcpHelperService.getGoogleCredential(
+        null, gcpConfig.isUseDelegateSelectors(), gcpOidcTokenExchangeDetailsForDelegate);
+    assertThat(googleCredential.getAccessToken()).isEqualTo(accessToken);
+  }
 
+  @Test
+  @Owner(developers = OwnerRule.TARUN_UBA)
+  @Category(UnitTests.class)
+  public void checkOidcConfiguredCredentialsFailure() {
+    GcpConfig gcpConfig = GcpConfig.builder().serviceAccountKeyFileContent(getServiceAccountKeyContent()).build();
+    String accessToken = "sampleAccessToken";
+    GcpOidcServiceAccountAccessTokenResponse gcpOidcServiceAccountAccessTokenResponse =
+        new GcpOidcServiceAccountAccessTokenResponse(accessToken, 0L);
+    when(gcpOidcTokenExchangeDetailsForDelegate.exchangeOidcServiceAccountAccessToken())
+        .thenReturn(gcpOidcServiceAccountAccessTokenResponse);
+    assertThatExceptionOfType(OidcException.class)
+        .isThrownBy(()
+                        -> gcpHelperService.getGoogleCredential(
+                            null, gcpConfig.isUseDelegateSelectors(), gcpOidcTokenExchangeDetailsForDelegate))
+        .withMessageContaining("Invalid Service Account Access Token received");
+  }
   @Test
   @Owner(developers = OwnerRule.AGORODETKI)
   @Category(UnitTests.class)

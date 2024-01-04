@@ -10,6 +10,7 @@ package io.harness.cdng.k8s.resources.gcp.service.impl;
 import static io.harness.annotations.dev.HarnessTeam.CDP;
 import static io.harness.rule.OwnerRule.ACASIAN;
 import static io.harness.rule.OwnerRule.JELENA;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +32,7 @@ import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorDTO;
 import io.harness.delegate.beans.connector.gcpconnector.GcpCredentialType;
 import io.harness.delegate.beans.connector.gcpconnector.GcpDelegateDetailsDTO;
 import io.harness.delegate.beans.connector.gcpconnector.GcpManualDetailsDTO;
+import io.harness.delegate.beans.connector.gcpconnector.GcpOidcDetailsDTO;
 import io.harness.delegate.task.gcp.GcpTaskType;
 import io.harness.delegate.task.gcp.request.GcpListClustersRequest;
 import io.harness.delegate.task.gcp.request.GcpRequest;
@@ -39,6 +41,7 @@ import io.harness.encryption.SecretRefData;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.ng.core.BaseNGAccess;
 import io.harness.ng.core.NGAccess;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 import io.harness.security.encryption.EncryptedDataDetail;
 
@@ -65,7 +68,6 @@ public class GcpResourceServiceImplTest extends CategoryTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(anyString(), any())).thenReturn(null);
   }
 
   @Test
@@ -78,6 +80,7 @@ public class GcpResourceServiceImplTest extends CategoryTest {
                                       .projectIdentifier(PROJECT_IDENTIFIER)
                                       .orgIdentifier(ORG_IDENTIFIER)
                                       .build();
+    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(anyString(), any())).thenReturn(null);
     GcpConnectorDTO gcpConnectorDTO = getConnector();
     when(gcpHelperService.getConnector(identifierRef)).thenReturn(gcpConnectorDTO);
     EncryptedDataDetail encryptedDataDetail = EncryptedDataDetail.builder().build();
@@ -107,6 +110,8 @@ public class GcpResourceServiceImplTest extends CategoryTest {
     assertThat(ngAccess.getOrgIdentifier()).isEqualTo("orgIdentifier");
     assertThat(ngAccess.getProjectIdentifier()).isEqualTo("projectIdentifier");
     assertThat(request.isUseDelegate()).isFalse();
+    assertThat(request.getGcpOidcDetailsDTO()).isNull();
+    assertThat(request.getGcpOidcTokenExchangeDetailsForDelegate()).isNull();
   }
 
   @Test
@@ -119,6 +124,7 @@ public class GcpResourceServiceImplTest extends CategoryTest {
                                       .projectIdentifier(PROJECT_IDENTIFIER)
                                       .orgIdentifier(ORG_IDENTIFIER)
                                       .build();
+    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(anyString(), any())).thenReturn(null);
     String delegateSelector = "test-delegate";
     GcpConnectorDTO gcpConnectorDTO =
         GcpConnectorDTO.builder()
@@ -155,6 +161,60 @@ public class GcpResourceServiceImplTest extends CategoryTest {
     assertThat(ngAccess.getOrgIdentifier()).isEqualTo("orgIdentifier");
     assertThat(ngAccess.getProjectIdentifier()).isEqualTo("projectIdentifier");
     assertThat(request.isUseDelegate()).isTrue();
+    assertThat(request.getGcpOidcDetailsDTO()).isNull();
+    assertThat(request.getGcpOidcTokenExchangeDetailsForDelegate()).isNull();
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void shouldGetClusterNamesWhenUsingOidcCredentials() {
+    IdentifierRef identifierRef2 = IdentifierRef.builder()
+                                       .accountIdentifier(ACCOUNT_ID)
+                                       .identifier("identifier2")
+                                       .projectIdentifier(PROJECT_IDENTIFIER)
+                                       .orgIdentifier(ORG_IDENTIFIER)
+                                       .build();
+    GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
+        GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+
+    GcpOidcDetailsDTO gcpOidcDetailsDTO = GcpOidcDetailsDTO.builder().build();
+    GcpConnectorDTO gcpConnectorDTO = GcpConnectorDTO.builder()
+                                          .credential(GcpConnectorCredentialDTO.builder()
+                                                          .gcpCredentialType(GcpCredentialType.OIDC_AUTHENTICATION)
+                                                          .config(gcpOidcDetailsDTO)
+                                                          .build())
+                                          .build();
+    when(gcpHelperService.getConnector(identifierRef2)).thenReturn(gcpConnectorDTO);
+    when(gcpHelperService.getOidcDetailsDTO(any())).thenReturn(gcpOidcDetailsDTO);
+    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(anyString(), any()))
+        .thenReturn(gcpOidcTokenExchangeDetailsForDelegate);
+    when(gcpHelperService.executeSyncTask(
+             any(BaseNGAccess.class), any(GcpRequest.class), eq(GcpTaskType.LIST_CLUSTERS), eq("list GCP clusters")))
+        .thenReturn(GcpClusterListTaskResponse.builder()
+                        .commandExecutionStatus(CommandExecutionStatus.SUCCESS)
+                        .clusterNames(Arrays.asList("cluster1", "cluster2"))
+                        .build());
+
+    GcpResponseDTO responseDTO =
+        gcpResourceService.getClusterNames(identifierRef2, ACCOUNT_ID, ORG_IDENTIFIER, PROJECT_IDENTIFIER);
+    assertThat(responseDTO).isNotNull();
+    assertThat(responseDTO.getClusterNames()).containsExactly("cluster1", "cluster2");
+
+    ArgumentCaptor<BaseNGAccess> ngAccessCaptor = ArgumentCaptor.forClass(BaseNGAccess.class);
+    ArgumentCaptor<GcpListClustersRequest> requestCaptor = ArgumentCaptor.forClass(GcpListClustersRequest.class);
+    verify(gcpHelperService, times(1))
+        .executeSyncTask(
+            ngAccessCaptor.capture(), requestCaptor.capture(), eq(GcpTaskType.LIST_CLUSTERS), eq("list GCP clusters"));
+    BaseNGAccess ngAccess = ngAccessCaptor.getValue();
+    GcpListClustersRequest request = requestCaptor.getValue();
+
+    assertThat(ngAccess.getAccountIdentifier()).isEqualTo("accountId");
+    assertThat(ngAccess.getOrgIdentifier()).isEqualTo("orgIdentifier");
+    assertThat(ngAccess.getProjectIdentifier()).isEqualTo("projectIdentifier");
+    assertThat(request.isUseDelegate()).isFalse();
+    assertThat(request.getGcpOidcDetailsDTO()).isEqualTo(gcpOidcDetailsDTO);
+    assertThat(request.getGcpOidcTokenExchangeDetailsForDelegate()).isEqualTo(gcpOidcTokenExchangeDetailsForDelegate);
   }
 
   private GcpConnectorDTO getConnector() {

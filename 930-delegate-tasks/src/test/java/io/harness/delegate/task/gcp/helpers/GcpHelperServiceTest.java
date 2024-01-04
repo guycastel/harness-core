@@ -8,6 +8,7 @@
 package io.harness.delegate.task.gcp.helpers;
 
 import static io.harness.rule.OwnerRule.ABHINAV2;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 import static io.harness.rule.OwnerRule.vivekveman;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +30,8 @@ import io.harness.exception.WingsException;
 import io.harness.gcp.helpers.GcpHttpTransportHelperService;
 import io.harness.globalcontex.ErrorHandlingGlobalContextData;
 import io.harness.manage.GlobalContextManager;
+import io.harness.oidc.gcp.constants.GcpOidcServiceAccountAccessTokenResponse;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
@@ -68,6 +71,8 @@ public class GcpHelperServiceTest extends CategoryTest {
   @Mock HttpResponse httpResponse;
   private HttpTransport transport;
   @Mock TokenResponseException tokenResponseException;
+  @Mock GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate;
+
   @Before
   public void setup() throws GeneralSecurityException, IOException {
     MockitoAnnotations.initMocks(this);
@@ -79,11 +84,29 @@ public class GcpHelperServiceTest extends CategoryTest {
   @Owner(developers = ABHINAV2)
   @Category(UnitTests.class)
   public void testGetGkeContainerService() throws IOException {
-    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false);
+    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false, null);
     Container container = gcpHelperService.getGkeContainerService(serviceAccountKeyFileContent, false);
 
     assertThat(container.getApplicationName()).isEqualTo("Harness");
     assertThat(container.getRequestFactory().getTransport()).isEqualTo(transport);
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testGetGkeContainerServices() {
+    String accessToken = "sampleAccessToken";
+    GcpOidcServiceAccountAccessTokenResponse gcpOidcServiceAccountAccessTokenResponse =
+        new GcpOidcServiceAccountAccessTokenResponse(accessToken, 1234L);
+    doReturn(gcpOidcServiceAccountAccessTokenResponse)
+        .when(gcpOidcTokenExchangeDetailsForDelegate)
+        .exchangeOidcServiceAccountAccessToken();
+    Container container = gcpHelperService.getGkeContainerService(null, false, gcpOidcTokenExchangeDetailsForDelegate);
+
+    assertThat(container.getApplicationName()).isEqualTo("Harness");
+    assertThat(container.getRequestFactory().getTransport()).isEqualTo(transport);
+    assertThat(((GoogleCredential) container.getRequestFactory().getInitializer()).getAccessToken())
+        .isEqualTo(accessToken);
   }
 
   @Test
@@ -107,7 +130,7 @@ public class GcpHelperServiceTest extends CategoryTest {
   @Owner(developers = ABHINAV2)
   @Category(UnitTests.class)
   public void testGetGcsStorageService() throws IOException {
-    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false);
+    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false, null);
     Storage storage = gcpHelperService.getGcsStorageService(serviceAccountKeyFileContent, false);
     assertThat(storage.getApplicationName()).isEqualTo("Harness");
     assertThat(storage.getRequestFactory().getTransport()).isEqualTo(transport);
@@ -119,13 +142,13 @@ public class GcpHelperServiceTest extends CategoryTest {
   public void testGetGcsStorageServiceWhenInvalidCredentials() throws IOException {
     doAnswer(invocation -> { throw new GeneralSecurityException(); })
         .when(gcpHelperService)
-        .getGoogleCredential(serviceAccountKeyFileContent, false);
+        .getGoogleCredential(serviceAccountKeyFileContent, false, null);
     assertThatThrownBy(() -> gcpHelperService.getGcsStorageService(serviceAccountKeyFileContent, false))
         .isInstanceOf(WingsException.class);
 
     doAnswer(invocation -> { throw new IOException(); })
         .when(gcpHelperService)
-        .getGoogleCredential(serviceAccountKeyFileContent, false);
+        .getGoogleCredential(serviceAccountKeyFileContent, false, null);
     assertThatThrownBy(() -> gcpHelperService.getGcsStorageService(serviceAccountKeyFileContent, false))
         .isInstanceOf(WingsException.class);
   }
@@ -134,7 +157,7 @@ public class GcpHelperServiceTest extends CategoryTest {
   @Owner(developers = ABHINAV2)
   @Category(UnitTests.class)
   public void testGetGCEService() throws IOException {
-    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false);
+    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false, null);
     Compute compute = gcpHelperService.getGCEService(serviceAccountKeyFileContent, TEST_PROJECT_ID, false);
     assertThat(compute.getApplicationName()).isEqualTo(TEST_PROJECT_ID);
     assertThat(compute.getRequestFactory().getTransport()).isEqualTo(transport);
@@ -146,13 +169,13 @@ public class GcpHelperServiceTest extends CategoryTest {
   public void testGetGCEServiceWhenInvalidCredentials() throws IOException {
     doAnswer(invocation -> { throw new GeneralSecurityException(); })
         .when(gcpHelperService)
-        .getGoogleCredential(serviceAccountKeyFileContent, false);
+        .getGoogleCredential(serviceAccountKeyFileContent, false, null);
     assertThatThrownBy(() -> gcpHelperService.getGCEService(serviceAccountKeyFileContent, TEST_PROJECT_ID, false))
         .isInstanceOf(WingsException.class);
 
     doAnswer(invocation -> { throw new IOException(); })
         .when(gcpHelperService)
-        .getGoogleCredential(serviceAccountKeyFileContent, false);
+        .getGoogleCredential(serviceAccountKeyFileContent, false, null);
     assertThatThrownBy(() -> gcpHelperService.getGCEService(serviceAccountKeyFileContent, TEST_PROJECT_ID, false))
         .isInstanceOf(WingsException.class);
   }
@@ -161,7 +184,7 @@ public class GcpHelperServiceTest extends CategoryTest {
   @Owner(developers = ABHINAV2)
   @Category(UnitTests.class)
   public void testGetMonitoringService() throws IOException {
-    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false);
+    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false, null);
     Monitoring monitoring = gcpHelperService.getMonitoringService(serviceAccountKeyFileContent, TEST_PROJECT_ID, false);
     assertThat(monitoring.getApplicationName()).isEqualTo(TEST_PROJECT_ID);
     assertThat(monitoring.getRequestFactory().getTransport()).isEqualTo(transport);
@@ -173,14 +196,14 @@ public class GcpHelperServiceTest extends CategoryTest {
   public void testGetMonitoringServiceWhenInvalidCredentials() throws IOException {
     doAnswer(invocation -> { throw new GeneralSecurityException(); })
         .when(gcpHelperService)
-        .getGoogleCredential(serviceAccountKeyFileContent, false);
+        .getGoogleCredential(serviceAccountKeyFileContent, false, null);
     assertThatThrownBy(
         () -> gcpHelperService.getMonitoringService(serviceAccountKeyFileContent, TEST_PROJECT_ID, false))
         .isInstanceOf(WingsException.class);
 
     doAnswer(invocation -> { throw new IOException(); })
         .when(gcpHelperService)
-        .getGoogleCredential(serviceAccountKeyFileContent, false);
+        .getGoogleCredential(serviceAccountKeyFileContent, false, null);
     assertThatThrownBy(
         () -> gcpHelperService.getMonitoringService(serviceAccountKeyFileContent, TEST_PROJECT_ID, false))
         .isInstanceOf(WingsException.class);
@@ -190,7 +213,7 @@ public class GcpHelperServiceTest extends CategoryTest {
   @Owner(developers = ABHINAV2)
   @Category(UnitTests.class)
   public void testGetLoggingResource() throws IOException {
-    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false);
+    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false, null);
     Logging logging = gcpHelperService.getLoggingResource(serviceAccountKeyFileContent, TEST_PROJECT_ID, false);
     assertThat(logging.getApplicationName()).isEqualTo(TEST_PROJECT_ID);
     assertThat(logging.getRequestFactory().getTransport()).isEqualTo(transport);
@@ -202,13 +225,13 @@ public class GcpHelperServiceTest extends CategoryTest {
   public void testGetLoggingResourceWhenInvalidCredentials() throws IOException {
     doAnswer(invocation -> { throw new GeneralSecurityException(); })
         .when(gcpHelperService)
-        .getGoogleCredential(serviceAccountKeyFileContent, false);
+        .getGoogleCredential(serviceAccountKeyFileContent, false, null);
     assertThatThrownBy(() -> gcpHelperService.getLoggingResource(serviceAccountKeyFileContent, TEST_PROJECT_ID, false))
         .isInstanceOf(WingsException.class);
 
     doAnswer(invocation -> { throw new IOException(); })
         .when(gcpHelperService)
-        .getGoogleCredential(serviceAccountKeyFileContent, false);
+        .getGoogleCredential(serviceAccountKeyFileContent, false, null);
     assertThatThrownBy(() -> gcpHelperService.getLoggingResource(serviceAccountKeyFileContent, TEST_PROJECT_ID, false))
         .isInstanceOf(WingsException.class);
   }
@@ -217,11 +240,11 @@ public class GcpHelperServiceTest extends CategoryTest {
   @Owner(developers = ABHINAV2)
   @Category(UnitTests.class)
   public void testGetGoogleCredentialsWithInvalidParams() {
-    assertThatThrownBy(() -> gcpHelperService.getGoogleCredential("".toCharArray(), false))
+    assertThatThrownBy(() -> gcpHelperService.getGoogleCredential("".toCharArray(), false, null))
         .isInstanceOf(InvalidRequestException.class);
-    assertThatThrownBy(() -> gcpHelperService.getGoogleCredential(serviceAccountKeyFileContent, false))
+    assertThatThrownBy(() -> gcpHelperService.getGoogleCredential(serviceAccountKeyFileContent, false, null))
         .isInstanceOf(InvalidRequestException.class);
-    assertThatThrownBy(() -> gcpHelperService.getGoogleCredential("InvalidJson".toCharArray(), false))
+    assertThatThrownBy(() -> gcpHelperService.getGoogleCredential("InvalidJson".toCharArray(), false, null))
         .isInstanceOf(InvalidRequestException.class);
   }
 
@@ -315,7 +338,7 @@ public class GcpHelperServiceTest extends CategoryTest {
   @Owner(developers = vivekveman)
   @Category(UnitTests.class)
   public void testGetBasicAuthHeaderForExpiredCredentials() throws IOException {
-    doReturn(googleCredential1).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false);
+    doReturn(googleCredential1).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false, null);
     doReturn(TEST_ACCESS_TOKEN).when(gcpHelperService).getDefaultCredentialsAccessToken(any(String.class));
 
     if (!GlobalContextManager.isAvailable()) {

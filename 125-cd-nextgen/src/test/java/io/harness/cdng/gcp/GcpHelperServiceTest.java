@@ -9,6 +9,7 @@ package io.harness.cdng.gcp;
 
 import static io.harness.annotations.dev.HarnessTeam.CDP;
 import static io.harness.rule.OwnerRule.ABOSII;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +37,7 @@ import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorCredentialDT
 import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorDTO;
 import io.harness.delegate.beans.connector.gcpconnector.GcpCredentialType;
 import io.harness.delegate.beans.connector.gcpconnector.GcpManualDetailsDTO;
+import io.harness.delegate.beans.connector.gcpconnector.GcpOidcDetailsDTO;
 import io.harness.delegate.task.gcp.GcpTaskType;
 import io.harness.delegate.task.gcp.request.GcpListBucketsRequest;
 import io.harness.delegate.task.gcp.request.GcpRequest;
@@ -228,6 +230,34 @@ public class GcpHelperServiceTest extends CategoryTest {
             .build();
 
     assertThat(gcpHelperService.getManualDetailsDTO(gcpConnectorDTO)).isNull();
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testGetOidcDetailsDTO() {
+    GcpOidcDetailsDTO gcpOidcDetailsDTO = GcpOidcDetailsDTO.builder().build();
+    GcpConnectorDTO gcpConnectorDTO = GcpConnectorDTO.builder()
+                                          .credential(GcpConnectorCredentialDTO.builder()
+                                                          .config(gcpOidcDetailsDTO)
+                                                          .gcpCredentialType(GcpCredentialType.OIDC_AUTHENTICATION)
+                                                          .build())
+                                          .build();
+
+    assertThat(gcpHelperService.getOidcDetailsDTO(gcpConnectorDTO)).isEqualTo(gcpOidcDetailsDTO);
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testGetOidcDetailsDTODelegate() {
+    GcpConnectorDTO gcpConnectorDTO =
+        GcpConnectorDTO.builder()
+            .credential(
+                GcpConnectorCredentialDTO.builder().gcpCredentialType(GcpCredentialType.INHERIT_FROM_DELEGATE).build())
+            .build();
+
+    assertThat(gcpHelperService.getOidcDetailsDTO(gcpConnectorDTO)).isNull();
   }
 
   private void setupConnector(IdentifierRef ref, GcpConnectorDTO connector, ConnectorType type) {

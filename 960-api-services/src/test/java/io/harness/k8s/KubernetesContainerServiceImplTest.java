@@ -17,6 +17,7 @@ import static io.harness.k8s.KubernetesConvention.CompressedReleaseHistoryFlag;
 import static io.harness.k8s.KubernetesConvention.ReleaseHistoryKeyName;
 import static io.harness.k8s.model.KubernetesClusterAuthType.EXEC_OAUTH;
 import static io.harness.k8s.model.KubernetesClusterAuthType.GCP_OAUTH;
+import static io.harness.k8s.model.KubernetesClusterAuthType.GCP_OIDC;
 import static io.harness.k8s.model.KubernetesClusterAuthType.OIDC;
 import static io.harness.k8s.model.KubernetesClusterAuthType.USER_PASSWORD;
 import static io.harness.rule.OwnerRule.ABHINAV2;
@@ -69,6 +70,8 @@ import io.harness.k8s.oidc.OidcTokenRetriever;
 import io.harness.rule.Owner;
 
 import com.github.scribejava.apis.openid.OpenIdOAuth2AccessToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.util.store.DataStore;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.TimeLimiter;
@@ -166,6 +169,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.internal.http2.ConnectionShutdownException;
 import org.assertj.core.api.Assertions;
@@ -674,6 +678,48 @@ public class KubernetesContainerServiceImplTest extends CategoryTest {
                                       .masterUrl("masterUrl")
                                       .username("username".toCharArray())
                                       .password("password".toCharArray())
+                                      .build();
+    String configFileContent = kubernetesContainerService.getConfigFileContent(kubeConfig);
+    assertThat(expected).isEqualTo(configFileContent);
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testGetConfigFileContentForGCPOIDCAuth() {
+    String expected = "apiVersion: v1\n"
+        + "clusters:\n"
+        + "- cluster:\n"
+        + "    server: masterUrl\n"
+        + "    \n"
+        + "    certificate-authority-data: caCert\n"
+        + "  name: CLUSTER_NAME\n"
+        + "contexts:\n"
+        + "- context:\n"
+        + "    cluster: CLUSTER_NAME\n"
+        + "    user: HARNESS_USER\n"
+        + "    namespace: namespace\n"
+        + "  name: CURRENT_CONTEXT\n"
+        + "current-context: CURRENT_CONTEXT\n"
+        + "kind: Config\n"
+        + "preferences: {}\n"
+        + "users:\n"
+        + "- name: HARNESS_USER\n"
+        + "  user:\n"
+        + "    token: sampleAccessToken";
+    String oidcAccessToken = "sampleAccessToken";
+    GoogleCredential googleCredential = new GoogleCredential().setAccessToken(oidcAccessToken);
+
+    // given
+    Supplier<String> gkeTokenSupplier = new GcpAccessTokenSupplier(
+        null, s -> googleCredential, mock(DataStore.class), Clock.systemUTC(), oidcAccessToken);
+    KubernetesConfig kubeConfig = KubernetesConfig.builder()
+                                      .authType(GCP_OIDC)
+                                      .serviceAccountTokenSupplier(gkeTokenSupplier)
+                                      .namespace("namespace")
+                                      .masterUrl("masterUrl")
+                                      .caCert("caCert".toCharArray())
+                                      .clientKey("CLIENT_KEY".toCharArray())
                                       .build();
     String configFileContent = kubernetesContainerService.getConfigFileContent(kubeConfig);
     assertThat(expected).isEqualTo(configFileContent);

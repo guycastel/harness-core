@@ -23,6 +23,9 @@ import io.harness.gcp.helpers.GcpHttpTransportHelperService;
 import io.harness.globalcontex.ErrorHandlingGlobalContextData;
 import io.harness.manage.GlobalContextManager;
 import io.harness.network.Http;
+import io.harness.oidc.exception.OidcException;
+import io.harness.oidc.gcp.constants.GcpOidcServiceAccountAccessTokenResponse;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.serializer.JsonUtils;
 
 import software.wings.beans.TaskType;
@@ -79,14 +82,16 @@ public class GcpHelperService {
    *
    * @param serviceAccountKeyFileContent
    * @param isUseDelegate
-   *
+   * @param gcpOidcTokenExchangeDetailsForDelegate
    * @return the gke container service
    */
-  public Container getGkeContainerService(char[] serviceAccountKeyFileContent, boolean isUseDelegate) {
+  public Container getGkeContainerService(char[] serviceAccountKeyFileContent, boolean isUseDelegate,
+      GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate) {
     try {
       JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
       HttpTransport transport = gcpHttpTransportHelperService.checkIfUseProxyAndGetHttpTransport();
-      GoogleCredential credential = getGoogleCredential(serviceAccountKeyFileContent, isUseDelegate);
+      GoogleCredential credential =
+          getGoogleCredential(serviceAccountKeyFileContent, isUseDelegate, gcpOidcTokenExchangeDetailsForDelegate);
       return new Container.Builder(transport, jsonFactory, credential).setApplicationName("Harness").build();
     } catch (GeneralSecurityException e) {
       log.error("Security exception getting Google container service", e);
@@ -97,6 +102,10 @@ public class GcpHelperService {
       throw new WingsException(INVALID_CLOUD_PROVIDER, USER)
           .addParam("message", "Invalid Google Cloud Platform credentials.");
     }
+  }
+
+  public Container getGkeContainerService(char[] serviceAccountKeyFileContent, boolean isUseDelegate) {
+    return getGkeContainerService(serviceAccountKeyFileContent, isUseDelegate, null);
   }
 
   /**
@@ -200,11 +209,25 @@ public class GcpHelperService {
           .addParam("message", "Invalid Google Cloud Platform credentials.");
     }
   }
-
   public GoogleCredential getGoogleCredential(char[] serviceAccountKeyFileContent, boolean isUseDelegate)
       throws IOException {
+    return getGoogleCredential(serviceAccountKeyFileContent, isUseDelegate, null);
+  }
+
+  public GoogleCredential getGoogleCredential(char[] serviceAccountKeyFileContent, boolean isUseDelegate,
+      GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate) throws IOException {
     if (isUseDelegate) {
       return GcpCredentialsHelperService.getApplicationDefaultCredentials();
+    }
+    if (gcpOidcTokenExchangeDetailsForDelegate != null) {
+      GcpOidcServiceAccountAccessTokenResponse oidcServiceAccountAccessTokenResponse =
+          gcpOidcTokenExchangeDetailsForDelegate.exchangeOidcServiceAccountAccessToken();
+      if (oidcServiceAccountAccessTokenResponse.getExpireTime() > 0) {
+        String accessTokenValue = oidcServiceAccountAccessTokenResponse.getAccessToken();
+        return new GoogleCredential().setAccessToken(accessTokenValue);
+      } else {
+        throw new OidcException("Invalid Service Account Access Token received");
+      }
     }
     validateServiceAccountKey(serviceAccountKeyFileContent);
     return checkIfUseProxyAndGetGoogleCredentials(serviceAccountKeyFileContent);

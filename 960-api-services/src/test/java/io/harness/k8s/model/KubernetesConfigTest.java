@@ -8,6 +8,7 @@
 package io.harness.k8s.model;
 
 import static io.harness.rule.OwnerRule.BOGDAN;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -54,8 +55,8 @@ public class KubernetesConfigTest {
   @Category(UnitTests.class)
   public void shouldGetServiceAccountIfGcp() {
     // given
-    Supplier<String> gkeTokenSupplier =
-        new GcpAccessTokenSupplier(DUMMY_GCP_KEY, s -> googleCredential, mock(DataStore.class), Clock.systemUTC());
+    Supplier<String> gkeTokenSupplier = new GcpAccessTokenSupplier(
+        DUMMY_GCP_KEY, s -> googleCredential, mock(DataStore.class), Clock.systemUTC(), null);
 
     KubernetesConfig kubernetesConfig = KubernetesConfig.builder()
                                             .authType(KubernetesClusterAuthType.GCP_OAUTH)
@@ -101,5 +102,27 @@ public class KubernetesConfigTest {
 
     // then
     assertThat(gcpAccountKeyFile).isEmpty();
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void getOidcTokenGcp() {
+    String oidcAccessToken = "sampleAccessToken";
+    GoogleCredential googleCredential1 = new GoogleCredential().setAccessToken(oidcAccessToken);
+
+    // given
+    Supplier<String> gkeTokenSupplier = new GcpAccessTokenSupplier(
+        null, s -> googleCredential1, mock(DataStore.class), Clock.systemUTC(), oidcAccessToken);
+    KubernetesConfig kubernetesConfig = KubernetesConfig.builder()
+                                            .authType(KubernetesClusterAuthType.GCP_OAUTH)
+                                            .serviceAccountTokenSupplier(gkeTokenSupplier)
+                                            .build();
+
+    // when
+    String accessToken = kubernetesConfig.getServiceAccountTokenSupplier().get();
+
+    // then
+    assertThat(accessToken).isEqualTo("sampleAccessToken");
   }
 }

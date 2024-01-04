@@ -18,6 +18,7 @@ import static io.harness.rule.OwnerRule.BOGDAN;
 import static io.harness.rule.OwnerRule.BRETT;
 import static io.harness.rule.OwnerRule.PRATYUSH;
 import static io.harness.rule.OwnerRule.SATYAM;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,6 +45,7 @@ import io.harness.k8s.model.KubernetesConfig;
 import io.harness.k8s.model.kubeconfig.Exec;
 import io.harness.k8s.model.kubeconfig.InteractiveMode;
 import io.harness.k8s.model.kubeconfig.KubeConfigAuthPluginHelper;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 
 import com.google.api.client.auth.oauth2.StoredCredential;
@@ -116,6 +118,9 @@ public class GkeClusterHelperTest extends CategoryTest {
                                                                                 .put("masterPwd", "password")
                                                                                 .build();
 
+  private static final GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
+      GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+
   private static final String DUMMY_GCP_KEY = "{\n"
       + "      \"type\": \"service_account\",\n"
       + "      \"project_id\": \"mock-project\",\n"
@@ -167,11 +172,14 @@ public class GkeClusterHelperTest extends CategoryTest {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
+    when(gcpHelperService.getGkeContainerService(eq(DUMMY_GCP_KEY_CHARS), anyBoolean(), any())).thenReturn(container);
     when(gcpHelperService.getGkeContainerService(eq(DUMMY_GCP_KEY_CHARS), anyBoolean())).thenReturn(container);
+    when(gcpHelperService.getGkeContainerService(eq(null), anyBoolean(), eq(gcpOidcTokenExchangeDetailsForDelegate)))
+        .thenReturn(container);
     when(gcpHelperService.getSleepIntervalSecs()).thenReturn(0);
     when(gcpHelperService.getTimeoutMins()).thenReturn(1);
     when(gcpHelperService.getClusterProjectId(any())).thenReturn("project-a");
-    when(gcpHelperService.getGoogleCredential(any(), anyBoolean()))
+    when(gcpHelperService.getGoogleCredential(any(), anyBoolean(), any()))
         .thenReturn(
             GoogleCredential.fromStream(new ByteArrayInputStream(DUMMY_GCP_KEY.getBytes(StandardCharsets.UTF_8))));
     when(container.projects()).thenReturn(projects);
@@ -434,20 +442,32 @@ public class GkeClusterHelperTest extends CategoryTest {
     List<Cluster> clusterList = ImmutableList.of(CLUSTER_1, CLUSTER_2);
     when(clustersList.execute()).thenReturn(new ListClustersResponse().setClusters(clusterList));
 
-    List<String> result = gkeClusterHelper.listClusters(DUMMY_GCP_KEY_CHARS, false);
+    List<String> result = gkeClusterHelper.listClusters(DUMMY_GCP_KEY_CHARS, false, null, null);
 
     verify(clusters).list(anyString());
     assertThat(result).containsExactlyInAnyOrder(CLUSTER_1.getZone() + LOCATION_DELIMITER + CLUSTER_1.getName(),
         CLUSTER_2.getZone() + LOCATION_DELIMITER + CLUSTER_2.getName());
   }
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void shouldListClusterss() throws Exception {
+    List<Cluster> clusterList = ImmutableList.of(CLUSTER_1, CLUSTER_2);
+    when(clustersList.execute()).thenReturn(new ListClustersResponse().setClusters(clusterList));
 
+    List<String> result = gkeClusterHelper.listClusters(null, false, gcpOidcTokenExchangeDetailsForDelegate, "122345");
+
+    verify(clusters).list(anyString());
+    assertThat(result).containsExactlyInAnyOrder(CLUSTER_1.getZone() + LOCATION_DELIMITER + CLUSTER_1.getName(),
+        CLUSTER_2.getZone() + LOCATION_DELIMITER + CLUSTER_2.getName());
+  }
   @Test
   @Owner(developers = BRETT)
   @Category(UnitTests.class)
   public void shouldNotListClustersIfError() throws Exception {
     when(clustersList.execute()).thenThrow(new IOException());
 
-    assertThatThrownBy(() -> gkeClusterHelper.listClusters(DUMMY_GCP_KEY_CHARS, false))
+    assertThatThrownBy(() -> gkeClusterHelper.listClusters(DUMMY_GCP_KEY_CHARS, false, null, null))
         .isInstanceOf(GcpServerException.class);
 
     verify(clusters).list(anyString());
@@ -464,7 +484,7 @@ public class GkeClusterHelperTest extends CategoryTest {
         new HttpResponseException.Builder(HttpStatusCodes.STATUS_CODE_BAD_REQUEST, "Forbidden", httpHeaders),
         googleJsonError);
     when(clustersList.execute()).thenThrow(responseException);
-    assertThatThrownBy(() -> gkeClusterHelper.listClusters(DUMMY_GCP_KEY_CHARS, false))
+    assertThatThrownBy(() -> gkeClusterHelper.listClusters(DUMMY_GCP_KEY_CHARS, false, null, null))
         .isInstanceOf(GcpServerException.class);
   }
 
@@ -476,7 +496,7 @@ public class GkeClusterHelperTest extends CategoryTest {
 
     GoogleCredential creds =
         GoogleCredential.fromStream(new ByteArrayInputStream(DUMMY_GCP_KEY.getBytes(StandardCharsets.UTF_8)));
-    when(gcpHelperService.getGoogleCredential(eq(DUMMY_GCP_KEY_CHARS), eq(false))).thenReturn(creds);
+    when(gcpHelperService.getGoogleCredential(eq(DUMMY_GCP_KEY_CHARS), eq(false), eq(null))).thenReturn(creds);
     MockedStatic mockedStaticAuthPlugin = mockStatic(KubeConfigAuthPluginHelper.class);
     when(KubeConfigAuthPluginHelper.isExecAuthPluginBinaryAvailable(any(), any())).thenReturn(true);
     when(KubeConfigAuthPluginHelper.runCommand(any(), any(), any())).thenReturn(true);

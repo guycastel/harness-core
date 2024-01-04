@@ -23,6 +23,7 @@ import io.harness.errorhandling.NGErrorHelper;
 import io.harness.exception.InvalidRequestException;
 import io.harness.exception.sanitizer.ExceptionMessageSanitizer;
 import io.harness.logging.CommandExecutionStatus;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.security.encryption.SecretDecryptionService;
 
 import com.google.inject.Inject;
@@ -56,7 +57,13 @@ public class GcpListClustersTaskHandler implements TaskHandler {
 
     GcpListClustersRequest request = (GcpListClustersRequest) gcpRequest;
     boolean useDelegate = request.getGcpManualDetailsDTO() == null && isNotEmpty(request.getDelegateSelectors());
-    List<String> clusterNames = gkeClusterHelper.listClusters(getGcpServiceAccountKeyFileContent(request), useDelegate);
+
+    String gcpOidcProjectId =
+        gcpRequest.getGcpOidcDetailsDTO() != null && gcpRequest.getGcpOidcDetailsDTO().getGcpProjectId() != null
+        ? gcpRequest.getGcpOidcDetailsDTO().getGcpProjectId()
+        : null;
+    List<String> clusterNames = gkeClusterHelper.listClusters(getGcpServiceAccountKeyFileContent(request), useDelegate,
+        request.getGcpOidcTokenExchangeDetailsForDelegate(), gcpOidcProjectId);
 
     return GcpClusterListTaskResponse.builder()
         .commandExecutionStatus(CommandExecutionStatus.SUCCESS)

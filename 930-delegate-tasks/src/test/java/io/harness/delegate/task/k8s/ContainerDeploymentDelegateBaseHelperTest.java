@@ -14,6 +14,7 @@ import static io.harness.rule.OwnerRule.ACASIAN;
 import static io.harness.rule.OwnerRule.ANSHUL;
 import static io.harness.rule.OwnerRule.LOVISH_BANSAL;
 import static io.harness.rule.OwnerRule.MLUKIC;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 import static io.harness.rule.OwnerRule.YOGESH;
 
 import static java.util.Arrays.asList;
@@ -46,6 +47,7 @@ import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorCredentialDT
 import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorDTO;
 import io.harness.delegate.beans.connector.gcpconnector.GcpCredentialType;
 import io.harness.delegate.beans.connector.gcpconnector.GcpManualDetailsDTO;
+import io.harness.delegate.beans.connector.gcpconnector.GcpOidcDetailsDTO;
 import io.harness.delegate.beans.connector.k8Connector.KubernetesAuthCredentialDTO;
 import io.harness.delegate.beans.connector.k8Connector.KubernetesAuthDTO;
 import io.harness.delegate.beans.connector.k8Connector.KubernetesClusterConfigDTO;
@@ -69,6 +71,7 @@ import io.harness.k8s.model.KubernetesConfig;
 import io.harness.k8s.model.kubeconfig.KubeConfigAuthPluginHelper;
 import io.harness.logging.LogCallback;
 import io.harness.logging.LogLevel;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 import io.harness.security.encryption.EncryptedDataDetail;
 import io.harness.security.encryption.SecretDecryptionService;
@@ -210,7 +213,7 @@ public class ContainerDeploymentDelegateBaseHelperTest extends CategoryTest {
     KubernetesConfig expectedKubernetesConfig = KubernetesConfig.builder().password(secret).build();
     doReturn(expectedKubernetesConfig)
         .when(gkeClusterHelper)
-        .getCluster(eq(secret), eq(false), eq("cluster1"), eq("default"), any(LogCallback.class));
+        .getCluster(eq(secret), eq(false), eq("cluster1"), eq("default"), any(LogCallback.class), eq(null), eq(null));
 
     KubernetesConfig kubernetesConfig =
         containerDeploymentDelegateBaseHelper.createKubernetesConfig(config, WORK_DIR, logCallback);
@@ -218,7 +221,51 @@ public class ContainerDeploymentDelegateBaseHelperTest extends CategoryTest {
     assertThat(kubernetesConfig).isEqualTo(expectedKubernetesConfig);
 
     verify(gkeClusterHelper, times(1))
-        .getCluster(eq(secret), eq(false), eq("cluster1"), eq("default"), any(LogCallback.class));
+        .getCluster(eq(secret), eq(false), eq("cluster1"), eq("default"), any(LogCallback.class), eq(null), eq(null));
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testCreateGcpOIDCCredentialsKubernetesConfig() {
+    char[] secret = "secret".toCharArray();
+    GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
+        GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+    String projectId = "12344";
+    GcpK8sInfraDelegateConfig config =
+        GcpK8sInfraDelegateConfig.builder()
+            .cluster("cluster1")
+            .namespace("default")
+            .gcpConnectorDTO(GcpConnectorDTO.builder()
+                                 .credential(GcpConnectorCredentialDTO.builder()
+                                                 .gcpCredentialType(GcpCredentialType.OIDC_AUTHENTICATION)
+                                                 .config(GcpOidcDetailsDTO.builder()
+                                                             .serviceAccountEmail("saEmail")
+                                                             .providerId("provider")
+                                                             .gcpProjectId(projectId)
+                                                             .workloadPoolId("poolId")
+                                                             .build())
+                                                 .build())
+                                 .build())
+            .gcpOidcTokenExchangeDetailsForDelegate(gcpOidcTokenExchangeDetailsForDelegate)
+            .build();
+    MockedStatic kubeConfigAuthPluginHelper = mockStatic(KubeConfigAuthPluginHelper.class);
+    Mockito.when(KubeConfigAuthPluginHelper.isExecAuthPluginBinaryAvailable(any(), any())).thenReturn(true);
+    when(KubeConfigAuthPluginHelper.runCommand(any(), any(), any())).thenReturn(true);
+    KubernetesConfig expectedKubernetesConfig = KubernetesConfig.builder().password(secret).build();
+    doReturn(expectedKubernetesConfig)
+        .when(gkeClusterHelper)
+        .getCluster(eq(null), eq(false), eq("cluster1"), eq("default"), any(LogCallback.class),
+            eq(gcpOidcTokenExchangeDetailsForDelegate), eq(projectId));
+
+    KubernetesConfig kubernetesConfig =
+        containerDeploymentDelegateBaseHelper.createKubernetesConfig(config, WORK_DIR, logCallback);
+    kubeConfigAuthPluginHelper.close();
+    assertThat(kubernetesConfig).isEqualTo(expectedKubernetesConfig);
+
+    verify(gkeClusterHelper, times(1))
+        .getCluster(eq(null), eq(false), eq("cluster1"), eq("default"), any(LogCallback.class),
+            eq(gcpOidcTokenExchangeDetailsForDelegate), eq(projectId));
   }
 
   @Test
@@ -243,7 +290,7 @@ public class ContainerDeploymentDelegateBaseHelperTest extends CategoryTest {
     KubernetesConfig expectedKubernetesConfig = KubernetesConfig.builder().username("test".toCharArray()).build();
     doReturn(expectedKubernetesConfig)
         .when(gkeClusterHelper)
-        .getCluster(eq(null), eq(true), eq("cluster1"), eq("default"), any(LogCallback.class));
+        .getCluster(eq(null), eq(true), eq("cluster1"), eq("default"), any(LogCallback.class), eq(null), eq(null));
 
     KubernetesConfig kubernetesConfig =
         containerDeploymentDelegateBaseHelper.createKubernetesConfig(config, WORK_DIR, logCallback);
@@ -251,7 +298,7 @@ public class ContainerDeploymentDelegateBaseHelperTest extends CategoryTest {
     assertThat(kubernetesConfig).isEqualTo(expectedKubernetesConfig);
 
     verify(gkeClusterHelper, times(1))
-        .getCluster(eq(null), eq(true), eq("cluster1"), eq("default"), any(LogCallback.class));
+        .getCluster(eq(null), eq(true), eq("cluster1"), eq("default"), any(LogCallback.class), eq(null), eq(null));
   }
 
   @Test
@@ -369,11 +416,11 @@ public class ContainerDeploymentDelegateBaseHelperTest extends CategoryTest {
     when(KubeConfigAuthPluginHelper.runCommand(any(), any(), any())).thenReturn(true);
     doReturn(kubernetesConfig)
         .when(gkeClusterHelper)
-        .getCluster(serviceAccountKeyFileContent, false, "cluster", "default", null);
+        .getCluster(serviceAccountKeyFileContent, false, "cluster", "default", null, null, null);
 
     containerDeploymentDelegateBaseHelper.getKubeconfigFileContent(gcpK8sInfraDelegateConfig, WORK_DIR);
     kubeConfigAuthPluginHelper.close();
-    verify(gkeClusterHelper).getCluster(serviceAccountKeyFileContent, false, "cluster", "default", null);
+    verify(gkeClusterHelper).getCluster(serviceAccountKeyFileContent, false, "cluster", "default", null, null, null);
     verify(secretDecryptionService).decrypt(credentials, encryptionDataDetails);
   }
 

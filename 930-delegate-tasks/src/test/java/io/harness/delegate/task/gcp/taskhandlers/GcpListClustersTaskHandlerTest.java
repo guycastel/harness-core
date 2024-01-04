@@ -26,12 +26,14 @@ import io.harness.CategoryTest;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.category.element.UnitTests;
 import io.harness.delegate.beans.connector.gcpconnector.GcpManualDetailsDTO;
+import io.harness.delegate.beans.connector.gcpconnector.GcpOidcDetailsDTO;
 import io.harness.delegate.task.gcp.helpers.GkeClusterHelper;
 import io.harness.delegate.task.gcp.request.GcpListClustersRequest;
 import io.harness.delegate.task.gcp.request.GcpValidationRequest;
 import io.harness.delegate.task.gcp.response.GcpClusterListTaskResponse;
 import io.harness.encryption.SecretRefData;
 import io.harness.errorhandling.NGErrorHelper;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 import io.harness.rule.OwnerRule;
 import io.harness.security.encryption.SecretDecryptionService;
@@ -65,13 +67,15 @@ public class GcpListClustersTaskHandlerTest extends CategoryTest {
   public void executeGcpTaskUseDelegateSuccess() {
     GcpListClustersRequest request =
         GcpListClustersRequest.builder().delegateSelectors(ImmutableSet.of("delegate1")).build();
-    doReturn(Arrays.asList("cluster1", "cluster2")).when(gkeClusterHelper).listClusters(eq(null), eq(true));
+    doReturn(Arrays.asList("cluster1", "cluster2"))
+        .when(gkeClusterHelper)
+        .listClusters(eq(null), eq(true), eq(null), eq(null));
 
     final GcpClusterListTaskResponse response = (GcpClusterListTaskResponse) taskHandler.executeRequest(request);
     assertThat(response.getCommandExecutionStatus()).isEqualTo(SUCCESS);
     assertThat(response.getClusterNames()).containsExactly("cluster1", "cluster2");
 
-    verify(gkeClusterHelper, times(1)).listClusters(eq(null), eq(true));
+    verify(gkeClusterHelper, times(1)).listClusters(eq(null), eq(true), eq(null), eq(null));
     verify(secretDecryptionService, times(0)).decrypt(any(), anyList());
   }
 
@@ -87,14 +91,76 @@ public class GcpListClustersTaskHandlerTest extends CategoryTest {
                                      .secretKeyRef(SecretRefData.builder().decryptedValue(secret).build())
                                      .build())
             .build();
-    doReturn(Arrays.asList("cluster1", "cluster2")).when(gkeClusterHelper).listClusters(eq(secret), eq(false));
+    doReturn(Arrays.asList("cluster1", "cluster2"))
+        .when(gkeClusterHelper)
+        .listClusters(eq(secret), eq(false), eq(null), eq(null));
 
     final GcpClusterListTaskResponse response = (GcpClusterListTaskResponse) taskHandler.executeRequest(request);
     assertThat(response.getCommandExecutionStatus()).isEqualTo(SUCCESS);
     assertThat(response.getClusterNames()).containsExactly("cluster1", "cluster2");
 
-    verify(gkeClusterHelper, times(1)).listClusters(eq(secret), eq(false));
+    verify(gkeClusterHelper, times(1)).listClusters(eq(secret), eq(false), eq(null), eq(null));
     verify(secretDecryptionService, times(1)).decrypt(any(), anyList());
+  }
+
+  @Test
+  @Owner(developers = OwnerRule.TARUN_UBA)
+  @Category(UnitTests.class)
+  public void executeGcpTaskOIDCCredentialsSuccess() {
+    GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
+        GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+    String projectId = "12344";
+    GcpListClustersRequest request = GcpListClustersRequest.builder()
+                                         .encryptionDetails(Collections.emptyList())
+                                         .gcpOidcTokenExchangeDetailsForDelegate(gcpOidcTokenExchangeDetailsForDelegate)
+                                         .gcpOidcDetailsDTO(GcpOidcDetailsDTO.builder()
+                                                                .serviceAccountEmail("saEmail")
+                                                                .providerId("provider")
+                                                                .gcpProjectId(projectId)
+                                                                .workloadPoolId("poolId")
+                                                                .build())
+                                         .build();
+    doReturn(Arrays.asList("cluster1", "cluster2"))
+        .when(gkeClusterHelper)
+        .listClusters(eq(null), eq(false), eq(gcpOidcTokenExchangeDetailsForDelegate), eq(projectId));
+
+    final GcpClusterListTaskResponse response = (GcpClusterListTaskResponse) taskHandler.executeRequest(request);
+    assertThat(response.getCommandExecutionStatus()).isEqualTo(SUCCESS);
+    assertThat(response.getClusterNames()).containsExactly("cluster1", "cluster2");
+
+    verify(gkeClusterHelper, times(1))
+        .listClusters(eq(null), eq(false), eq(gcpOidcTokenExchangeDetailsForDelegate), eq(projectId));
+  }
+
+  @Test
+  @Owner(developers = OwnerRule.TARUN_UBA)
+  @Category(UnitTests.class)
+  public void executeGcpTaskOIDCCredentialsFailure() {
+    GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
+        GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+    String projectId = "12344";
+    GcpListClustersRequest request = GcpListClustersRequest.builder()
+                                         .encryptionDetails(Collections.emptyList())
+                                         .gcpOidcTokenExchangeDetailsForDelegate(gcpOidcTokenExchangeDetailsForDelegate)
+                                         .gcpOidcDetailsDTO(GcpOidcDetailsDTO.builder()
+                                                                .serviceAccountEmail("saEmail")
+                                                                .providerId("provider")
+                                                                .gcpProjectId(projectId)
+                                                                .workloadPoolId("poolId")
+                                                                .build())
+                                         .build();
+    doThrow(new RuntimeException("No credentials found"))
+        .when(gkeClusterHelper)
+        .listClusters(eq(null), eq(false), eq(gcpOidcTokenExchangeDetailsForDelegate), eq(projectId));
+    doReturn("No credentials found").when(ngErrorHelper).getErrorSummary(anyString());
+
+    final GcpClusterListTaskResponse response = (GcpClusterListTaskResponse) taskHandler.executeRequest(request);
+    assertThat(response.getCommandExecutionStatus()).isEqualTo(FAILURE);
+    assertThat(response.getClusterNames()).isNull();
+    assertThat(response.getErrorMessage()).isEqualTo("No credentials found");
+
+    verify(gkeClusterHelper, times(1))
+        .listClusters(eq(null), eq(false), eq(gcpOidcTokenExchangeDetailsForDelegate), eq(projectId));
   }
 
   @Test
@@ -109,7 +175,9 @@ public class GcpListClustersTaskHandlerTest extends CategoryTest {
                                      .secretKeyRef(SecretRefData.builder().decryptedValue(secret).build())
                                      .build())
             .build();
-    doThrow(new RuntimeException("No credentials found")).when(gkeClusterHelper).listClusters(eq(secret), eq(false));
+    doThrow(new RuntimeException("No credentials found"))
+        .when(gkeClusterHelper)
+        .listClusters(eq(secret), eq(false), eq(null), eq(null));
     doReturn("No credentials found").when(ngErrorHelper).getErrorSummary(anyString());
 
     final GcpClusterListTaskResponse response = (GcpClusterListTaskResponse) taskHandler.executeRequest(request);
@@ -117,7 +185,7 @@ public class GcpListClustersTaskHandlerTest extends CategoryTest {
     assertThat(response.getClusterNames()).isNull();
     assertThat(response.getErrorMessage()).isEqualTo("No credentials found");
 
-    verify(gkeClusterHelper, times(1)).listClusters(eq(secret), eq(false));
+    verify(gkeClusterHelper, times(1)).listClusters(eq(secret), eq(false), eq(null), eq(null));
     verify(secretDecryptionService, times(1)).decrypt(any(), anyList());
   }
 
@@ -135,7 +203,7 @@ public class GcpListClustersTaskHandlerTest extends CategoryTest {
     assertThat(response.getClusterNames()).isNull();
     assertThat(response.getErrorMessage()).isEqualTo(errorMessage);
 
-    verify(gkeClusterHelper, times(0)).listClusters(any(), anyBoolean());
+    verify(gkeClusterHelper, times(0)).listClusters(any(), anyBoolean(), eq(null), eq(null));
     verify(secretDecryptionService, times(0)).decrypt(any(), anyList());
   }
 }

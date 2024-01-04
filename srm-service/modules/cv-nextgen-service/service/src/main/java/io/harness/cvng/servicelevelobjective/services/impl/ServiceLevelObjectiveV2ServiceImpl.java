@@ -1437,7 +1437,7 @@ public class ServiceLevelObjectiveV2ServiceImpl implements ServiceLevelObjective
   private AbstractServiceLevelObjective checkIfSLOPresent(ProjectParams projectParams, String identifier) {
     AbstractServiceLevelObjective serviceLevelObjective = getEntity(projectParams, identifier);
     if (serviceLevelObjective == null) {
-      throw new InvalidRequestException(String.format(
+      throw new NotFoundException(String.format(
           "SLO with identifier %s, accountId %s, orgIdentifier %s, and projectIdentifier %s is not present.",
           identifier, projectParams.getAccountIdentifier(), projectParams.getOrgIdentifier(),
           projectParams.getProjectIdentifier()));
@@ -1472,8 +1472,15 @@ public class ServiceLevelObjectiveV2ServiceImpl implements ServiceLevelObjective
   }
 
   private void validateSimpleSLO(ServiceLevelObjectiveV2DTO sloCreateDTO, ProjectParams projectParams) {
-    monitoredServiceService.get(
-        projectParams, ((SimpleServiceLevelObjectiveSpec) sloCreateDTO.getSpec()).getMonitoredServiceRef());
+    String monitoredServiceRef = ((SimpleServiceLevelObjectiveSpec) sloCreateDTO.getSpec()).getMonitoredServiceRef();
+    try {
+      monitoredServiceService.get(projectParams, monitoredServiceRef);
+    } catch (NotFoundException notFoundException) {
+      throw new InvalidRequestException(String.format(
+          "Monitored Service entity with identifier %s, accountId %s, orgIdentifier %s and projectIdentifier %s is not present",
+          monitoredServiceRef, projectParams.getAccountIdentifier(), projectParams.getOrgIdentifier(),
+          projectParams.getProjectIdentifier()));
+    }
     notificationRuleService.validateNotification(sloCreateDTO.getNotificationRuleRefs(), projectParams);
   }
 

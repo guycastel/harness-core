@@ -132,6 +132,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.ws.rs.NotFoundException;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -773,7 +774,7 @@ public class ServiceLevelObjectiveV2ServiceImplTest extends CvNextGenTestBase {
                       .build())
             .build();
     assertThatThrownBy(() -> serviceLevelObjectiveV2Service.create(projectParams, sloDTO))
-        .isInstanceOf(InvalidRequestException.class)
+        .isInstanceOf(NotFoundException.class)
         .hasMessage(String.format(
             "SLO with identifier %s, accountId %s, orgIdentifier %s, and projectIdentifier %s is not present.",
             "simpleslo1", projectParams.getAccountIdentifier(), projectParams.getOrgIdentifier(),
@@ -943,7 +944,7 @@ public class ServiceLevelObjectiveV2ServiceImplTest extends CvNextGenTestBase {
     serviceLevelObjectiveV2Service.create(projectParams, sloDTO);
     sloDTO.setIdentifier("incorrectSLOIdentifier");
     assertThatThrownBy(() -> serviceLevelObjectiveV2Service.delete(projectParams, sloDTO.getIdentifier()))
-        .isInstanceOf(InvalidRequestException.class)
+        .isInstanceOf(NotFoundException.class)
         .hasMessage(String.format(
             "SLO with identifier %s, accountId %s, orgIdentifier %s, and projectIdentifier %s is not present.",
             sloDTO.getIdentifier(), projectParams.getAccountIdentifier(), projectParams.getOrgIdentifier(),
@@ -1945,7 +1946,7 @@ public class ServiceLevelObjectiveV2ServiceImplTest extends CvNextGenTestBase {
     sloDTO.setIdentifier("newIdentifier");
     sloDTO.setDescription("newDescription");
     assertThatThrownBy(() -> serviceLevelObjectiveV2Service.update(projectParams, sloDTO.getIdentifier(), sloDTO))
-        .isInstanceOf(InvalidRequestException.class)
+        .isInstanceOf(NotFoundException.class)
         .hasMessage(String.format(
             "SLO with identifier %s, accountId %s, orgIdentifier %s, and projectIdentifier %s is not present.",
             sloDTO.getIdentifier(), projectParams.getAccountIdentifier(), projectParams.getOrgIdentifier(),

@@ -1307,7 +1307,7 @@ public class MonitoredServiceResourceTest extends CvNextGenTestBase {
                               .queryParam("pageSize", 10);
 
     Response response = webTarget.request(MediaType.APPLICATION_JSON_TYPE).get();
-    assertThat(response.getStatus()).isEqualTo(404);
+    assertThat(response.getStatus()).isEqualTo(400);
     assertThat(response.readEntity(String.class))
         .contains("Monitored Service with identifier monitoredServiceIdentifier not found.");
   }

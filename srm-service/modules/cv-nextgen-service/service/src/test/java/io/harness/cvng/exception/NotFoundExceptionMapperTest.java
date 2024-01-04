@@ -14,6 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.harness.CategoryTest;
 import io.harness.category.element.UnitTests;
 import io.harness.cvng.exception.mapper.NotFoundExceptionMapper;
+import io.harness.eraro.ErrorCode;
+import io.harness.ng.core.Status;
 import io.harness.ng.core.dto.ErrorDTO;
 import io.harness.rule.Owner;
 
@@ -38,6 +40,9 @@ public class NotFoundExceptionMapperTest extends CategoryTest {
     NotFoundException exception = new NotFoundException();
     Response response = notFoundExceptionMapper.toResponse(exception);
     assertThat(response.getEntity()).isInstanceOf(ErrorDTO.class);
-    assertThat(response.getStatus()).isEqualTo(Response.Status.NOT_FOUND.getStatusCode());
+    assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
+    ErrorDTO errorDTO = (ErrorDTO) response.getEntity();
+    assertThat(errorDTO.getCode()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND_EXCEPTION);
+    assertThat(errorDTO.getStatus()).isEqualTo(Status.ERROR);
   }
 }

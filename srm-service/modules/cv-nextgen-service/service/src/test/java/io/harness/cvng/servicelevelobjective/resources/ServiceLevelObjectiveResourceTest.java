@@ -124,7 +124,7 @@ public class ServiceLevelObjectiveResourceTest extends CvNextGenTestBase {
   @Test
   @Owner(developers = KAPIL)
   @Category(UnitTests.class)
-  public void testGetServiceLevelObjectiveLogs_withNoSLO() throws IOException {
+  public void testGetServiceLevelObjectiveLogs_withNoSLO() {
     Instant startTime = CVNGTestConstants.FIXED_TIME_FOR_TESTS.instant().minusSeconds(5);
     Instant endTime = CVNGTestConstants.FIXED_TIME_FOR_TESTS.instant();
     WebTarget webTarget = RESOURCES.client()
@@ -141,14 +141,14 @@ public class ServiceLevelObjectiveResourceTest extends CvNextGenTestBase {
                               .queryParam("pageSize", 10);
 
     Response response = webTarget.request(MediaType.APPLICATION_JSON_TYPE).get();
-    assertThat(response.getStatus()).isEqualTo(404);
+    assertThat(response.getStatus()).isEqualTo(400);
     assertThat(response.readEntity(String.class)).contains("SLO with identifier SLOIdentifier not found.");
   }
 
   @Test
   @Owner(developers = KAPIL)
   @Category(UnitTests.class)
-  public void testGetServiceLevelObjectiveLogs() throws IOException {
+  public void testGetServiceLevelObjectiveLogs() {
     Instant startTime = CVNGTestConstants.FIXED_TIME_FOR_TESTS.instant().minusSeconds(5);
     Instant endTime = CVNGTestConstants.FIXED_TIME_FOR_TESTS.instant();
     ServiceLevelObjectiveV2DTO sloDTO = builderFactory.getSimpleServiceLevelObjectiveV2DTOBuilder().build();

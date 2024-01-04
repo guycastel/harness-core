@@ -498,7 +498,6 @@ import io.harness.pms.sdk.core.waiter.AsyncWaitEngine;
 import io.harness.redis.RedisConfig;
 import io.harness.reflection.HarnessReflections;
 import io.harness.remote.client.ServiceHttpClientConfig;
-import io.harness.serializer.CvNextGenRegistrars;
 import io.harness.servicediscovery.client.remote.ServiceDiscoveryClientModule;
 import io.harness.spec.server.cvng.v1.ServiceLevelObjectiveApi;
 import io.harness.telemetry.AbstractTelemetryModule;

@@ -73,6 +73,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.ws.rs.NotFoundException;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -215,7 +216,7 @@ public class DowntimeServiceImpl implements DowntimeService {
     validateUpdate(projectParams, identifier, downtimeDTO);
     Optional<Downtime> downtimeOptional = getOptionalDowntime(projectParams, identifier);
     if (downtimeOptional.isEmpty()) {
-      throw new InvalidRequestException(String.format(
+      throw new NotFoundException(String.format(
           "Downtime with identifier %s, accountId %s, orgIdentifier %s, and projectIdentifier %s is not present.",
           identifier, projectParams.getAccountIdentifier(), projectParams.getOrgIdentifier(),
           projectParams.getProjectIdentifier()));
@@ -227,7 +228,7 @@ public class DowntimeServiceImpl implements DowntimeService {
   public DowntimeResponse enableOrDisable(ProjectParams projectParams, String identifier, boolean enable) {
     Optional<Downtime> downtimeOptional = getOptionalDowntime(projectParams, identifier);
     if (downtimeOptional.isEmpty()) {
-      throw new InvalidRequestException(String.format(
+      throw new NotFoundException(String.format(
           "Downtime with identifier %s, accountId %s, orgIdentifier %s, and projectIdentifier %s is not present.",
           identifier, projectParams.getAccountIdentifier(), projectParams.getOrgIdentifier(),
           projectParams.getProjectIdentifier()));
@@ -287,7 +288,7 @@ public class DowntimeServiceImpl implements DowntimeService {
   public boolean delete(ProjectParams projectParams, String identifier) {
     Optional<Downtime> downtimeOptional = getOptionalDowntime(projectParams, identifier);
     if (downtimeOptional.isEmpty()) {
-      throw new InvalidRequestException(String.format(
+      throw new NotFoundException(String.format(
           "Downtime with identifier %s, accountId %s, orgIdentifier %s, and projectIdentifier %s is not present.",
           identifier, projectParams.getAccountIdentifier(), projectParams.getOrgIdentifier(),
           projectParams.getProjectIdentifier()));

@@ -140,6 +140,13 @@ spec:
                   number: {{ $.Values.service.port }}
             path: /(v1/orgs/.+/projects/.+/remediations.*)
             pathType: ImplementationSpecific
+          - backend:
+              service:
+                name: ssca-manager
+                port:
+                  number: {{ $.Values.service.port }}
+            path: /(v1/orgs/.+/projects/.+/exemptions.*)
+            pathType: ImplementationSpecific
     {{- end }}
   {{- if .Values.global.ingress.tls.enabled }}
   tls:

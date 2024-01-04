@@ -32,7 +32,6 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.delegate.k8s.beans.K8sCanaryHandlerConfig;
 import io.harness.delegate.k8s.trafficrouting.TrafficRoutingResourceCreator;
-import io.harness.delegate.k8s.trafficrouting.TrafficRoutingResourceCreatorFactory;
 import io.harness.delegate.task.k8s.K8sCanaryDeployRequest;
 import io.harness.delegate.task.k8s.K8sTaskHelperBase;
 import io.harness.delegate.task.k8s.client.K8sApiClient;
@@ -89,6 +88,7 @@ public class K8sCanaryBaseHandler {
   @Inject private K8sTaskHelperBase k8sTaskHelperBase;
   @Inject private IstioTaskHelper istioTaskHelper;
   @Inject private K8sApiClient kubernetesApiClient;
+  @Inject private Map<String, TrafficRoutingResourceCreator> k8sTrafficRoutingCreators;
 
   public boolean prepareForCanary(K8sCanaryHandlerConfig canaryHandlerConfig,
       K8sRequestHandlerContext k8sRequestHandlerContext, K8sDelegateTaskParams k8sDelegateTaskParams,
@@ -367,11 +367,11 @@ public class K8sCanaryBaseHandler {
             k8sDelegateTaskParams.getWorkingDirectory(), k8sCanaryHandlerConfig.getKubernetesConfig(), logCallback);
 
     TrafficRoutingResourceCreator trafficRoutingResourceCreator =
-        TrafficRoutingResourceCreatorFactory.create(trafficRoutingConfig);
+        k8sTrafficRoutingCreators.get(trafficRoutingConfig.getProviderConfig().getProviderType().name());
 
     List<KubernetesResource> trafficRoutingResources = trafficRoutingResourceCreator.createTrafficRoutingResources(
-        k8sCanaryHandlerConfig.getKubernetesConfig().getNamespace(), k8sCanaryHandlerConfig.getReleaseName(),
-        primaryService, canaryService, availableApiVersions, logCallback);
+        trafficRoutingConfig, k8sCanaryHandlerConfig.getKubernetesConfig().getNamespace(),
+        k8sCanaryHandlerConfig.getReleaseName(), primaryService, canaryService, availableApiVersions, logCallback);
 
     Optional<TrafficRoutingInfoDTO> trafficRoutingInfo =
         trafficRoutingResourceCreator.getTrafficRoutingInfo(trafficRoutingResources);

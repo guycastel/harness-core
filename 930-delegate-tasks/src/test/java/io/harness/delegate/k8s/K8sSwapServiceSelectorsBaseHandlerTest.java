@@ -17,6 +17,7 @@ import static io.harness.rule.OwnerRule.TARUN_UBA;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.joor.Reflect.on;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -32,6 +33,9 @@ import io.harness.CategoryTest;
 import io.harness.category.element.UnitTests;
 import io.harness.delegate.beans.logstreaming.CommandUnitsProgress;
 import io.harness.delegate.beans.logstreaming.ILogStreamingTaskClient;
+import io.harness.delegate.k8s.trafficrouting.IstioTrafficRoutingResourceCreator;
+import io.harness.delegate.k8s.trafficrouting.SMITrafficRoutingResourceCreator;
+import io.harness.delegate.k8s.trafficrouting.TrafficRoutingResourceCreator;
 import io.harness.delegate.task.k8s.ContainerDeploymentDelegateBaseHelper;
 import io.harness.delegate.task.k8s.K8sDeployResponse;
 import io.harness.delegate.task.k8s.K8sInfraDelegateConfig;
@@ -66,6 +70,7 @@ import io.kubernetes.client.openapi.models.V1ServiceBuilder;
 import io.kubernetes.client.openapi.models.V1ServiceSpecBuilder;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -88,6 +93,9 @@ public class K8sSwapServiceSelectorsBaseHandlerTest extends CategoryTest {
   @Mock K8sBGBaseHandler k8sBGBaseHandler;
   @Spy @InjectMocks private K8sSwapServiceSelectorsBaseHandler k8sSwapServiceSelectorsBaseHandler;
   @InjectMocks private K8sSwapServiceSelectorsHandler k8sSwapServiceSelectorsHandler;
+  @Mock private Map<String, TrafficRoutingResourceCreator> k8sTrafficRoutingCreators;
+  @Mock IstioTrafficRoutingResourceCreator istioTrafficRoutingResourceCreator;
+  @Mock SMITrafficRoutingResourceCreator smiTrafficRoutingResourceCreator;
 
   K8sDelegateTaskParams k8sDelegateTaskParams;
   CommandUnitsProgress commandUnitsProgress;
@@ -400,6 +408,13 @@ public class K8sSwapServiceSelectorsBaseHandlerTest extends CategoryTest {
         .when(kubernetesContainerService)
         .patchCustomObject(any(), any(), any(), any(), anyString());
 
+    on(k8sSwapServiceSelectorsBaseHandler).set("k8sTrafficRoutingCreators", k8sTrafficRoutingCreators);
+
+    doReturn(smiTrafficRoutingResourceCreator).when(k8sTrafficRoutingCreators).get(any());
+    doReturn(Optional.of(patch))
+        .when(smiTrafficRoutingResourceCreator)
+        .getSwapTrafficRoutingPatch("service", "service-stage");
+
     k8sSwapServiceSelectorsBaseHandler.updateTrafficRouting(
         kubernetesConfig, release, "service", "service-stage", logCallback);
 
@@ -432,6 +447,10 @@ public class K8sSwapServiceSelectorsBaseHandlerTest extends CategoryTest {
                                                               .build())
                                    .build();
 
+    on(k8sSwapServiceSelectorsBaseHandler).set("k8sTrafficRoutingCreators", k8sTrafficRoutingCreators);
+
+    doReturn(istioTrafficRoutingResourceCreator).when(k8sTrafficRoutingCreators).get(any());
+
     k8sSwapServiceSelectorsBaseHandler.updateTrafficRouting(kubernetesConfig, release, "stable", null, logCallback);
 
     verifyNoInteractions(kubernetesContainerService);
@@ -448,6 +467,10 @@ public class K8sSwapServiceSelectorsBaseHandlerTest extends CategoryTest {
                                                               .version("networking.istio.io/v1alpha3")
                                                               .build())
                                    .build();
+
+    on(k8sSwapServiceSelectorsBaseHandler).set("k8sTrafficRoutingCreators", k8sTrafficRoutingCreators);
+
+    doReturn(istioTrafficRoutingResourceCreator).when(k8sTrafficRoutingCreators).get(any());
 
     doThrow(new InvalidArgumentsException("error"))
         .when(kubernetesContainerService)

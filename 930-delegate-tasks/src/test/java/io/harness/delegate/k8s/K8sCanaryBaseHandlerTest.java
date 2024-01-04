@@ -48,13 +48,13 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.category.element.UnitTests;
 import io.harness.delegate.k8s.beans.K8sCanaryHandlerConfig;
 import io.harness.delegate.k8s.trafficrouting.TrafficRoutingResourceCreator;
-import io.harness.delegate.k8s.trafficrouting.TrafficRoutingResourceCreatorFactory;
 import io.harness.delegate.task.k8s.K8sCanaryDeployRequest;
 import io.harness.delegate.task.k8s.K8sInfraDelegateConfig;
 import io.harness.delegate.task.k8s.K8sTaskHelperBase;
 import io.harness.delegate.task.k8s.KustomizeManifestDelegateConfig;
 import io.harness.delegate.task.k8s.client.K8sApiClient;
 import io.harness.delegate.task.k8s.istio.IstioTaskHelper;
+import io.harness.delegate.task.k8s.trafficrouting.IstioProviderConfig;
 import io.harness.delegate.task.k8s.trafficrouting.K8sTrafficRoutingConfig;
 import io.harness.exception.ExceptionUtils;
 import io.harness.exception.ExplanationException;
@@ -103,8 +103,6 @@ import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @OwnedBy(CDP)
@@ -120,6 +118,7 @@ public class K8sCanaryBaseHandlerTest extends CategoryTest {
   @Mock K8sInfraDelegateConfig k8sInfraDelegateConfig;
   @Mock TrafficRoutingResourceCreator trafficRoutingResourceCreator;
   @Mock K8sCanaryHandlerConfig k8sCanaryHandlerConfig;
+  @Mock private Map<String, TrafficRoutingResourceCreator> k8sTrafficRoutingCreators;
 
   private final String namespace = "default";
   private final K8sDelegateTaskParams delegateTaskParams = K8sDelegateTaskParams.builder().build();
@@ -700,7 +699,8 @@ public class K8sCanaryBaseHandlerTest extends CategoryTest {
   @Owner(developers = BUHA)
   @Category(UnitTests.class)
   public void testCreateTrafficRoutingResources() {
-    K8sTrafficRoutingConfig trafficRoutingProvider = K8sTrafficRoutingConfig.builder().build();
+    K8sTrafficRoutingConfig trafficRoutingProvider =
+        K8sTrafficRoutingConfig.builder().providerConfig(IstioProviderConfig.builder().build()).build();
     K8sDelegateTaskParams k8sDelegateTaskParams = K8sDelegateTaskParams.builder().workingDirectory(".").build();
     KubernetesResource primaryService =
         KubernetesResource.builder().resourceId(KubernetesResourceId.builder().name("primaryService").build()).build();
@@ -719,36 +719,33 @@ public class K8sCanaryBaseHandlerTest extends CategoryTest {
             .trafficRoutingConfig(trafficRoutingProvider)
             .build();
 
+    doReturn(trafficRoutingResourceCreator).when(k8sTrafficRoutingCreators).get(any());
     doReturn(List.of(KubernetesResource.builder().build()))
         .when(trafficRoutingResourceCreator)
-        .createTrafficRoutingResources(any(), any(), any(), any(), any(), any());
+        .createTrafficRoutingResources(any(), any(), any(), any(), any(), any(), any());
     doReturn(Optional.of(TrafficRoutingInfoDTO.builder().build()))
         .when(trafficRoutingResourceCreator)
         .getTrafficRoutingInfo(anyList());
     doReturn(legacyRelease).when(k8sCanaryHandlerConfig).getCurrentRelease();
     doReturn(kubernetesConfig).when(k8sCanaryHandlerConfig).getKubernetesConfig();
 
-    try (MockedStatic<TrafficRoutingResourceCreatorFactory> utilities =
-             Mockito.mockStatic(TrafficRoutingResourceCreatorFactory.class)) {
-      utilities.when(() -> TrafficRoutingResourceCreatorFactory.create(trafficRoutingProvider))
-          .thenReturn(trafficRoutingResourceCreator);
+    List<KubernetesResource> trafficRoutingResources =
+        k8sCanaryBaseHandler.createTrafficRoutingResources(k8sCanaryDeployRequest, k8sDelegateTaskParams,
+            trafficRoutingProvider, k8sCanaryHandlerConfig, primaryService, canaryService, logCallback);
 
-      List<KubernetesResource> trafficRoutingResources =
-          k8sCanaryBaseHandler.createTrafficRoutingResources(k8sCanaryDeployRequest, k8sDelegateTaskParams,
-              trafficRoutingProvider, k8sCanaryHandlerConfig, primaryService, canaryService, logCallback);
-
-      assertThat(trafficRoutingResources).hasSize(1);
-      assertThat(legacyRelease.getTrafficRoutingInfo()).isNotNull();
-      verify(kubernetesApiClient).getApiVersions(any(), any(), any(), any());
-      verify(trafficRoutingResourceCreator).createTrafficRoutingResources(any(), any(), any(), any(), any(), any());
-    }
+    assertThat(trafficRoutingResources).hasSize(1);
+    assertThat(legacyRelease.getTrafficRoutingInfo()).isNotNull();
+    verify(kubernetesApiClient).getApiVersions(any(), any(), any(), any());
+    verify(trafficRoutingResourceCreator)
+        .createTrafficRoutingResources(any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test
   @Owner(developers = BUHA)
   @Category(UnitTests.class)
   public void testCreateTrafficRoutingResourcesSkipStoringInfoInRelease() {
-    K8sTrafficRoutingConfig trafficRoutingProvider = K8sTrafficRoutingConfig.builder().build();
+    K8sTrafficRoutingConfig trafficRoutingProvider =
+        K8sTrafficRoutingConfig.builder().providerConfig(IstioProviderConfig.builder().build()).build();
     K8sDelegateTaskParams k8sDelegateTaskParams = K8sDelegateTaskParams.builder().workingDirectory(".").build();
     KubernetesResource primaryService =
         KubernetesResource.builder().resourceId(KubernetesResourceId.builder().name("primaryService").build()).build();
@@ -767,27 +764,23 @@ public class K8sCanaryBaseHandlerTest extends CategoryTest {
             .trafficRoutingConfig(trafficRoutingProvider)
             .build();
 
+    doReturn(trafficRoutingResourceCreator).when(k8sTrafficRoutingCreators).get(any());
     doReturn(List.of(KubernetesResource.builder().build()))
         .when(trafficRoutingResourceCreator)
-        .createTrafficRoutingResources(any(), any(), any(), any(), any(), any());
+        .createTrafficRoutingResources(any(), any(), any(), any(), any(), any(), any());
     doReturn(Optional.empty()).when(trafficRoutingResourceCreator).getTrafficRoutingInfo(anyList());
     doReturn(legacyRelease).when(k8sCanaryHandlerConfig).getCurrentRelease();
     doReturn(kubernetesConfig).when(k8sCanaryHandlerConfig).getKubernetesConfig();
 
-    try (MockedStatic<TrafficRoutingResourceCreatorFactory> utilities =
-             Mockito.mockStatic(TrafficRoutingResourceCreatorFactory.class)) {
-      utilities.when(() -> TrafficRoutingResourceCreatorFactory.create(trafficRoutingProvider))
-          .thenReturn(trafficRoutingResourceCreator);
+    List<KubernetesResource> trafficRoutingResources =
+        k8sCanaryBaseHandler.createTrafficRoutingResources(k8sCanaryDeployRequest, k8sDelegateTaskParams,
+            trafficRoutingProvider, k8sCanaryHandlerConfig, primaryService, canaryService, logCallback);
 
-      List<KubernetesResource> trafficRoutingResources =
-          k8sCanaryBaseHandler.createTrafficRoutingResources(k8sCanaryDeployRequest, k8sDelegateTaskParams,
-              trafficRoutingProvider, k8sCanaryHandlerConfig, primaryService, canaryService, logCallback);
-
-      assertThat(trafficRoutingResources).hasSize(1);
-      assertThat(legacyRelease.getTrafficRoutingInfo()).isNull();
-      verify(kubernetesApiClient).getApiVersions(any(), any(), any(), any());
-      verify(trafficRoutingResourceCreator).createTrafficRoutingResources(any(), any(), any(), any(), any(), any());
-    }
+    assertThat(trafficRoutingResources).hasSize(1);
+    assertThat(legacyRelease.getTrafficRoutingInfo()).isNull();
+    verify(kubernetesApiClient).getApiVersions(any(), any(), any(), any());
+    verify(trafficRoutingResourceCreator)
+        .createTrafficRoutingResources(any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test

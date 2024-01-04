@@ -103,6 +103,7 @@ import io.harness.idp.audittrails.eventhandlers.ScorecardEventHandler;
 import io.harness.idp.backstage.resources.BackstageHarnessApiImpl;
 import io.harness.idp.backstage.service.BackstageService;
 import io.harness.idp.backstage.service.impl.BackstageServiceImpl;
+import io.harness.idp.common.OkHttpClientConnectionPoolConfig;
 import io.harness.idp.common.delegateselectors.cache.DelegateSelectorsCache;
 import io.harness.idp.common.delegateselectors.cache.memory.DelegateSelectorsInMemoryCache;
 import io.harness.idp.common.delegateselectors.cache.redis.DelegateSelectorsRedisCache;
@@ -1091,5 +1092,12 @@ public class IdpModule extends AbstractModule {
   @Named("PSQLExecuteListener")
   ExecuteListener executeListener() {
     return HExecuteListener.getInstance();
+  }
+
+  @Provides
+  @Singleton
+  @Named("backstageHttpClientConnectionPoolConfig")
+  public OkHttpClientConnectionPoolConfig backstageHttpClientConnectionPoolConfig() {
+    return this.appConfig.getOkHttpClientConnectionPoolConfigs().get("backstageHttpClient");
   }
 }

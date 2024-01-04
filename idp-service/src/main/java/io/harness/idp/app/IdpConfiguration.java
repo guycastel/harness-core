@@ -25,6 +25,7 @@ import io.harness.enforcement.client.EnforcementClientConfiguration;
 import io.harness.eventsframework.EventsFrameworkConfiguration;
 import io.harness.grpc.client.GrpcClientConfig;
 import io.harness.grpc.server.GrpcServerConfig;
+import io.harness.idp.common.OkHttpClientConnectionPoolConfig;
 import io.harness.idp.events.config.DebeziumConsumersConfig;
 import io.harness.idp.onboarding.config.OnboardingModuleConfig;
 import io.harness.idp.plugin.config.CustomPluginsConfig;
@@ -166,6 +167,9 @@ public class IdpConfiguration extends Configuration {
   @JsonProperty("debeziumConsumersConfigs") DebeziumConsumersConfig debeziumConsumersConfigs;
   @JsonProperty("enableDashboardTimescale") private Boolean enableDashboardTimescale;
   @JsonProperty("timescaledb") private TimeScaleDBConfig timeScaleDBConfig;
+  @JsonProperty("numberOfThreadsToUseForConsumers") private HashMap<String, Integer> numberOfThreadsToUseForConsumers;
+  @JsonProperty("okHttpClientConnectionPoolConfigs")
+  private HashMap<String, OkHttpClientConnectionPoolConfig> okHttpClientConnectionPoolConfigs;
 
   public static final Collection<Class<?>> HARNESS_RESOURCE_CLASSES = getResourceClasses();
   public static final String IDP_SPEC_PACKAGE = "io.harness.spec.server.idp.v1";

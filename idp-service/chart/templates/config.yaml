@@ -83,3 +83,11 @@ data:
 {{ toYaml .Values.proxyAllowListConfigServices | indent 4 }}
   CUSTOM_PLUGINS_TRIGGER_PIPELINE_URL: {{.Values.customPluginsTriggerPipelineUrl}}
   ENFORCEMENT_CHECK_ENABLED: "true"
+  ENTITY_CRUD_CONSUMER_THREADS: {{.Values.entityCrudConsumerThreads}}
+  IDP_MODULE_LICENSE_USAGE_CAPTURE_EVENT_CONSUMER_THREADS: {{.Values.idpModuleLicenseUsageCaptureEventConsumerThreads}}
+  IDP_CATALOG_ENTITIES_SYNC_CAPTURE_EVENT_CONSUMER_THREADS: {{.Values.idpCatalogEntitiesSyncCaptureEventConsumerThreads}}
+  BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER_THREADS: {{.Values.backstageCatalogRedisEventConsumerThreads}}
+  BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER_THREADS: {{.Values.backstageScaffolderTasksRedisEventConsumerThreads}}
+  BACKSTAGE_HTTP_CLIENT_CP_MAX_IDLE_CONNECTIONS: {{.Values.backstageHttpClientCpMaxIdleConnections}}
+  BACKSTAGE_HTTP_CLIENT_CP_KEEP_ALIVE_DURATION: {{.Values.backstageHttpClientCpKeepAliveDuration}}
+  BACKSTAGE_HTTP_CLIENT_CP_TIME_UNIT: {{.Values.backstageHttpClientCpTimeUnit}}

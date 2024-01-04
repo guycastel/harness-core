@@ -10,6 +10,11 @@ package io.harness.idp.app;
 import static io.harness.NGConstants.X_API_KEY;
 import static io.harness.annotations.dev.HarnessTeam.IDP;
 import static io.harness.authorization.AuthorizationServiceHeader.DEFAULT;
+import static io.harness.eventsframework.EventsFrameworkConstants.BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER;
+import static io.harness.eventsframework.EventsFrameworkConstants.BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER;
+import static io.harness.eventsframework.EventsFrameworkConstants.ENTITY_CRUD;
+import static io.harness.eventsframework.EventsFrameworkConstants.IDP_CATALOG_ENTITIES_SYNC_CAPTURE_EVENT;
+import static io.harness.eventsframework.EventsFrameworkConstants.IDP_MODULE_LICENSE_USAGE_CAPTURE_EVENT;
 import static io.harness.idp.app.IdpConfiguration.HARNESS_RESOURCE_CLASSES;
 import static io.harness.logging.LoggingInitializer.initializeLogging;
 import static io.harness.pms.listener.NgOrchestrationNotifyEventListener.NG_ORCHESTRATION;
@@ -259,7 +264,7 @@ public class IdpApplication extends Application<IdpConfiguration> {
     registerPMSSDK(configuration, injector);
     registerResources(environment, injector);
     registerHealthChecksManager(environment, injector);
-    registerQueueListeners(injector);
+    registerQueueListeners(configuration, injector);
     registerAuthFilters(configuration, environment, injector);
     registerManagedJobs(environment, injector);
     registerPmsSdkEvents(injector);
@@ -304,16 +309,21 @@ public class IdpApplication extends Application<IdpConfiguration> {
         .scheduleWithFixedDelay(injector.getInstance(DelegateProgressServiceImpl.class), 0L, 5L, TimeUnit.SECONDS);
   }
 
-  private void registerQueueListeners(Injector injector) {
+  private void registerQueueListeners(IdpConfiguration configuration, Injector injector) {
     log.info("Initializing queue listeners...");
     IdpEventConsumerController controller = injector.getInstance(IdpEventConsumerController.class);
-    controller.register(injector.getInstance(EntityCrudStreamConsumer.class), 1);
+    controller.register(injector.getInstance(EntityCrudStreamConsumer.class),
+        configuration.getNumberOfThreadsToUseForConsumers().get(ENTITY_CRUD));
     QueueListenerController queueListenerController = injector.getInstance(QueueListenerController.class);
     queueListenerController.register(injector.getInstance(NgOrchestrationNotifyEventListenerNonVersioned.class), 1);
-    controller.register(injector.getInstance(IdpModuleLicenseUsageCaptureEventConsumer.class), 2);
-    controller.register(injector.getInstance(IdpCatalogEntitiesSyncCaptureEventConsumer.class), 1);
-    controller.register(injector.getInstance(BackstageCatalogRedisEventConsumer.class), 1);
-    controller.register(injector.getInstance(BackstageScaffolderTasksRedisEventConsumer.class), 1);
+    controller.register(injector.getInstance(IdpModuleLicenseUsageCaptureEventConsumer.class),
+        configuration.getNumberOfThreadsToUseForConsumers().get(IDP_MODULE_LICENSE_USAGE_CAPTURE_EVENT));
+    controller.register(injector.getInstance(IdpCatalogEntitiesSyncCaptureEventConsumer.class),
+        configuration.getNumberOfThreadsToUseForConsumers().get(IDP_CATALOG_ENTITIES_SYNC_CAPTURE_EVENT));
+    controller.register(injector.getInstance(BackstageCatalogRedisEventConsumer.class),
+        configuration.getNumberOfThreadsToUseForConsumers().get(BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER));
+    controller.register(injector.getInstance(BackstageScaffolderTasksRedisEventConsumer.class),
+        configuration.getNumberOfThreadsToUseForConsumers().get(BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER));
   }
 
   private void registerOasResource(IdpConfiguration config, Environment environment, Injector injector) {

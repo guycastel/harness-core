@@ -12,6 +12,7 @@ import static io.harness.network.Http.getSslContext;
 import static io.harness.network.Http.getTrustManagers;
 
 import io.harness.annotations.dev.OwnedBy;
+import io.harness.idp.common.OkHttpClientConnectionPoolConfig;
 import io.harness.network.Http;
 import io.harness.network.NoopHostnameVerifier;
 import io.harness.remote.client.ServiceHttpClientConfig;
@@ -31,6 +32,7 @@ import javax.net.ssl.X509TrustManager;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -45,6 +47,7 @@ public class BackstageResourceClientHttpFactory implements Provider<BackstageRes
   private final OkHttpClient httpClient;
   private final SecretManagerClientService secretManagerClientService;
   private final String env;
+  private final OkHttpClientConnectionPoolConfig backstageHttpClientConnectionPoolConfig;
   private static final ObjectMapper mapper = new ObjectMapper()
                                                  .registerModule(new Jdk8Module())
                                                  .registerModule(new GuavaModule())
@@ -53,10 +56,13 @@ public class BackstageResourceClientHttpFactory implements Provider<BackstageRes
   @Inject
   public BackstageResourceClientHttpFactory(
       @Named("backstageHttpClientConfig") ServiceHttpClientConfig backstageClientConfig,
-      @Named("PRIVILEGED") SecretManagerClientService secretManagerClientService, @Named("env") String env) {
+      @Named("PRIVILEGED") SecretManagerClientService secretManagerClientService, @Named("env") String env,
+      @Named("backstageHttpClientConnectionPoolConfig")
+      OkHttpClientConnectionPoolConfig backstageHttpClientConnectionPoolConfig) {
     this.backstageClientConfig = backstageClientConfig;
     this.secretManagerClientService = secretManagerClientService;
     this.env = env;
+    this.backstageHttpClientConnectionPoolConfig = backstageHttpClientConnectionPoolConfig;
 
     // CAUTION: getSafeOkHttpClient should be at the end as it depends on the above fields
     this.httpClient = this.getSafeOkHttpClient();
@@ -83,6 +89,9 @@ public class BackstageResourceClientHttpFactory implements Provider<BackstageRes
 
   private OkHttpClient getHttpClient() {
     return Http.getOkHttpClientWithProxyAuthSetup()
+        .connectionPool(new ConnectionPool(backstageHttpClientConnectionPoolConfig.getMaxIdleConnections(),
+            backstageHttpClientConnectionPoolConfig.getKeepAliveDuration(),
+            TimeUnit.valueOf(backstageHttpClientConnectionPoolConfig.getTimeUnit())))
         .hostnameVerifier(new NoopHostnameVerifier())
         .sslSocketFactory(getSslContext().getSocketFactory(), (X509TrustManager) getTrustManagers()[0])
         .connectTimeout(backstageClientConfig.getConnectTimeOutSeconds(), TimeUnit.SECONDS)

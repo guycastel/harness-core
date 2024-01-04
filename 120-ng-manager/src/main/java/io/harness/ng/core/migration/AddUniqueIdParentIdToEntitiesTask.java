@@ -13,9 +13,12 @@ import static io.harness.mongo.MongoConfig.NO_LIMIT;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 
+import io.harness.NGCommonEntityConstants;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
+import io.harness.connector.entities.Connector;
 import io.harness.data.structure.UUIDGenerator;
 import io.harness.lock.AcquiredLock;
 import io.harness.lock.PersistentLocker;
@@ -30,10 +33,13 @@ import io.harness.persistence.UniqueIdAccess;
 import io.harness.persistence.UniqueIdAware;
 
 import com.google.inject.Inject;
+import java.lang.reflect.Field;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.BulkOperations;
@@ -48,10 +54,14 @@ import org.springframework.data.util.CloseableIterator;
 public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
   private final MongoTemplate mongoTemplate;
   private final PersistentLocker persistentLocker;
+  private static final String PARENT_UNIQUE_ID_KEY = "parentUniqueId";
   private static final String LOCK_NAME_PREFIX = "NGEntitiesPeriodicMigrationTaskLock";
-  private static final String NG_MANAGER_ENTITIES_MIGRATION_LOG = "[NGManagerAddUniqueIdAndParentIdToEntitiesTask]:";
+  private static final String NG_MANAGER_ENTITIES_MIGRATION_LOG =
+      "[NGManagerAddUniqueIdAndParentUniqueIdToEntitiesTask]:";
   private static final int BATCH_SIZE = 500;
-  private static final Set<Class<? extends UniqueIdAware>> entitiesSet = Set.of(Organization.class, Project.class);
+  private static final Map<Class<? extends UniqueIdAware>, List<String>> entityWithOrgProjectKeysMap =
+      Map.of(Organization.class, new ArrayList<>(), Project.class, List.of(NGCommonEntityConstants.ORG_KEY),
+          Connector.class, List.of(NGCommonEntityConstants.ORG_KEY, NGCommonEntityConstants.PROJECT_KEY));
 
   @Inject
   public AddUniqueIdParentIdToEntitiesTask(MongoTemplate mongoTemplate, PersistentLocker persistentLocker) {
@@ -63,7 +73,21 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
   public void run() {
     log.info(format("%s starting...", NG_MANAGER_ENTITIES_MIGRATION_LOG));
 
-    for (Class<? extends UniqueIdAware> clazz : entitiesSet) {
+    for (Map.Entry<Class<? extends UniqueIdAware>, List<String>> entityMapEntry :
+        entityWithOrgProjectKeysMap.entrySet()) {
+      String orgIdentifierFieldName = null;
+      String projectIdentifierFieldName = null;
+      List<String> orgProjectKeysValue = entityMapEntry.getValue();
+      if (isNotEmpty(orgProjectKeysValue)) {
+        if (orgProjectKeysValue.size() == 2) {
+          orgIdentifierFieldName = orgProjectKeysValue.get(0);
+          projectIdentifierFieldName = orgProjectKeysValue.get(1);
+        } else if (orgProjectKeysValue.size() == 1) {
+          orgIdentifierFieldName = orgProjectKeysValue.get(0);
+        }
+      }
+
+      Class<? extends UniqueIdAware> clazz = entityMapEntry.getKey();
       final String typeAliasName = getTypeAliasValueOrNameForClass(clazz);
       NGManagerUniqueIdParentIdMigrationStatus foundEntity = mongoTemplate.findOne(
           new Query(Criteria.where(NGManagerUniqueIdParentIdMigrationStatusKeys.entityClassName).is(typeAliasName)),
@@ -87,7 +111,7 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
         log.info(format("%s job for parentId on Entity Type: [%s] already completed.",
             NG_MANAGER_ENTITIES_MIGRATION_LOG, clazz.getSimpleName()));
       } else {
-        performParentIdMigrationTask(foundEntity, clazz);
+        performParentIdMigrationTask(foundEntity, clazz, orgIdentifierFieldName, projectIdentifierFieldName);
       }
     }
   }
@@ -121,6 +145,8 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
                 idValue = ((Project) entity).getId();
               } else if (entity instanceof Organization) {
                 idValue = ((Organization) entity).getId();
+              } else if (entity instanceof Connector) {
+                idValue = ((Connector) entity).getId();
               }
               if (isNotEmpty(idValue)) {
                 toUpdateCounter++;
@@ -158,18 +184,106 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
     mongoTemplate.save(migrationStatusEntity);
   }
 
-  private void performParentIdMigrationTask(
-      NGManagerUniqueIdParentIdMigrationStatus foundEntity, final Class<? extends UniqueIdAware> clazz) {
+  private void performParentIdMigrationTask(NGManagerUniqueIdParentIdMigrationStatus foundEntity,
+      final Class<? extends UniqueIdAware> clazz, final String orgIdentifierFieldName,
+      final String projectIdentifierFieldName) {
     if (clazz == Organization.class && foundEntity.getEntityClassName() != null
         && foundEntity.getEntityClassName().equals(Organization.class.getName())) {
-      performOrganizationParentIdMigrationTask(foundEntity);
+      performOrganizationParentUniqueIdMigrationTask(foundEntity);
+    } else if (clazz == Project.class && foundEntity.getEntityClassName() != null
+        && foundEntity.getEntityClassName().equals(Project.class.getName())) {
+      performProjectParentUniqueIdMigrationTask(foundEntity);
     } else {
-      performEntityParentIdMigrationTask(foundEntity, clazz);
+      performEntityParentUniqueIdMigrationTask(foundEntity, clazz, orgIdentifierFieldName, projectIdentifierFieldName);
     }
   }
 
-  private void performEntityParentIdMigrationTask(
-      NGManagerUniqueIdParentIdMigrationStatus foundEntity, final Class<? extends UniqueIdAware> clazz) {
+  private void performProjectParentUniqueIdMigrationTask(NGManagerUniqueIdParentIdMigrationStatus foundEntity) {
+    int migratedCounter = 0;
+    int updateCounter = 0;
+    int batchSizeCounter = 0;
+    int skippedCounter = 0;
+    final String LOCAL_MAP_DELIMITER = "|";
+
+    try (AcquiredLock<?> lock =
+             persistentLocker.tryToAcquireInfiniteLockWithPeriodicRefresh(LOCK_NAME_PREFIX, Duration.ofSeconds(5))) {
+      if (lock == null) {
+        log.info(format("%s failed to acquire lock for Entity type: [%s] during parentId migration task",
+            NG_MANAGER_ENTITIES_MIGRATION_LOG, "Project"));
+        return;
+      }
+      try {
+        final Map<String, String> orgIdentifierUniqueIdMap = new HashMap<>();
+
+        Query documentQuery = new Query(new Criteria());
+        BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Project.class);
+        // iterate over all Project documents
+        try (CloseableIterator<Project> iterator =
+                 mongoTemplate.stream(documentQuery.limit(NO_LIMIT).maxTimeMsec(MAX_VALUE), Project.class)) {
+          while (iterator.hasNext()) {
+            Project nextProject = iterator.next();
+            if (isEmpty(nextProject.getParentUniqueId())) {
+              updateCounter++;
+              final String mapKey =
+                  nextProject.getAccountIdentifier() + LOCAL_MAP_DELIMITER + nextProject.getOrgIdentifier();
+              String uniqueIdOfOrg = null;
+              // check if Org with uniqueId is present locally
+              if (orgIdentifierUniqueIdMap.containsKey(mapKey)) {
+                uniqueIdOfOrg = orgIdentifierUniqueIdMap.get(mapKey);
+              } else {
+                Criteria orgCriteria = Criteria.where("accountIdentifier")
+                                           .is(nextProject.getAccountIdentifier())
+                                           .and("identifier")
+                                           .is(nextProject.getOrgIdentifier());
+                Organization organization = mongoTemplate.findOne(new Query(orgCriteria), Organization.class);
+                if (organization != null && isNotEmpty(organization.getUniqueId())) {
+                  uniqueIdOfOrg = organization.getUniqueId();
+                  orgIdentifierUniqueIdMap.put(mapKey, uniqueIdOfOrg);
+                } else {
+                  log.warn(format(
+                      "%s For EntityType: %s and ParentType: %s having identifier: %s, not found or uniqueId on parent not present. Skipping...",
+                      NG_MANAGER_ENTITIES_MIGRATION_LOG, "Project", "Organization", nextProject.getOrgIdentifier()));
+                  skippedCounter++;
+                }
+              }
+
+              if (isNotEmpty(uniqueIdOfOrg)) {
+                batchSizeCounter++;
+                Update update = new Update().set(ProjectKeys.parentUniqueId, uniqueIdOfOrg);
+                bulkOperations.updateOne(new Query(Criteria.where("_id").is(nextProject.getId())), update);
+
+                if (batchSizeCounter == BATCH_SIZE) {
+                  migratedCounter += bulkOperations.execute().getModifiedCount();
+                  bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Project.class);
+                  batchSizeCounter = 0;
+                }
+              }
+            }
+          }
+          if (batchSizeCounter > 0) { // for the last remaining batch of projects
+            migratedCounter += bulkOperations.execute().getModifiedCount();
+          }
+        } catch (Exception exc) {
+          log.error(format("%s task failed to iterate over entities of Entity Type: [%s]",
+                        NG_MANAGER_ENTITIES_MIGRATION_LOG, "Project"),
+              exc);
+          return;
+        }
+      } catch (Exception exc) {
+        log.error(format("%s task failed for Entity Type [%s]", NG_MANAGER_ENTITIES_MIGRATION_LOG, "Project"), exc);
+        return;
+      }
+      log.info(format("%s task on entity [%s] for parentId. Successful: [%d], Failed: [%d], Skipped: [%d]",
+          NG_MANAGER_ENTITIES_MIGRATION_LOG, "Project", migratedCounter,
+          updateCounter - (migratedCounter + skippedCounter), skippedCounter));
+      foundEntity.setParentIdMigrationCompleted(Boolean.TRUE);
+      mongoTemplate.save(foundEntity);
+    }
+  }
+
+  private void performEntityParentUniqueIdMigrationTask(NGManagerUniqueIdParentIdMigrationStatus foundEntity,
+      final Class<? extends UniqueIdAware> clazz, final String orgIdentifierFieldName,
+      final String projectIdentifierFieldName) {
     int migratedCounter = 0;
     int updateCounter = 0;
     int batchSizeCounter = 0;
@@ -184,51 +298,77 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
         return;
       }
       try {
-        final Map<String, String> orgIdentifierUniqueIdMap = new HashMap<>();
+        final Map<String, String> scopeEntityUniqueIdMap = new HashMap<>();
 
         Query documentQuery = new Query(new Criteria());
         BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, clazz);
-        // iterate over all Project documents
+        // iterate over all entity documents
         try (CloseableIterator<? extends UniqueIdAware> iterator =
                  mongoTemplate.stream(documentQuery.limit(NO_LIMIT).maxTimeMsec(MAX_VALUE), clazz)) {
           while (iterator.hasNext()) {
             UniqueIdAware nextEntity = iterator.next();
-            if (nextEntity instanceof Project) {
-              Project nextProject = (Project) nextEntity;
-              if (isEmpty(nextProject.getParentUniqueId())) {
+            // for rest of the entities which has field 'parentUniqueId' & at least 'accountIdentifier' present
+            if (classHasField(clazz, PARENT_UNIQUE_ID_KEY)
+                && classHasField(clazz, NGCommonEntityConstants.ACCOUNT_KEY)) {
+              String mapKey = null;
+              String account = getValueOfFieldInEntity(clazz, NGCommonEntityConstants.ACCOUNT_KEY, nextEntity);
+              String org = getValueOfFieldInEntity(clazz, orgIdentifierFieldName, nextEntity);
+              String proj = getValueOfFieldInEntity(clazz, projectIdentifierFieldName, nextEntity);
+
+              String parentUniqueId = getValueOfFieldInEntity(clazz, PARENT_UNIQUE_ID_KEY, nextEntity);
+              if (isEmpty(parentUniqueId)) {
                 updateCounter++;
-                final String mapKey =
-                    nextProject.getAccountIdentifier() + LOCAL_MAP_DELIMITER + nextProject.getOrgIdentifier();
-                String uniqueIdOfOrg = null;
-                // check if Org with uniqueId is present locally
-                if (orgIdentifierUniqueIdMap.containsKey(mapKey)) {
-                  uniqueIdOfOrg = orgIdentifierUniqueIdMap.get(mapKey);
+                if (isNotEmpty(org) && isNotEmpty(proj)) {
+                  mapKey = account + LOCAL_MAP_DELIMITER + org + LOCAL_MAP_DELIMITER + proj;
+                } else if (isNotEmpty(org)) {
+                  mapKey = account + LOCAL_MAP_DELIMITER + org;
                 } else {
-                  Criteria orgCriteria = Criteria.where("accountIdentifier")
-                                             .is(nextProject.getAccountIdentifier())
-                                             .and("identifier")
-                                             .is(nextProject.getOrgIdentifier());
-                  Organization organization = mongoTemplate.findOne(new Query(orgCriteria), Organization.class);
-                  if (organization != null && isNotEmpty(organization.getUniqueId())) {
-                    uniqueIdOfOrg = organization.getUniqueId();
-                    orgIdentifierUniqueIdMap.put(mapKey, uniqueIdOfOrg);
+                  mapKey = account;
+                }
+
+                String scopeUniqueId = null;
+                if (scopeEntityUniqueIdMap.containsKey(mapKey)) {
+                  scopeUniqueId = scopeEntityUniqueIdMap.get(mapKey);
+                } else {
+                  Criteria entityCriteria = Criteria.where(NGCommonEntityConstants.ACCOUNT_KEY).is(account);
+                  if (isNotEmpty(org) && isNotEmpty(proj)) {
+                    entityCriteria.and(orgIdentifierFieldName)
+                        .is(org)
+                        .and(NGCommonEntityConstants.IDENTIFIER_KEY)
+                        .is(proj);
+                  } else if (isNotEmpty(org)) {
+                    entityCriteria.and(NGCommonEntityConstants.IDENTIFIER_KEY).is(org);
+                  }
+
+                  if (isNotEmpty(org) && isNotEmpty(proj)) {
+                    Project project = mongoTemplate.findOne(new Query(entityCriteria), Project.class);
+                    if (null != project && isNotEmpty(project.getUniqueId())) {
+                      scopeUniqueId = project.getUniqueId();
+                    }
+                  } else if (isNotEmpty(org)) {
+                    Organization organization = mongoTemplate.findOne(new Query(entityCriteria), Organization.class);
+                    if (null != organization && isNotEmpty(organization.getUniqueId())) {
+                      scopeUniqueId = organization.getUniqueId();
+                    }
                   } else {
-                    log.warn(format(
-                        "%s For EntityType: %s and ParentType: %s having identifier: %s, not found or uniqueId on parent not present. Skipping...",
-                        NG_MANAGER_ENTITIES_MIGRATION_LOG, clazz.getSimpleName(), "Organization",
-                        nextProject.getOrgIdentifier()));
-                    skippedCounter++;
+                    scopeUniqueId = account;
                   }
                 }
 
-                if (isNotEmpty(uniqueIdOfOrg)) {
+                String idValue = getValueOfFieldInEntity(clazz, "id", nextEntity);
+                if (isEmpty(idValue)) {
+                  // multiple entities have 'uuid' field instead of 'id' field
+                  idValue = getValueOfFieldInEntity(clazz, NGCommonEntityConstants.UUID, nextEntity);
+                }
+                if (isNotEmpty(scopeUniqueId) && isNotEmpty(idValue)) {
+                  scopeEntityUniqueIdMap.put(mapKey, scopeUniqueId);
+                  // non-scope entities update logic
                   batchSizeCounter++;
-                  Update update = new Update().set(ProjectKeys.parentUniqueId, uniqueIdOfOrg);
-                  bulkOperations.updateOne(new Query(Criteria.where("_id").is(nextProject.getId())), update);
-
+                  Update update = new Update().set(PARENT_UNIQUE_ID_KEY, scopeUniqueId);
+                  bulkOperations.updateOne(new Query(Criteria.where("_id").is(idValue)), update);
                   if (batchSizeCounter == BATCH_SIZE) {
                     migratedCounter += bulkOperations.execute().getModifiedCount();
-                    bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Project.class);
+                    bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, clazz);
                     batchSizeCounter = 0;
                   }
                 }
@@ -258,7 +398,7 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
     }
   }
 
-  private void performOrganizationParentIdMigrationTask(NGManagerUniqueIdParentIdMigrationStatus foundEntity) {
+  private void performOrganizationParentUniqueIdMigrationTask(NGManagerUniqueIdParentIdMigrationStatus foundEntity) {
     int migratedCounter = 0;
     int updateCounter = 0;
     int batchSizeCounter = 0;
@@ -272,9 +412,7 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
       }
       try {
         Query documentQuery = new Query(new Criteria());
-
         BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Organization.class);
-
         String idValue = null;
         try (CloseableIterator<Organization> iterator =
                  mongoTemplate.stream(documentQuery.limit(NO_LIMIT).maxTimeMsec(MAX_VALUE), Organization.class)) {
@@ -318,5 +456,28 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
       return annotation.value();
     }
     return clazz.getName();
+  }
+
+  private boolean classHasField(final Class<? extends UniqueIdAware> clazz, final String fieldName) {
+    return Arrays.stream(clazz.getDeclaredFields())
+        .map(Field::getName)
+        .anyMatch(f -> nonNull(f) && f.equals(fieldName));
+  }
+
+  private String getValueOfFieldInEntity(
+      Class<? extends UniqueIdAware> clazz, final String fieldName, UniqueIdAware entity) {
+    if (!classHasField(clazz, fieldName)) {
+      return null;
+    }
+    String value = null;
+    try {
+      Field field = clazz.getDeclaredField(fieldName);
+      field.setAccessible(true);
+      value = (String) field.get(entity);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      log.warn(format("%s For EntityType: [%s], cannot get or access value for field: [%s]",
+          NG_MANAGER_ENTITIES_MIGRATION_LOG, clazz.getSimpleName(), fieldName));
+    }
+    return value;
   }
 }

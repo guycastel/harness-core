@@ -98,7 +98,7 @@ public class PermissionsEventHandler implements OutboxEventHandler {
             .module(ModuleType.IDP)
             .newYaml(NGYamlUtils.getYamlString(PermissionsDTO.builder()
                                                    .permissions(newBackstagePermissions.getPermissions())
-                                                   .userGroupIdentifier(newBackstagePermissions.getIdentifer())
+                                                   .userGroupIdentifier(newBackstagePermissions.getUserGroup())
                                                    .build(),
                 objectMapper))
             .oldYaml(NGYamlUtils.getYamlString(PermissionsDTO.builder()

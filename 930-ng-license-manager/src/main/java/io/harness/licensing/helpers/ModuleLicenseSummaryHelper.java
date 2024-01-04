@@ -218,8 +218,9 @@ public class ModuleLicenseSummaryHelper {
           if (current < codeModuleLicenseDTO.getExpiryTime() && codeModuleLicenseDTO.getNumberOfDevelopers() != null) {
             codeLicenseSummaryDTO.setNumberOfDevelopers(ModuleLicenseUtils.computeAdd(
                 codeLicenseSummaryDTO.getNumberOfDevelopers(), codeModuleLicenseDTO.getNumberOfDevelopers()));
-            codeLicenseSummaryDTO.setNumberOfRepositories(ModuleLicenseUtils.computeAdd(
-                codeLicenseSummaryDTO.getNumberOfRepositories(), codeModuleLicenseDTO.getNumberOfRepositories()));
+            codeLicenseSummaryDTO.setNumberOfRepositories(codeModuleLicenseDTO.getNumberOfRepositories());
+            codeLicenseSummaryDTO.setMaxRepoSizeInBytes(codeModuleLicenseDTO.getMaxRepoSizeInBytes());
+            codeLicenseSummaryDTO.setMaxRepoSizeString(codeModuleLicenseDTO.getMaxRepoSizeString());
           }
         };
         break;

@@ -34,4 +34,6 @@ import lombok.experimental.SuperBuilder;
 public class CodeModuleLicenseDTO extends ModuleLicenseDTO {
   Integer numberOfDevelopers;
   Integer numberOfRepositories;
+  String maxRepoSizeString;
+  Long maxRepoSizeInBytes;
 }

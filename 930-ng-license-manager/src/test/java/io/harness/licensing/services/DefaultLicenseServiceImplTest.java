@@ -13,6 +13,7 @@ import static io.harness.ModuleType.CET;
 import static io.harness.ModuleType.CF;
 import static io.harness.ModuleType.CHAOS;
 import static io.harness.ModuleType.CI;
+import static io.harness.ModuleType.CODE;
 import static io.harness.ModuleType.CV;
 import static io.harness.ModuleType.IACM;
 import static io.harness.ModuleType.IDP;
@@ -152,6 +153,7 @@ public class DefaultLicenseServiceImplTest extends CategoryTest {
                                    .put(CET, Lists.newArrayList())
                                    .put(IDP, Lists.newArrayList())
                                    .put(SEI, Lists.newArrayList())
+                                   .put(CODE, Lists.newArrayList())
                                    .build())
             .build();
 

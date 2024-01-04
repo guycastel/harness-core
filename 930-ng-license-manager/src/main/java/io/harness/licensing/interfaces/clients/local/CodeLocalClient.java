@@ -20,12 +20,17 @@ import io.harness.licensing.beans.modules.CodeModuleLicenseDTO;
 import io.harness.licensing.beans.modules.CodeModuleLicenseDTO.CodeModuleLicenseDTOBuilder;
 import io.harness.licensing.interfaces.clients.CodeModuleLicenseClient;
 
+import io.dropwizard.util.DataSize;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @OwnedBy(HarnessTeam.CODE)
 public class CodeLocalClient implements CodeModuleLicenseClient {
   private static final int ENTERPRISE_TRIAL_DEVELOPERS = 200;
+  private static final int REPO_COUNT_FREE = 5;
+
+  private static final DataSize REPO_SIZE_ENTERPRISE = DataSize.parse("10GiB");
+  private static final DataSize REPO_SIZE_FREE = DataSize.parse("4GiB");
 
   @Override
   public CodeModuleLicenseDTO createTrialLicense(Edition edition, String accountId) {
@@ -39,10 +44,16 @@ public class CodeLocalClient implements CodeModuleLicenseClient {
       case ENTERPRISE:
         return builder.numberOfDevelopers(ENTERPRISE_TRIAL_DEVELOPERS)
             .numberOfRepositories(Integer.valueOf(UNLIMITED))
+            .maxRepoSizeString(REPO_SIZE_ENTERPRISE.toString())
+            .maxRepoSizeInBytes(REPO_SIZE_ENTERPRISE.toBytes())
             .licenseType(LicenseType.TRIAL)
             .build();
       case FREE:
-        return builder.numberOfDevelopers(Integer.valueOf(UNLIMITED)).numberOfRepositories(5).build();
+        return builder.numberOfDevelopers(Integer.valueOf(UNLIMITED))
+            .numberOfRepositories(REPO_COUNT_FREE)
+            .maxRepoSizeString(REPO_SIZE_FREE.toString())
+            .maxRepoSizeInBytes(REPO_SIZE_FREE.toBytes())
+            .build();
       default:
         throw new UnsupportedOperationException("Requested edition is not supported");
     }

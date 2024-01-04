@@ -361,6 +361,12 @@ public class ModuleLicenseHelper {
                 currentCodeModuleLicense.getNumberOfRepositories())) {
           currentCodeModuleLicense.setNumberOfRepositories(updatedCodeModuleLicense.getNumberOfRepositories());
         }
+        if (updatedCodeModuleLicense.getMaxRepoSizeInBytes() != null
+            && !updatedCodeModuleLicense.getMaxRepoSizeInBytes().equals(
+                currentCodeModuleLicense.getMaxRepoSizeInBytes())) {
+          currentCodeModuleLicense.setMaxRepoSizeInBytes(updatedCodeModuleLicense.getMaxRepoSizeInBytes());
+        }
+
         break;
       default:
         // Do nothing

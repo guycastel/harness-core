@@ -19,6 +19,7 @@ import static io.harness.idp.common.Constants.PAGERDUTY_IDENTIFIER;
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
+import io.harness.cistatus.service.GithubService;
 import io.harness.idp.proxy.services.IdpAuthInterceptor;
 import io.harness.idp.scorecard.datapoints.parser.factory.DataSourceDataPointParserFactory;
 import io.harness.idp.scorecard.datapoints.service.DataPointService;
@@ -46,6 +47,7 @@ public class DataSourceProviderFactory {
 
   @Inject ConfigReader configReader;
   @Inject DataSourceRepository dataSourceRepository;
+  @Inject GithubService githubService;
 
   public DataSourceProvider getProvider(String dataSource) {
     switch (dataSource) {
@@ -55,7 +57,7 @@ public class DataSourceProviderFactory {
       case GITHUB_IDENTIFIER:
         return new GithubProvider(dataPointService, dataSourceLocationFactory, dataSourceLocationRepository,
             dataSourceDataPointParserFactory.getDataPointParserFactory(GITHUB_IDENTIFIER), configReader,
-            dataSourceRepository);
+            dataSourceRepository, githubService);
       case BITBUCKET_IDENTIFIER:
         return new BitbucketProvider(dataPointService, dataSourceLocationFactory, dataSourceLocationRepository,
             dataSourceDataPointParserFactory.getDataPointParserFactory(BITBUCKET_IDENTIFIER), configReader,

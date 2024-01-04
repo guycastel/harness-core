@@ -67,6 +67,11 @@ public class ConfigReader {
     }
     String env = matcher.group(0);
     String envName = matcher.group(1);
+    value = ((String) value).replace(env, getDecryptedValue(accountIdentifier, envName));
+    return value;
+  }
+
+  public String getDecryptedValue(String accountIdentifier, String envName) {
     Optional<BackstageEnvVariable> envVariableOpt =
         backstageEnvVariableService.findByEnvNameAndAccountIdentifier(envName, accountIdentifier);
     if (envVariableOpt.isPresent() && envVariableOpt.get().getType().equals(BackstageEnvVariable.TypeEnum.SECRET)) {
@@ -80,12 +85,12 @@ public class ConfigReader {
                 + "by env: %s, in account: %s",
             secret.getHarnessSecretIdentifier(), envName, accountIdentifier));
       }
-      value = ((String) value).replace(env, decryptedValue);
+      return decryptedValue;
     } else if (envVariableOpt.isPresent()
         && envVariableOpt.get().getType().equals(BackstageEnvVariable.TypeEnum.CONFIG)) {
       BackstageEnvConfigVariable config = (BackstageEnvConfigVariable) envVariableOpt.get();
-      value = ((String) value).replace(env, config.getValue());
+      return config.getValue();
     }
-    return value;
+    return null;
   }
 }

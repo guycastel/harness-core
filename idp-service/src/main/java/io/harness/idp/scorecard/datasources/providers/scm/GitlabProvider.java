@@ -25,6 +25,7 @@ import io.harness.idp.scorecard.scores.beans.DataFetchDTO;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 @OwnedBy(HarnessTeam.IDP)
 public class GitlabProvider extends ScmBaseProvider {
@@ -52,6 +53,6 @@ public class GitlabProvider extends ScmBaseProvider {
   @Override
   protected Map<String, String> getAuthHeaders(String accountIdentifier, String configs) {
     String token = parseObjectToString(configReader.getConfigValues(accountIdentifier, configs, TOKEN_EXPRESSION_KEY));
-    return Map.of(AUTHORIZATION_HEADER, "Bearer " + token);
+    return Map.of(AUTHORIZATION_HEADER, !StringUtils.isEmpty(token) ? "Bearer " + token : StringUtils.EMPTY);
   }
 }

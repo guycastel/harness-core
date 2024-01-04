@@ -104,4 +104,9 @@ public class ScmProxyThroughDsl extends ScmBaseDslNoLoop {
       String url, DataPointEntity dataPoint, List<InputValue> inputValues) {
     return url;
   }
+
+  @Override
+  protected String getHost(Map<String, String> data) {
+    return null;
+  }
 }

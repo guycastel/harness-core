@@ -26,6 +26,7 @@ import io.harness.idp.scorecard.scores.beans.DataFetchDTO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 @OwnedBy(HarnessTeam.IDP)
 public class BitbucketProvider extends ScmBaseProvider {
@@ -65,9 +66,9 @@ public class BitbucketProvider extends ScmBaseProvider {
     String password =
         parseObjectToString(configReader.getConfigValues(accountIdentifier, configs, PASSWORD_EXPRESSION_KEY));
     String authToken = null;
-    if (username != null && password != null) {
+    if (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password)) {
       authToken = encodeBase64(username + ":" + password);
     }
-    return Map.of(AUTHORIZATION_HEADER, "Basic " + authToken);
+    return Map.of(AUTHORIZATION_HEADER, !StringUtils.isEmpty(authToken) ? "Basic " + authToken : StringUtils.EMPTY);
   }
 }

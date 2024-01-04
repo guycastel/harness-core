@@ -35,6 +35,8 @@ public class DataPoints {
       "Invalid or missing source-location annotation in the catalog info YAML";
   public static final String INVALID_BRANCH_NAME_ERROR = "Invalid branch name provided";
   public static final String INVALID_PATTERN = "Invalid pattern provided";
+  public static final String INVALID_CONNECTOR_CONFIGURATION =
+      "Invalid connector configuration or unsupported connector type for scorecards";
 
   // Catalog
   public static final String CATALOG_TECH_DOCS = "techDocsAnnotationExists";
@@ -68,7 +70,7 @@ public class DataPoints {
   public static final String NO_ISSUES_FOUND = "No issues found";
 
   // Commons
-  public static final String AUTHORIZATION_HEADER_ERROR = "Invalid or missing token";
+  public static final String PLUGIN_DISABLED = "Unable to get plugin details, probably plugin is not enabled";
   public static final String INVALID_CONDITIONAL_INPUT = "Invalid conditional input";
   public static final String INVALID_FILE_NAME_ERROR = "Invalid file name provided";
 }

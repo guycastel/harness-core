@@ -9,7 +9,7 @@ package io.harness.idp.scorecard.datasourcelocations.locations.scm;
 
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.idp.common.Constants.ERROR_MESSAGE_KEY;
-import static io.harness.idp.scorecard.datapoints.constants.DataPoints.AUTHORIZATION_HEADER_ERROR;
+import static io.harness.idp.scorecard.datapoints.constants.DataPoints.INVALID_CONNECTOR_CONFIGURATION;
 import static io.harness.idp.scorecard.datapoints.constants.DataPoints.SOURCE_LOCATION_ANNOTATION_ERROR;
 import static io.harness.idp.scorecard.datasourcelocations.constants.DataSourceLocations.AUTHORIZATION_HEADER;
 import static io.harness.idp.scorecard.datasourcelocations.constants.DataSourceLocations.REPOSITORY_NAME;
@@ -36,7 +36,7 @@ public abstract class ScmBaseDslNoLoop extends DataSourceLocationNoLoop {
     }
 
     if (isEmpty(replaceableHeaders.get(AUTHORIZATION_HEADER))) {
-      data.put(dataFetchDTO.getRuleIdentifier(), Map.of(ERROR_MESSAGE_KEY, AUTHORIZATION_HEADER_ERROR));
+      data.put(dataFetchDTO.getRuleIdentifier(), Map.of(ERROR_MESSAGE_KEY, INVALID_CONNECTOR_CONFIGURATION));
       return false;
     }
     return true;

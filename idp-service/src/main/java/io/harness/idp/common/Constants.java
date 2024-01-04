@@ -52,6 +52,7 @@ public class Constants {
           JIRA_PLUGIN, KUBERNETES_PLUGIN, OPSGENIE_PLUGIN, PAGER_DUTY_PLUGIN, SONARQUBE_PLUGIN, TODO_PLUGIN);
   public static final String GITHUB_TOKEN = "HARNESS_GITHUB_TOKEN";
   public static final String GITHUB_APP_ID = "HARNESS_GITHUB_APP_APPLICATION_ID";
+  public static final String GITHUB_INSTALLATION_ID = "HARNESS_GITHUB_APP_INSTALLATION_ID";
   public static final String GITHUB_APP_PRIVATE_KEY_REF = "HARNESS_GITHUB_APP_PRIVATE_KEY_REF";
   public static final String PRIVATE_KEY_START = "-----BEGIN PRIVATE KEY-----";
   public static final String PRIVATE_KEY_END = "-----END PRIVATE KEY-----";

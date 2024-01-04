@@ -94,6 +94,19 @@ public class GithubConnectorProcessor extends ConnectorProcessor {
             GitIntegrationUtils.getBackstageEnvSecretVariable(applicationIdSecretRefId, Constants.GITHUB_APP_ID));
       }
 
+      if (apiAccessSpec.getInstallationIdRef() == null) {
+        BackstageEnvConfigVariable installationIDEnvironmentSecret = new BackstageEnvConfigVariable();
+        installationIDEnvironmentSecret.setEnvName(Constants.GITHUB_INSTALLATION_ID);
+        installationIDEnvironmentSecret.setType(BackstageEnvVariable.TypeEnum.CONFIG);
+        installationIDEnvironmentSecret.value(apiAccessSpec.getInstallationId());
+        secrets.put(Constants.GITHUB_INSTALLATION_ID, installationIDEnvironmentSecret);
+      } else {
+        String installationIdSecretRefId = apiAccessSpec.getInstallationIdRef().getIdentifier();
+        secrets.put(Constants.GITHUB_INSTALLATION_ID,
+            GitIntegrationUtils.getBackstageEnvSecretVariable(
+                installationIdSecretRefId, Constants.GITHUB_INSTALLATION_ID));
+      }
+
       String privateRefKeySecretIdentifier = apiAccessSpec.getPrivateKeyRef().getIdentifier();
       secrets.put(Constants.GITHUB_APP_PRIVATE_KEY_REF,
           GitIntegrationUtils.getBackstageEnvSecretVariable(

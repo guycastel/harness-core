@@ -11,7 +11,7 @@ import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.idp.common.Constants.DSL_RESPONSE;
 import static io.harness.idp.common.Constants.ERROR_MESSAGES_KEY;
 import static io.harness.idp.common.Constants.ERROR_MESSAGE_KEY;
-import static io.harness.idp.scorecard.datapoints.constants.DataPoints.AUTHORIZATION_HEADER_ERROR;
+import static io.harness.idp.scorecard.datapoints.constants.DataPoints.PLUGIN_DISABLED;
 import static io.harness.idp.scorecard.datapoints.constants.DataPoints.PROJECT_KEY_ANNOTATION_ERROR;
 import static io.harness.idp.scorecard.datapoints.constants.Inputs.JQL;
 import static io.harness.idp.scorecard.datasourcelocations.constants.DataSourceLocations.API_BASE_URL;
@@ -51,7 +51,7 @@ public abstract class JiraBaseDsl extends DataSourceLocationNoLoop {
       return false;
     }
     if (isEmpty(replaceableHeaders.get(AUTHORIZATION_HEADER))) {
-      data.put(dataFetchDTO.getRuleIdentifier(), Map.of(ERROR_MESSAGE_KEY, AUTHORIZATION_HEADER_ERROR));
+      data.put(dataFetchDTO.getRuleIdentifier(), Map.of(ERROR_MESSAGE_KEY, PLUGIN_DISABLED));
       return false;
     }
     return true;

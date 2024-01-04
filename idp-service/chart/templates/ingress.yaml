@@ -247,6 +247,13 @@ spec:
                 name: {{.Values.name}}
                 port:
                   number: 12003
+          - path: /(idp/api/usage.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: {{.Values.name}}
+                port:
+                  number: 12003
     {{- range .Values.global.ingress.hosts }}
       host: {{ . | quote }}
     {{- end }}

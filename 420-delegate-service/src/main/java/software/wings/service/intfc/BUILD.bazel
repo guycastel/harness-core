@@ -1,0 +1,35 @@
+# Copyright 2024 Harness Inc. All rights reserved.
+# Use of this source code is governed by the PolyForm Free Trial 1.0.0 license
+# that can be found in the licenses directory at the root of this repository, also available at
+# https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
+
+load("@rules_java//java:defs.bzl", "java_library")
+load("//:tools/bazel/macros.bzl", "run_analysis_per_module")
+
+java_library(
+    name = "module",
+    srcs = glob(["*.java"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//420-delegate-service/src/main/java/io/harness/delegate/beans:module",
+        "//420-delegate-service/src/main/java/io/harness/selection/log:module",
+        "//420-delegate-service/src/main/java/software/wings/delegatetasks/validation/core:module",
+        "//870-cg-orchestration:module",
+        "//920-delegate-agent-beans:module",
+        "//920-delegate-service-beans:module",
+        "//950-delegate-tasks-beans:module",
+        "//951-delegate-task-commons/src/main/java/io/harness/delegate/beans:module",
+        "//951-delegate-task-commons/src/main/java/io/harness/delegate/beans/executioncapability:module",
+        "//957-cg-beans/src/main/java/software/wings/service/intfc/ownership:module",
+        "//960-persistence/src/main/java/io/harness/beans:module",
+        "//980-commons/src/main/java/io/harness/validation:module",
+        "//999-annotations/src/main/java/io/harness/annotations/dev:module",
+        "@maven//:com_google_guava_guava",
+        "@maven//:javax_validation_validation_api",
+        "@maven//:ru_vyarus_guice_validator",
+    ] + [
+        "//955-delegate-beans/src/main/proto/io/harness/delegate/core/beans:955_delegate_core_task_java_proto",
+    ],
+)
+
+run_analysis_per_module()

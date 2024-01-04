@@ -332,6 +332,11 @@ public class MigratorUtility {
     return getDefaultScope(inputDTO, entityId, defaultScope, entityType);
   }
 
+  public static Scope getDefaultScopeOfEnv(MigrationInputDTO inputDTO, CgEntityId entityId, Scope defaultScope) {
+    NGMigrationEntityType entityType = NGMigrationEntityType.ENVIRONMENT;
+    return getDefaultScope(inputDTO, entityId, defaultScope, entityType);
+  }
+
   public static Scope getDefaultScope(MigrationInputDTO inputDTO, CgEntityId entityId, Scope defaultScope,
       NGMigrationEntityType destinationEntityType) {
     if (inputDTO == null) {

@@ -9,6 +9,7 @@ package io.harness.ngmigration.service.entity;
 
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.ngmigration.beans.MigrationInputSettingsType.SIMULTANEOUS_DEPLOYMENT_ON_SAME_INFRA;
+import static io.harness.ngmigration.utils.MigratorUtility.isEnabled;
 
 import static software.wings.api.CloudProviderType.AWS;
 import static software.wings.ngmigration.NGMigrationEntityType.CONNECTOR;
@@ -49,6 +50,7 @@ import io.harness.ngmigration.beans.summary.InfraDefSummary;
 import io.harness.ngmigration.client.NGClient;
 import io.harness.ngmigration.client.PmsClient;
 import io.harness.ngmigration.client.TemplateClient;
+import io.harness.ngmigration.dto.Flag;
 import io.harness.ngmigration.dto.ImportError;
 import io.harness.ngmigration.dto.MigrationImportSummaryDTO;
 import io.harness.ngmigration.expressions.MigratorExpressionUtils;
@@ -105,6 +107,10 @@ public class InfraMigrationService extends NgMigrationService {
     String identifier = infrastructureConfig.getInfrastructureDefinitionConfig().getIdentifier();
     String orgIdentifier = infrastructureConfig.getInfrastructureDefinitionConfig().getOrgIdentifier();
     String projectIdentifier = infrastructureConfig.getInfrastructureDefinitionConfig().getOrgIdentifier();
+    Scope scope = Scope.PROJECT;
+    if (isEnabled(Flag.ENV_AT_DIFFERENT_LEVEL)) {
+      scope = MigratorMappingService.getScope(orgIdentifier, projectIdentifier);
+    }
     return MigratedEntityMapping.builder()
         .appId(basicInfo.getAppId())
         .accountId(basicInfo.getAccountId())
@@ -114,7 +120,7 @@ public class InfraMigrationService extends NgMigrationService {
         .orgIdentifier(orgIdentifier)
         .projectIdentifier(projectIdentifier)
         .identifier(identifier)
-        .scope(Scope.PROJECT)
+        .scope(scope)
         .fullyQualifiedIdentifier(MigratorMappingService.getFullyQualifiedIdentifier(
             basicInfo.getAccountId(), orgIdentifier, projectIdentifier, identifier))
         .build();
@@ -256,8 +262,13 @@ public class InfraMigrationService extends NgMigrationService {
     String name = MigratorUtility.generateName(inputDTO.getOverrides(), entityId, infra.getName());
     String identifier = MigratorUtility.generateIdentifierDefaultName(
         inputDTO.getOverrides(), entityId, name, inputDTO.getIdentifierCaseFormat());
-    String projectIdentifier = MigratorUtility.getProjectIdentifier(Scope.PROJECT, inputDTO);
-    String orgIdentifier = MigratorUtility.getOrgIdentifier(Scope.PROJECT, inputDTO);
+    Scope scope = Scope.PROJECT;
+    if (isEnabled(Flag.ENV_AT_DIFFERENT_LEVEL)) {
+      scope = MigratorUtility.getDefaultScope(
+          inputDTO, CgEntityId.builder().type(ENVIRONMENT).id(infra.getEnvId()).build(), Scope.PROJECT);
+    }
+    String projectIdentifier = MigratorUtility.getProjectIdentifier(scope, inputDTO);
+    String orgIdentifier = MigratorUtility.getOrgIdentifier(scope, inputDTO);
     InfraDefMapper infraDefMapper = InfraMapperFactory.getInfraDefMapper(infra);
     NGYamlFile envNgYamlFile =
         migratedEntities.get(CgEntityId.builder().id(infra.getEnvId()).type(ENVIRONMENT).build());

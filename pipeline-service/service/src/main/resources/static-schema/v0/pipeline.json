@@ -370,6 +370,9 @@
           "properties" : {
             "webhookUrl" : {
               "type" : "string"
+            },
+            "headers" : {
+              "type" : "object"
             }
           }
         } ],
@@ -3483,7 +3486,7 @@
               "$ref" : "#/definitions/pipeline/steps/common/Infrastructure"
             }, {
               "type" : "object",
-              "required" : [ "awsInstanceFilter", "connectorRef", "credentialsRef", "hostConnectionType", "region" ],
+              "required" : [ "connectorRef", "credentialsRef", "hostConnectionType", "region" ],
               "properties" : {
                 "awsInstanceFilter" : {
                   "$ref" : "#/definitions/pipeline/stages/cd/AwsInstanceFilter"
@@ -3507,6 +3510,9 @@
                 "region" : {
                   "type" : "string",
                   "minLength" : 1
+                },
+                "asgName" : {
+                  "type" : "string"
                 }
               }
             } ],
@@ -3532,10 +3538,16 @@
                 } ]
               },
               "vpcs" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string"
-                }
+                "oneOf" : [ {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }, {
+                  "type" : "string",
+                  "pattern" : "(<\\+.+>.*)",
+                  "minLength" : 1
+                } ]
               },
               "description" : {
                 "desc" : "This is the description for AwsInstanceFilter"
@@ -7621,6 +7633,8 @@
                 }, {
                   "$ref" : "#/definitions/pipeline/steps/common/OpenvasScanNode"
                 }, {
+                  "$ref" : "#/definitions/pipeline/steps/common/OsvScannerScanNode"
+                }, {
                   "$ref" : "#/definitions/pipeline/steps/common/OwaspScanNode"
                 }, {
                   "$ref" : "#/definitions/pipeline/steps/common/PluginStepNode"
@@ -8054,6 +8068,8 @@
                   "$ref" : "#/definitions/pipeline/steps/common/NmapScanNode"
                 }, {
                   "$ref" : "#/definitions/pipeline/steps/common/OpenvasScanNode"
+                }, {
+                  "$ref" : "#/definitions/pipeline/steps/common/OsvScannerScanNode"
                 }, {
                   "$ref" : "#/definitions/pipeline/steps/common/OwaspScanNode"
                 }, {
@@ -9925,6 +9941,12 @@
               "desc" : "This is the description for FailureStrategyConfig"
             }
           },
+          "metadata" : {
+            "inputProperties" : {
+              "type" : "string",
+              "internalType" : "failure_strategy"
+            }
+          },
           "$schema" : "http://json-schema.org/draft-07/schema#"
         },
         "OnFailureConfig" : {
@@ -9993,6 +10015,12 @@
             },
             "description" : {
               "desc" : "This is the description for StrategyConfig"
+            }
+          },
+          "metadata" : {
+            "inputProperties" : {
+              "type" : "object",
+              "internalType" : "strategy_config"
             }
           },
           "$schema" : "http://json-schema.org/draft-07/schema#",
@@ -10360,6 +10388,12 @@
               "desc" : "This is the description for PolicyConfig"
             }
           },
+          "metadata" : {
+            "inputProperties" : {
+              "type" : "object",
+              "internalType" : "policy_config"
+            }
+          },
           "$schema" : "http://json-schema.org/draft-07/schema#"
         },
         "StepWhenCondition" : {
@@ -10377,6 +10411,12 @@
             },
             "description" : {
               "desc" : "This is the description for StepWhenCondition"
+            }
+          },
+          "metadata" : {
+            "inputProperties" : {
+              "type" : "string",
+              "internalType" : "conditional_execution"
             }
           },
           "$schema" : "http://json-schema.org/draft-07/schema#"
@@ -10580,7 +10620,13 @@
             "type" : "object",
             "properties" : {
               "script" : {
-                "type" : "string"
+                "type" : "string",
+                "metadata" : {
+                  "inputProperties" : {
+                    "type" : "string",
+                    "internalType" : "shell_script"
+                  }
+                }
               }
             }
           } ],
@@ -10590,6 +10636,18 @@
               "desc" : "This is the description for ShellScriptInlineSource"
             }
           }
+        },
+        "Timeout" : {
+          "title" : "Timeout",
+          "type" : "string",
+          "pattern" : "^(([1-9])+\\d+[s])|(((([1-9])+\\d*[mhwd])+([\\s]?\\d+[smhwd])*)|(<\\+.+>.*)|(^$))$",
+          "metadata" : {
+            "inputProperties" : {
+              "type" : "string",
+              "internalType" : "duration"
+            }
+          },
+          "$schema" : "http://json-schema.org/draft-07/schema#"
         },
         "K8sDirectInfra" : {
           "title" : "K8sDirectInfra",
@@ -11530,6 +11588,20 @@
               }
             }
           },
+          "SbomDrift" : {
+            "title" : "SbomDrift",
+            "type" : "object",
+            "required" : [ "base" ],
+            "properties" : {
+              "base" : {
+                "type" : "string",
+                "enum" : [ "baseline", "last_generated_sbom" ]
+              },
+              "description" : {
+                "desc" : "This is the description for SbomOrchestrationTool"
+              }
+            }
+          },
           "HttpStepNode" : {
             "title" : "HttpStepNode",
             "type" : "object",
@@ -11572,8 +11644,7 @@
                 } ]
               },
               "timeout" : {
-                "type" : "string",
-                "pattern" : "^(([1-9])+\\d+[s])|(((([1-9])+\\d*[mhwd])+([\\s]?\\d+[smhwd])*)|(.*<\\+.*>(?!.*\\.executionInput\\(\\)).*)|(^$))$"
+                "$ref" : "#/definitions/pipeline/common/Timeout"
               },
               "type" : {
                 "type" : "string",
@@ -11637,7 +11708,13 @@
                   }
                 },
                 "method" : {
-                  "type" : "string"
+                  "type" : "string",
+                  "metadata" : {
+                    "inputProperties" : {
+                      "type" : "string",
+                      "internalType" : "http_method"
+                    }
+                  }
                 },
                 "outputVariables" : {
                   "type" : "array",
@@ -11652,10 +11729,22 @@
                   }
                 },
                 "requestBody" : {
-                  "type" : "string"
+                  "type" : "string",
+                  "metadata" : {
+                    "inputProperties" : {
+                      "type" : "string",
+                      "internalType" : "text_area"
+                    }
+                  }
                 },
                 "url" : {
-                  "type" : "string"
+                  "type" : "string",
+                  "metadata" : {
+                    "inputProperties" : {
+                      "type" : "string",
+                      "internalType" : "url"
+                    }
+                  }
                 }
               }
             } ],
@@ -12022,8 +12111,7 @@
                 } ]
               },
               "timeout" : {
-                "type" : "string",
-                "pattern" : "^(([1-9])+\\d+[s])|(((([1-9])+\\d*[mhwd])+([\\s]?\\d+[smhwd])*)|(.*<\\+.*>(?!.*\\.executionInput\\(\\)).*)|(^$))$"
+                "$ref" : "#/definitions/pipeline/common/Timeout"
               },
               "type" : {
                 "type" : "string",
@@ -13397,7 +13485,8 @@
               "required" : [ "approvers", "includePipelineExecutionHistory" ],
               "properties" : {
                 "callbackId" : {
-                  "type" : "string"
+                  "type" : "string",
+                  "pattern" : "^[a-zA-Z0-9_-]*(<\\+[^ ]+>)?[a-zA-Z0-9_.()-]*$"
                 },
                 "approvalMessage" : {
                   "type" : "string",
@@ -13429,7 +13518,8 @@
             "required" : [ "approvers", "includePipelineExecutionHistory" ],
             "properties" : {
               "callbackId" : {
-                "type" : "string"
+                "type" : "string",
+                "pattern" : "^[a-zA-Z0-9_-]*(<\\+[^ ]+>)?[a-zA-Z0-9_.()-]*$"
               },
               "approvalMessage" : {
                 "type" : "string",
@@ -16802,6 +16892,9 @@
                 },
                 "tool" : {
                   "$ref" : "#/definitions/pipeline/steps/custom/SbomOrchestrationTool"
+                },
+                "sbom_drift" : {
+                  "$ref" : "#/definitions/pipeline/steps/custom/SbomDrift"
                 }
               }
             } ],
@@ -16827,6 +16920,9 @@
               },
               "tool" : {
                 "$ref" : "#/definitions/pipeline/steps/custom/SbomOrchestrationTool"
+              },
+              "sbom_drift" : {
+                "$ref" : "#/definitions/pipeline/steps/custom/SbomDrift"
               },
               "description" : {
                 "desc" : "This is the description for SscaOrchestrationStepInfo"
@@ -19016,7 +19112,7 @@
           "STOYamlTarget" : {
             "title" : "STOYamlTarget",
             "type" : "object",
-            "required" : [ "name", "type", "variant" ],
+            "required" : [ "type", "detection" ],
             "properties" : {
               "name" : {
                 "type" : "string"
@@ -19033,6 +19129,16 @@
               },
               "variant" : {
                 "type" : "string"
+              },
+              "detection" : {
+                "oneOf" : [ {
+                  "type" : "string",
+                  "enum" : [ "manual", "auto" ]
+                }, {
+                  "type" : "string",
+                  "pattern" : "^<\\+input>((\\.)((executionInput\\(\\))|(allowedValues|default|regex)\\(.+?\\)))*$",
+                  "minLength" : 1
+                } ]
               },
               "workspace" : {
                 "type" : "string"
@@ -26141,6 +26247,258 @@
               }
             }
           },
+          "OsvScannerScanNode" : {
+            "title" : "OsvScannerScanNode",
+            "type" : "object",
+            "required" : [ "identifier", "name", "spec", "type" ],
+            "properties" : {
+              "description" : {
+                "type" : "string",
+                "desc" : "This is the description for OsvScannerScanNode"
+              },
+              "enforce" : {
+                "$ref" : "#/definitions/pipeline/common/PolicyConfig"
+              },
+              "failureStrategies" : {
+                "oneOf" : [ {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/definitions/pipeline/common/FailureStrategyConfig"
+                  }
+                }, {
+                  "type" : "string",
+                  "pattern" : "^<\\+input>$",
+                  "minLength" : 1
+                } ]
+              },
+              "identifier" : {
+                "type" : "string",
+                "pattern" : "^[a-zA-Z_][0-9a-zA-Z_]{0,127}$"
+              },
+              "name" : {
+                "type" : "string",
+                "pattern" : "^[a-zA-Z_0-9-.][-0-9a-zA-Z_\\s.]{0,127}$"
+              },
+              "strategy" : {
+                "oneOf" : [ {
+                  "$ref" : "#/definitions/pipeline/common/StrategyConfig"
+                }, {
+                  "type" : "string",
+                  "pattern" : "^<\\+input>$",
+                  "minLength" : 1
+                } ]
+              },
+              "timeout" : {
+                "type" : "string",
+                "pattern" : "^(([1-9])+\\d+[s])|(((([1-9])+\\d*[mhwd])+([\\s]?\\d+[smhwd])*)|(.*<\\+.*>(?!.*\\.executionInput\\(\\)).*)|(^$))$"
+              },
+              "type" : {
+                "type" : "string",
+                "enum" : [ "OsvScanner" ]
+              },
+              "when" : {
+                "oneOf" : [ {
+                  "$ref" : "#/definitions/pipeline/common/StepWhenCondition"
+                }, {
+                  "type" : "string",
+                  "pattern" : "^<\\+input>$",
+                  "minLength" : 1
+                } ]
+              }
+            },
+            "$schema" : "http://json-schema.org/draft-07/schema#",
+            "allOf" : [ {
+              "if" : {
+                "properties" : {
+                  "type" : {
+                    "const" : "OsvScanner"
+                  }
+                }
+              },
+              "then" : {
+                "properties" : {
+                  "spec" : {
+                    "$ref" : "#/definitions/pipeline/steps/common/OsvScannerStepInfo"
+                  }
+                }
+              }
+            } ]
+          },
+          "OsvScannerStepInfo" : {
+            "title" : "OsvScannerStepInfo",
+            "allOf" : [ {
+              "$ref" : "#/definitions/pipeline/common/StepSpecType"
+            }, {
+              "type" : "object",
+              "required" : [ "config", "mode", "target" ],
+              "properties" : {
+                "advanced" : {
+                  "$ref" : "#/definitions/pipeline/steps/common/STOYamlAdvancedSettings"
+                },
+                "baseImageConnectorRefs" : {
+                  "$ref" : "#/definitions/pipeline/steps/common/ParameterFieldListString"
+                },
+                "config" : {
+                  "type" : "string",
+                  "enum" : [ "default" ]
+                },
+                "image" : {
+                  "$ref" : "#/definitions/pipeline/steps/common/STOYamlImage"
+                },
+                "imagePullPolicy" : {
+                  "oneOf" : [ {
+                    "type" : "string",
+                    "enum" : [ "Always", "Never", "IfNotPresent" ]
+                  }, {
+                    "type" : "string",
+                    "pattern" : "(<\\+.+>.*)",
+                    "minLength" : 1
+                  } ]
+                },
+                "ingestion" : {
+                  "$ref" : "#/definitions/pipeline/steps/common/STOYamlIngestion"
+                },
+                "mode" : {
+                  "oneOf" : [ {
+                    "type" : "string",
+                    "enum" : [ "ingestion", "orchestration" ]
+                  }, {
+                    "type" : "string",
+                    "pattern" : "(<\\+.+>.*)",
+                    "minLength" : 1
+                  } ]
+                },
+                "outputVariables" : {
+                  "oneOf" : [ {
+                    "type" : "array",
+                    "items" : {
+                      "$ref" : "#/definitions/pipeline/common/OutputNGVariable"
+                    }
+                  }, {
+                    "type" : "string",
+                    "pattern" : "^<\\+input>((\\.)((executionInput\\(\\))|(allowedValues|default|regex)\\(.+?\\)))*$",
+                    "minLength" : 1
+                  } ]
+                },
+                "privileged" : {
+                  "oneOf" : [ {
+                    "type" : "boolean"
+                  }, {
+                    "type" : "string",
+                    "pattern" : "^<\\+input>((\\.)((executionInput\\(\\))|(allowedValues|default|regex)\\(.+?\\)))*$",
+                    "minLength" : 1
+                  } ]
+                },
+                "resources" : {
+                  "$ref" : "#/definitions/pipeline/common/ContainerResource"
+                },
+                "runAsUser" : {
+                  "oneOf" : [ {
+                    "type" : "integer",
+                    "format" : "int32"
+                  }, {
+                    "type" : "string"
+                  } ]
+                },
+                "settings" : {
+                  "oneOf" : [ {
+                    "$ref" : "#/definitions/pipeline/common/ParameterFieldMapStringJsonNode"
+                  }, {
+                    "type" : "string"
+                  } ]
+                },
+                "target" : {
+                  "$ref" : "#/definitions/pipeline/steps/common/STOYamlTarget"
+                }
+              }
+            } ],
+            "$schema" : "http://json-schema.org/draft-07/schema#",
+            "type" : "object",
+            "required" : [ "config", "mode", "target" ],
+            "properties" : {
+              "advanced" : {
+                "$ref" : "#/definitions/pipeline/steps/common/STOYamlAdvancedSettings"
+              },
+              "baseImageConnectorRefs" : {
+                "$ref" : "#/definitions/pipeline/steps/common/ParameterFieldListString"
+              },
+              "config" : {
+                "type" : "string",
+                "enum" : [ "default" ]
+              },
+              "image" : {
+                "$ref" : "#/definitions/pipeline/steps/common/STOYamlImage"
+              },
+              "imagePullPolicy" : {
+                "oneOf" : [ {
+                  "type" : "string",
+                  "enum" : [ "Always", "Never", "IfNotPresent" ]
+                }, {
+                  "type" : "string",
+                  "pattern" : "(<\\+.+>.*)",
+                  "minLength" : 1
+                } ]
+              },
+              "ingestion" : {
+                "$ref" : "#/definitions/pipeline/steps/common/STOYamlIngestion"
+              },
+              "mode" : {
+                "oneOf" : [ {
+                  "type" : "string",
+                  "enum" : [ "ingestion", "orchestration" ]
+                }, {
+                  "type" : "string",
+                  "pattern" : "(<\\+.+>.*)",
+                  "minLength" : 1
+                } ]
+              },
+              "outputVariables" : {
+                "oneOf" : [ {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/definitions/pipeline/common/OutputNGVariable"
+                  }
+                }, {
+                  "type" : "string",
+                  "pattern" : "^<\\+input>((\\.)((executionInput\\(\\))|(allowedValues|default|regex)\\(.+?\\)))*$",
+                  "minLength" : 1
+                } ]
+              },
+              "privileged" : {
+                "oneOf" : [ {
+                  "type" : "boolean"
+                }, {
+                  "type" : "string",
+                  "pattern" : "^<\\+input>((\\.)((executionInput\\(\\))|(allowedValues|default|regex)\\(.+?\\)))*$",
+                  "minLength" : 1
+                } ]
+              },
+              "resources" : {
+                "$ref" : "#/definitions/pipeline/common/ContainerResource"
+              },
+              "runAsUser" : {
+                "oneOf" : [ {
+                  "type" : "integer",
+                  "format" : "int32"
+                }, {
+                  "type" : "string"
+                } ]
+              },
+              "settings" : {
+                "oneOf" : [ {
+                  "$ref" : "#/definitions/pipeline/common/ParameterFieldMapStringJsonNode"
+                }, {
+                  "type" : "string"
+                } ]
+              },
+              "target" : {
+                "$ref" : "#/definitions/pipeline/steps/common/STOYamlTarget"
+              },
+              "description" : {
+                "desc" : "This is the description for OsvScannerStepInfo"
+              }
+            }
+          },
           "OwaspScanNode" : {
             "title" : "OwaspScanNode",
             "type" : "object",
@@ -27851,6 +28209,21 @@
                 "properties" : {
                   "spec" : {
                     "$ref" : "#/definitions/pipeline/steps/common/OpenvasStepInfo"
+                  }
+                }
+              }
+            }, {
+              "if" : {
+                "properties" : {
+                  "type" : {
+                    "const" : "OsvScanner"
+                  }
+                }
+              },
+              "then" : {
+                "properties" : {
+                  "spec" : {
+                    "$ref" : "#/definitions/pipeline/steps/common/OsvScannerStepInfo"
                   }
                 }
               }

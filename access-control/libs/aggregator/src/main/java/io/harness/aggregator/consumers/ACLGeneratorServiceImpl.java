@@ -180,7 +180,7 @@ public class ACLGeneratorServiceImpl implements ACLGeneratorService {
 
   public long createImplicitACLsForRoleAssignment(RoleAssignmentDBO roleAssignment) {
     List<ACL> acls = getImplicitACLsForRoleAssignment(roleAssignment);
-    return aclRepository.insertAllIgnoringDuplicates(acls);
+    return createImplicitACLs(acls);
   }
 
   private List<ACL> getImplicitACLsForRoleAssignment(RoleAssignmentDBO roleAssignment) {

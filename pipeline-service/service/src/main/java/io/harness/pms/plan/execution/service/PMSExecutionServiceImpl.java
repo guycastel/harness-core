@@ -41,6 +41,7 @@ import io.harness.execution.PlanExecutionMetadata.PlanExecutionMetadataKeys;
 import io.harness.execution.StagesExecutionMetadata;
 import io.harness.filter.FilterType;
 import io.harness.filter.dto.FilterDTO;
+import io.harness.filter.dto.FilterPropertiesDTO;
 import io.harness.filter.service.FilterService;
 import io.harness.gitaware.helper.GitAwareContextHelper;
 import io.harness.gitaware.helper.GitAwareEntityHelper;
@@ -166,19 +167,23 @@ public class PMSExecutionServiceImpl implements PMSExecutionService {
     }
     // This condition is being used by some customers so we are not removing it at the moment.
     // showAllExecution will be handled by the ExecutionModeFilter once this condition has been removed.
-    if (!showAllExecutions) {
+
+    Criteria filterCriteria = new Criteria();
+
+    if (EmptyPredicate.isNotEmpty(filterIdentifier) && filterProperties != null) {
+      throw new InvalidRequestException("Can not apply both filter properties and saved filter together");
+    }
+
+    FilterPropertiesDTO filterPropertiesDTO =
+        fetchFilterPropertiesDTO(accountId, orgId, projectId, filterIdentifier, filterProperties);
+
+    if (!(showAllExecutions || isAllExecutionModeFilterPresent(filterPropertiesDTO))) {
       criteria.and(PlanExecutionSummaryKeys.isLatestExecution).ne(false);
     }
 
-    Criteria filterCriteria = new Criteria();
-    if (EmptyPredicate.isNotEmpty(filterIdentifier) && filterProperties != null) {
-      throw new InvalidRequestException("Can not apply both filter properties and saved filter together");
-    } else if (EmptyPredicate.isNotEmpty(filterIdentifier) && filterProperties == null) {
-      populatePipelineFilterUsingIdentifierANDOperator(
-          filterCriteria, accountId, orgId, projectId, filterIdentifier, EmptyPredicate.isNotEmpty(pipelineIdentifier));
-    } else if (EmptyPredicate.isEmpty(filterIdentifier) && filterProperties != null) {
-      populatePipelineFilterANDOperator(
-          filterCriteria, filterProperties, EmptyPredicate.isNotEmpty(pipelineIdentifier));
+    if (EmptyPredicate.isNotEmpty(filterIdentifier) || filterProperties != null) {
+      populatePipelineFilterANDOperator(filterCriteria, (PipelineExecutionFilterPropertiesDTO) filterPropertiesDTO,
+          EmptyPredicate.isNotEmpty(pipelineIdentifier));
     } else {
       // If filterIdentifier and filterCriteria both are null then we need default behaviour.
       // So instead of duplicating the logic here, we are calling the same flow with filterCriteria with default
@@ -266,6 +271,28 @@ public class PMSExecutionServiceImpl implements PMSExecutionService {
       criteria.andOperator(criteriaList.toArray(new Criteria[criteriaList.size()]));
     }
     return criteria;
+  }
+
+  private FilterPropertiesDTO fetchFilterPropertiesDTO(String accountIdentifier, String orgIdentifier,
+      String projectIdentifier, String filterIdentifier, FilterPropertiesDTO filterProperties) {
+    if (filterIdentifier != null) {
+      FilterDTO filterDTO = filterService.get(
+          accountIdentifier, orgIdentifier, projectIdentifier, filterIdentifier, FilterType.PIPELINEEXECUTION);
+      if (filterDTO == null) {
+        throw new InvalidRequestException(
+            format("Could not find a pipeline filter with the identifier %s", filterIdentifier));
+      }
+      return filterDTO.getFilterProperties();
+    }
+    return filterProperties;
+  }
+
+  public boolean isAllExecutionModeFilterPresent(FilterPropertiesDTO filterPropertiesDTO) {
+    if (filterPropertiesDTO == null) {
+      return false;
+    }
+    return ExecutionModeFilter.ALL.equals(
+        ((PipelineExecutionFilterPropertiesDTO) filterPropertiesDTO).getExecutionModeFilter());
   }
 
   @Override
@@ -384,13 +411,6 @@ public class PMSExecutionServiceImpl implements PMSExecutionService {
           String.format("Missing permission %s on %s", PipelineRbacPermissions.PIPELINE_VIEW, "pipeline"),
           ErrorCode.NG_ACCESS_DENIED, USER);
     }
-  }
-
-  private void populatePipelineFilterUsingIdentifierANDOperator(Criteria criteria, String accountIdentifier,
-      String orgIdentifier, String projectIdentifier, @NotNull String filterIdentifier,
-      boolean isPipelineIdentifierPresent) {
-    populatePipelineFilterUsingIdentifierParametrisedOperatorOnModules(criteria, accountIdentifier, orgIdentifier,
-        projectIdentifier, filterIdentifier, ModuleInfoOperators.AND, null, isPipelineIdentifierPresent);
   }
 
   private void populatePipelineFilterUsingIdentifierOROperator(Criteria criteria, String accountIdentifier,

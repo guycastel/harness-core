@@ -25,11 +25,13 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.OpType;
 import co.elastic.clients.elasticsearch._types.Refresh;
 import co.elastic.clients.elasticsearch._types.Result;
+import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.UpdateByQueryResponse;
 import co.elastic.clients.elasticsearch.core.UpdateResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.google.inject.Inject;
@@ -99,6 +101,22 @@ public class SearchServiceImpl implements SearchService {
       return updateResponse.result();
     } catch (IOException ex) {
       throw new GeneralException("Could not update artifact", ex);
+    }
+  }
+
+  @Override
+  public Long invalidateOldArtifact(ArtifactEntity artifactEntity) {
+    String index = elasticSearchIndexManager.getIndex(artifactEntity.getAccountId());
+    try {
+      UpdateByQueryResponse updateResponse = elasticsearchClient.updateByQuery(u
+          -> u.index(index)
+                 .query(ArtifactQueryBuilder.getOldArtifacts(artifactEntity))
+                 .routing(artifactEntity.getAccountId())
+                 .script(Script.of(s -> s.inline(i -> i.source("ctx._source.invalid=true")))));
+
+      return updateResponse.updated();
+    } catch (IOException ex) {
+      throw new GeneralException("Could not invalidate older artifacts", ex);
     }
   }
 

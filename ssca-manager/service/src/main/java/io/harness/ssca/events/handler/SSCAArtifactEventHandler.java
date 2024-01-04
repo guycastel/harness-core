@@ -84,6 +84,7 @@ public class SSCAArtifactEventHandler implements OutboxEventHandler {
       BatchProcessor<NormalizedSBOMComponentEntity> componentEntityBatchProcessor =
           new BatchProcessor<>(mongoTemplate, NormalizedSBOMComponentEntity.class);
       try {
+        searchService.invalidateOldArtifact(sscaArtifactCreatedEvent.getArtifact());
         searchService.upsertArtifact(sscaArtifactCreatedEvent.getArtifact());
         componentEntityBatchProcessor.processBatch(
             new Query(Criteria.where(ArtifactEntityKeys.accountId)

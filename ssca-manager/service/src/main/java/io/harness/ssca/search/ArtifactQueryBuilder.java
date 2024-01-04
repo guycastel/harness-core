@@ -15,6 +15,7 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.spec.server.ssca.v1.model.ComponentFilter;
 import io.harness.spec.server.ssca.v1.model.Operator;
 import io.harness.ssca.entities.NormalizedSBOMComponentEntity;
+import io.harness.ssca.entities.artifact.ArtifactEntity;
 import io.harness.ssca.search.beans.ArtifactFilter;
 import io.harness.ssca.search.entities.Component.ComponentKeys;
 import io.harness.ssca.search.entities.SSCAArtifact.SSCAArtifactKeys;
@@ -78,5 +79,24 @@ public class ArtifactQueryBuilder {
     BoolQuery boolQuery = boolQueryBuilder.build();
 
     return boolQuery._toQuery();
+  }
+
+  public Query getOldArtifacts(ArtifactEntity artifactEntity) {
+    BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+    List<Query> matchQueries = new ArrayList<>();
+
+    matchQueries.add(
+        ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.accountId, artifactEntity.getAccountId()));
+    matchQueries.add(
+        ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.orgIdentifier, artifactEntity.getOrgId()));
+    matchQueries.add(
+        ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.projectIdentifier, artifactEntity.getProjectId()));
+    matchQueries.add(ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.tag, artifactEntity.getTag()));
+    matchQueries.add(
+        ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.artifactId, artifactEntity.getArtifactId()));
+    matchQueries.add(ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.invalid, false));
+
+    boolQueryBuilder.must(matchQueries);
+    return boolQueryBuilder.build()._toQuery();
   }
 }

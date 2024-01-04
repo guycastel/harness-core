@@ -69,9 +69,11 @@ public class JiraProvider extends HttpDataSourceProvider {
     String projectKey = entity.getMetadata().getAnnotations().get(JIRA_PROJECT_ANNOTATION);
     String component = entity.getMetadata().getAnnotations().get(JIRA_COMPONENT_ANNOTATION);
     StringBuilder builder = new StringBuilder();
-    builder.append("'").append(projectKey).append("'");
-    if (component != null) {
-      builder.append(" AND ").append("component = ").append("'").append(component).append("'");
+    if (projectKey != null) {
+      builder.append("'").append(projectKey).append("'");
+      if (component != null) {
+        builder.append(" AND ").append("component = ").append("'").append(component).append("'");
+      }
     }
     requestBodyPairs.put(PROJECT_COMPONENT_REPLACER, builder.toString());
     return requestBodyPairs;

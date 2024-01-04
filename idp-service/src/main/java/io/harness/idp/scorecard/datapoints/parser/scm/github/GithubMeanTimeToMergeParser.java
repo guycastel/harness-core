@@ -12,7 +12,7 @@ import static io.harness.idp.common.Constants.DEFAULT;
 import static io.harness.idp.common.Constants.DEFAULT_BRANCH_KEY;
 import static io.harness.idp.common.Constants.ERROR_MESSAGE_KEY;
 import static io.harness.idp.scorecard.datapoints.constants.DataPoints.INVALID_BRANCH_NAME_ERROR;
-import static io.harness.idp.scorecard.datapoints.constants.DataPoints.INVALID_FILE_NAME_ERROR;
+import static io.harness.idp.scorecard.datapoints.constants.DataPoints.INVALID_CONDITIONAL_INPUT;
 import static io.harness.idp.scorecard.datapoints.constants.DataPoints.NO_PULL_REQUESTS_FOUND;
 
 import static java.lang.String.format;
@@ -38,7 +38,7 @@ public class GithubMeanTimeToMergeParser implements DataPointParser {
     Map<String, Object> dataPointData = new HashMap<>();
     List<InputValue> inputValues = dataFetchDTO.getInputValues();
     if (inputValues.size() != 1) {
-      dataPointData.putAll(constructDataPointInfo(dataFetchDTO, null, INVALID_FILE_NAME_ERROR));
+      dataPointData.putAll(constructDataPointInfo(dataFetchDTO, null, INVALID_CONDITIONAL_INPUT));
     }
     String inputValue = inputValues.get(0).getValue();
     data = (Map<String, Object>) data.get(dataFetchDTO.getRuleIdentifier());

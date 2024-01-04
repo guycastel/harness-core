@@ -99,7 +99,7 @@ public abstract class ScmContentDsl {
       String inputValue = inputValueOpt.get().getValue();
       inputValue = inputValue.replace("\"", "");
       int lastSlash = inputValue.lastIndexOf("/");
-      String path = (lastSlash != -1) ? inputValue.substring(0, lastSlash - 1) : "";
+      String path = (lastSlash != -1) ? inputValue.substring(0, lastSlash) : "";
       if (!isEmpty(fileName)) {
         path = isEmpty(path) ? path : path + "/";
         requestBody = requestBody.replace(FILE_PATH_REPLACER, path + fileName);

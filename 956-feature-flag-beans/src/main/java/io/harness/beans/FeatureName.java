@@ -384,6 +384,7 @@ public enum FeatureName {
   FFM_8344_FLAG_CLEANUP("Enable Stale Flag Cleanup in Feature Flags filtered listing page", HarnessTeam.CF),
   FFM_8823_AIDA_SDK_CODE_SAMPLE("Enable AIDA generated code sample in FF Onboarding", HarnessTeam.CF),
   FFM_8184_FEATURE_FLAG_TAGGING("Enable tagging in Feature Flags", HarnessTeam.CF),
+  FFM_9811_CCM_INTEGRATION("Enable CCM integration with Feature Flags", HarnessTeam.CF),
   FFM_9497_PROXY_KEY_MANAGEMENT("Enable FF proxy key management via the Account Resources", HarnessTeam.CF),
   FF_ALLOW_OPTIONAL_VARIABLE("Allow Optional Variable from UI in NG.", HarnessTeam.PIPELINE),
   FF_FLAG_SYNC_THROUGH_GITEX_ENABLED,
@@ -713,7 +714,9 @@ public enum FeatureName {
   STOP_INSTANCE_SYNC_VIA_ITERATOR_FOR_PDC_DEPLOYMENTS,
   STOP_SHOWING_RUNNING_EXECUTIONS,
   STO_ALL_ISSUES_PAGE("Enable all issues page for STO", HarnessTeam.STO),
-  STO_BASELINE_DEFAULTING("Enable defaulting of Security Test Target baselines by matching against customer-configurable RegEx's", HarnessTeam.STO),
+  STO_BASELINE_DEFAULTING(
+      "Enable defaulting of Security Test Target baselines by matching against customer-configurable RegEx's",
+      HarnessTeam.STO),
   STO_JIRA_INTEGRATION("Enable Jira integration for STO", HarnessTeam.STO),
   STO_STEPS_TEST_MODE(
       "Enable the rest of STO Steps Q3 2023 and beyond, NOT READY for use in PRODUCTION", HarnessTeam.STO),

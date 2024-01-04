@@ -581,8 +581,15 @@ func (r *runTestsTask) getCmd(ctx context.Context, agentPath, outputVarFile stri
 
 	// Environment variables
 	outputVarCmd := ""
-	for _, o := range r.outputs {
-		outputVarCmd += fmt.Sprintf("\necho %s $%s >> %s", o.Key, o.Value, outputVarFile)
+
+	if len(r.outputs) > 0 {
+		for _, o := range r.outputs {
+			outputVarCmd += fmt.Sprintf("\necho %s $%s >> %s", o.Key, o.Value, outputVarFile)
+		}
+	} else if len(r.envVarOutputs) > 0 {
+		for _, o := range r.envVarOutputs {
+			outputVarCmd += fmt.Sprintf("\necho %s $%s >> %s", o, o, outputVarFile)
+		}
 	}
 
 	// Config file
@@ -691,22 +698,34 @@ func (r *runTestsTask) execute(ctx context.Context) ([]*pb.OutputVariable, error
 	}
 
 	stepOutputs := []*pb.OutputVariable{}
-	if len(r.outputs) != 0 {
+	if len(r.outputs) != 0 || len(r.envVarOutputs) != 0 {
 		var err error
 		outputVars, err := fetchOutputVariables(outputFile, r.fs, r.log)
 		if err != nil {
 			logCommandExecErr(r.log, "error encountered while fetching output of runtest step from .env File", r.id, cmdToExecute, retryCount, start, err)
 			return nil, err
 		}
-
-		for _, output := range r.outputs {
-			if _, ok := outputVars[output.Key]; ok {
-				stepOutput := &pb.OutputVariable{
-					Key:   output.Key,
-					Value: outputVars[output.Key],
-					Type:  output.Type,
+		if len(r.outputs) > 0 {
+			for _, output := range r.outputs {
+				if _, ok := outputVars[output.Key]; ok {
+					stepOutput := &pb.OutputVariable{
+						Key:   output.Key,
+						Value: outputVars[output.Key],
+						Type:  output.Type,
+					}
+					stepOutputs = append(stepOutputs, stepOutput)
 				}
-				stepOutputs = append(stepOutputs, stepOutput)
+			}
+		} else if len(r.envVarOutputs) > 0 {
+			for _, output := range r.envVarOutputs {
+				if _, ok := outputVars[output]; ok {
+					stepOutput := &pb.OutputVariable{
+						Key:   output,
+						Value: outputVars[output],
+						Type:  pb.OutputVariable_STRING,
+					}
+					stepOutputs = append(stepOutputs, stepOutput)
+				}
 			}
 		}
 	}

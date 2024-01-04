@@ -173,21 +173,34 @@ func (r *runTask) execute(ctx context.Context, retryCount int32) ([]*pb.OutputVa
 	}
 
 	stepOutputs := []*pb.OutputVariable{}
-	if len(r.outputs) != 0 {
+	if len(r.outputs) != 0 || len(r.envVarOutputs) != 0 {
 		var err error
 		outputVars, err := fetchOutputVariables(outputFile, r.fs, r.log)
 		if err != nil {
 			logCommandExecErr(r.log, "error encountered while fetching output of run step", r.id, cmdToExecute, retryCount, start, err)
 			return nil, err
 		}
-		for _, output := range r.outputs {
-			if _, ok := outputVars[output.Key]; ok {
-				stepOutput := &pb.OutputVariable{
-					Key:   output.Key,
-					Value: outputVars[output.Key],
-					Type:  output.Type,
+		if len(r.outputs) != 0 {
+			for _, output := range r.outputs {
+				if _, ok := outputVars[output.Key]; ok {
+					stepOutput := &pb.OutputVariable{
+						Key:   output.Key,
+						Value: outputVars[output.Key],
+						Type:  output.Type,
+					}
+					stepOutputs = append(stepOutputs, stepOutput)
 				}
-				stepOutputs = append(stepOutputs, stepOutput)
+			}
+		} else if len(r.envVarOutputs) != 0 {
+			for _, output := range r.envVarOutputs {
+				if _, ok := outputVars[output]; ok {
+					stepOutput := &pb.OutputVariable{
+						Key:   output,
+						Value: outputVars[output],
+						Type:  pb.OutputVariable_STRING,
+					}
+					stepOutputs = append(stepOutputs, stepOutput)
+				}
 			}
 		}
 	}
@@ -204,8 +217,7 @@ func (r *runTask) getScript(ctx context.Context, outputVarFile string) (string, 
 	if r.detach && len(r.command) == 0 {
 		return "", nil
 	}
-
-	outputVarCmd := r.getOutputVarCmd(r.outputs, outputVarFile)
+	outputVarCmd := r.getOutputVarCmd(r.envVarOutputs, r.outputs, outputVarFile)
 	resolvedCmd, err := resolveExprInCmd(r.command)
 	if err != nil {
 		return "", err
@@ -277,7 +289,7 @@ func (r *runTask) getEarlyExitCommand() (string, error) {
 	return "", fmt.Errorf("Unknown shell type: %s", r.shellType)
 }
 
-func (r *runTask) getOutputVarCmd(outputVars []*pb.OutputVariable, outputFile string) string {
+func (r *runTask) getOutputVarCmd(oldOutputVars []string, outputVars []*pb.OutputVariable, outputFile string) string {
 	isPsh := isPowershell(r.shellType)
 	isPython := isPython(r.shellType)
 
@@ -287,14 +299,25 @@ func (r *runTask) getOutputVarCmd(outputVars []*pb.OutputVariable, outputFile st
 	} else if isPython {
 		cmd += "\nimport os\n"
 	}
-
-	for _, o := range outputVars {
-		if isPsh {
-			cmd += fmt.Sprintf("\n$val = \"%s $Env:%s\" \nAdd-Content -Path %s -Value $val", o.Key, o.Value, outputFile)
-		} else if isPython {
-			cmd += fmt.Sprintf("with open('%s', 'a') as out_file:\n\tout_file.write('%s ' + os.getenv('%s') + '\\n')\n", outputFile, o.Key, o.Value)
-		} else {
-			cmd += fmt.Sprintf("\necho \"%s $%s\" >> %s", o.Key, o.Value, outputFile)
+	if len(outputVars) > 0 {
+		for _, o := range outputVars {
+			if isPsh {
+				cmd += fmt.Sprintf("\n$val = \"%s $Env:%s\" \nAdd-Content -Path %s -Value $val", o.Key, o.Value, outputFile)
+			} else if isPython {
+				cmd += fmt.Sprintf("with open('%s', 'a') as out_file:\n\tout_file.write('%s ' + os.getenv('%s') + '\\n')\n", outputFile, o.Key, o.Value)
+			} else {
+				cmd += fmt.Sprintf("\necho \"%s $%s\" >> %s", o.Key, o.Value, outputFile)
+			}
+		}
+	} else if len(oldOutputVars) > 0 {
+		for _, o := range oldOutputVars {
+			if isPsh {
+				cmd += fmt.Sprintf("\n$val = \"%s $Env:%s\" \nAdd-Content -Path %s -Value $val", o, o, outputFile)
+			} else if isPython {
+				cmd += fmt.Sprintf("with open('%s', 'a') as out_file:\n\tout_file.write('%s ' + os.getenv('%s') + '\\n')\n", outputFile, o, o)
+			} else {
+				cmd += fmt.Sprintf("\necho \"%s $%s\" >> %s", o, o, outputFile)
+			}
 		}
 	}
 

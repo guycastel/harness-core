@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +56,13 @@ public class ArtifactApiImpl implements ArtifactApi {
   public Response getArtifactDetails(String org, String project, String artifact, String tag, String harnessAccount) {
     ArtifactDetailResponse response = artifactService.getArtifactDetails(harnessAccount, org, project, artifact, tag);
     return Response.ok().entity(response).build();
+  }
+
+  @Override
+  public Response list(@NotNull String type, String org, String project, @Valid ArtifactListingRequestBody body,
+      String harnessAccount, @Min(1L) @Max(1000L) Integer limit, String order, @Min(0L) Integer page, String sort,
+      Boolean latestOnly) {
+    return null;
   }
 
   @Override

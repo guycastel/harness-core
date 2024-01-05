@@ -560,7 +560,11 @@ public class NGTemplateServiceImpl implements NGTemplateService {
           projectIdentifier, templateIdentifier, versionLabel, deleted, false, loadFromCache, loadFromFallbackBranch);
       if (templateOptional.isPresent() && StoreType.REMOTE.equals(templateOptional.get().getStoreType())) {
         TemplateEntity templateEntity = templateOptional.get();
-        validateTemplateVersion(versionLabel, templateEntity);
+        if (HarnessYamlVersion.V0.equals(templateEntity.getHarnessVersion())) {
+          // We are not validating the versionLabel for V1 templates because label is not present in YAML in V1 but in
+          // metadata.
+          validateTemplateVersion(versionLabel, templateEntity);
+        }
       }
 
       return templateOptional;

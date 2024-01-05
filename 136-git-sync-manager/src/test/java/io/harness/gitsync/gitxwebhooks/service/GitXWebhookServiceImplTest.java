@@ -23,6 +23,7 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.Scope;
 import io.harness.category.element.UnitTests;
 import io.harness.exception.InternalServerErrorException;
+import io.harness.exception.InvalidRequestException;
 import io.harness.exception.ScmBadRequestException;
 import io.harness.exception.WebhookException;
 import io.harness.gitsync.GitSyncTestBase;
@@ -184,7 +185,7 @@ public class GitXWebhookServiceImplTest extends GitSyncTestBase {
     ArrayList<GitXWebhook> gitXWebhookArrayList = new ArrayList<>();
     gitXWebhookArrayList.add(gitXWebhook1);
     gitXWebhookArrayList.add(gitXWebhook2);
-    when(gitXWebhookRepository.findByAccountIdentifierAndIdentifier(any(), any())).thenReturn(gitXWebhookArrayList);
+    when(gitXWebhookRepository.find(any())).thenThrow(new InvalidRequestException(""));
     assertThrows(InternalServerErrorException.class, () -> gitXWebhookService.getGitXWebhook(getGitXWebhookRequestDTO));
   }
 

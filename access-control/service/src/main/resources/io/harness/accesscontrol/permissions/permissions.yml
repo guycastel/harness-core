@@ -1,6 +1,6 @@
 #Any edit in this file should accompany an increment in version.
 name: permissionsConfiguration
-version: 70
+version: 71
 permissions:
   - identifier: core_project_delete
     name: Delete Project
@@ -1930,7 +1930,7 @@ permissions:
       - project
   - identifier: core_gitxWebhooks_edit
     name: Create or Edit GitXWebhooks
-    status: EXPERIMENTAL
+    status: ACTIVE
     includeInAllRoles: false
     allowedScopeLevels:
       - account
@@ -1938,7 +1938,7 @@ permissions:
       - project
   - identifier: core_gitxWebhooks_delete
     name: Delete GitXWebhooks
-    status: EXPERIMENTAL
+    status: ACTIVE
     includeInAllRoles: false
     allowedScopeLevels:
       - account
@@ -1946,7 +1946,7 @@ permissions:
       - project
   - identifier: core_gitxWebhooks_view
     name: View GitXWebhooks
-    status: EXPERIMENTAL
+    status: ACTIVE
     includeInAllRoles: false
     allowedScopeLevels:
       - account

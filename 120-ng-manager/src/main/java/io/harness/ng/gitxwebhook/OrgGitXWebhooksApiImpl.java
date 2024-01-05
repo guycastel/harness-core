@@ -6,30 +6,30 @@
  */
 
 package io.harness.ng.gitxwebhook;
+
 import static io.harness.ng.gitxwebhook.GitXWebhooksApiImpl.HTTP_201;
 import static io.harness.ng.gitxwebhook.GitXWebhooksApiImpl.HTTP_204;
 import static io.harness.ng.gitxwebhook.GitXWebhooksApiImpl.HTTP_404;
 
+import io.harness.accesscontrol.AccountIdentifier;
+import io.harness.accesscontrol.NGAccessControlCheck;
+import io.harness.accesscontrol.OrgIdentifier;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.beans.Scope;
-import io.harness.gitsync.gitxwebhooks.dtos.CreateGitXWebhookRequestDTO;
 import io.harness.gitsync.gitxwebhooks.dtos.CreateGitXWebhookResponseDTO;
-import io.harness.gitsync.gitxwebhooks.dtos.DeleteGitXWebhookRequestDTO;
-import io.harness.gitsync.gitxwebhooks.dtos.GetGitXWebhookRequestDTO;
+import io.harness.gitsync.gitxwebhooks.dtos.DeleteGitXWebhookResponseDTO;
 import io.harness.gitsync.gitxwebhooks.dtos.GetGitXWebhookResponseDTO;
-import io.harness.gitsync.gitxwebhooks.dtos.ListGitXWebhookRequestDTO;
 import io.harness.gitsync.gitxwebhooks.dtos.ListGitXWebhookResponseDTO;
-import io.harness.gitsync.gitxwebhooks.dtos.UpdateGitXWebhookCriteriaDTO;
-import io.harness.gitsync.gitxwebhooks.dtos.UpdateGitXWebhookRequestDTO;
 import io.harness.gitsync.gitxwebhooks.dtos.UpdateGitXWebhookResponseDTO;
 import io.harness.gitsync.gitxwebhooks.mapper.GitXWebhookMapper;
 import io.harness.gitsync.gitxwebhooks.service.GitXWebhookEventService;
 import io.harness.gitsync.gitxwebhooks.service.GitXWebhookService;
+import io.harness.gitx.GitXWebhhookRbacPermissionsConstants;
 import io.harness.spec.server.ng.v1.OrgGitxWebhooksApi;
 import io.harness.spec.server.ng.v1.model.CreateGitXWebhookRequest;
 import io.harness.spec.server.ng.v1.model.CreateGitXWebhookResponse;
+import io.harness.spec.server.ng.v1.model.DeleteGitXWebhookResponse;
 import io.harness.spec.server.ng.v1.model.GitXWebhookResponse;
 import io.harness.spec.server.ng.v1.model.UpdateGitXWebhookRequest;
 import io.harness.spec.server.ng.v1.model.UpdateGitXWebhookResponse;
@@ -53,24 +53,28 @@ import org.springframework.data.domain.Page;
 public class OrgGitXWebhooksApiImpl implements OrgGitxWebhooksApi {
   GitXWebhookService gitXWebhookService;
   GitXWebhookEventService gitXWebhookEventService;
+  GitXWebhooksApiHelper gitXWebhooksApiHelper;
 
   @Override
-  public Response createOrgGitxWebhook(String org, @Valid CreateGitXWebhookRequest body, String harnessAccount) {
-    CreateGitXWebhookRequestDTO createGitXWebhookRequestDTO =
-        GitXWebhookMapper.buildCreateGitXWebhookRequestDTO(Scope.of(harnessAccount, org), body);
+  @NGAccessControlCheck(
+      resourceType = "GITX_WEBHOOKS", permission = GitXWebhhookRbacPermissionsConstants.GitXWebhhook_CREATE_AND_EDIT)
+  public Response
+  createOrgGitxWebhook(
+      @OrgIdentifier String org, @Valid CreateGitXWebhookRequest body, @AccountIdentifier String harnessAccount) {
     CreateGitXWebhookResponseDTO createGitXWebhookResponseDTO =
-        gitXWebhookService.createGitXWebhook(createGitXWebhookRequestDTO);
+        gitXWebhooksApiHelper.createGitXWebhook(harnessAccount, org, null, body);
     CreateGitXWebhookResponse responseBody =
         GitXWebhookMapper.buildCreateGitXWebhookResponse(createGitXWebhookResponseDTO);
     return Response.status(HTTP_201).entity(responseBody).build();
   }
 
   @Override
-  public Response getOrgGitxWebhook(String org, String gitxWebhook, String harnessAccount) {
-    GetGitXWebhookRequestDTO getGitXWebhookRequestDTO =
-        GitXWebhookMapper.buildGetGitXWebhookRequestDTO(Scope.of(harnessAccount, org), gitxWebhook);
+  @NGAccessControlCheck(
+      resourceType = "GITX_WEBHOOKS", permission = GitXWebhhookRbacPermissionsConstants.GitXWebhhook_VIEW)
+  public Response
+  getOrgGitxWebhook(@OrgIdentifier String org, String gitxWebhook, @AccountIdentifier String harnessAccount) {
     Optional<GetGitXWebhookResponseDTO> optionalGetGitXWebhookResponseDTO =
-        gitXWebhookService.getGitXWebhook(getGitXWebhookRequestDTO);
+        gitXWebhooksApiHelper.getGitXWebhook(harnessAccount, org, null, gitxWebhook);
     if (optionalGetGitXWebhookResponseDTO.isEmpty()) {
       return Response.status(HTTP_404).build();
     }
@@ -80,35 +84,38 @@ public class OrgGitXWebhooksApiImpl implements OrgGitxWebhooksApi {
   }
 
   @Override
-  public Response updateOrgGitxWebhook(
-      String org, String gitxWebhook, @Valid UpdateGitXWebhookRequest body, String harnessAccount) {
-    UpdateGitXWebhookRequestDTO updateGitXWebhookRequestDTO = GitXWebhookMapper.buildUpdateGitXWebhookRequestDTO(body);
+  @NGAccessControlCheck(
+      resourceType = "GITX_WEBHOOKS", permission = GitXWebhhookRbacPermissionsConstants.GitXWebhhook_CREATE_AND_EDIT)
+  public Response
+  updateOrgGitxWebhook(@OrgIdentifier String org, String gitxWebhook, @Valid UpdateGitXWebhookRequest body,
+      @AccountIdentifier String harnessAccount) {
     UpdateGitXWebhookResponseDTO updateGitXWebhookResponseDTO =
-        gitXWebhookService.updateGitXWebhook(UpdateGitXWebhookCriteriaDTO.builder()
-                                                 .scope(Scope.of(harnessAccount, org))
-                                                 .webhookIdentifier(gitxWebhook)
-                                                 .build(),
-            updateGitXWebhookRequestDTO);
+        gitXWebhooksApiHelper.updateGitXWebhook(harnessAccount, org, null, gitxWebhook, body);
     UpdateGitXWebhookResponse responseBody =
         GitXWebhookMapper.buildUpdateGitXWebhookResponse(updateGitXWebhookResponseDTO);
     return Response.ok().entity(responseBody).build();
   }
 
   @Override
-  public Response deleteOrgGitxWebhook(String org, String gitxWebhook, String harnessAccount) {
-    DeleteGitXWebhookRequestDTO deleteGitXWebhookRequestDTO =
-        GitXWebhookMapper.buildDeleteGitXWebhookRequestDTO(Scope.of(harnessAccount, org), gitxWebhook);
-    gitXWebhookService.deleteGitXWebhook(deleteGitXWebhookRequestDTO);
-    return Response.status(HTTP_204).build();
+  @NGAccessControlCheck(
+      resourceType = "GITX_WEBHOOKS", permission = GitXWebhhookRbacPermissionsConstants.GitXWebhhook_DELETE)
+  public Response
+  deleteOrgGitxWebhook(@OrgIdentifier String org, String gitxWebhook, @AccountIdentifier String harnessAccount) {
+    DeleteGitXWebhookResponseDTO deleteGitXWebhookResponse =
+        gitXWebhooksApiHelper.deleteGitXWebhook(harnessAccount, org, null, gitxWebhook);
+    DeleteGitXWebhookResponse responseBody =
+        GitXWebhookMapper.buildDeleteGitXWebhookResponse(deleteGitXWebhookResponse);
+    return Response.status(HTTP_204).entity(responseBody).build();
   }
 
   @Override
-  public Response listOrgGitxWebhooks(
-      String org, String harnessAccount, Integer page, @Max(1000L) Integer limit, String webhookIdentifier) {
-    ListGitXWebhookRequestDTO listGitXWebhookRequestDTO =
-        GitXWebhookMapper.buildListGitXWebhookRequestDTO(Scope.of(harnessAccount, org), webhookIdentifier);
+  @NGAccessControlCheck(
+      resourceType = "GITX_WEBHOOKS", permission = GitXWebhhookRbacPermissionsConstants.GitXWebhhook_CREATE_AND_EDIT)
+  public Response
+  listOrgGitxWebhooks(@OrgIdentifier String org, @AccountIdentifier String harnessAccount, Integer page,
+      @Max(1000L) Integer limit, String webhookIdentifier) {
     ListGitXWebhookResponseDTO listGitXWebhookResponseDTO =
-        gitXWebhookService.listGitXWebhooks(listGitXWebhookRequestDTO);
+        gitXWebhooksApiHelper.listGitXWebhooks(harnessAccount, org, null, webhookIdentifier);
     Page<GitXWebhookResponse> gitXWebhooks =
         GitXWebhookMapper.buildListGitXWebhookResponse(listGitXWebhookResponseDTO, page, limit);
 

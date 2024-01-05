@@ -1626,7 +1626,7 @@ paths:
       operationId: delete-gitx-webhook
       responses:
         '204':
-          description: OK
+          $ref: '#/components/responses/DeleteGitXWebhookResponse'
       description: Deletes a gitx webhooks
       security:
         - x-api-key: []
@@ -1786,7 +1786,7 @@ paths:
       operationId: delete-org-gitx-webhook
       responses:
         '204':
-          description: No Content
+          $ref: '#/components/responses/DeleteGitXWebhookResponse'
       description: Deletes a org level gitx webhooks
       security:
         - x-api-key: []
@@ -1932,7 +1932,7 @@ paths:
       operationId: delete-project-gitx-webhook
       responses:
         '204':
-          description: No Content
+          $ref: '#/components/responses/DeleteGitXWebhookResponse'
       description: Deletes a project level gitx webhooks
       tags:
         - Project Gitx Webhooks
@@ -3205,6 +3205,15 @@ components:
             - SUCCESSFUL
             - PROCESSING
             - UNKNOWN
+    DeleteGitXWebhookResponse:
+      title: DeleteGitXWebhookResponse
+      x-stoplight:
+        id: 515tw0c67xfnp
+      type: object
+      description: Contains information about the GitX webhooks that was deleted.
+      properties:
+        webhook_identifier:
+          type: string
     ReleaseDetailsResponse:
       title: ReleaseDetailsResponse
       x-stoplight:
@@ -4057,6 +4066,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GitXWebhookEventResponse'
+    DeleteGitXWebhookResponse:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeleteGitXWebhookResponse'
   requestBodies:
     ServiceRequest:
       content:

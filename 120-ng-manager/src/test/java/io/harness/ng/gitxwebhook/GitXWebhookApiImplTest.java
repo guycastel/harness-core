@@ -52,6 +52,7 @@ public class GitXWebhookApiImplTest extends CategoryTest {
   private GitXWebhooksApiImpl gitXWebhooksApi;
   @Mock GitXWebhookService gitXWebhookService;
   @Mock GitXWebhookEventService gitXWebhookEventService;
+  @Mock GitXWebhooksApiHelper gitXWebhooksApiHelper;
 
   private static final String ACCOUNT_IDENTIFIER = "accountId";
   private static final String WEBHOOK_IDENTIFIER = "gitWebhook";
@@ -64,7 +65,7 @@ public class GitXWebhookApiImplTest extends CategoryTest {
   @Before
   public void setup() {
     MockitoAnnotations.openMocks(this);
-    gitXWebhooksApi = new GitXWebhooksApiImpl(gitXWebhookService, gitXWebhookEventService);
+    gitXWebhooksApi = new GitXWebhooksApiImpl(gitXWebhookService, gitXWebhookEventService, gitXWebhooksApiHelper);
     FOLDER_PATHS = new ArrayList<>();
     FOLDER_PATHS.add("path1");
     FOLDER_PATHS.add("path2");
@@ -82,7 +83,7 @@ public class GitXWebhookApiImplTest extends CategoryTest {
 
     CreateGitXWebhookResponseDTO createGitXWebhookResponseDTO =
         CreateGitXWebhookResponseDTO.builder().webhookIdentifier(WEBHOOK_IDENTIFIER).build();
-    when(gitXWebhookService.createGitXWebhook(any())).thenReturn(createGitXWebhookResponseDTO);
+    when(gitXWebhooksApiHelper.createGitXWebhook(any(), any(), any(), any())).thenReturn(createGitXWebhookResponseDTO);
     Response response = gitXWebhooksApi.createGitxWebhook(createGitXWebhookRequest, ACCOUNT_IDENTIFIER);
     assertEquals(201, response.getStatus());
     CreateGitXWebhookResponse createGitXWebhookResponse = (CreateGitXWebhookResponse) response.getEntity();
@@ -98,7 +99,8 @@ public class GitXWebhookApiImplTest extends CategoryTest {
                                                               .accountIdentifier(ACCOUNT_IDENTIFIER)
                                                               .isEnabled(true)
                                                               .build();
-    when(gitXWebhookService.getGitXWebhook(any())).thenReturn(Optional.ofNullable(getGitXWebhookResponseDTO));
+    when(gitXWebhooksApiHelper.getGitXWebhook(any(), any(), any(), any()))
+        .thenReturn(Optional.ofNullable(getGitXWebhookResponseDTO));
     Response response = gitXWebhooksApi.getGitxWebhook(WEBHOOK_IDENTIFIER, ACCOUNT_IDENTIFIER);
     assertEquals(200, response.getStatus());
     GitXWebhookResponse getGitXWebhookResponse = (GitXWebhookResponse) response.getEntity();
@@ -113,7 +115,8 @@ public class GitXWebhookApiImplTest extends CategoryTest {
     updateGitXWebhookRequest.setFolderPaths(FOLDER_PATHS);
     UpdateGitXWebhookResponseDTO updateGitXWebhookResponseDTO =
         UpdateGitXWebhookResponseDTO.builder().webhookIdentifier(WEBHOOK_IDENTIFIER).build();
-    when(gitXWebhookService.updateGitXWebhook(any(), any())).thenReturn(updateGitXWebhookResponseDTO);
+    when(gitXWebhooksApiHelper.updateGitXWebhook(any(), any(), any(), any(), any()))
+        .thenReturn(updateGitXWebhookResponseDTO);
     Response response =
         gitXWebhooksApi.updateGitxWebhook(WEBHOOK_IDENTIFIER, updateGitXWebhookRequest, ACCOUNT_IDENTIFIER);
     UpdateGitXWebhookResponse updateGitXWebhookResponse = (UpdateGitXWebhookResponse) response.getEntity();
@@ -126,7 +129,7 @@ public class GitXWebhookApiImplTest extends CategoryTest {
   public void testDeleteWebhook() {
     DeleteGitXWebhookResponseDTO deleteGitXWebhookResponseDTO =
         DeleteGitXWebhookResponseDTO.builder().successfullyDeleted(true).build();
-    when(gitXWebhookService.deleteGitXWebhook(any())).thenReturn(deleteGitXWebhookResponseDTO);
+    when(gitXWebhooksApiHelper.deleteGitXWebhook(any(), any(), any(), any())).thenReturn(deleteGitXWebhookResponseDTO);
     Response response = gitXWebhooksApi.deleteGitxWebhook(WEBHOOK_IDENTIFIER, ACCOUNT_IDENTIFIER);
     assertEquals(204, response.getStatus());
   }
@@ -150,7 +153,7 @@ public class GitXWebhookApiImplTest extends CategoryTest {
     gitXWebhooksList.add(getGitXWebhookResponseDTO2);
     ListGitXWebhookResponseDTO listGitXWebhookResponseDTO =
         ListGitXWebhookResponseDTO.builder().gitXWebhooksList(gitXWebhooksList).build();
-    when(gitXWebhookService.listGitXWebhooks(any())).thenReturn(listGitXWebhookResponseDTO);
+    when(gitXWebhooksApiHelper.listGitXWebhooks(any(), any(), any(), any())).thenReturn(listGitXWebhookResponseDTO);
     Response response = gitXWebhooksApi.listGitxWebhooks(ACCOUNT_IDENTIFIER, 0, 10, "");
     List<GitXWebhookResponse> listGitXWebhookResponse = (List<GitXWebhookResponse>) response.getEntity();
     assertEquals(2, listGitXWebhookResponse.size());

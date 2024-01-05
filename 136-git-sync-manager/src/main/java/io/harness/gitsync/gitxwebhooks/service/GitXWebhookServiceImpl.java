@@ -74,7 +74,6 @@ public class GitXWebhookServiceImpl implements GitXWebhookService {
   @Inject GitSyncConnectorService gitSyncConnectorService;
   @Inject WebhookEventService webhookEventService;
   @Inject GitFileCacheService gitFileCacheService;
-
   private static final String DUP_KEY_EXP_FORMAT_STRING =
       "GitX Webhook with identifier [%s] or repo [%s] already exists in the account [%s].";
 
@@ -141,6 +140,9 @@ public class GitXWebhookServiceImpl implements GitXWebhookService {
         Criteria criteria =
             buildCriteria(getGitXWebhookRequestDTO.getScope(), getGitXWebhookRequestDTO.getWebhookIdentifier());
         GitXWebhook gitXWebhook = gitXWebhookRepository.find(new Query(criteria));
+        if (gitXWebhook == null) {
+          return Optional.empty();
+        }
         return Optional.of(prepareGitXWebhooks(gitXWebhook));
       } catch (Exception exception) {
         log.error(String.format(WEBHOOK_FAILURE_ERROR_MESSAGE, FETCHING), exception);
@@ -250,7 +252,10 @@ public class GitXWebhookServiceImpl implements GitXWebhookService {
         Criteria criteria =
             buildCriteria(deleteGitXWebhookRequestDTO.getScope(), deleteGitXWebhookRequestDTO.getWebhookIdentifier());
         DeleteResult deleteResult = gitXWebhookRepository.delete(criteria);
-        return DeleteGitXWebhookResponseDTO.builder().successfullyDeleted(deleteResult.getDeletedCount() == 1).build();
+        return DeleteGitXWebhookResponseDTO.builder()
+            .successfullyDeleted(deleteResult.getDeletedCount() == 1)
+            .webhookIdentifier(deleteGitXWebhookRequestDTO.getWebhookIdentifier())
+            .build();
       } catch (Exception exception) {
         log.error(String.format(WEBHOOK_FAILURE_ERROR_MESSAGE, DELETING), exception);
         throw new InternalServerErrorException(String.format(WEBHOOK_FAILURE_ERROR_MESSAGE, DELETING));

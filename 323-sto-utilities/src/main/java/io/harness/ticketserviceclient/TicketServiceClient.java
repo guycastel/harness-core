@@ -26,4 +26,11 @@ public interface TicketServiceClient {
 
   @DELETE(STOCommonEndpointConstants.TICKET_SERVICE_DELETE_ACCOUNT_DATA_ENDPOINT)
   Call<JsonObject> deleteAccountData(@Header("Authorization") String token, @Path("accountId") String accountId);
+
+  @GET(STOCommonEndpointConstants.TICKET_SERVICE_ALL_EXTERNAL_TICKETS)
+  Call<JsonObject> getAllExternalTickets(@Header("Authorization") String token, @Query("accountId") String accountId,
+                                         @Query("page") String page, @Query("pageSize") String pageSize,
+                                         @Query("orgId") String orgId, @Query("projectId") String projectId,
+                                         @Query("module") String module, @Query("identifiers") String identifiers,
+                                         @Query("optional") String optional, @Query("externalId") String externalId);
 }

@@ -19,6 +19,8 @@ public class STOCommonEndpointConstants {
 
   public static final String TICKET_SERVICE_DELETE_ACCOUNT_DATA_ENDPOINT = "api/accounts/{accountId}/data";
 
+  public static final String TICKET_SERVICE_ALL_EXTERNAL_TICKETS = "api/tickets";
+
   public static final String STO_SERVICE_TOKEN_ENDPOINT = "api/v2/token";
 
   public static final String STO_SERVICE_DELETE_ACCOUNT_DATA_ENDPOINT = "api/v2/accounts/{accountId}/data";
@@ -28,4 +30,6 @@ public class STOCommonEndpointConstants {
   public static final String STO_SERVICE_SCANS_ENDPOINT = "api/v2/scans";
 
   public static final String STO_SERVICE_USAGE_ALL_ACCOUNTS_ENDPOINT = "api/usage/all-accounts";
+
+  public static final String STO_SERVICE_ALL_PRODUCTS_ENDPOINT = "api/v2/products";
 }

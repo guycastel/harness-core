@@ -7,8 +7,6 @@
 
 package io.harness.ngsettings.services.impl;
 
-import static io.harness.ngsettings.SettingConstants.TYPE_ALIAS_FOR_ACCOUNT_CONFIGURATION;
-import static io.harness.ngsettings.SettingConstants._CLASS;
 import static io.harness.rule.OwnerRule.NISHANT;
 import static io.harness.rule.OwnerRule.SAHILDEEP;
 import static io.harness.rule.OwnerRule.TEJAS;
@@ -475,7 +473,7 @@ public class SettingsServiceImplTest extends CategoryTest {
   @Category(UnitTests.class)
   public void testListDefaultSettings() {
     String identifier = randomAlphabetic(10);
-    Criteria criteria = Criteria.where(_CLASS).is(TYPE_ALIAS_FOR_ACCOUNT_CONFIGURATION);
+    Criteria criteria = Criteria.where(SettingConfigurationKeys.category).ne(SettingCategory.USER);
     AccountSettingConfiguration accountSettingConfiguration =
         AccountSettingConfiguration.builder().identifier(identifier).build();
     when(settingConfigurationRepository.findAll(criteria)).thenReturn(List.of(accountSettingConfiguration));
@@ -554,7 +552,6 @@ public class SettingsServiceImplTest extends CategoryTest {
             .orOperator(Criteria.where(SettingConfigurationKeys.allowedPlans).is(null),
                 Criteria.where(SettingConfigurationKeys.allowedPlans + "." + Edition.ENTERPRISE.toString())
                     .exists(true));
-    expectedCriteria.and(_CLASS).is(TYPE_ALIAS_FOR_ACCOUNT_CONFIGURATION);
     verify(settingConfigurationRepository, times(1)).findAll(criteriaArgumentCaptor.capture());
     assertThat(expectedCriteria).isEqualTo(criteriaArgumentCaptor.getValue());
     assertThat(dtoList.size()).isEqualTo(settingConfigurations.size());

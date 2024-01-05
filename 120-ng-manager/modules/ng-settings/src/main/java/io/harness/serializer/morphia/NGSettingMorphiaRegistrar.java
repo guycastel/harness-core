@@ -17,6 +17,8 @@ import io.harness.ngsettings.entities.AccountSettingConfiguration;
 import io.harness.ngsettings.entities.Setting;
 import io.harness.ngsettings.entities.SettingConfiguration;
 import io.harness.ngsettings.entities.SettingsConfigurationState;
+import io.harness.ngsettings.entities.UserSetting;
+import io.harness.ngsettings.entities.UserSettingConfiguration;
 
 import java.util.Set;
 
@@ -29,6 +31,8 @@ public class NGSettingMorphiaRegistrar implements MorphiaRegistrar {
     set.add(SettingsConfigurationState.class);
     set.add(AccountSetting.class);
     set.add(AccountSettingConfiguration.class);
+    set.add(UserSetting.class);
+    set.add(UserSettingConfiguration.class);
   }
 
   @Override

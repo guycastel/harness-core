@@ -11,9 +11,6 @@ import static io.harness.NGConstants.SETTINGS_STRING;
 import static io.harness.annotations.dev.HarnessTeam.PL;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.ACCOUNT_IDENTIFIER_METRICS_KEY;
-import static io.harness.ngsettings.SettingConstants.TYPE_ALIAS_FOR_ACCOUNT_CONFIGURATION;
-import static io.harness.ngsettings.SettingConstants.TYPE_ALIAS_FOR_ACCOUNT_SETTING;
-import static io.harness.ngsettings.SettingConstants._CLASS;
 import static io.harness.outbox.TransactionOutboxModule.OUTBOX_TRANSACTION_TEMPLATE;
 import static io.harness.springdata.PersistenceUtils.DEFAULT_RETRY_POLICY;
 
@@ -249,7 +246,7 @@ public class SettingsServiceImpl implements SettingsService {
   @Override
   public List<AccountSettingConfiguration> listDefaultSettings() {
     List<AccountSettingConfiguration> settingConfigurationList = new ArrayList<>();
-    Criteria criteria = Criteria.where(_CLASS).is(TYPE_ALIAS_FOR_ACCOUNT_CONFIGURATION);
+    Criteria criteria = Criteria.where(SettingConfigurationKeys.category).ne(SettingCategory.USER);
 
     for (AccountSettingConfiguration accountSettingConfiguration : settingConfigurationRepository.findAll(criteria)) {
       settingConfigurationList.add(accountSettingConfiguration);
@@ -291,7 +288,6 @@ public class SettingsServiceImpl implements SettingsService {
         throw new InvalidRequestException(
             String.format("Invalid scope- %s present in the settings.yml", scopeLevel.toString()));
     }
-    criteria.and(_CLASS).is(TYPE_ALIAS_FOR_ACCOUNT_SETTING);
     settingRepository.deleteAll(criteria);
   }
 
@@ -307,7 +303,7 @@ public class SettingsServiceImpl implements SettingsService {
     criteria.and(SettingKeys.accountIdentifier).is(accountIdentifier);
     criteria.and(SettingKeys.orgIdentifier).is(orgIdentifier);
     criteria.and(SettingKeys.projectIdentifier).is(projectIdentifier);
-    criteria.and(_CLASS).is(TYPE_ALIAS_FOR_ACCOUNT_SETTING);
+    criteria.and(SettingConfigurationKeys.category).ne(SettingCategory.USER);
     return criteria;
   }
 
@@ -329,7 +325,6 @@ public class SettingsServiceImpl implements SettingsService {
     if (isNotEmpty(groupIdentifier)) {
       criteria.and(SettingKeys.groupIdentifier).is(groupIdentifier);
     }
-    criteria.and(_CLASS).is(TYPE_ALIAS_FOR_ACCOUNT_SETTING);
     settings = settingRepository.findAll(criteria);
     return settings.stream().collect(Collectors.toMap(setting
         -> new ImmutablePair<>(setting.getIdentifier(),
@@ -380,7 +375,6 @@ public class SettingsServiceImpl implements SettingsService {
     if (isNotEmpty(groupIdentifier)) {
       criteria.and(SettingConfigurationKeys.groupIdentifier).is(groupIdentifier);
     }
-    criteria.and(_CLASS).is(TYPE_ALIAS_FOR_ACCOUNT_CONFIGURATION);
     return criteria;
   }
 

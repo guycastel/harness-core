@@ -59,6 +59,7 @@ import io.harness.rule.Owner;
 import io.harness.secretmanagerclient.dto.SecretManagerConfigDTO;
 import io.harness.secretmanagerclient.dto.VaultConfigDTO;
 import io.harness.template.remote.TemplateResourceClient;
+import io.harness.utils.featureflaghelper.NGFeatureFlagHelperService;
 
 import software.wings.beans.NameValuePairWithDefault;
 
@@ -102,6 +103,7 @@ public class SecretManagerConnectorServiceImplTest extends CategoryTest {
   private SecretCrudService ngSecretService;
   private SecretRefInputValidationHelper secretRefInputValidationHelper;
   private NGConnectorSecretManagerService ngConnectorSecretManagerService;
+  private NGFeatureFlagHelperService featureFlagHelperService;
 
   @Before
   public void setup() {
@@ -116,10 +118,12 @@ public class SecretManagerConnectorServiceImplTest extends CategoryTest {
     ngSecretService = mock(SecretCrudService.class);
     secretRefInputValidationHelper = mock(SecretRefInputValidationHelper.class);
     ngConnectorSecretManagerService = mock(NGConnectorSecretManagerService.class);
+    featureFlagHelperService = mock(NGFeatureFlagHelperService.class);
 
-    secretManagerConnectorService = new SecretManagerConnectorServiceImpl(defaultConnectorService, connectorRepository,
-        ngVaultService, enforcementClientService, templateResourceClient, connectorErrorMessagesHelper,
-        customSecretManagerHelper, ngSecretService, secretRefInputValidationHelper, ngConnectorSecretManagerService);
+    secretManagerConnectorService =
+        new SecretManagerConnectorServiceImpl(defaultConnectorService, connectorRepository, ngVaultService,
+            enforcementClientService, templateResourceClient, connectorErrorMessagesHelper, customSecretManagerHelper,
+            ngSecretService, secretRefInputValidationHelper, ngConnectorSecretManagerService, featureFlagHelperService);
   }
 
   private InvalidRequestException getInvalidRequestException() {

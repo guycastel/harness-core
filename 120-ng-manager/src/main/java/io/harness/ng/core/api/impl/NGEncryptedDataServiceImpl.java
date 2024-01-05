@@ -40,6 +40,7 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 import io.harness.beans.DecryptableEntity;
 import io.harness.beans.DecryptedSecretValue;
+import io.harness.beans.FeatureName;
 import io.harness.beans.SecretManagerConfig;
 import io.harness.connector.ConnectorDTO;
 import io.harness.connector.helper.CustomSecretManagerHelper;
@@ -346,9 +347,13 @@ public class NGEncryptedDataServiceImpl implements NGEncryptedDataService {
     Map<String, List<NameValuePairWithDefault>> inputValues = customSecretManagerHelper.mergeStringInInputValues(
         value, customSecretManagerConnectorDTO.getTemplate().getTemplateInputs());
     customSecretManagerConnectorDTO.getTemplate().setTemplateInputs(inputValues);
+    boolean validateSMCredentialsStoredInHarnessSM = true;
+    if (ngFeatureFlagHelperService.isEnabled(accountIdentifier, FeatureName.PL_DISABLE_SM_CREDENTIALS_CHECK)) {
+      validateSMCredentialsStoredInHarnessSM = false;
+    }
     Set<String> secretIdentifiers = customSecretManagerHelper.extractSecretsUsed(accountIdentifier, connectorDTO);
     ngConnectorSecretManagerService.validateSecretManagerCredentialsAreInHarnessSM(
-        accountIdentifier, connectorDTO, secretIdentifiers, true);
+        accountIdentifier, connectorDTO, secretIdentifiers, validateSMCredentialsStoredInHarnessSM);
   }
 
   private void validateSecretDoesNotExist(

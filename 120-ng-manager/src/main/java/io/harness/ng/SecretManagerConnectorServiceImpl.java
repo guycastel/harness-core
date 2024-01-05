@@ -19,6 +19,7 @@ import io.harness.accesscontrol.AccountIdentifier;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.DecryptableEntity;
 import io.harness.beans.EntityReference;
+import io.harness.beans.FeatureName;
 import io.harness.connector.CombineCcmK8sConnectorResponseDTO;
 import io.harness.connector.ConnectivityStatus;
 import io.harness.connector.ConnectorCatalogueResponseDTO;
@@ -66,6 +67,7 @@ import io.harness.remote.client.NGRestUtils;
 import io.harness.repositories.ConnectorRepository;
 import io.harness.template.remote.TemplateResourceClient;
 import io.harness.utils.FullyQualifiedIdentifierHelper;
+import io.harness.utils.featureflaghelper.NGFeatureFlagHelperService;
 
 import software.wings.beans.NameValuePairWithDefault;
 
@@ -105,6 +107,7 @@ public class SecretManagerConnectorServiceImpl implements ConnectorService {
   private final SecretCrudService ngSecretService;
   private final SecretRefInputValidationHelper secretRefInputValidationHelper;
   private final NGConnectorSecretManagerService ngConnectorSecretManagerService;
+  private final NGFeatureFlagHelperService featureFlagHelperService;
   private static final String ENVIRONMENT_VARIABLES = "environmentVariables";
   private static final String ACCOUNT = "account";
   private static final String EMPTY_STRING = "";
@@ -115,7 +118,8 @@ public class SecretManagerConnectorServiceImpl implements ConnectorService {
       EnforcementClientService enforcementClientService, TemplateResourceClient templateResourceClient,
       ConnectorErrorMessagesHelper connectorErrorMessagesHelper, CustomSecretManagerHelper customSecretManagerHelper,
       SecretCrudService ngSecretService, SecretRefInputValidationHelper secretRefInputValidationHelper,
-      NGConnectorSecretManagerService ngConnectorSecretManagerService) {
+      NGConnectorSecretManagerService ngConnectorSecretManagerService,
+      NGFeatureFlagHelperService featureFlagHelperService) {
     this.defaultConnectorService = defaultConnectorService;
     this.connectorRepository = connectorRepository;
     this.ngVaultService = ngVaultService;
@@ -126,6 +130,7 @@ public class SecretManagerConnectorServiceImpl implements ConnectorService {
     this.ngSecretService = ngSecretService;
     this.secretRefInputValidationHelper = secretRefInputValidationHelper;
     this.ngConnectorSecretManagerService = ngConnectorSecretManagerService;
+    this.featureFlagHelperService = featureFlagHelperService;
   }
 
   @Override
@@ -197,8 +202,10 @@ public class SecretManagerConnectorServiceImpl implements ConnectorService {
       validateCustomSecretManagerInputs(connectorConfigDTO, accountIdentifier, connectorInfo.getOrgIdentifier(),
           connectorInfo.getProjectIdentifier(), connectorInfo.getIdentifier());
       validateCustomSmForCyclicSecretUsage(accountIdentifier, connector);
-      ngConnectorSecretManagerService.checkIfDecryptionIsPossible(
-          accountIdentifier, connector.getConnectorInfo(), true);
+      if (!featureFlagHelperService.isEnabled(accountIdentifier, FeatureName.PL_DISABLE_SM_CREDENTIALS_CHECK)) {
+        ngConnectorSecretManagerService.checkIfDecryptionIsPossible(
+            accountIdentifier, connector.getConnectorInfo(), true);
+      }
 
     } catch (IOException ex) {
       log.error(
@@ -383,7 +390,8 @@ public class SecretManagerConnectorServiceImpl implements ConnectorService {
       ngVaultService.processTokenLookup(connector, accountIdentifier);
       alreadyDefaultSM = isDefaultSecretManager(existingConnectorDTO.get().getConnector());
       validateCustomSmForCyclicSecretUsage(accountIdentifier, connector);
-      if (secretReferencesUpdated(existingConnectorDTO.get().getConnector(), connector.getConnectorInfo())) {
+      if (!featureFlagHelperService.isEnabled(accountIdentifier, FeatureName.PL_DISABLE_SM_CREDENTIALS_CHECK)
+          && secretReferencesUpdated(existingConnectorDTO.get().getConnector(), connector.getConnectorInfo())) {
         ngConnectorSecretManagerService.checkIfDecryptionIsPossible(
             accountIdentifier, connector.getConnectorInfo(), true);
       }
@@ -403,7 +411,8 @@ public class SecretManagerConnectorServiceImpl implements ConnectorService {
   }
 
   private void validateCustomSmForCyclicSecretUsage(String accountIdentifier, ConnectorDTO connectorDTO) {
-    if (connectorDTO.getConnectorInfo().getConnectorType() == ConnectorType.CUSTOM_SECRET_MANAGER) {
+    if (connectorDTO.getConnectorInfo().getConnectorType() == ConnectorType.CUSTOM_SECRET_MANAGER
+        && !featureFlagHelperService.isEnabled(accountIdentifier, FeatureName.PL_DISABLE_SM_CREDENTIALS_CHECK)) {
       Set<String> secretIdentifiers = customSecretManagerHelper.extractSecretsUsed(accountIdentifier, connectorDTO);
       ngConnectorSecretManagerService.validateSecretManagerCredentialsAreInHarnessSM(
           accountIdentifier, connectorDTO, secretIdentifiers, true);

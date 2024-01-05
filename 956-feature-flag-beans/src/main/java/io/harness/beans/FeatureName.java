@@ -919,7 +919,9 @@ public enum FeatureName {
   CDS_INPUT_YAML_IN_WEBHOOK_NOTIFICATION(
       "FF to enable sending input set yaml as part of pipeline webhook notification", PIPELINE),
   CDS_SAVE_PIPELINE_OPA_RESPONSE_CODE_CHANGE(
-      "FF to enable 4xx response code on pipeline save when OPA policy fails", CDC);
+      "FF to enable 4xx response code on pipeline save when OPA policy fails", CDC),
+  PL_DISABLE_SM_CREDENTIALS_CHECK(
+      "Disables the checks to detect credentials of secret manager are stored in Built In Harness SM", HarnessTeam.PL);
 
   // keep-sorted end
 

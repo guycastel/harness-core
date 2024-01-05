@@ -14,7 +14,9 @@ import io.harness.delegate.service.runners.itfc.Runner;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,5 +42,9 @@ public final class RunnersFactory {
       throw new RunnerNotFoundException(runnerType);
     }
     return runnerRegistry.get(runnerType);
+  }
+
+  public List<String> getRunnersList() {
+    return new ArrayList<>(runnerRegistry.keySet());
   }
 }

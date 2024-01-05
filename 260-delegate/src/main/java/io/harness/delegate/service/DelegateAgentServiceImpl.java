@@ -132,6 +132,7 @@ import io.harness.delegate.service.common.DelegateTaskExecutionData;
 import io.harness.delegate.service.common.ManagerCallHelper;
 import io.harness.delegate.service.handlermapping.HandlerMappingServer;
 import io.harness.delegate.service.handlermapping.context.Context;
+import io.harness.delegate.service.runners.RunnersFactory;
 import io.harness.delegate.task.ActivityAccess;
 import io.harness.delegate.task.Cd1ApplicationAccess;
 import io.harness.delegate.task.TaskParameters;
@@ -362,6 +363,7 @@ public class DelegateAgentServiceImpl implements DelegateAgentService {
   @Inject private DelegateLogService delegateLogService;
   @Inject private EncryptionService encryptionService;
   @Inject private ExecutionConfigOverrideFromFileOnDelegate delegateLocalConfigService;
+  @Inject private RunnersFactory runnersFactory;
   @Inject(optional = true) @Nullable private PerpetualTaskWorker perpetualTaskWorker;
   @Inject(optional = true) @Nullable private LogStreamingClient logStreamingClient;
   @Inject DelegateTaskFactory delegateTaskFactory;
@@ -635,6 +637,7 @@ public class DelegateAgentServiceImpl implements DelegateAgentService {
               .ng(delegateNg)
               .tags(isNotBlank(delegateTags) ? new ArrayList<>(asList(delegateTags.trim().split("\\s*,+\\s*,*\\s*")))
                                              : emptyList())
+              .runnerTypes(runnersFactory.getRunnersList())
               .location(Paths.get("").toAbsolutePath().toString())
               .heartbeatAsObject(true)
               .immutable(isImmutableDelegate)

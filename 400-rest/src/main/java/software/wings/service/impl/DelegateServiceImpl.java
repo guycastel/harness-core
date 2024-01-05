@@ -2670,14 +2670,20 @@ public class DelegateServiceImpl implements DelegateService {
       delegateGroupName = delegateGroup.getName();
     }
 
-    if (isNotBlank(delegateGroupId) && isNotEmpty(delegateParams.getTags())) {
-      // TODO: remove after resolving PL-40073
-      if (ACCOUNTID_FOR_DEBUG.equals(delegateParams.getAccountId())) {
-        log.info("Following tags registering for delegate group {} : {} ", delegateGroupId, delegateParams.getTags());
+    if (isNotBlank(delegateGroupId)) {
+      UpdateOperations<DelegateGroup> updateOperations = persistence.createUpdateOperations(DelegateGroup.class);
+      if (isNotEmpty(delegateParams.getTags())) {
+        // TODO: remove after resolving PL-40073
+        if (ACCOUNTID_FOR_DEBUG.equals(delegateParams.getAccountId())) {
+          log.info("Following tags registering for delegate group {} : {} ", delegateGroupId, delegateParams.getTags());
+        }
+        updateOperations.set(DelegateGroupKeys.tags, new HashSet<>(delegateParams.getTags()));
+      }
+      if (isNotEmpty(delegateParams.getRunnerTypes())) {
+        updateOperations.set(DelegateGroupKeys.runnerTypes, new HashSet<>(delegateParams.getRunnerTypes()));
       }
       persistence.update(persistence.createQuery(DelegateGroup.class).filter(DelegateGroupKeys.uuid, delegateGroupId),
-          persistence.createUpdateOperations(DelegateGroup.class)
-              .set(DelegateGroupKeys.tags, new HashSet<>(delegateParams.getTags())));
+          updateOperations);
     }
 
     final DelegateEntityOwner owner = DelegateEntityOwnerHelper.buildOwner(orgIdentifier, projectIdentifier);

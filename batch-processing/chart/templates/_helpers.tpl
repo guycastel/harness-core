@@ -97,43 +97,43 @@ Create the name of the service account to use
     {{- $localESOSecretCtxIdentifier := (include "harnesscommon.secrets.localESOSecretCtxIdentifier" (dict "ctx" $ )) }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "S3_SYNC_CONFIG_ACCESSKEY")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-S3_SYNC_CONFIG_ACCESSKEY: '{{ .ctx.Values.awsSecret.S3_SYNC_CONFIG_ACCESSKEY | b64enc }}'
+S3_SYNC_CONFIG_ACCESSKEY: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "S3_SYNC_CONFIG_ACCESSKEY" "providedValues" (list "awsSecret.S3_SYNC_CONFIG_ACCESSKEY" "secrets.default.S3_SYNC_CONFIG_ACCESSKEY") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "S3_SYNC_CONFIG_SECRETKEY")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-S3_SYNC_CONFIG_SECRETKEY: '{{ .ctx.Values.awsSecret.S3_SYNC_CONFIG_SECRETKEY | b64enc }}'
+S3_SYNC_CONFIG_SECRETKEY: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "S3_SYNC_CONFIG_SECRETKEY" "providedValues" (list "awsSecret.S3_SYNC_CONFIG_SECRETKEY" "secrets.default.S3_SYNC_CONFIG_SECRETKEY") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "NEXT_GEN_MANAGER_SECRET")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-NEXT_GEN_MANAGER_SECRET: '{{ .ctx.Values.secrets.default.NEXT_GEN_MANAGER_SECRET | b64enc  }}'
+NEXT_GEN_MANAGER_SECRET: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "NEXT_GEN_MANAGER_SECRET" "providedValues" (list "secrets.default.NEXT_GEN_MANAGER_SECRET") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "CE_NG_SERVICE_SECRET")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-CE_NG_SERVICE_SECRET: '{{ .ctx.Values.secrets.default.CE_NG_SERVICE_SECRET | b64enc }}'
+CE_NG_SERVICE_SECRET: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "CE_NG_SERVICE_SECRET" "providedValues" (list "secrets.default.CE_NG_SERVICE_SECRET") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "HARNESS_CE_AZURE_CLIENTSECRET")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-HARNESS_CE_AZURE_CLIENTSECRET: '{{ .ctx.Values.secrets.default.HARNESS_CE_AZURE_CLIENTSECRET | b64enc }}'
+HARNESS_CE_AZURE_CLIENTSECRET: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "HARNESS_CE_AZURE_CLIENTSECRET" "providedValues" (list "secrets.default.HARNESS_CE_AZURE_CLIENTSECRET") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "HARNESS_CE_AZURE_SAS")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-HARNESS_CE_AZURE_SAS: '{{ .ctx.Values.secrets.default.HARNESS_CE_AZURE_SAS | b64enc }}'
+HARNESS_CE_AZURE_SAS: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "HARNESS_CE_AZURE_SAS" "providedValues" (list "secrets.default.HARNESS_CE_AZURE_SAS") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "HARNESS_CE_AZURE_CLIENTID")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-HARNESS_CE_AZURE_CLIENTID: '{{ .ctx.Values.secrets.default.HARNESS_CE_AZURE_CLIENTID | b64enc }}'
+HARNESS_CE_AZURE_CLIENTID: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "HARNESS_CE_AZURE_CLIENTID" "providedValues" (list "secrets.default.HARNESS_CE_AZURE_CLIENTID") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "HARNESS_CE_AZURE_TENANTID")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-HARNESS_CE_AZURE_TENANTID: '{{ .ctx.Values.secrets.default.HARNESS_CE_AZURE_TENANTID | b64enc }}'
+HARNESS_CE_AZURE_TENANTID: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "HARNESS_CE_AZURE_TENANTID" "providedValues" (list "secrets.default.HARNESS_CE_AZURE_TENANTID") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "HMAC_ACCESS_KEY")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-HMAC_ACCESS_KEY: '{{ .ctx.Values.secrets.default.HMAC_ACCESS_KEY | b64enc }}'
+HMAC_ACCESS_KEY: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "HMAC_ACCESS_KEY" "providedValues" (list "secrets.default.HMAC_ACCESS_KEY") "length" 10 "context" $) }}
     {{- end }}
     {{- if eq (include "harnesscommon.secrets.isDefaultAppSecret" (dict "ctx" $ "variableName" "HMAC_SECRET_KEY")) "true" }}
     {{- $hasAtleastOneSecret = true }}
-HMAC_SECRET_KEY: '{{ .ctx.Values.secrets.default.HMAC_SECRET_KEY | b64enc }}'
+HMAC_SECRET_KEY: {{ include "harnesscommon.secrets.passwords.manage" (dict "secret" "batch-processing" "key" "HMAC_SECRET_KEY" "providedValues" (list "secrets.default.HMAC_SECRET_KEY") "length" 10 "context" $) }}
     {{- end }}
     {{- if not $hasAtleastOneSecret }}
 {}

@@ -29,8 +29,7 @@ public interface TicketServiceClient {
 
   @GET(STOCommonEndpointConstants.TICKET_SERVICE_ALL_EXTERNAL_TICKETS)
   Call<JsonObject> getAllExternalTickets(@Header("Authorization") String token, @Query("accountId") String accountId,
-                                         @Query("page") String page, @Query("pageSize") String pageSize,
-                                         @Query("orgId") String orgId, @Query("projectId") String projectId,
-                                         @Query("module") String module, @Query("identifiers") String identifiers,
-                                         @Query("optional") String optional, @Query("externalId") String externalId);
+      @Query("page") String page, @Query("pageSize") String pageSize, @Query("orgId") String orgId,
+      @Query("projectId") String projectId, @Query("module") String module, @Query("identifiers") String identifiers,
+      @Query("optional") String optional, @Query("externalId") String externalId);
 }

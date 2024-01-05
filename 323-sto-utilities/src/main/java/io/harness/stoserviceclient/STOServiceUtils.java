@@ -7,6 +7,12 @@
 
 package io.harness.stoserviceclient;
 
+import io.harness.annotations.dev.HarnessTeam;
+import io.harness.annotations.dev.OwnedBy;
+import io.harness.common.STORetryPolicyUtils;
+import io.harness.exception.GeneralException;
+import io.harness.sto.beans.entities.STOServiceConfig;
+
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -14,11 +20,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.harness.annotations.dev.HarnessTeam;
-import io.harness.annotations.dev.OwnedBy;
-import io.harness.common.STORetryPolicyUtils;
-import io.harness.exception.GeneralException;
-import io.harness.sto.beans.entities.STOServiceConfig;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Response;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Getter
 @Setter
 @Slf4j
@@ -42,8 +42,10 @@ import java.util.Map;
 public class STOServiceUtils {
   private static final String TOKEN = "token";
   private static final String API_TOKEN_PREFIX = "ApiKey ";
-  private static final RetryPolicy<Object> RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicy("Retrying STO Core Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
-  private static final RetryPolicy<Object> TOKEN_RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicyForToken("Retrying STO Core Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
+  private static final RetryPolicy<Object> RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicy(
+      "Retrying STO Core Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
+  private static final RetryPolicy<Object> TOKEN_RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicyForToken(
+      "Retrying STO Core Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
   private static final String DEFAULT_PAGE = "1";
   private static final String DEFAULT_NAME = "NodeGoat";
   private static final String DEFAULT_PAGE_SIZE = "100";
@@ -61,9 +63,11 @@ public class STOServiceUtils {
     log.info("Initiating token request to STO service: {}", this.stoServiceConfig.getInternalUrl());
     JsonObject responseBody;
     if (accountId == null) {
-      responseBody = makeAPICallForTokenWithRetry(stoServiceClient.generateTokenAllAccounts(this.stoServiceConfig.getGlobalToken()));
+      responseBody = makeAPICallForTokenWithRetry(
+          stoServiceClient.generateTokenAllAccounts(this.stoServiceConfig.getGlobalToken()));
     } else {
-      responseBody = makeAPICallForTokenWithRetry(stoServiceClient.generateToken(accountId, this.stoServiceConfig.getGlobalToken()));
+      responseBody = makeAPICallForTokenWithRetry(
+          stoServiceClient.generateToken(accountId, this.stoServiceConfig.getGlobalToken()));
     }
 
     if (responseBody.has(TOKEN)) {
@@ -138,7 +142,7 @@ public class STOServiceUtils {
     String scanStatus = matchingScan.get("status").getAsString();
 
     JsonObject responseBody =
-            makeAPICallWithRetry(stoServiceClient.getOutputVariables(accessToken, scanId, accountId, orgId, projectId));
+        makeAPICallWithRetry(stoServiceClient.getOutputVariables(accessToken, scanId, accountId, orgId, projectId));
 
     result.put("JOB_ID", scanId);
     result.put("JOB_STATUS", scanStatus);
@@ -187,8 +191,10 @@ public class STOServiceUtils {
       JsonObject tokenResponseBody = makeAPICall(apiCall);
       if (tokenResponseBody.has(TOKEN)) {
         String token = API_TOKEN_PREFIX + tokenResponseBody.get(TOKEN).getAsString();
-        JsonObject productsResponseBody = makeAPICall(stoServiceClient.getAllProducts(token, DEFAULT_PAGE, DEFAULT_PAGE, DEFAULT_NAME));
-        if (productsResponseBody.has("status") && productsResponseBody.get("status").getAsInt() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED)
+        JsonObject productsResponseBody =
+            makeAPICall(stoServiceClient.getAllProducts(token, DEFAULT_PAGE, DEFAULT_PAGE, DEFAULT_NAME));
+        if (productsResponseBody.has("status")
+            && productsResponseBody.get("status").getAsInt() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED)
           throw new GeneralException("Invalid Token");
       }
       return tokenResponseBody;

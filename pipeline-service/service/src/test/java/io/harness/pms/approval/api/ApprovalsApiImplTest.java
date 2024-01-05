@@ -78,27 +78,27 @@ public class ApprovalsApiImplTest extends PipelineServiceTestBase {
   public void testGetApprovalInstancesByExecutionIdNegativeCases() {
     assertThatThrownBy(()
                            -> approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
-                               EXECUTION_IDENTIFIER, ACCOUNT_ID, "InvalidStatus", null, null))
+                               EXECUTION_IDENTIFIER, ACCOUNT_ID, "InvalidStatus", null, null, null))
         .isInstanceOf(InvalidRequestException.class);
 
     assertThatThrownBy(()
                            -> approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
-                               EXECUTION_IDENTIFIER, ACCOUNT_ID, null, "InvalidType", null))
+                               EXECUTION_IDENTIFIER, ACCOUNT_ID, null, "InvalidType", null, null))
         .isInstanceOf(InvalidRequestException.class);
 
     assertThatThrownBy(()
                            -> approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
-                               EXECUTION_IDENTIFIER, ACCOUNT_ID, "InvalidStatus", "InvalidType", null))
+                               EXECUTION_IDENTIFIER, ACCOUNT_ID, "InvalidStatus", "InvalidType", null, null))
         .isInstanceOf(InvalidRequestException.class);
 
     assertThatThrownBy(()
                            -> approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
-                               EXECUTION_IDENTIFIER, ACCOUNT_ID, "InvalidStatus", "InvalidType", null))
+                               EXECUTION_IDENTIFIER, ACCOUNT_ID, "InvalidStatus", "InvalidType", null, null))
         .isInstanceOf(InvalidRequestException.class);
 
     assertThatThrownBy(()
                            -> approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
-                               EXECUTION_IDENTIFIER, null, "InvalidStatus", "InvalidType", null))
+                               EXECUTION_IDENTIFIER, null, "InvalidStatus", "InvalidType", null, null))
         .isInstanceOf(InvalidRequestException.class);
 
     when(approvalResourceService.getApprovalInstancesByExecutionId(EXECUTION_IDENTIFIER, null, null, null, null))
@@ -106,7 +106,7 @@ public class ApprovalsApiImplTest extends PipelineServiceTestBase {
 
     assertThatCode(()
                        -> approvalsApiImpl.getApprovalInstancesByExecutionId(
-                           ORG_IDENTIFIER, PROJ_IDENTIFIER, EXECUTION_IDENTIFIER, ACCOUNT_ID, null, null, null))
+                           ORG_IDENTIFIER, PROJ_IDENTIFIER, EXECUTION_IDENTIFIER, ACCOUNT_ID, null, null, null, null))
         .doesNotThrowAnyException();
 
     when(pmsExecutionService.getPipelineExecutionSummaryEntity(
@@ -114,8 +114,8 @@ public class ApprovalsApiImplTest extends PipelineServiceTestBase {
         .thenThrow(new EntityNotFoundException("summary doesn't exist"));
 
     assertThatThrownBy(()
-                           -> approvalsApiImpl.getApprovalInstancesByExecutionId(
-                               ORG_IDENTIFIER, PROJ_IDENTIFIER, EXECUTION_IDENTIFIER, ACCOUNT_ID, null, null, null))
+                           -> approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
+                               EXECUTION_IDENTIFIER, ACCOUNT_ID, null, null, null, null))
         .isInstanceOf(InvalidRequestException.class)
         .hasMessage(String.format(
             "execution_id param value provided doesn't belong to Account: %s, Org: %s, Project: %s or the pipeline has been deleted",
@@ -241,8 +241,8 @@ public class ApprovalsApiImplTest extends PipelineServiceTestBase {
         .thenThrow(new InvalidRequestException("random exception"));
 
     assertThatThrownBy(()
-                           -> approvalsApiImpl.getApprovalInstancesByExecutionId(
-                               ORG_IDENTIFIER, PROJ_IDENTIFIER, EXECUTION_IDENTIFIER, ACCOUNT_ID, null, null, null))
+                           -> approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
+                               EXECUTION_IDENTIFIER, ACCOUNT_ID, null, null, null, null))
         .isInstanceOf(InvalidRequestException.class)
         .hasMessage("An unexpected error occurred while validating execution_id param");
     verify(pmsExecutionService, times(1))
@@ -264,10 +264,38 @@ public class ApprovalsApiImplTest extends PipelineServiceTestBase {
         .thenReturn(approvalInstances);
 
     Response response = approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
-        EXECUTION_IDENTIFIER, ACCOUNT_ID, APPROVAL_STATUS, APPROVAL_TYPE, NODE_IDENTIFIER);
+        EXECUTION_IDENTIFIER, ACCOUNT_ID, APPROVAL_STATUS, APPROVAL_TYPE, NODE_IDENTIFIER, null);
     List<ApprovalInstanceResponseBody> approvalInstanceResponseBodyList =
         (List<ApprovalInstanceResponseBody>) response.getEntity();
     assertThat(approvalInstanceResponseBodyList.size()).isEqualTo(4);
+    ApprovalInstanceResponseBody approvalInstanceResponseBody = approvalInstanceResponseBodyList.get(0);
+
+    assertThat(approvalInstanceResponseBody.getId()).isEqualTo(RESOURCE_IDENTIFIER);
+    assertThat(approvalInstanceResponseBody.getStatus()).isEqualTo(ApprovalInstanceResponseBody.StatusEnum.WAITING);
+    assertThat(approvalInstanceResponseBody.getDeadline()).isEqualTo(DEADLINE);
+    assertThat(approvalInstanceResponseBody.getDetails()).isEqualTo(null);
+    assertThat(approvalInstanceResponseBody.getCreated()).isEqualTo(CREATED_AT);
+    assertThat(approvalInstanceResponseBody.getUpdated()).isEqualTo(UPDATED_AT);
+    assertThat(approvalInstanceResponseBody.getErrorMessage()).isEqualTo(ERROR_MESSAGE);
+    assertThat(approvalInstanceResponseBody.getType()).isNotNull();
+  }
+
+  @Test
+  @Owner(developers = RISHABH)
+  @Category(UnitTests.class)
+  public void testGetApprovalInstancesByExecutionIdWithCallbackId() {
+    List<ApprovalInstanceResponseDTO> approvalInstances = new ArrayList<>();
+    approvalInstances.add(buildApprovalInstance(ApprovalType.HARNESS_APPROVAL, ApprovalStatus.WAITING));
+
+    when(approvalResourceService.getApprovalInstancesByExecutionId(EXECUTION_IDENTIFIER, ApprovalStatus.WAITING,
+             ApprovalType.HARNESS_APPROVAL, NODE_IDENTIFIER, CALLBACK_IDENTIFIER))
+        .thenReturn(approvalInstances);
+
+    Response response = approvalsApiImpl.getApprovalInstancesByExecutionId(ORG_IDENTIFIER, PROJ_IDENTIFIER,
+        EXECUTION_IDENTIFIER, ACCOUNT_ID, APPROVAL_STATUS, APPROVAL_TYPE, NODE_IDENTIFIER, CALLBACK_IDENTIFIER);
+    List<ApprovalInstanceResponseBody> approvalInstanceResponseBodyList =
+        (List<ApprovalInstanceResponseBody>) response.getEntity();
+    assertThat(approvalInstanceResponseBodyList.size()).isEqualTo(1);
     ApprovalInstanceResponseBody approvalInstanceResponseBody = approvalInstanceResponseBodyList.get(0);
 
     assertThat(approvalInstanceResponseBody.getId()).isEqualTo(RESOURCE_IDENTIFIER);

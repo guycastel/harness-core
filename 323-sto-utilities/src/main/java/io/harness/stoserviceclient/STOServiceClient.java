@@ -39,5 +39,6 @@ public interface STOServiceClient {
   Call<JsonObject> getUsageAllAccounts(@Header("Authorization") String token, @Query("timestamp") String timestamp);
 
   @GET(STOCommonEndpointConstants.STO_SERVICE_ALL_PRODUCTS_ENDPOINT)
-  Call<JsonObject> getAllProducts(@Header("Authorization") String token, @Query("page") String page, @Query("pageSize") String pageSize, @Query("name") String name);
+  Call<JsonObject> getAllProducts(@Header("Authorization") String token, @Query("page") String page,
+      @Query("pageSize") String pageSize, @Query("name") String name);
 }

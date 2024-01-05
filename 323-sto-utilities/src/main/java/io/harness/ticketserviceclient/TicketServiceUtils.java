@@ -7,15 +7,17 @@
 
 package io.harness.ticketserviceclient;
 
-import com.google.api.client.http.HttpStatusCodes;
-import com.google.gson.JsonObject;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.common.STORetryPolicyUtils;
 import io.harness.exception.GeneralException;
 import io.harness.sto.beans.entities.TicketServiceConfig;
+
+import com.google.api.client.http.HttpStatusCodes;
+import com.google.gson.JsonObject;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import java.io.IOException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +26,6 @@ import net.jodah.failsafe.RetryPolicy;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Response;
-
-import java.io.IOException;
 
 @Getter
 @Setter
@@ -38,8 +38,10 @@ public class TicketServiceUtils {
   private static final String DEFAULT_ACCOUNT = "abcdef1234567890ghijkl";
   private static final String MODULE = "sto";
   private static final String PAGE = "1";
-  private static final RetryPolicy<Object> RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicy("Retrying Ticket Service Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
-  private static final RetryPolicy<Object> TOKEN_RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicyForToken("Retrying Ticket Service Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
+  private static final RetryPolicy<Object> RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicy(
+      "Retrying Ticket Service Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
+  private static final RetryPolicy<Object> TOKEN_RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicyForToken(
+      "Retrying Ticket Service Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
   private static final String DEFAULT_PAGE_SIZE = "100";
   private final TicketServiceClient ticketServiceClient;
   private final TicketServiceConfig serviceConfig;
@@ -55,9 +57,11 @@ public class TicketServiceUtils {
     log.info("Initiating token request to Ticket service: {}", this.serviceConfig.getInternalUrl());
     JsonObject responseBody;
     if (accountId == null) {
-      responseBody = makeAPICallForTokenWithRetry(ticketServiceClient.generateTokenAllAccounts(this.serviceConfig.getGlobalToken()));
+      responseBody = makeAPICallForTokenWithRetry(
+          ticketServiceClient.generateTokenAllAccounts(this.serviceConfig.getGlobalToken()));
     } else {
-      responseBody = makeAPICallForTokenWithRetry(ticketServiceClient.generateToken(accountId, this.serviceConfig.getGlobalToken()));
+      responseBody = makeAPICallForTokenWithRetry(
+          ticketServiceClient.generateToken(accountId, this.serviceConfig.getGlobalToken()));
     }
 
     if (responseBody.has(TOKEN)) {
@@ -83,8 +87,10 @@ public class TicketServiceUtils {
       JsonObject tokenResponseBody = makeAPICall(apiCall);
       if (tokenResponseBody.has(TOKEN)) {
         String token = API_TOKEN_PREFIX + tokenResponseBody.get(TOKEN).getAsString();
-        JsonObject ticketsResponseBody = makeAPICall(ticketServiceClient.getAllExternalTickets(token, DEFAULT_ACCOUNT, PAGE, PAGE, "", "", MODULE, "", "", ""));
-        if (ticketsResponseBody.has("status") && ticketsResponseBody.get("status").getAsInt() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED)
+        JsonObject ticketsResponseBody = makeAPICall(
+            ticketServiceClient.getAllExternalTickets(token, DEFAULT_ACCOUNT, PAGE, PAGE, "", "", MODULE, "", "", ""));
+        if (ticketsResponseBody.has("status")
+            && ticketsResponseBody.get("status").getAsInt() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED)
           throw new GeneralException("Invalid Token");
       }
       return tokenResponseBody;

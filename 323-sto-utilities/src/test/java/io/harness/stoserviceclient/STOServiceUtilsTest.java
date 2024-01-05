@@ -7,7 +7,12 @@
 
 package io.harness.stoserviceclient;
 
-import com.google.gson.JsonObject;
+import static io.harness.rule.OwnerRule.SERGEY;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
 import io.harness.CategoryTest;
 import io.harness.MockableTestMixin;
 import io.harness.category.element.UnitTests;
@@ -15,6 +20,9 @@ import io.harness.exception.GeneralException;
 import io.harness.rule.LifecycleRule;
 import io.harness.rule.Owner;
 import io.harness.sto.beans.entities.STOServiceConfig;
+
+import com.google.gson.JsonObject;
+import java.io.IOException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -23,13 +31,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import retrofit2.Call;
 import retrofit2.Response;
-
-import java.io.IOException;
-
-import static io.harness.rule.OwnerRule.SERGEY;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
 
 public class STOServiceUtilsTest extends CategoryTest implements MockableTestMixin {
   @Mock private STOServiceClient stoServiceClient;
@@ -58,7 +59,8 @@ public class STOServiceUtilsTest extends CategoryTest implements MockableTestMix
     when(stoServiceTokenValidationCall.clone()).thenReturn(stoServiceTokenValidationCall);
     when(stoServiceTokenValidationCall.execute()).thenReturn(Response.success(stoServiceTokenResponse));
     when(stoServiceClient.generateToken(eq(accountID), eq(globalToken))).thenReturn(stoServiceTokenCall);
-    when(stoServiceClient.getAllProducts(eq(authorizationToken), eq(page), eq(page), eq(name))).thenReturn(stoServiceTokenValidationCall);
+    when(stoServiceClient.getAllProducts(eq(authorizationToken), eq(page), eq(page), eq(name)))
+        .thenReturn(stoServiceTokenValidationCall);
     STOServiceConfig stoServiceConfig =
         STOServiceConfig.builder().globalToken(globalToken).baseUrl(baseUrl).internalUrl(baseUrl).build();
     STOServiceUtils stoServiceUtils = new STOServiceUtils(stoServiceClient, stoServiceConfig);

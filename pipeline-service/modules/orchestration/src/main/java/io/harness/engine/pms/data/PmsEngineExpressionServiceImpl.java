@@ -6,6 +6,7 @@
  */
 
 package io.harness.engine.pms.data;
+
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 
 import io.harness.annotations.dev.CodePulse;
@@ -64,7 +65,7 @@ public class PmsEngineExpressionServiceImpl implements PmsEngineExpressionServic
       Ambiance ambiance, String expression, ExpressionMode expressionMode, boolean newRecastFlow) {
     EngineExpressionEvaluator evaluator = prepareExpressionEvaluator(ambiance);
     Object value = evaluator.evaluateExpression(expression, expressionMode);
-    return RecastOrchestrationUtils.toJson(value);
+    return RecastOrchestrationUtils.toJson(value, newRecastFlow);
   }
 
   @Override

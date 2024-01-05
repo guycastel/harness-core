@@ -6,6 +6,7 @@
  */
 
 package io.harness.pms.plan.execution.data.service.expressions;
+
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
@@ -58,9 +59,10 @@ public class EngineExpressionGrpcServiceImpl extends EngineExpressionProtoServic
     if (request.getExpressionMode() != ExpressionMode.UNKNOWN_MODE
         && request.getExpressionMode() != ExpressionMode.UNRECOGNIZED) {
       value = pmsEngineExpressionService.evaluateExpression(request.getAmbiance(), request.getExpression(),
-          ExpressionModeMapper.fromExpressionModeProto(request.getExpressionMode()));
+          ExpressionModeMapper.fromExpressionModeProto(request.getExpressionMode()), request.getNewRecastFlow());
     } else {
-      value = pmsEngineExpressionService.evaluateExpression(request.getAmbiance(), request.getExpression());
+      value = pmsEngineExpressionService.evaluateExpression(
+          request.getAmbiance(), request.getExpression(), request.getNewRecastFlow());
     }
     responseObserver.onNext(ExpressionEvaluateBlobResponse.newBuilder().setValue(value).build());
     responseObserver.onCompleted();

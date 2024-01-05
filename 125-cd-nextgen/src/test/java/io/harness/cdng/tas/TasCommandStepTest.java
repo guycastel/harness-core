@@ -412,11 +412,12 @@ public class TasCommandStepTest extends CDNGTestBase {
         .when(instanceInfoService)
         .saveServerInstancesIntoSweepingOutput(ambiance, List.of(tasServerInstanceInfo));
 
-    StepResponse stepResponse1 = tasCommandStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParameters,
-        TasExecutionPassThroughData.builder()
-            .resolvedOutputVariables(getStepParametersStringOutputVariablesMap())
-            .build(),
-        () -> responseData);
+    StepResponse stepResponse1 =
+        tasCommandStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance, stepElementParameters,
+            TasExecutionPassThroughData.builder()
+                .resolvedOutputVariables(getStepParametersStringOutputVariablesMap())
+                .build(),
+            () -> responseData);
     assertThat(stepResponse1.getStatus()).isEqualTo(Status.SUCCEEDED);
     assertThat(stepResponse1.getStepOutcomes()).isEmpty();
   }
@@ -453,11 +454,12 @@ public class TasCommandStepTest extends CDNGTestBase {
         .when(instanceInfoService)
         .saveServerInstancesIntoSweepingOutput(ambiance, List.of(tasServerInstanceInfo));
 
-    StepResponse stepResponse1 = tasCommandStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParameters,
-        TasExecutionPassThroughData.builder()
-            .resolvedOutputVariables(getStepParametersStringOutputVariablesMap())
-            .build(),
-        () -> responseData);
+    StepResponse stepResponse1 =
+        tasCommandStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance, stepElementParameters,
+            TasExecutionPassThroughData.builder()
+                .resolvedOutputVariables(getStepParametersStringOutputVariablesMap())
+                .build(),
+            () -> responseData);
     assertThat(stepResponse1.getStatus()).isEqualTo(Status.SUCCEEDED);
     Map<String, String> outputVariablesStepParamReq = new HashMap<>();
     outputVariablesStepParamReq.put("Output1", "Value1");
@@ -591,7 +593,7 @@ public class TasCommandStepTest extends CDNGTestBase {
         .when(instanceInfoService)
         .saveServerInstancesIntoSweepingOutput(ambiance, List.of(tasServerInstanceInfo));
 
-    StepResponse stepResponse1 = tasCommandStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse1 = tasCommandStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, TasExecutionPassThroughData.builder().build(), () -> responseData);
     assertThat(stepResponse1.getStatus()).isEqualTo(Status.FAILED);
   }
@@ -633,9 +635,10 @@ public class TasCommandStepTest extends CDNGTestBase {
         .when(instanceInfoService)
         .saveServerInstancesIntoSweepingOutput(ambiance, List.of(tasServerInstanceInfo));
 
-    StepResponse stepResponse1 = tasCommandStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParameters,
-        StepExceptionPassThroughData.builder().unitProgressData(unitProgressData).errorMessage("error").build(),
-        () -> responseData);
+    StepResponse stepResponse1 =
+        tasCommandStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance, stepElementParameters,
+            StepExceptionPassThroughData.builder().unitProgressData(unitProgressData).errorMessage("error").build(),
+            () -> responseData);
     assertThat(stepResponse1.getStatus()).isEqualTo(Status.FAILED);
   }
 }

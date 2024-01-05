@@ -324,18 +324,18 @@ public class CloudformationCreateStackStepTest extends CategoryTest {
             .build();
     doNothing().when(cloudformationStepHelper).saveCloudFormationInheritOutput(any(), any(), any(), anyBoolean());
     doReturn(cloudformationConfig).when(cloudformationStepHelper).getCloudformationConfig(any(), any(), any());
-    StepResponse response = cloudformationCreateStackStep.finalizeExecutionWithSecurityContext(
+    StepResponse response = cloudformationCreateStackStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         getAmbiance(), stepElementParameters, passThroughData, () -> cloudformationTaskNGResponse);
     assertThat(response.getStatus()).isEqualTo(Status.SUCCEEDED);
     verify(cloudformationConfigDAL).saveCloudformationConfig(eq(cloudformationConfig));
 
     // Verify now that if the passthorugh data is StepExceptionPassThroughData the cloudformation task is not executed
-    cloudformationCreateStackStep.finalizeExecutionWithSecurityContext(getAmbiance(), stepElementParameters,
+    cloudformationCreateStackStep.finalizeExecutionWithSecurityContextAndNodeInfo(getAmbiance(), stepElementParameters,
         StepExceptionPassThroughData.builder().build(), () -> cloudformationTaskNGResponse);
     verify(cdStepHelper, times(1)).handleStepExceptionFailure(any());
     reset(cloudformationStepHelper);
 
-    cloudformationCreateStackStep.finalizeExecutionWithSecurityContext(getAmbiance(), stepElementParameters,
+    cloudformationCreateStackStep.finalizeExecutionWithSecurityContextAndNodeInfo(getAmbiance(), stepElementParameters,
         passThroughData, () -> { throw new TaskNGDataException(UnitProgressData.builder().build(), null); });
 
     verify(cloudformationStepHelper, times(1)).getFailureResponse(any(), any());
@@ -352,7 +352,7 @@ public class CloudformationCreateStackStepTest extends CategoryTest {
             .commandExecutionStatus(CommandExecutionStatus.FAILURE)
             .build();
 
-    cloudformationCreateStackStep.finalizeExecutionWithSecurityContext(
+    cloudformationCreateStackStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         getAmbiance(), stepElementParameters, passThroughData, () -> failedTaskResponse);
     verify(cloudformationStepHelper, times(1)).getFailureResponse(any(), any());
   }
@@ -419,7 +419,7 @@ public class CloudformationCreateStackStepTest extends CategoryTest {
         .saveCloudFormationInheritOutput(any(), any(), any(), anyBoolean());
     doReturn(cloudformationConfig).when(cloudformationStepHelper).getCloudformationConfig(any(), any(), any());
 
-    cloudformationCreateStackStep.finalizeExecutionWithSecurityContext(
+    cloudformationCreateStackStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         getAmbiance(), stepElementParameters, passThroughData, () -> cloudformationTaskNGResponse);
 
     verify(cloudformationStepHelper, times(1))

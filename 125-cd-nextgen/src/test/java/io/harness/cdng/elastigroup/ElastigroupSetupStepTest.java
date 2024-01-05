@@ -203,7 +203,7 @@ public class ElastigroupSetupStepTest extends CDNGTestBase {
     ResponseData responseData = elastigroupSetupResponse;
     ThrowingSupplier<ResponseData> responseSupplier = () -> responseData;
     doReturn(elastiGroup).when(elastigroupStepCommonHelper).fetchOldElasticGroup(elastigroupSetupResult);
-    StepResponse stepResponse = elastigroupSetupStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = elastigroupSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, elastigroupExecutionPassThroughData, responseSupplier);
     assertThat(stepResponse.getStepOutcomes().size()).isEqualTo(1);
     assertThat(((ElastigroupSetupDataOutcome) stepResponse.getStepOutcomes().stream().findFirst().get().getOutcome())

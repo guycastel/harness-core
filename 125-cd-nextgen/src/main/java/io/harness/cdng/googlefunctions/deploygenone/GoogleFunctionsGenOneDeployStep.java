@@ -10,6 +10,7 @@ package io.harness.cdng.googlefunctions.deploygenone;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.cdng.CDStepHelper;
+import io.harness.cdng.executables.CdTaskChainExecutable;
 import io.harness.cdng.googlefunctions.GoogleFunctionsEntityHelper;
 import io.harness.cdng.googlefunctions.GoogleFunctionsHelper;
 import io.harness.cdng.googlefunctions.GoogleFunctionsStepExceptionPassThroughData;
@@ -29,7 +30,6 @@ import io.harness.delegate.task.googlefunctionbeans.request.GoogleFunctionGenOne
 import io.harness.delegate.task.googlefunctionbeans.response.GoogleFunctionGenOneDeployResponse;
 import io.harness.executions.steps.ExecutionNodeType;
 import io.harness.logging.CommandExecutionStatus;
-import io.harness.plancreator.steps.common.rollback.TaskChainExecutableWithRollbackAndRbac;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.execution.Status;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -43,6 +43,7 @@ import io.harness.pms.sdk.core.steps.io.StepResponse.StepResponseBuilder;
 import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 
 import software.wings.beans.TaskType;
 
@@ -52,8 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @OwnedBy(HarnessTeam.CDP)
 @Slf4j
-public class GoogleFunctionsGenOneDeployStep
-    extends TaskChainExecutableWithRollbackAndRbac implements GoogleFunctionsStepExecutor {
+public class GoogleFunctionsGenOneDeployStep extends CdTaskChainExecutable implements GoogleFunctionsStepExecutor {
   public static final StepType STEP_TYPE =
       StepType.newBuilder()
           .setType(ExecutionNodeType.GOOGLE_CLOUD_FUNCTIONS_GEN_ONE_DEPLOY.getYamlType())
@@ -103,16 +103,17 @@ public class GoogleFunctionsGenOneDeployStep
   }
 
   @Override
-  public TaskChainResponse executeNextLinkWithSecurityContext(Ambiance ambiance, StepBaseParameters stepParameters,
-      StepInputPackage inputPackage, PassThroughData passThroughData, ThrowingSupplier<ResponseData> responseSupplier)
-      throws Exception {
+  public TaskChainResponse executeNextLinkWithSecurityContextAndNodeInfo(Ambiance ambiance,
+      StepBaseParameters stepParameters, StepInputPackage inputPackage, PassThroughData passThroughData,
+      ThrowingSupplier<ResponseData> responseSupplier) throws Exception {
     log.info("Calling executeNextLink");
     return googleFunctionsHelper.executeNextLink(this, ambiance, stepParameters, passThroughData, responseSupplier);
   }
 
   @Override
-  public StepResponse finalizeExecutionWithSecurityContext(Ambiance ambiance, StepBaseParameters stepParameters,
-      PassThroughData passThroughData, ThrowingSupplier<ResponseData> responseDataSupplier) throws Exception {
+  public StepResponse finalizeExecutionWithSecurityContextAndNodeInfo(Ambiance ambiance,
+      StepBaseParameters stepParameters, PassThroughData passThroughData,
+      ThrowingSupplier<ResponseData> responseDataSupplier) throws Exception {
     if (passThroughData instanceof GoogleFunctionsStepExceptionPassThroughData) {
       return googleFunctionsHelper.handleStepExceptionFailure(
           (GoogleFunctionsStepExceptionPassThroughData) passThroughData);
@@ -154,5 +155,11 @@ public class GoogleFunctionsGenOneDeployStep
   public TaskChainResponse startChainLinkAfterRbac(
       Ambiance ambiance, StepBaseParameters stepParameters, StepInputPackage inputPackage) {
     return googleFunctionsHelper.startChainLink(ambiance, stepParameters);
+  }
+
+  @Override
+  protected StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
+      Ambiance ambiance, StepBaseParameters stepParameters, PassThroughData passThroughData) {
+    return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
   }
 }

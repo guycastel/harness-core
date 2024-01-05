@@ -21,6 +21,7 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.cdng.executables.CdTaskChainExecutable;
 import io.harness.cdng.featureFlag.CDFeatureFlagHelper;
 import io.harness.cdng.provision.terraform.executions.RunDetails;
 import io.harness.cdng.provision.terraformcloud.TerraformCloudConstants;
@@ -61,7 +62,6 @@ import io.harness.logging.CommandExecutionStatus;
 import io.harness.logging.UnitProgress;
 import io.harness.ng.core.EntityDetail;
 import io.harness.plancreator.steps.TaskSelectorYaml;
-import io.harness.plancreator.steps.common.rollback.TaskChainExecutableWithRollbackAndRbac;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.execution.Status;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -81,6 +81,7 @@ import io.harness.steps.StepUtils;
 import io.harness.steps.TaskRequestsUtils;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.IdentifierRefHelper;
 
 import software.wings.beans.TaskType;
@@ -96,11 +97,12 @@ import lombok.extern.slf4j.Slf4j;
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_K8S})
 @OwnedBy(HarnessTeam.CDP)
 @Slf4j
-public class TerraformCloudRunStep extends TaskChainExecutableWithRollbackAndRbac {
+public class TerraformCloudRunStep extends CdTaskChainExecutable {
   public static final StepType STEP_TYPE = StepType.newBuilder()
                                                .setType(ExecutionNodeType.TERRAFORM_CLOUD_RUN.getYamlType())
                                                .setStepCategory(StepCategory.STEP)
                                                .build();
+  public static final String RUN_TYPE = "type";
 
   @Inject private PipelineRbacHelper pipelineRbacHelper;
   @Inject @Named("referenceFalseKryoSerializer") private KryoSerializer referenceFalseKryoSerializer;
@@ -161,7 +163,7 @@ public class TerraformCloudRunStep extends TaskChainExecutableWithRollbackAndRba
   }
 
   @Override
-  public TaskChainResponse executeNextLinkWithSecurityContext(Ambiance ambiance,
+  public TaskChainResponse executeNextLinkWithSecurityContextAndNodeInfo(Ambiance ambiance,
       StepBaseParameters stepElementParameters, StepInputPackage inputPackage, PassThroughData passThroughData,
       ThrowingSupplier<ResponseData> responseSupplier) throws Exception {
     TerraformCloudRunStepParameters runStepParameters =
@@ -188,8 +190,9 @@ public class TerraformCloudRunStep extends TaskChainExecutableWithRollbackAndRba
   }
 
   @Override
-  public StepResponse finalizeExecutionWithSecurityContext(Ambiance ambiance, StepBaseParameters stepElementParameters,
-      PassThroughData passThroughData, ThrowingSupplier<ResponseData> responseSupplier) throws Exception {
+  public StepResponse finalizeExecutionWithSecurityContextAndNodeInfo(Ambiance ambiance,
+      StepBaseParameters stepElementParameters, PassThroughData passThroughData,
+      ThrowingSupplier<ResponseData> responseSupplier) throws Exception {
     log.info("Handling Task result with Security Context for the Terraform Cloud Run Step");
     TerraformCloudRunStepParameters runStepParameters =
         (TerraformCloudRunStepParameters) stepElementParameters.getSpec();
@@ -270,6 +273,18 @@ public class TerraformCloudRunStep extends TaskChainExecutableWithRollbackAndRba
           StepOutcome.builder().name(OUTCOME_NAME).outcome(terraformCloudRunOutcome).build());
     }
     return stepResponseBuilder.build();
+  }
+
+  @Override
+  protected StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
+      Ambiance ambiance, StepBaseParameters stepParameters, PassThroughData passThroughData) {
+    TerraformCloudRunStepParameters runStepParameters = (TerraformCloudRunStepParameters) stepParameters.getSpec();
+    HashMap<String, Object> telemetryProperties = new HashMap<>();
+    telemetryProperties.put(RUN_TYPE, runStepParameters.getSpec().getType().getDisplayName());
+    return StepExecutionTelemetryEventDTO.builder()
+        .stepType(STEP_TYPE.getType())
+        .properties(telemetryProperties)
+        .build();
   }
 
   private TerraformCloudRunOutcome handleApplyResponse(

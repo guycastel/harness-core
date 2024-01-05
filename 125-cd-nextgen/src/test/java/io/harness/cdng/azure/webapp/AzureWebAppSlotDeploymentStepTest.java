@@ -436,7 +436,7 @@ public class AzureWebAppSlotDeploymentStepTest extends CDNGTestBase {
 
     doReturn("deploymentInfoKey").when(azureWebAppStepHelper).getDeploymentIdentifier(any(), any(), any());
 
-    StepResponse stepResponse = slotDeploymentStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = slotDeploymentStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, passThroughData, () -> azureWebAppTaskResponse);
 
     verify(executionSweepingOutputService)
@@ -496,7 +496,7 @@ public class AzureWebAppSlotDeploymentStepTest extends CDNGTestBase {
     doReturn(artifactConfig).when(azureWebAppStepHelper).getPrimaryArtifactConfig(any(), any());
     doReturn("rollbackDeploymentInfoKey").when(azureWebAppStepHelper).getDeploymentIdentifier(any(), any(), any());
 
-    StepResponse stepResponse = slotDeploymentStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = slotDeploymentStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, passThroughData, () -> azureWebAppTaskResponse);
 
     verify(executionSweepingOutputService)

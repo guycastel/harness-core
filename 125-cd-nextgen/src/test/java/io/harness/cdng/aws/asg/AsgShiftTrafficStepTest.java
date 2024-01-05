@@ -170,7 +170,7 @@ public class AsgShiftTrafficStepTest extends CategoryTest {
         .when(asgStepCommonHelper)
         .getInfrastructureOutcomeWithUpdatedExpressions(any());
 
-    StepResponse stepResponse = asgShiftTrafficStep.handleTaskResultWithSecurityContext(
+    StepResponse stepResponse = asgShiftTrafficStep.handleTaskResultWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, () -> (AsgCommandResponse) responseData);
 
     Map<String, Outcome> outcomeMap = stepResponse.getStepOutcomes().stream().collect(

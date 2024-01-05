@@ -163,7 +163,7 @@ public class AwsLambdaDeployStepTest extends CDNGTestBase {
                                                .commandExecutionStatus(CommandExecutionStatus.SUCCESS)
                                                .build();
     StepResponse stepResponse =
-        awsLambdaDeployStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParameters,
+        awsLambdaDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance, stepElementParameters,
             AwsLambdaStepPassThroughData.builder().infrastructureOutcome(infrastructureOutcome).build(),
             () -> responseData);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -204,7 +204,7 @@ public class AwsLambdaDeployStepTest extends CDNGTestBase {
     doReturn(stepResponse1)
         .when(awsLambdaHelper)
         .handleStepExceptionFailure((AwsLambdaStepExceptionPassThroughData) any());
-    StepResponse stepResponse = awsLambdaDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = awsLambdaDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, AwsLambdaStepExceptionPassThroughData.builder().build(), () -> responseData);
     assertThat(stepResponse).isEqualTo(stepResponse1);
   }
@@ -243,7 +243,7 @@ public class AwsLambdaDeployStepTest extends CDNGTestBase {
     StepResponse stepResponse1 = mock(StepResponse.class);
     doReturn(stepResponse1).when(awsLambdaHelper).handleStepFailureException(any(), any(), any());
     StepResponse stepResponse =
-        awsLambdaDeployStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParameters,
+        awsLambdaDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance, stepElementParameters,
             AwsLambdaStepPassThroughData.builder().infrastructureOutcome(infrastructureOutcome).build(),
             () -> { throw new Exception("exception"); });
     assertThat(stepResponse).isEqualTo(stepResponse1);

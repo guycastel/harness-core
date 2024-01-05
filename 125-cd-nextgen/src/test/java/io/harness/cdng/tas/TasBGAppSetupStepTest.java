@@ -183,7 +183,7 @@ public class TasBGAppSetupStepTest extends CDNGTestBase {
                                                                 .commandExecutionStatus(CommandExecutionStatus.FAILURE)
                                                                 .unitProgressData(unitProgressData)
                                                                 .build();
-    StepResponse stepResponse = tasBGAppSetupStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = tasBGAppSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParametersFromManifest, passThroughData, () -> cfBlueGreenSetupResponseNG);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.FAILED);
     assertThat(stepResponse.getUnitProgressList()).isEqualTo(unitProgresses);
@@ -203,7 +203,7 @@ public class TasBGAppSetupStepTest extends CDNGTestBase {
                                                                 .unitProgressData(unitProgressData)
                                                                 .build();
     StepResponse stepResponse =
-        tasBGAppSetupStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParametersFromManifest,
+        tasBGAppSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance, stepElementParametersFromManifest,
             TasExecutionPassThroughData.builder().build(), () -> cfBlueGreenSetupResponseNG);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.FAILED);
     assertThat(stepResponse.getUnitProgressList()).isEqualTo(unitProgresses);
@@ -231,7 +231,7 @@ public class TasBGAppSetupStepTest extends CDNGTestBase {
                                                                 .unitProgressData(unitProgressData)
                                                                 .build();
     StepResponse stepResponse =
-        tasBGAppSetupStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParametersFromManifest,
+        tasBGAppSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance, stepElementParametersFromManifest,
             TasExecutionPassThroughData.builder()
                 .cfCliVersion(CfCliVersionNG.V7)
                 .applicationName(activeApplicationName)
@@ -304,7 +304,7 @@ public class TasBGAppSetupStepTest extends CDNGTestBase {
                                                                 .unitProgressData(unitProgressData)
                                                                 .build();
     StepResponse stepResponse =
-        tasBGAppSetupStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParametersFromManifest,
+        tasBGAppSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance, stepElementParametersFromManifest,
             TasExecutionPassThroughData.builder()
                 .cfCliVersion(CfCliVersionNG.V7)
                 .applicationName(activeApplicationName)
@@ -379,14 +379,14 @@ public class TasBGAppSetupStepTest extends CDNGTestBase {
     ((TasBGAppSetupStepParameters) stepElementParametersMatchRunningInstances.getSpec())
         .setExistingVersionToKeep(ParameterField.createValueField("0"));
 
-    StepResponse stepResponse =
-        tasBGAppSetupStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParametersMatchRunningInstances,
-            TasExecutionPassThroughData.builder()
-                .cfCliVersion(CfCliVersionNG.V7)
-                .applicationName(activeApplicationName)
-                .tasManifestsPackage(tasManifestsPackage)
-                .build(),
-            () -> cfBlueGreenSetupResponseNG);
+    StepResponse stepResponse = tasBGAppSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance,
+        stepElementParametersMatchRunningInstances,
+        TasExecutionPassThroughData.builder()
+            .cfCliVersion(CfCliVersionNG.V7)
+            .applicationName(activeApplicationName)
+            .tasManifestsPackage(tasManifestsPackage)
+            .build(),
+        () -> cfBlueGreenSetupResponseNG);
     ExecutionSweepingOutput executionSweepingOutput = executionSweepingOutputArgumentCaptor.getValue();
     assertThat(executionSweepingOutput).isInstanceOf(TasSetupDataOutcome.class);
     TasSetupDataOutcome tasSetupDataOutcome = (TasSetupDataOutcome) executionSweepingOutput;
@@ -454,14 +454,14 @@ public class TasBGAppSetupStepTest extends CDNGTestBase {
                                                                 .newApplicationInfo(newApplicationInfo)
                                                                 .unitProgressData(unitProgressData)
                                                                 .build();
-    StepResponse stepResponse =
-        tasBGAppSetupStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParametersMatchRunningInstances,
-            TasExecutionPassThroughData.builder()
-                .cfCliVersion(CfCliVersionNG.V7)
-                .applicationName(activeApplicationName)
-                .tasManifestsPackage(tasManifestsPackage)
-                .build(),
-            () -> cfBlueGreenSetupResponseNG);
+    StepResponse stepResponse = tasBGAppSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance,
+        stepElementParametersMatchRunningInstances,
+        TasExecutionPassThroughData.builder()
+            .cfCliVersion(CfCliVersionNG.V7)
+            .applicationName(activeApplicationName)
+            .tasManifestsPackage(tasManifestsPackage)
+            .build(),
+        () -> cfBlueGreenSetupResponseNG);
     ExecutionSweepingOutput executionSweepingOutput = executionSweepingOutputArgumentCaptor.getValue();
     assertThat(executionSweepingOutput).isInstanceOf(TasSetupDataOutcome.class);
     TasSetupDataOutcome tasSetupDataOutcome = (TasSetupDataOutcome) executionSweepingOutput;
@@ -514,14 +514,14 @@ public class TasBGAppSetupStepTest extends CDNGTestBase {
                                                                 .activeApplicationInfo(activeApplicationInfo)
                                                                 .unitProgressData(unitProgressData)
                                                                 .build();
-    StepResponse stepResponse =
-        tasBGAppSetupStep.finalizeExecutionWithSecurityContext(ambiance, stepElementParametersMatchRunningInstances,
-            TasExecutionPassThroughData.builder()
-                .cfCliVersion(CfCliVersionNG.V7)
-                .applicationName(activeApplicationName)
-                .tasManifestsPackage(tasManifestsPackage)
-                .build(),
-            () -> cfBlueGreenSetupResponseNG);
+    StepResponse stepResponse = tasBGAppSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance,
+        stepElementParametersMatchRunningInstances,
+        TasExecutionPassThroughData.builder()
+            .cfCliVersion(CfCliVersionNG.V7)
+            .applicationName(activeApplicationName)
+            .tasManifestsPackage(tasManifestsPackage)
+            .build(),
+        () -> cfBlueGreenSetupResponseNG);
     ExecutionSweepingOutput executionSweepingOutput = executionSweepingOutputArgumentCaptor.getValue();
     assertThat(executionSweepingOutput).isInstanceOf(TasSetupDataOutcome.class);
     TasSetupDataOutcome tasSetupDataOutcome = (TasSetupDataOutcome) executionSweepingOutput;

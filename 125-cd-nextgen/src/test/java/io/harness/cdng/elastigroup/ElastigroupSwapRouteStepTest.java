@@ -213,7 +213,7 @@ public class ElastigroupSwapRouteStepTest extends CDNGTestBase {
         ElastigroupExecutionPassThroughData.builder().infrastructure(elastigroupInfrastructureOutcome).build();
     ResponseData responseData = elastigroupSwapRouteResponse;
     ThrowingSupplier<ResponseData> responseSupplier = () -> responseData;
-    StepResponse stepResponse = elastigroupSetupStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = elastigroupSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, elastigroupExecutionPassThroughData, responseSupplier);
     assertThat(stepResponse.getStepOutcomes().size()).isEqualTo(1);
     assertThat(

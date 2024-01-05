@@ -306,8 +306,8 @@ public class AzureCreateBPStepTest extends CategoryTest {
                         UnitProgress.newBuilder().setUnitName("Fetch Files").setStatus(UnitStatus.FAILURE).build()))
                     .build())
             .build();
-    azureCreateBPStep.finalizeExecutionWithSecurityContext(azureHelperTest.getAmbiance(), createStep(), exception,
-        () -> getTaskNGResponse(CommandExecutionStatus.FAILURE, UnitStatus.FAILURE, ""));
+    azureCreateBPStep.finalizeExecutionWithSecurityContextAndNodeInfo(azureHelperTest.getAmbiance(), createStep(),
+        exception, () -> getTaskNGResponse(CommandExecutionStatus.FAILURE, UnitStatus.FAILURE, ""));
     verify(cdStepHelper, times(1)).handleStepExceptionFailure(any());
   }
 
@@ -316,8 +316,8 @@ public class AzureCreateBPStepTest extends CategoryTest {
   @Category(UnitTests.class)
   public void testFinalizeExecutionWithFailureStep() throws Exception {
     AzureCreateARMResourcePassThroughData passThroughData = AzureCreateARMResourcePassThroughData.builder().build();
-    azureCreateBPStep.finalizeExecutionWithSecurityContext(azureHelperTest.getAmbiance(), createStep(), passThroughData,
-        () -> getTaskNGResponse(CommandExecutionStatus.FAILURE, UnitStatus.SUCCESS, "foobar"));
+    azureCreateBPStep.finalizeExecutionWithSecurityContextAndNodeInfo(azureHelperTest.getAmbiance(), createStep(),
+        passThroughData, () -> getTaskNGResponse(CommandExecutionStatus.FAILURE, UnitStatus.SUCCESS, "foobar"));
     verify(azureCommonHelper, times(1)).getFailureResponse(any(), any());
   }
 
@@ -326,8 +326,9 @@ public class AzureCreateBPStepTest extends CategoryTest {
   @Category(UnitTests.class)
   public void testFinalizeExecutionWithSucceededStep() throws Exception {
     AzureCreateBPPassThroughData passThroughData = AzureCreateBPPassThroughData.builder().build();
-    StepResponse response = azureCreateBPStep.finalizeExecutionWithSecurityContext(azureHelperTest.getAmbiance(),
-        createStep(), passThroughData, () -> getTaskNGResponse(CommandExecutionStatus.SUCCESS, UnitStatus.SUCCESS, ""));
+    StepResponse response =
+        azureCreateBPStep.finalizeExecutionWithSecurityContextAndNodeInfo(azureHelperTest.getAmbiance(), createStep(),
+            passThroughData, () -> getTaskNGResponse(CommandExecutionStatus.SUCCESS, UnitStatus.SUCCESS, ""));
 
     assertThat(response.getStatus()).isEqualTo(Status.SUCCEEDED);
     assertThat(response.getStepOutcomes().size()).isEqualTo(0);

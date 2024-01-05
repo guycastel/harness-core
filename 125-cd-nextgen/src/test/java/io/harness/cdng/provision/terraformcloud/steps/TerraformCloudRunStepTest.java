@@ -5,9 +5,10 @@
  * https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
  */
 
-package io.harness.cdng.provision.terraformcloud;
+package io.harness.cdng.provision.terraformcloud.steps;
 
 import static io.harness.rule.OwnerRule.BUHA;
+import static io.harness.rule.OwnerRule.TMACARI;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -26,8 +27,14 @@ import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.category.element.UnitTests;
 import io.harness.cdng.featureFlag.CDFeatureFlagHelper;
+import io.harness.cdng.provision.terraformcloud.TerraformCloudParamsMapper;
+import io.harness.cdng.provision.terraformcloud.TerraformCloudPassThroughData;
+import io.harness.cdng.provision.terraformcloud.TerraformCloudRunStepParameters;
+import io.harness.cdng.provision.terraformcloud.TerraformCloudRunType;
+import io.harness.cdng.provision.terraformcloud.TerraformCloudStepHelper;
+import io.harness.cdng.provision.terraformcloud.TerraformCloudTestStepUtils;
 import io.harness.cdng.provision.terraformcloud.outcome.TerraformCloudRunOutcome;
-import io.harness.cdng.provision.terraformcloud.steps.TerraformCloudRunStep;
+import io.harness.cdng.provision.terraformcloud.params.TerraformCloudApplySpecParameters;
 import io.harness.connector.helper.EncryptionHelper;
 import io.harness.delegate.beans.TaskData;
 import io.harness.delegate.beans.logstreaming.UnitProgressData;
@@ -60,6 +67,7 @@ import io.harness.security.encryption.EncryptedDataDetail;
 import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
 import io.harness.steps.TaskRequestsUtils;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 
 import java.util.Collections;
 import java.util.List;
@@ -224,7 +232,7 @@ public class TerraformCloudRunStepTest extends CategoryTest {
   @Owner(developers = BUHA)
   @Category(UnitTests.class)
   public void finalizeExecutionWithSecurityContextRefresh() throws Exception {
-    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContext(ambiance,
+    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance,
         getStepElementParams(TerraformCloudRunType.REFRESH_STATE), null,
         ()
             -> TerraformCloudRefreshTaskResponse.builder()
@@ -251,7 +259,7 @@ public class TerraformCloudRunStepTest extends CategoryTest {
                                                       .tfPlanJsonFileId("tfPlanJsonFieldId")
                                                       .runId("run-123")
                                                       .build();
-    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, getStepElementParams(TerraformCloudRunType.PLAN_ONLY), null, () -> response);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -276,7 +284,7 @@ public class TerraformCloudRunStepTest extends CategoryTest {
             .tfOutput("{x1 : y1}")
             .build();
 
-    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContext(ambiance,
+    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance,
         getStepElementParams(TerraformCloudRunType.PLAN_AND_APPLY), null, () -> terraformCloudRunTaskResponse);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -302,7 +310,7 @@ public class TerraformCloudRunStepTest extends CategoryTest {
             .runId("run-123")
             .tfOutput("{x1 : y1}")
             .build();
-    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContext(ambiance,
+    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContextAndNodeInfo(ambiance,
         getStepElementParams(TerraformCloudRunType.PLAN_AND_DESTROY), null, () -> terraformCloudRunTaskResponse);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -327,7 +335,7 @@ public class TerraformCloudRunStepTest extends CategoryTest {
             .runId("run-123")
             .tfPlanJsonFileId("jsonFileId")
             .build();
-    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, getStepElementParams(TerraformCloudRunType.PLAN), null, () -> terraformCloudRunTaskResponse);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -353,7 +361,7 @@ public class TerraformCloudRunStepTest extends CategoryTest {
             .runId("run-123")
             .tfOutput("{x1 : y1}")
             .build();
-    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformCloudRunStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, getStepElementParams(TerraformCloudRunType.APPLY), null, () -> terraformCloudRunTaskResponse);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -405,6 +413,22 @@ public class TerraformCloudRunStepTest extends CategoryTest {
     assertThat(commandUnitsCaptor.getValue()).isNotNull();
     assertThat(commandUnitsCaptor.getValue()).contains("Apply");
     verify(helper, times(1)).saveTerraformCloudConfig(any(), any(), any(), any());
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    TerraformCloudRunStepParameters runStepParameters =
+        TerraformCloudRunStepParameters.infoBuilder().spec(TerraformCloudApplySpecParameters.builder().build()).build();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().spec(runStepParameters).build();
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        terraformCloudRunStep.getStepExecutionTelemetryEventDTO(
+            ambiance, stepElementParameters, TerraformCloudPassThroughData.builder().build());
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(TerraformCloudRunStep.STEP_TYPE.getType());
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(TerraformCloudRunStep.RUN_TYPE))
+        .isEqualTo(TerraformCloudRunType.APPLY.getDisplayName());
   }
 
   private StepElementParameters getStepElementParams(TerraformCloudRunType type) {

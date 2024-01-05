@@ -967,7 +967,7 @@ public class AzureCreateARMResourceStepTest extends CategoryTest {
                       .connectorRef(ParameterField.createValueField("template-connector-ref"))
                       .build())
             .build();
-    azureCreateStep.finalizeExecutionWithSecurityContext(azureHelperTest.getAmbiance(),
+    azureCreateStep.finalizeExecutionWithSecurityContextAndNodeInfo(azureHelperTest.getAmbiance(),
         createStep("RG", templateStore, fileStoreConfigWrapper), exception,
         () -> getTaskNGResponse(CommandExecutionStatus.FAILURE, UnitStatus.FAILURE, ""));
     verify(cdStepHelper, times(1)).handleStepExceptionFailure(any());
@@ -992,7 +992,7 @@ public class AzureCreateARMResourceStepTest extends CategoryTest {
                       .build())
             .build();
     AzureCreateARMResourcePassThroughData passThroughData = AzureCreateARMResourcePassThroughData.builder().build();
-    azureCreateStep.finalizeExecutionWithSecurityContext(azureHelperTest.getAmbiance(),
+    azureCreateStep.finalizeExecutionWithSecurityContextAndNodeInfo(azureHelperTest.getAmbiance(),
         createStep("RG", templateStore, fileStoreConfigWrapper), passThroughData,
         () -> getTaskNGResponse(CommandExecutionStatus.FAILURE, UnitStatus.SUCCESS, "foobar"));
     verify(azureCommonHelper, times(1)).getFailureResponse(any(), any());
@@ -1017,8 +1017,8 @@ public class AzureCreateARMResourceStepTest extends CategoryTest {
                       .connectorRef(ParameterField.createValueField("template-connector-ref"))
                       .build())
             .build();
-    StepResponse response = azureCreateStep.finalizeExecutionWithSecurityContext(azureHelperTest.getAmbiance(),
-        createStep("RG", templateStore, fileStoreConfigWrapper), passThroughData,
+    StepResponse response = azureCreateStep.finalizeExecutionWithSecurityContextAndNodeInfo(
+        azureHelperTest.getAmbiance(), createStep("RG", templateStore, fileStoreConfigWrapper), passThroughData,
         () -> getTaskNGResponse(CommandExecutionStatus.SUCCESS, UnitStatus.SUCCESS, ""));
 
     assertThat(response.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -1049,11 +1049,12 @@ public class AzureCreateARMResourceStepTest extends CategoryTest {
                       .build())
             .build();
     InvalidArgumentsException exception = new InvalidArgumentsException("Foobar");
-    assertThatThrownBy(()
-                           -> azureCreateStep.finalizeExecutionWithSecurityContext(azureHelperTest.getAmbiance(),
-                               createStep("RG", templateStore, fileStoreConfigWrapper), passThroughData,
+    assertThatThrownBy(
+        ()
+            -> azureCreateStep.finalizeExecutionWithSecurityContextAndNodeInfo(azureHelperTest.getAmbiance(),
+                createStep("RG", templateStore, fileStoreConfigWrapper), passThroughData,
 
-                               () -> { throw new TaskNGDataException(UnitProgressData.builder().build(), exception); }))
+                () -> { throw new TaskNGDataException(UnitProgressData.builder().build(), exception); }))
         .isInstanceOf(TaskNGDataException.class);
   }
 

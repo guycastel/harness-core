@@ -135,7 +135,7 @@ public class AsgCanaryDeployStepTest extends CategoryTest {
             .build();
     ResponseData responseData = AsgCanaryDeployResponse.builder().build();
 
-    StepResponse stepResponse = asgCanaryDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = asgCanaryDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, asgStepExceptionPassThroughData, () -> responseData);
 
     assertThat(stepResponse.getUnitProgressList()).isEqualTo(Arrays.asList(UnitProgress.newBuilder().build()));
@@ -182,7 +182,7 @@ public class AsgCanaryDeployStepTest extends CategoryTest {
         .when(instanceInfoService)
         .saveServerInstancesIntoSweepingOutput(any(), any());
 
-    StepResponse stepResponse = asgCanaryDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = asgCanaryDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, asgExecutionPassThroughData, () -> responseData);
 
     Map<String, Outcome> outcomeMap = stepResponse.getStepOutcomes().stream().collect(

@@ -191,7 +191,7 @@ public class K8sRollingStep extends CdTaskChainExecutable implements K8sStepExec
     K8sRollingStepParameters k8sRollingStepParameters = (K8sRollingStepParameters) stepParameters.getSpec();
     HashMap<String, Object> telemetryProperties = new HashMap<>();
     telemetryProperties.put(DeploymentsInstrumentationHelper.K8S_SKIP_DRY_RUN,
-        ParameterFieldHelper.getBooleanParameterFieldValue(k8sRollingStepParameters.skipDryRun));
+        ParameterFieldHelper.getBooleanParameterFieldValue(k8sRollingStepParameters.getSkipDryRun()));
     return StepExecutionTelemetryEventDTO.builder()
         .stepType(STEP_TYPE.getType())
         .properties(telemetryProperties)

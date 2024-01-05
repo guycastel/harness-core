@@ -119,7 +119,7 @@ public class ServerlessAwsLambdaDeployStepTest extends AbstractServerlessStepExe
         .when(instanceInfoService)
         .saveServerInstancesIntoSweepingOutput(ambiance, serverInstanceInfoList);
 
-    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, serverlessExecutionPassThroughData, () -> serverlessDeployResponse);
     assertThat(response.getStatus()).isEqualTo(Status.SUCCEEDED);
     assertThat(response.getUnitProgressList()).isEqualTo(Arrays.asList());
@@ -152,7 +152,7 @@ public class ServerlessAwsLambdaDeployStepTest extends AbstractServerlessStepExe
         .when(serverlessStepHelper)
         .handleGitTaskFailure((ServerlessGitFetchFailurePassThroughData) passThroughData);
 
-    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, passThroughData, () -> serverlessDeployResponse);
     verify(serverlessStepHelper, times(1))
         .handleGitTaskFailure((ServerlessGitFetchFailurePassThroughData) passThroughData);
@@ -182,7 +182,7 @@ public class ServerlessAwsLambdaDeployStepTest extends AbstractServerlessStepExe
         .when(serverlessStepHelper)
         .handleStepExceptionFailure((ServerlessStepExceptionPassThroughData) passThroughData);
 
-    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, passThroughData, () -> serverlessDeployResponse);
     verify(serverlessStepHelper, times(1))
         .handleStepExceptionFailure((ServerlessStepExceptionPassThroughData) passThroughData);
@@ -205,7 +205,7 @@ public class ServerlessAwsLambdaDeployStepTest extends AbstractServerlessStepExe
     doReturn(stepResponse)
         .when(serverlessStepHelper)
         .handleTaskException(ambiance, (ServerlessExecutionPassThroughData) passThroughData, e);
-    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, passThroughData, () -> { throw e; });
     verify(serverlessStepHelper, times(1))
         .handleTaskException(ambiance, (ServerlessExecutionPassThroughData) passThroughData, e);
@@ -228,7 +228,7 @@ public class ServerlessAwsLambdaDeployStepTest extends AbstractServerlessStepExe
     doReturn(stepResponse)
         .when(serverlessStepHelper)
         .handleTaskException(ambiance, (ServerlessExecutionPassThroughData) passThroughData, e);
-    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse response = serverlessAwsLambdaDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, passThroughData, () -> { throw e; });
     verify(serverlessStepHelper, times(1))
         .handleTaskException(ambiance, (ServerlessExecutionPassThroughData) passThroughData, e);

@@ -15,6 +15,7 @@ import static io.harness.rule.OwnerRule.ACHYUTH;
 import static io.harness.rule.OwnerRule.BUHA;
 import static io.harness.rule.OwnerRule.NAMAN_TALAYCHA;
 import static io.harness.rule.OwnerRule.TARUN_UBA;
+import static io.harness.rule.OwnerRule.TMACARI;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,6 +70,7 @@ import io.harness.rule.Owner;
 import io.harness.secretusage.SecretRuntimeUsageService;
 import io.harness.steps.EntityReferenceExtractorUtils;
 import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.walktree.visitor.entityreference.beans.VisitedSecretReference;
 
 import com.google.common.collect.ImmutableMap;
@@ -465,6 +467,42 @@ public class K8sApplyStepTest extends AbstractK8sStepExecutorTestBase {
             + "All files should be part of the manifest specified in the service definition. \n"
             + "The following files could not be found in the manifest: \n"
             + "- /notExistingPath.yaml \n");
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    GitStore gitStoreStepLevelSource = GitStore.builder()
+                                           .branch(ParameterField.createValueField("master"))
+                                           .paths(ParameterField.createValueField(asList("path1")))
+                                           .connectorRef(ParameterField.createValueField("git-connector"))
+                                           .build();
+    StoreConfigWrapper storeConfigWrapper = StoreConfigWrapper.builder().spec(gitStoreStepLevelSource).build();
+
+    K8sApplyStepParameters k8sApplyStepParameters =
+        K8sApplyStepParameters.infoBuilder()
+            .skipDryRun(ParameterField.createValueField(true))
+            .skipRendering(ParameterField.createValueField(true))
+            .skipSteadyStateCheck(ParameterField.createValueField(true))
+            .manifestSource(
+                ManifestSourceWrapper.builder()
+                    .spec(K8sManifest.builder().store(ParameterField.createValueField(storeConfigWrapper)).build())
+                    .type(ManifestConfigType.K8_MANIFEST)
+                    .build())
+            .build();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().spec(k8sApplyStepParameters).build();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO = k8sApplyStep.getStepExecutionTelemetryEventDTO(
+        ambiance, stepElementParameters, K8sExecutionPassThroughData.builder().build());
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(K8sApplyStep.STEP_TYPE.getType());
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(K8sApplyStep.MANIFEST_SOURCE)).isEqualTo(true);
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(K8sApplyStep.FILE_PATHS)).isEqualTo(null);
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(K8sApplyStep.SKIP_RENDERING)).isEqualTo(true);
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(K8sApplyStep.SKIP_DRY_RUN)).isEqualTo(true);
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(K8sApplyStep.SKIP_STEADY_STATE_CHECK))
+        .isEqualTo(true);
   }
 
   private void testPublishSecretRuntimeUsage(K8sApplyStepParameters applyStepParameters, Object visitable) {

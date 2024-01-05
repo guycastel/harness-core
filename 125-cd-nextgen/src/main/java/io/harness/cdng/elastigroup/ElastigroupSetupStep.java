@@ -25,6 +25,7 @@ import io.harness.cdng.elastigroup.beans.ElastigroupParametersFetchFailurePassTh
 import io.harness.cdng.elastigroup.beans.ElastigroupSetupDataOutcome;
 import io.harness.cdng.elastigroup.beans.ElastigroupStartupScriptFetchFailurePassThroughData;
 import io.harness.cdng.elastigroup.beans.ElastigroupStepExceptionPassThroughData;
+import io.harness.cdng.executables.CdTaskChainExecutable;
 import io.harness.cdng.infra.beans.ElastigroupInfrastructureOutcome;
 import io.harness.cdng.stepsdependency.constants.OutcomeExpressionConstants;
 import io.harness.delegate.beans.elastigroup.ElastigroupSetupResult;
@@ -41,7 +42,6 @@ import io.harness.logging.LogCallback;
 import io.harness.logging.Misc;
 import io.harness.logging.UnitProgress;
 import io.harness.logging.UnitStatus;
-import io.harness.plancreator.steps.common.rollback.TaskChainExecutableWithRollbackAndRbac;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.execution.Status;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -60,6 +60,7 @@ import io.harness.spotinst.model.ElastiGroup;
 import io.harness.spotinst.model.ElastiGroupCapacity;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 
 import software.wings.beans.LogColor;
 import software.wings.beans.LogWeight;
@@ -71,7 +72,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @OwnedBy(HarnessTeam.CDP)
 @Slf4j
-public class ElastigroupSetupStep extends TaskChainExecutableWithRollbackAndRbac implements ElastigroupStepExecutor {
+public class ElastigroupSetupStep extends CdTaskChainExecutable implements ElastigroupStepExecutor {
   public static final StepType STEP_TYPE = StepType.newBuilder()
                                                .setType(ExecutionNodeType.ELASTIGROUP_SETUP.getYamlType())
                                                .setStepCategory(StepCategory.STEP)
@@ -185,17 +186,18 @@ public class ElastigroupSetupStep extends TaskChainExecutableWithRollbackAndRbac
   }
 
   @Override
-  public TaskChainResponse executeNextLinkWithSecurityContext(Ambiance ambiance, StepBaseParameters stepParameters,
-      StepInputPackage inputPackage, PassThroughData passThroughData, ThrowingSupplier<ResponseData> responseSupplier)
-      throws Exception {
+  public TaskChainResponse executeNextLinkWithSecurityContextAndNodeInfo(Ambiance ambiance,
+      StepBaseParameters stepParameters, StepInputPackage inputPackage, PassThroughData passThroughData,
+      ThrowingSupplier<ResponseData> responseSupplier) throws Exception {
     log.info("Calling executeNextLink");
     return elastigroupStepCommonHelper.executeNextLink(
         this, ambiance, stepParameters, passThroughData, responseSupplier);
   }
 
   @Override
-  public StepResponse finalizeExecutionWithSecurityContext(Ambiance ambiance, StepBaseParameters stepParameters,
-      PassThroughData passThroughData, ThrowingSupplier<ResponseData> responseDataSupplier) throws Exception {
+  public StepResponse finalizeExecutionWithSecurityContextAndNodeInfo(Ambiance ambiance,
+      StepBaseParameters stepParameters, PassThroughData passThroughData,
+      ThrowingSupplier<ResponseData> responseDataSupplier) throws Exception {
     if (passThroughData instanceof ElastigroupStartupScriptFetchFailurePassThroughData) {
       return elastigroupStepCommonHelper.handleStartupScriptTaskFailure(
           (ElastigroupStartupScriptFetchFailurePassThroughData) passThroughData);
@@ -283,5 +285,11 @@ public class ElastigroupSetupStep extends TaskChainExecutableWithRollbackAndRbac
     ElastigroupExecutionPassThroughData passThroughData =
         ElastigroupExecutionPassThroughData.builder().blueGreen(false).build();
     return elastigroupStepCommonHelper.startChainLink(ambiance, stepParameters, passThroughData);
+  }
+
+  @Override
+  protected StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
+      Ambiance ambiance, StepBaseParameters stepParameters, PassThroughData passThroughData) {
+    return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
   }
 }

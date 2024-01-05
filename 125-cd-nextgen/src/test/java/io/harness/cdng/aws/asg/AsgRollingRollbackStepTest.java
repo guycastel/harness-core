@@ -130,8 +130,8 @@ public class AsgRollingRollbackStepTest extends CategoryTest {
     doReturn(asgInfrastructureOutcome).when(outcomeService).resolve(any(), any());
     doReturn(asgInfrastructureOutcome).when(asgStepCommonHelper).getInfrastructureOutcomeWithUpdatedExpressions(any());
 
-    StepResponse stepResponse =
-        asgRollingRollbackStep.handleTaskResultWithSecurityContext(ambiance, stepElementParameters, () -> responseData);
+    StepResponse stepResponse = asgRollingRollbackStep.handleTaskResultWithSecurityContextAndNodeInfo(
+        ambiance, stepElementParameters, () -> responseData);
 
     Map<String, Outcome> outcomeMap = stepResponse.getStepOutcomes().stream().collect(
         Collectors.toMap(StepResponse.StepOutcome::getName, StepResponse.StepOutcome::getOutcome));
@@ -154,8 +154,8 @@ public class AsgRollingRollbackStepTest extends CategoryTest {
 
     AccountDTO accountDTO = AccountDTO.builder().name("acc").build();
     doReturn(accountDTO).when(accountService).getAccount(AmbianceUtils.getAccountId(ambiance));
-    StepResponse stepResponse =
-        asgRollingRollbackStep.handleTaskResultWithSecurityContext(ambiance, stepElementParameters, () -> responseData);
+    StepResponse stepResponse = asgRollingRollbackStep.handleTaskResultWithSecurityContextAndNodeInfo(
+        ambiance, stepElementParameters, () -> responseData);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.FAILED);
   }
 

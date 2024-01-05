@@ -23,6 +23,7 @@ import io.harness.azure.model.AzureConstants;
 import io.harness.beans.FileReference;
 import io.harness.beans.IdentifierRef;
 import io.harness.cdng.CDStepHelper;
+import io.harness.cdng.executables.CdTaskChainExecutable;
 import io.harness.cdng.expressions.CDExpressionResolver;
 import io.harness.cdng.featureFlag.CDFeatureFlagHelper;
 import io.harness.cdng.k8s.beans.StepExceptionPassThroughData;
@@ -57,7 +58,6 @@ import io.harness.logging.CommandExecutionStatus;
 import io.harness.ng.core.EntityDetail;
 import io.harness.ng.core.NGAccess;
 import io.harness.plancreator.steps.TaskSelectorYaml;
-import io.harness.plancreator.steps.common.rollback.TaskChainExecutableWithRollbackAndRbac;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.execution.Status;
 import io.harness.pms.contracts.execution.tasks.TaskRequest;
@@ -78,6 +78,7 @@ import io.harness.steps.StepUtils;
 import io.harness.steps.TaskRequestsUtils;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.IdentifierRefHelper;
 
 import software.wings.beans.TaskType;
@@ -94,7 +95,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @OwnedBy(CDP)
 @Slf4j
-public class AzureCreateBPStep extends TaskChainExecutableWithRollbackAndRbac {
+public class AzureCreateBPStep extends CdTaskChainExecutable {
   private static final String BLUEPRINT_JSON = "blueprint.json";
   private static final String ASSIGN_JSON = "assign.json";
   private static final String ARTIFACTS = "artifacts/";
@@ -145,9 +146,9 @@ public class AzureCreateBPStep extends TaskChainExecutableWithRollbackAndRbac {
   }
 
   @Override
-  public TaskChainResponse executeNextLinkWithSecurityContext(Ambiance ambiance, StepBaseParameters stepParameters,
-      StepInputPackage inputPackage, PassThroughData passThroughData, ThrowingSupplier<ResponseData> responseSupplier)
-      throws Exception {
+  public TaskChainResponse executeNextLinkWithSecurityContextAndNodeInfo(Ambiance ambiance,
+      StepBaseParameters stepParameters, StepInputPackage inputPackage, PassThroughData passThroughData,
+      ThrowingSupplier<ResponseData> responseSupplier) throws Exception {
     ResponseData responseData = responseSupplier.get();
     if (responseData instanceof GitFetchResponse) {
       return handleGitFetchResponse(ambiance, stepParameters, passThroughData, (GitFetchResponse) responseData);
@@ -164,8 +165,9 @@ public class AzureCreateBPStep extends TaskChainExecutableWithRollbackAndRbac {
   }
 
   @Override
-  public StepResponse finalizeExecutionWithSecurityContext(Ambiance ambiance, StepBaseParameters stepParameters,
-      PassThroughData passThroughData, ThrowingSupplier<ResponseData> responseDataSupplier) throws Exception {
+  public StepResponse finalizeExecutionWithSecurityContextAndNodeInfo(Ambiance ambiance,
+      StepBaseParameters stepParameters, PassThroughData passThroughData,
+      ThrowingSupplier<ResponseData> responseDataSupplier) throws Exception {
     if (passThroughData instanceof StepExceptionPassThroughData) {
       StepExceptionPassThroughData stepExceptionPassThroughData = (StepExceptionPassThroughData) passThroughData;
       return cdStepHelper.handleStepExceptionFailure(stepExceptionPassThroughData);
@@ -354,6 +356,12 @@ public class AzureCreateBPStep extends TaskChainExecutableWithRollbackAndRbac {
       throw new InvalidArgumentsException("Secrets files are not supported for Blueprints");
     }
     throw new InvalidArgumentsException("The selected path points to an empty Store");
+  }
+
+  @Override
+  protected StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
+      Ambiance ambiance, StepBaseParameters stepParameters, PassThroughData passThroughData) {
+    return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
   }
 
   /**

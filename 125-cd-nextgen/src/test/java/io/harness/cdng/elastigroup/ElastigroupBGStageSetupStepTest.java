@@ -277,7 +277,7 @@ public class ElastigroupBGStageSetupStepTest extends CDNGTestBase {
         .when(elastigroupStepCommonHelper)
         .generateOriginalConfigFromJson(
             elastigroupJson, elastigroupBGStageSetupStepParameters.getInstances(), ambiance);
-    StepResponse stepResponse = elastigroupSetupStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = elastigroupSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, elastigroupExecutionPassThroughData, responseSupplier);
     assertThat(stepResponse.getStepOutcomes().size()).isEqualTo(1);
     assertThat(((ElastigroupSetupDataOutcome) stepResponse.getStepOutcomes().stream().findFirst().get().getOutcome())
@@ -392,7 +392,7 @@ public class ElastigroupBGStageSetupStepTest extends CDNGTestBase {
                .build();
 
     // When
-    final StepResponse response = elastigroupSetupStep.finalizeExecutionWithSecurityContext(
+    final StepResponse response = elastigroupSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         anAmbiance(), stepParameters, passThroughData, throwingSupplier);
 
     // Then
@@ -414,7 +414,7 @@ public class ElastigroupBGStageSetupStepTest extends CDNGTestBase {
     };
 
     // When
-    elastigroupSetupStep.finalizeExecutionWithSecurityContext(
+    elastigroupSetupStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         anAmbiance(), stepParameters, passThroughData, throwingSupplier);
 
     // Then

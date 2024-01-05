@@ -307,7 +307,7 @@ public class AsgBlueGreenDeployStepTest extends CategoryTest {
         AsgStepExceptionPassThroughData.builder().unitProgressData(unitProgressData).errorMessage("error").build();
     ResponseData responseData = AsgCanaryDeployResponse.builder().build();
 
-    StepResponse stepResponse = asgBlueGreenDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = asgBlueGreenDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, asgStepExceptionPassThroughData, () -> responseData);
 
     assertThat(stepResponse.getUnitProgressList()).isEqualTo(Arrays.asList(UnitProgress.newBuilder().build()));
@@ -339,7 +339,7 @@ public class AsgBlueGreenDeployStepTest extends CategoryTest {
         .when(instanceInfoService)
         .saveServerInstancesIntoSweepingOutput(any(), any());
 
-    StepResponse stepResponse = asgBlueGreenDeployStep.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = asgBlueGreenDeployStep.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, asgBlueGreenExecutionPassThroughData, () -> responseData);
 
     Map<String, Outcome> outcomeMap = stepResponse.getStepOutcomes().stream().collect(

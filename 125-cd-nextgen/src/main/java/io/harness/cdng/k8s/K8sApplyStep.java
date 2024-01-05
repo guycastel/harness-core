@@ -31,6 +31,7 @@ import io.harness.cdng.k8s.beans.StepExceptionPassThroughData;
 import io.harness.cdng.manifest.ManifestType;
 import io.harness.cdng.manifest.steps.outcome.ManifestsOutcome;
 import io.harness.cdng.manifest.yaml.ManifestOutcome;
+import io.harness.common.ParameterFieldHelper;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.delegate.beans.logstreaming.UnitProgressData;
 import io.harness.delegate.beans.logstreaming.UnitProgressDataMapper;
@@ -71,6 +72,7 @@ import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.walktree.visitor.entityreference.beans.VisitedSecretReference;
 
 import com.google.inject.Inject;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +88,11 @@ public class K8sApplyStep extends CdTaskChainExecutable implements K8sStepExecut
                                                .setType(ExecutionNodeType.K8S_APPLY.getYamlType())
                                                .setStepCategory(StepCategory.STEP)
                                                .build();
+  public static final String MANIFEST_SOURCE = "manifest_source";
+  public static final String FILE_PATHS = "file_paths";
+  public static final String SKIP_RENDERING = "skip_rendering";
+  public static final String SKIP_DRY_RUN = "skip_dry_run";
+  public static final String SKIP_STEADY_STATE_CHECK = "skip_steady_state_check";
   private final String K8S_APPLY_COMMAND_NAME = "K8s Apply";
 
   @Inject private K8sStepHelper k8sStepHelper;
@@ -265,7 +272,24 @@ public class K8sApplyStep extends CdTaskChainExecutable implements K8sStepExecut
   @Override
   protected StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
       Ambiance ambiance, StepBaseParameters stepParameters, PassThroughData passThroughData) {
-    return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
+    K8sApplyStepParameters k8sApplyStepParameters = (K8sApplyStepParameters) stepParameters.getSpec();
+    HashMap<String, Object> telemetryProperties = new HashMap<>();
+    if (k8sApplyStepParameters.getManifestSource() != null) {
+      telemetryProperties.put(MANIFEST_SOURCE, true);
+    } else {
+      telemetryProperties.put(FILE_PATHS, true);
+    }
+    telemetryProperties.put(
+        SKIP_RENDERING, ParameterFieldHelper.getBooleanParameterFieldValue(k8sApplyStepParameters.getSkipRendering()));
+    telemetryProperties.put(
+        SKIP_DRY_RUN, ParameterFieldHelper.getBooleanParameterFieldValue(k8sApplyStepParameters.getSkipDryRun()));
+    telemetryProperties.put(SKIP_STEADY_STATE_CHECK,
+        ParameterFieldHelper.getBooleanParameterFieldValue(k8sApplyStepParameters.getSkipSteadyStateCheck()));
+
+    return StepExecutionTelemetryEventDTO.builder()
+        .stepType(STEP_TYPE.getType())
+        .properties(telemetryProperties)
+        .build();
   }
 
   private void publishSecretRuntimeUsage(Ambiance ambiance, K8sApplyStepParameters stepParameters) {

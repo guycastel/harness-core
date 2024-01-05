@@ -197,8 +197,7 @@ public class NormalisedSbomComponentServiceImplTest extends SSCAManagerTestBase 
         new ComponentFilter().fieldName(FieldNameEnum.COMPONENTVERSION).value("1.2.3").operator(Operator.EQUALS);
     Criteria criteria = componentService.getComponentVersionFilterCriteria(filter);
     assertThat(new Query(criteria).toString())
-        .isEqualTo(
-            "Query: { \"majorVersion\" : 1, \"minorVersion\" : 2, \"patchVersion\" : 3, \"$or\" : [{ \"packageVersion\" : \"1.2.3\"}]}, Fields: {}, Sort: {}");
+        .isEqualTo("Query: { \"packageVersion\" : \"1.2.3\"}, Fields: {}, Sort: {}");
     filter.setOperator(Operator.NOTEQUALS);
     criteria = componentService.getComponentVersionFilterCriteria(filter);
     assertThat(new Query(criteria).toString())
@@ -235,14 +234,12 @@ public class NormalisedSbomComponentServiceImplTest extends SSCAManagerTestBase 
         new ComponentFilter().fieldName(FieldNameEnum.COMPONENTVERSION).value("1.2.3").operator(Operator.EQUALS);
     Criteria criteria = componentService.getComponentVersionFilterCriteria(filter);
     assertThat(new Query(criteria).toString())
-        .isEqualTo(
-            "Query: { \"majorVersion\" : 1, \"minorVersion\" : 2, \"patchVersion\" : 3, \"$or\" : [{ \"packageVersion\" : \"1.2.3\"}]}, Fields: {}, Sort: {}");
+        .isEqualTo("Query: { \"packageVersion\" : \"1.2.3\"}, Fields: {}, Sort: {}");
     filter =
         new ComponentFilter().fieldName(FieldNameEnum.COMPONENTVERSION).value("1.2.3-abcd").operator(Operator.EQUALS);
     criteria = componentService.getComponentVersionFilterCriteria(filter);
     assertThat(new Query(criteria).toString())
-        .isEqualTo(
-            "Query: { \"majorVersion\" : 1, \"minorVersion\" : 2, \"patchVersion\" : -1, \"$or\" : [{ \"packageVersion\" : \"1.2.3-abcd\"}]}, Fields: {}, Sort: {}");
+        .isEqualTo("Query: { \"packageVersion\" : \"1.2.3-abcd\"}, Fields: {}, Sort: {}");
     filter = new ComponentFilter().fieldName(FieldNameEnum.COMPONENTVERSION).value("latest").operator(Operator.EQUALS);
     criteria = componentService.getComponentVersionFilterCriteria(filter);
     assertThat(new Query(criteria).toString())
@@ -255,8 +252,7 @@ public class NormalisedSbomComponentServiceImplTest extends SSCAManagerTestBase 
     filter = new ComponentFilter().fieldName(FieldNameEnum.COMPONENTVERSION).value("2.e-xyz").operator(Operator.EQUALS);
     criteria = componentService.getComponentVersionFilterCriteria(filter);
     assertThat(new Query(criteria).toString())
-        .isEqualTo(
-            "Query: { \"majorVersion\" : 2, \"minorVersion\" : -1, \"patchVersion\" : -1, \"$or\" : [{ \"packageVersion\" : \"2.e-xyz\"}]}, Fields: {}, Sort: {}");
+        .isEqualTo("Query: { \"packageVersion\" : \"2.e-xyz\"}, Fields: {}, Sort: {}");
   }
 
   @Test

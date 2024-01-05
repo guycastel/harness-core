@@ -151,31 +151,26 @@ public class NormalisedSbomComponentServiceImpl implements NormalisedSbomCompone
 
   @VisibleForTesting
   Criteria getComponentVersionFilterCriteria(ComponentFilter filter) {
+    if (filter.getOperator() == Operator.EQUALS) {
+      return new Criteria().where(NormalizedSBOMEntityKeys.packageVersion).is(filter.getValue());
+    }
     List<Integer> versions = VersionField.getVersion(filter.getValue());
     if (versions.size() != 3 || versions.get(0) == -1) {
-      if (filter.getOperator() == Operator.EQUALS) {
-        return new Criteria().where(NormalizedSBOMEntityKeys.packageVersion).is(filter.getValue());
-      }
       throw new InvalidArgumentsException(String.format("Unsupported Version Format"));
     }
-    if (filter.getOperator() != Operator.EQUALS) {
-      Criteria patchCriteria = new Criteria();
-      Criteria minorCriteria = new Criteria();
-      Criteria majorCriteria = new Criteria();
-      if (versions.get(2) != -1) {
-        patchCriteria =
-            getPatchVersionCriteria(versions.get(0), versions.get(1), versions.get(2), filter.getOperator());
-      }
-      if (versions.get(1) != -1) {
-        minorCriteria = getMinorVersionCriteria(versions.get(0), versions.get(1), filter.getOperator());
-      }
-      if (versions.get(0) != -1) {
-        majorCriteria = getMajorVersionCriteria(versions.get(0), filter.getOperator());
-      }
-      return new Criteria().orOperator(patchCriteria, minorCriteria, majorCriteria);
+    Criteria patchCriteria = new Criteria();
+    Criteria minorCriteria = new Criteria();
+    Criteria majorCriteria = new Criteria();
+    if (versions.get(2) != -1) {
+      patchCriteria = getPatchVersionCriteria(versions.get(0), versions.get(1), versions.get(2), filter.getOperator());
     }
-    return getEqualVersionCriteria(versions).orOperator(
-        new Criteria().where(NormalizedSBOMEntityKeys.packageVersion).is(filter.getValue()));
+    if (versions.get(1) != -1) {
+      minorCriteria = getMinorVersionCriteria(versions.get(0), versions.get(1), filter.getOperator());
+    }
+    if (versions.get(0) != -1) {
+      majorCriteria = getMajorVersionCriteria(versions.get(0), filter.getOperator());
+    }
+    return new Criteria().orOperator(patchCriteria, minorCriteria, majorCriteria);
   }
 
   private Criteria getEqualVersionCriteria(List<Integer> versions) {

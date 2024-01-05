@@ -18,7 +18,6 @@ import io.harness.ssca.search.entities.Component.ComponentKeys;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import lombok.experimental.UtilityClass;
 
@@ -62,11 +61,11 @@ public class ComponentVersionQueryBuilder {
   }
 
   public Query buildComponentVersionQuery(ComponentFilter filter) {
+    if (filter.getOperator() == EQUALS) {
+      return ElasticSearchQueryBuilder.matchFieldValue(ComponentKeys.packageVersion, filter.getValue());
+    }
     List<Integer> versions = VersionField.getVersion(filter.getValue());
     if (versions.size() != 3 || versions.get(0) == -1) {
-      if (filter.getOperator() == EQUALS) {
-        return ElasticSearchQueryBuilder.matchFieldValue(ComponentKeys.packageVersion, filter.getValue());
-      }
       throw new InvalidArgumentsException("Unsupported Version Format");
     }
     Integer majorVersion = versions.get(0);
@@ -74,11 +73,6 @@ public class ComponentVersionQueryBuilder {
     Integer patchVersion = versions.get(2);
 
     switch (filter.getOperator()) {
-      case EQUALS:
-        List<Query> equalQueries =
-            new ArrayList<>((Collection) buildEqualsQuery(majorVersion, minorVersion, patchVersion));
-        equalQueries.add(ElasticSearchQueryBuilder.matchFieldValue(ComponentKeys.packageVersion, filter.getValue()));
-        return ElasticSearchQueryBuilder.shouldMatchAtleastOne(equalQueries);
       case NOTEQUALS:
         return buildNotEqualsQuery(majorVersion, minorVersion, patchVersion);
       case GREATERTHAN:

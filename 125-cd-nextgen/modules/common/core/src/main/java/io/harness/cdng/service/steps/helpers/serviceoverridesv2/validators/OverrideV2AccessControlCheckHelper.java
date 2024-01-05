@@ -58,8 +58,12 @@ public class OverrideV2AccessControlCheckHelper {
   }
 
   public void validateRBACForService(ServiceOverrideRequestDTOV2 requestDTOV2, String accountId) {
-    IdentifierRef svcIdentifierRef = IdentifierRefHelper.getIdentifierRef(
-        requestDTOV2.getServiceRef(), accountId, requestDTOV2.getOrgIdentifier(), requestDTOV2.getProjectIdentifier());
+    validateRBACForService(
+        accountId, requestDTOV2.getOrgIdentifier(), requestDTOV2.getProjectIdentifier(), requestDTOV2.getServiceRef());
+  }
+
+  public void validateRBACForService(String accountId, String orgId, String projectId, String serviceRef) {
+    IdentifierRef svcIdentifierRef = IdentifierRefHelper.getIdentifierRef(serviceRef, accountId, orgId, projectId);
     accessControlClient.checkForAccessOrThrow(
         ResourceScope.of(accountId, svcIdentifierRef.getOrgIdentifier(), svcIdentifierRef.getProjectIdentifier()),
         Resource.of(NGResourceType.SERVICE, svcIdentifierRef.getIdentifier()), SERVICE_UPDATE_PERMISSION);

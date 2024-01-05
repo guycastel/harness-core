@@ -66,4 +66,11 @@ public class InfraGlobalOverrideRequestParamsHandler implements ServiceOverrideT
       throw new InvalidRequestException("Infra Identifier should not be empty for Infrastructure override");
     }
   }
+
+  @Override
+  public void validateDeleteRequest(@NonNull NGServiceOverridesEntity serviceOverridesEntity) {
+    overrideValidatorService.validateEnvWithRBACOrThrow(serviceOverridesEntity.getAccountId(),
+        serviceOverridesEntity.getOrgIdentifier(), serviceOverridesEntity.getProjectIdentifier(),
+        serviceOverridesEntity.getEnvironmentRef());
+  }
 }

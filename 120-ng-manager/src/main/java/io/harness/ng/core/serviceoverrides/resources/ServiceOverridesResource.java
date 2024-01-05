@@ -349,8 +349,8 @@ public class ServiceOverridesResource {
           identifier, projectIdentifier, orgIdentifier));
     }
     NGServiceOverridesEntity ngServiceOverridesEntity = ngServiceOverridesEntityOptional.get();
-    overrideValidatorService.validateEnvWithRBACOrThrow(
-        accountId, orgIdentifier, projectIdentifier, ngServiceOverridesEntity.getEnvironmentRef());
+
+    overrideValidatorService.validateDeleteRequestOrThrow(ngServiceOverridesEntity);
 
     return ResponseDTO.newResponse(serviceOverridesServiceV2.delete(accountId, orgIdentifier, projectIdentifier,
         ngServiceOverridesEntity.getIdentifier(), ngServiceOverridesEntity));

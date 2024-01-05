@@ -72,4 +72,14 @@ public class InfraServiceOverrideRequestParamsHandler implements ServiceOverride
       throw new InvalidRequestException("ServiceRef should not be empty for INFRA-SERVICE override");
     }
   }
+
+  @Override
+  public void validateDeleteRequest(@NonNull NGServiceOverridesEntity serviceOverridesEntity) {
+    serviceEntityValidationHelper.checkThatServiceExists(serviceOverridesEntity.getAccountId(),
+        serviceOverridesEntity.getOrgIdentifier(), serviceOverridesEntity.getProjectIdentifier(),
+        serviceOverridesEntity.getServiceRef());
+    overrideV2AccessControlCheckHelper.validateRBACForService(serviceOverridesEntity.getAccountId(),
+        serviceOverridesEntity.getOrgIdentifier(), serviceOverridesEntity.getProjectIdentifier(),
+        serviceOverridesEntity.getServiceRef());
+  }
 }

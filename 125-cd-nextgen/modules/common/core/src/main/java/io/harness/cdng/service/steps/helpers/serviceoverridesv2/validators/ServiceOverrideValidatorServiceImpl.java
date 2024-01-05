@@ -6,6 +6,7 @@
  */
 
 package io.harness.cdng.service.steps.helpers.serviceoverridesv2.validators;
+
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.rbac.CDNGRbacPermissions.ENVIRONMENT_UPDATE_PERMISSION;
@@ -24,6 +25,7 @@ import io.harness.ng.core.environment.beans.Environment;
 import io.harness.ng.core.serviceoverride.beans.NGServiceOverridesEntity;
 import io.harness.ng.core.serviceoverridev2.beans.ServiceOverrideRequestDTOV2;
 import io.harness.ng.core.serviceoverridev2.beans.ServiceOverridesSpec;
+import io.harness.ng.core.serviceoverridev2.beans.ServiceOverridesType;
 import io.harness.ng.core.utils.OrgAndProjectValidationHelper;
 import io.harness.scope.ScopeHelper;
 import io.harness.utils.IdentifierRefHelper;
@@ -241,5 +243,13 @@ public class ServiceOverrideValidatorServiceImpl implements ServiceOverrideValid
             "For an account level override, project/org level environment can not be used. If you want to use environment at account level you might be missing prefix(account.) in environmentRef");
       }
     }
+  }
+
+  @Override
+  public void validateDeleteRequestOrThrow(@NonNull NGServiceOverridesEntity ngServiceOverridesEntity) {
+    // validating env & service permission based on type of override
+    ServiceOverridesType type = ngServiceOverridesEntity.getType();
+    ServiceOverrideTypeBasedRequestParamsHandler validator = overrideValidatorFactory.getTypeBasedValidator(type);
+    validator.validateDeleteRequest(ngServiceOverridesEntity);
   }
 }

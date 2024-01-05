@@ -63,4 +63,6 @@ public interface ServiceOverrideValidatorService {
           isNull(overrideMapper.get(overrideLocation)) ? overrideLocation : overrideMapper.get(overrideLocation)));
     }
   }
+
+  void validateDeleteRequestOrThrow(@NonNull NGServiceOverridesEntity ngServiceOverridesEntity);
 }

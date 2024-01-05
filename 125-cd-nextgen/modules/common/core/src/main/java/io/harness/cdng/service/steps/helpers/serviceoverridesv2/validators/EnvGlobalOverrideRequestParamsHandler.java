@@ -30,4 +30,11 @@ public class EnvGlobalOverrideRequestParamsHandler implements ServiceOverrideTyp
   public String generateServiceOverrideIdentifier(@NonNull NGServiceOverridesEntity serviceOverridesEntity) {
     return String.join("_", serviceOverridesEntity.getEnvironmentRef()).replace(".", "_");
   }
+
+  @Override
+  public void validateDeleteRequest(@NonNull NGServiceOverridesEntity serviceOverridesEntity) {
+    overrideValidatorService.validateEnvWithRBACOrThrow(serviceOverridesEntity.getAccountId(),
+        serviceOverridesEntity.getOrgIdentifier(), serviceOverridesEntity.getProjectIdentifier(),
+        serviceOverridesEntity.getEnvironmentRef());
+  }
 }

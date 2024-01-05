@@ -49,4 +49,14 @@ public class EnvServiceOverrideRequestParamsHandler implements ServiceOverrideTy
     return String.join("_", serviceOverridesEntity.getEnvironmentRef(), serviceOverridesEntity.getServiceRef())
         .replace(".", "_");
   }
+
+  @Override
+  public void validateDeleteRequest(@NonNull NGServiceOverridesEntity serviceOverridesEntity) {
+    serviceEntityValidationHelper.checkThatServiceExists(serviceOverridesEntity.getAccountId(),
+        serviceOverridesEntity.getOrgIdentifier(), serviceOverridesEntity.getProjectIdentifier(),
+        serviceOverridesEntity.getServiceRef());
+    overrideV2AccessControlCheckHelper.validateRBACForService(serviceOverridesEntity.getAccountId(),
+        serviceOverridesEntity.getOrgIdentifier(), serviceOverridesEntity.getProjectIdentifier(),
+        serviceOverridesEntity.getServiceRef());
+  }
 }

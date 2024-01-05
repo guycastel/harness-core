@@ -21,4 +21,6 @@ public interface ServiceOverrideTypeBasedRequestParamsHandler {
   void validateRequest(@NonNull ServiceOverrideRequestDTOV2 requestDTOV2, @NonNull String accountId);
 
   String generateServiceOverrideIdentifier(@NonNull NGServiceOverridesEntity serviceOverridesEntity);
+
+  void validateDeleteRequest(NGServiceOverridesEntity serviceOverridesEntity);
 }

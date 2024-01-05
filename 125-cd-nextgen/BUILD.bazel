@@ -99,7 +99,6 @@ java_library(
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/cdng/service/steps:module",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/cdng/service/steps/constants:module",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/cdng/utilities:module",
-        "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/cdng/yaml:module",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/evaluators:module",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/ng:module",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/ng/core/envGroup:module",

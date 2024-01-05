@@ -187,10 +187,17 @@ public class ServiceOverridesResource {
       @Parameter(description = "Specifies whether to load the entity from cache", hidden = true) @HeaderParam(
           "Load-From-Cache") @DefaultValue("false") String loadFromCache,
       @Parameter(description = "Specifies whether to load the entity from fallback branch", hidden = true) @QueryParam(
-          "loadFromFallbackBranch") @DefaultValue("false") boolean loadFromFallbackBranch) {
-    Optional<NGServiceOverridesEntity> serviceOverridesEntityOptional =
-        serviceOverridesServiceV2.get(accountId, orgIdentifier, projectIdentifier, identifier,
-            GitXUtils.parseLoadFromCacheHeaderParam(loadFromCache), loadFromFallbackBranch);
+          "loadFromFallbackBranch") @DefaultValue("false") boolean loadFromFallbackBranch,
+      @Parameter(description = "Specifies whether to get only the metadata of entity", hidden = true) @QueryParam(
+          "getMetadataOnly") @DefaultValue("false") boolean getMetadataOnly) {
+    Optional<NGServiceOverridesEntity> serviceOverridesEntityOptional;
+    if (getMetadataOnly) {
+      serviceOverridesEntityOptional =
+          serviceOverridesServiceV2.getMetadata(accountId, orgIdentifier, projectIdentifier, identifier);
+    } else {
+      serviceOverridesEntityOptional = serviceOverridesServiceV2.get(accountId, orgIdentifier, projectIdentifier,
+          identifier, GitXUtils.parseLoadFromCacheHeaderParam(loadFromCache), loadFromFallbackBranch);
+    }
     if (serviceOverridesEntityOptional.isEmpty()) {
       throw new NotFoundException(
           format("ServiceOverride entity with identifier [%s] in project [%s], org [%s] not found", identifier,

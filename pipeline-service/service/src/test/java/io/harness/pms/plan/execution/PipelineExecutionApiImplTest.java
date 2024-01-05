@@ -26,6 +26,7 @@ import io.harness.engine.executions.retry.RetryInfo;
 import io.harness.execution.PlanExecution;
 import io.harness.pms.contracts.execution.Status;
 import io.harness.pms.plan.execution.beans.dto.RunStageRequestDTO;
+import io.harness.pms.yaml.YamlUtils;
 import io.harness.rule.Owner;
 import io.harness.spec.server.pipeline.v1.model.PipelineExecuteRequestBody;
 import io.harness.spec.server.pipeline.v1.model.PipelineExecuteResponseBody;
@@ -36,6 +37,7 @@ import io.harness.utils.PmsFeatureFlagService;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,15 +73,15 @@ public class PipelineExecutionApiImplTest extends CategoryTest {
 
     PipelineExecuteRequestBody pipelineExecuteBody = new PipelineExecuteRequestBody();
     Status status = Status.RUNNING;
-    pipelineExecuteBody.setInputsYaml("inputSetYaml");
+    pipelineExecuteBody.setInputs(Map.of("inputs", "inputSetYaml"));
     String module = "CD";
 
     doReturn(PlanExecutionResponseDto.builder()
                  .planExecution(PlanExecution.builder().uuid(planExecutionId).status(status).build())
                  .build())
         .when(pipelineExecutor)
-        .runPipelineWithInputSetPipelineYaml(
-            accountId, orgId, projectId, pipelineId, module, pipelineExecuteBody.getInputsYaml(), false, false, "");
+        .runPipelineWithInputSetPipelineYaml(accountId, orgId, projectId, pipelineId, module,
+            YamlUtils.writeYamlString(Map.of("inputs", pipelineExecuteBody.getInputs())), false, false, "");
 
     Response response = pipelineExecutionApi.executePipeline(
         orgId, projectId, pipelineId, pipelineExecuteBody, accountId, module, false, false, "", null, null, null);
@@ -103,6 +105,7 @@ public class PipelineExecutionApiImplTest extends CategoryTest {
     when(pmsFeatureFlagService.isEnabled(eq(accountId), eq(FeatureName.PIE_GET_FILE_CONTENT_ONLY))).thenReturn(false);
     RunStageRequestBody runStageRequestBody = new RunStageRequestBody();
     runStageRequestBody.setStageIdentifiers(Arrays.asList("stg1"));
+    runStageRequestBody.setInputsYaml("yaml");
     RunStageRequestDTO runStageRequestDTO = RunStageRequestDTO.builder()
                                                 .stageIdentifiers(runStageRequestBody.getStageIdentifiers())
                                                 .runtimeInputYaml(runStageRequestBody.getInputsYaml())
@@ -139,6 +142,7 @@ public class PipelineExecutionApiImplTest extends CategoryTest {
     when(pmsFeatureFlagService.isEnabled(eq(accountId), eq(FeatureName.PIE_GET_FILE_CONTENT_ONLY))).thenReturn(false);
     RunStageRequestBody runStageRequestBody = new RunStageRequestBody();
     runStageRequestBody.setStageIdentifiers(Arrays.asList("stg1"));
+    runStageRequestBody.setInputsYaml("yaml");
     RunStageRequestDTO runStageRequestDTO = RunStageRequestDTO.builder()
                                                 .stageIdentifiers(runStageRequestBody.getStageIdentifiers())
                                                 .runtimeInputYaml(runStageRequestBody.getInputsYaml())
@@ -177,7 +181,7 @@ public class PipelineExecutionApiImplTest extends CategoryTest {
     when(retryExecutionHelper.validateRetry(accountId, orgId, projectId, pipelineId, planExecutionId, null))
         .thenReturn(RetryInfo.builder().isResumable(true).build());
     RerunPipelineRequest rerunPipelineRequestBody = new RerunPipelineRequest();
-    rerunPipelineRequestBody.setInputsYaml("input");
+    rerunPipelineRequestBody.setInputs(Map.of("inputs", "inputSetYaml"));
     Status status = Status.RUNNING;
     String module = "CD";
 
@@ -186,7 +190,8 @@ public class PipelineExecutionApiImplTest extends CategoryTest {
                  .build())
         .when(pipelineExecutor)
         .retryPipelineWithInputSetPipelineYaml(accountId, orgId, projectId, pipelineId, module,
-            rerunPipelineRequestBody.getInputsYaml(), planExecutionId, List.of("stage1"), false, false, false, "");
+            YamlUtils.writeYamlString(Map.of("inputs", rerunPipelineRequestBody.getInputs())), planExecutionId,
+            List.of("stage1"), false, false, false, "");
 
     Response response = pipelineExecutionApi.retryPipelineWithInputsetPipelineYaml(orgId, projectId, pipelineId,
         planExecutionId, rerunPipelineRequestBody, accountId, module, List.of("stage1"), false, "");
@@ -209,7 +214,7 @@ public class PipelineExecutionApiImplTest extends CategoryTest {
     String planExecutionId = generateUuid();
     when(pmsFeatureFlagService.isEnabled(eq(accountId), eq(FeatureName.PIE_GET_FILE_CONTENT_ONLY))).thenReturn(false);
     RerunPipelineRequest rerunPipelineRequestBody = new RerunPipelineRequest();
-    rerunPipelineRequestBody.setInputsYaml("input");
+    rerunPipelineRequestBody.setInputs(Map.of("inputs", "inputSetYaml"));
     Status status = Status.RUNNING;
     String module = "CD";
 
@@ -218,7 +223,7 @@ public class PipelineExecutionApiImplTest extends CategoryTest {
                  .build())
         .when(pipelineExecutor)
         .runPipelineWithInputSetPipelineYaml(accountId, orgId, projectId, pipelineId, module,
-            rerunPipelineRequestBody.getInputsYaml(), false, false, "");
+            YamlUtils.writeYamlString(Map.of("inputs", rerunPipelineRequestBody.getInputs())), false, false, "");
 
     Response response = pipelineExecutionApi.rerunPipeline(orgId, projectId, pipelineId, planExecutionId,
         rerunPipelineRequestBody, accountId, module, false, "", null, null, null);

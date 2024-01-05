@@ -17,9 +17,11 @@ import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 import io.harness.beans.FeatureName;
+import io.harness.data.structure.EmptyPredicate;
 import io.harness.engine.executions.retry.RetryInfo;
 import io.harness.eraro.ErrorCode;
 import io.harness.exception.InvalidRequestException;
+import io.harness.exception.NestedExceptionUtils;
 import io.harness.exception.ngexception.NGTemplateException;
 import io.harness.exception.ngexception.PipelineException;
 import io.harness.gitaware.helper.GitAwareContextHelper;
@@ -52,6 +54,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.validation.Valid;
 import javax.ws.rs.core.Response;
@@ -70,6 +73,7 @@ public class PipelineExecutionApiImpl implements PipelineExecutionApi {
   private final RetryExecutionHelper retryExecutionHelper;
   private final PMSPipelineService pmsPipelineService;
   private final PMSPipelineTemplateHelper pipelineTemplateHelper;
+  private final String INPUTS = "inputs";
 
   @Override
   public Response executePipeline(String org, String project, String pipeline, @Valid PipelineExecuteRequestBody body,
@@ -78,7 +82,7 @@ public class PipelineExecutionApiImpl implements PipelineExecutionApi {
     try {
       String inputSetPipelineYaml = null;
       if (body != null) {
-        inputSetPipelineYaml = body.getInputsYaml();
+        inputSetPipelineYaml = getInputsForPipeline(body.getInputsYaml(), body.getInputs());
       }
       GitAwareContextHelper.populateGitDetails(
           GitEntityInfo.builder().branch(branchName).connectorRef(connectorRef).repoName(repoName).build());
@@ -113,7 +117,7 @@ public class PipelineExecutionApiImpl implements PipelineExecutionApi {
   private RunStageRequestDTO getRunStageRequestDTO(RunStageRequestBody body) {
     return RunStageRequestDTO.builder()
         .stageIdentifiers(body.getStageIdentifiers())
-        .runtimeInputYaml(body.getInputsYaml())
+        .runtimeInputYaml(getInputsForPipeline(body.getInputsYaml(), body.getInputs()))
         .expressionValues(body.getExpressionValues())
         .build();
   }
@@ -191,7 +195,7 @@ public class PipelineExecutionApiImpl implements PipelineExecutionApi {
     }
     String inputSetPipelineYaml = null;
     if (body != null) {
-      inputSetPipelineYaml = body.getInputsYaml();
+      inputSetPipelineYaml = getInputsForPipeline(body.getInputsYaml(), body.getInputs());
     }
     PlanExecutionResponseDto planExecutionResponseDto = pipelineExecutor.runPipelineWithInputSetPipelineYaml(
         harnessAccount, org, project, pipeline, module, inputSetPipelineYaml, false, false, notes);
@@ -234,7 +238,7 @@ public class PipelineExecutionApiImpl implements PipelineExecutionApi {
     }
     String inputSetPipelineYaml = null;
     if (body != null) {
-      inputSetPipelineYaml = body.getInputsYaml();
+      inputSetPipelineYaml = getInputsForPipeline(body.getInputsYaml(), body.getInputs());
     }
     PlanExecutionResponseDto planExecutionResponseDto =
         pipelineExecutor.retryPipelineWithInputSetPipelineYaml(harnessAccount, org, project, pipeline, module,
@@ -252,5 +256,20 @@ public class PipelineExecutionApiImpl implements PipelineExecutionApi {
     executionDetails.setStatus(planExecutionResponseDto.getPlanExecution().getStatus().toString());
     pipelineExecuteResponseBody.setExecutionDetails(executionDetails);
     return pipelineExecuteResponseBody;
+  }
+  String getInputsForPipeline(String inputsYaml, Map<String, Object> inputs) {
+    String inputSetPipelineYaml = null;
+    if (EmptyPredicate.isNotEmpty(inputsYaml) && EmptyPredicate.isNotEmpty(inputs)) {
+      throw NestedExceptionUtils.hintWithExplanationException(
+          "Do not include both inputs and inputs_yaml parameters in the same request",
+          "Please choose either the inputs parameter to provide input data in a structured format for v1 pipelines, or the inputs_yaml parameter to provide input data in YAML format works for both v0 and v1. Do not include both parameters in the same request.",
+          new InvalidRequestException(
+              "Please choose either the inputs parameter to provide input data in a structured format for v1 pipelines, or the inputs_yaml parameter to provide input data in YAML format works for both v0 and v1. Do not include both parameters in the same request."));
+    } else if (EmptyPredicate.isNotEmpty(inputsYaml)) {
+      inputSetPipelineYaml = inputsYaml;
+    } else if (EmptyPredicate.isNotEmpty(inputs)) {
+      inputSetPipelineYaml = YamlUtils.writeYamlString(Map.of(INPUTS, inputs));
+    }
+    return inputSetPipelineYaml;
   }
 }

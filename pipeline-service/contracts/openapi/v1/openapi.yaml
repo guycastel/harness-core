@@ -1,6 +1,6 @@
 openapi: 3.0.0
 x-stoplight:
-  id: enn20txlgj5zq
+  id: ql9z81fdvebpv
 info:
   title: Harness NextGen Software Delivery Platform API Reference
   version: '1.0'
@@ -134,7 +134,7 @@ paths:
         '200':
           $ref: '#/components/responses/PipelineListResponseBody'
       x-stoplight:
-        id: 30zs16zs1jnaq
+        id: cvkrrpraphnbh
     post:
       summary: Create a Pipeline
       operationId: create-pipeline
@@ -151,7 +151,7 @@ paths:
         '201':
           $ref: '#/components/responses/PipelineCreateResponseBody'
       x-stoplight:
-        id: mdxs0qz4oh0dc
+        id: drqdiwpheb050
   '/v1/orgs/{org}/projects/{project}/pipelines/{pipeline}/triggers':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -174,7 +174,7 @@ paths:
         '201':
           $ref: '#/components/responses/TriggerResponseBody'
       x-stoplight:
-        id: uegqlh7uxc0dh
+        id: ehv4dsm3t4nph
   '/v1/orgs/{org}/projects/{project}/pipelines/{pipeline}/triggers/{trigger}':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -295,7 +295,7 @@ paths:
         '200':
           $ref: '#/components/responses/PipelineGetResponseBody'
       x-stoplight:
-        id: rn41qzdjn8lh1
+        id: 14fetpfbd0036
     put:
       summary: Update a Pipeline
       operationId: update-pipeline
@@ -312,7 +312,7 @@ paths:
         '200':
           $ref: '#/components/responses/PipelineCreateResponseBody'
       x-stoplight:
-        id: 9gbauax4g8mkt
+        id: 0n2sqhp6570h0
     delete:
       summary: Delete a Pipeline
       operationId: delete-pipeline
@@ -345,7 +345,7 @@ paths:
                   value: |
                     {}
       x-stoplight:
-        id: 4jx8uy7y3r44p
+        id: 2vi3yqnoopeap
     patch:
       summary: Patch API for pipeline
       operationId: patch-pipeline
@@ -418,7 +418,7 @@ paths:
         '200':
           $ref: '#/components/responses/PipelineValidationUUIDResponseBody'
       x-stoplight:
-        id: sw5u2qvvrztc1
+        id: pjoc6g5bdisgx
   '/v1/orgs/{org}/projects/{project}/pipelines/validate/{uuid}':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -439,7 +439,7 @@ paths:
         '200':
           $ref: '#/components/responses/PipelineValidationResponseBody'
       x-stoplight:
-        id: 7oq9a7yzeq62m
+        id: gyeuvrkxv41gf
   '/v1/orgs/{org}/projects/{project}/input-sets':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -461,7 +461,7 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/InputSetCreateRequestBody'
       x-stoplight:
-        id: rs93jxpccd461
+        id: ijhb2cnryngc7
     get:
       summary: List Input Sets
       operationId: list-input-sets
@@ -482,7 +482,7 @@ paths:
         - $ref: '#/components/parameters/Sort'
         - $ref: '#/components/parameters/Order'
       x-stoplight:
-        id: r1m5r04ew0edo
+        id: 4pb7j5abkunyy
   '/v1/orgs/{org}/projects/{project}/input-sets/{input-set}':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -526,7 +526,7 @@ paths:
           description: Specifies whether the remote pipeline should be loaded from Git or Git cache.
           name: Load-From-Cache
       x-stoplight:
-        id: cghityrhzn3qi
+        id: w7j8nb6mqp3sb
     put:
       summary: Update an Input Set
       operationId: update-input-set
@@ -544,7 +544,7 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/InputSetUpdateRequestBody'
       x-stoplight:
-        id: yngruwctpu1nf
+        id: zf2za2myvdqhk
     delete:
       summary: Delete an Input Set
       operationId: delete-input-set
@@ -578,7 +578,7 @@ paths:
         - $ref: '#/components/parameters/AccountHeader'
         - $ref: '#/components/parameters/PipelineInputSetParam'
       x-stoplight:
-        id: mgc4ka4g4nczv
+        id: ct4zmcbkkief1
   '/v1/orgs/{org}/projects/{project}/pipelines/{pipeline}/inputs':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -614,7 +614,7 @@ paths:
         - Inputs
       x-internal: true
       x-stoplight:
-        id: 7ylrtcm85ki3c
+        id: gy9751sqjy7oo
   '/v1/orgs/{org}/projects/{project}/pipelines/{pipeline}/move-config':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -637,7 +637,7 @@ paths:
         - Pipelines
       x-internal: false
       x-stoplight:
-        id: qw42s90zscen1
+        id: 9x27t7v1hjr1a
   '/v1/orgs/{org}/projects/{project}/input-sets/{input-set}/move-config':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -1072,7 +1072,7 @@ paths:
             type: string
           in: query
           name: module
-          description: 'Module type for the entity. If its from deployments,type will be CD , if its from build type will be CI.'
+          description: Module type for the entity. If its from deployments,type will be CD , if its from build type will be CI.
         - schema:
             type: boolean
             default: false
@@ -1242,8 +1242,8 @@ paths:
           $ref: '#/components/responses/PipelineExecuteResponseBody'
       operationId: execute-stages-with-input-yaml
       x-stoplight:
-        id: gp30uxkm66ijj
-      description: Execute given Stages of a Pipeline with Input Yaml
+        id: ednttmgoecup3
+      description: Execute given Stages of a Pipeline with Inputs
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
         - schema:
@@ -5056,6 +5056,13 @@ components:
         id: sybat01ihsx1t
       type: object
       properties:
+        inputs:
+          type: object
+          additionalProperties:
+            type: object
+          x-stoplight:
+            id: p7q56qkaxipsv
+          description: Inputs for V1 Pipeline if it contains Runtime Inputs.
         inputs_yaml:
           type: string
           x-stoplight:
@@ -5163,6 +5170,13 @@ components:
       type: object
       description: Request Parameters needed to run specific Stages of a Pipeline.
       properties:
+        inputs:
+          type: object
+          additionalProperties:
+            type: object
+          x-stoplight:
+            id: jeqqceesmtqxd
+          description: Inputs for V1 Pipeline if it contains Runtime Inputs.
         inputs_yaml:
           type: string
           x-stoplight:
@@ -5190,32 +5204,40 @@ components:
         id: ewyvhqpxsefmi
       type: object
       properties:
+        inputs:
+          type: object
+          additionalProperties:
+            type: object
+          x-stoplight:
+            id: 92ulq11rm8w5x
+          description: Inputs for V1 Pipeline if it contains Runtime Inputs.
         inputs_yaml:
           type: string
           x-stoplight:
-            id: nuc124clughh4
-          description: Inputs YAML if the Pipeline contains Runtime Inputs
+            id: 11skxy7uppirj
+          description: Inputs yaml of the Pipeline.
       x-examples:
-        Example 1:
-          inputs_yaml: |-
+        Example for V1 pipelines:
+          inputs:
+            input1: {}
+            input2: {}
+        Example 2:
+          inputs_yaml: |
             pipeline:
-              identifier: pipelineIdentifier
+              identifier: das
               stages:
                 - stage:
-                    identifier: stage1
+                    identifier: wee
                     type: Custom
                     spec:
                       execution:
                         steps:
                           - step:
-                              identifier: ShellScript_1
-                              type: ShellScript
+                              identifier: Wait_1
+                              type: Wait
                               spec:
-                                source:
-                                  type: Inline
-                                  spec:
-                                    script: echo hello
-                              timeout: 10s
+                                duration: 11s
+      description: 'Please choose either the inputs parameter to provide input data in a structured format for v1 pipelines, or the inputs_yaml parameter to provide input data in YAML format works for both v0 and v1. Do not include both parameters in the same request.'
   securitySchemes:
     x-api-key:
       name: x-api-key

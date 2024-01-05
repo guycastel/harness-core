@@ -50,6 +50,8 @@ import io.harness.security.annotations.InternalApi;
 import io.harness.security.annotations.NextGenManagerAuth;
 import io.harness.utils.PageUtils;
 
+import com.codahale.metrics.annotation.ResponseMetered;
+import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import io.swagger.annotations.Api;
@@ -129,6 +131,8 @@ public class OrganizationResource {
         ApiResponse(responseCode = "default", description = "Returns created Organization details")
       })
   @NGAccessControlCheck(resourceType = ORGANIZATION, permission = CREATE_ORGANIZATION_PERMISSION)
+  @Timed
+  @ResponseMetered
   public ResponseDTO<OrganizationResponse>
   create(@Parameter(description = ACCOUNT_PARAM_MESSAGE) @NotNull @QueryParam(
              NGCommonEntityConstants.ACCOUNT_KEY) @AccountIdentifier String accountIdentifier,
@@ -154,6 +158,8 @@ public class OrganizationResource {
             description = "Returns the Organization details with the passed Account Identifier and Org Identifier")
       })
   @NGAccessControlCheck(resourceType = ORGANIZATION, permission = VIEW_ORGANIZATION_PERMISSION)
+  @Timed
+  @ResponseMetered
   public ResponseDTO<OrganizationResponse>
   get(@Parameter(description = ORG_PARAM_MESSAGE) @NotNull @PathParam(
           NGCommonEntityConstants.IDENTIFIER_KEY) @ResourceIdentifier String identifier,
@@ -176,6 +182,8 @@ public class OrganizationResource {
         @io.swagger.v3.oas.annotations.responses.
         ApiResponse(responseCode = "default", description = "Returns list of Organizations")
       })
+  @Timed
+  @ResponseMetered
   public ResponseDTO<PageResponse<OrganizationResponse>>
   list(@Parameter(description = ACCOUNT_PARAM_MESSAGE) @NotNull @QueryParam(
            NGCommonEntityConstants.ACCOUNT_KEY) String accountIdentifier,
@@ -206,6 +214,8 @@ public class OrganizationResource {
   @Path("all-organizations")
   @ApiOperation(value = "Get All Organizations list", nickname = "getAllOrganizationList", hidden = true)
   @InternalApi
+  @Timed
+  @ResponseMetered
   public ResponseDTO<PageResponse<OrganizationResponse>> listAllOrganizations(
       @Parameter(description = ACCOUNT_PARAM_MESSAGE) @NotNull @QueryParam(
           NGCommonEntityConstants.ACCOUNT_KEY) String accountIdentifier,
@@ -230,6 +240,8 @@ public class OrganizationResource {
         ApiResponse(responseCode = "default", description = "Returns the updated Organization details")
       })
   @NGAccessControlCheck(resourceType = ORGANIZATION, permission = EDIT_ORGANIZATION_PERMISSION)
+  @Timed
+  @ResponseMetered
   public ResponseDTO<OrganizationResponse>
   update(@Parameter(description = "Version number of the Organization") @HeaderParam(IF_MATCH) String ifMatch,
       @Parameter(description = ORG_PARAM_MESSAGE) @NotNull @PathParam(
@@ -265,6 +277,8 @@ public class OrganizationResource {
                 "It returns true if the Organization is deleted successfully and false if the Organization is not deleted.")
       })
   @NGAccessControlCheck(resourceType = ORGANIZATION, permission = DELETE_ORGANIZATION_PERMISSION)
+  @Timed
+  @ResponseMetered
   public ResponseDTO<Boolean>
   delete(@Parameter(description = "Version number of the Organization") @HeaderParam(IF_MATCH) String ifMatch,
       @Parameter(description = ORG_PARAM_MESSAGE) @NotNull @PathParam(

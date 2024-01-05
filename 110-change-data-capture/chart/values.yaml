@@ -96,7 +96,6 @@ global:
 # --replicaCount Number of pods
 ##
 replicaCount: 1
-
 timescaledb:
   # -- TimescaleDB host names
   hosts: []
@@ -125,7 +124,6 @@ timescaledb:
             TIMESCALEDB_SSL_ROOT_CERT:
               name: ""
               property: ""
-
 database:
   mongo:
     harness:
@@ -139,7 +137,7 @@ database:
             keys:
               MONGO_USER: ""
               MONGO_PASSWORD: ""
-        secretManagement: 
+        secretManagement:
           externalSecretsOperator:
             - secretStore:
                 name: ""
@@ -162,7 +160,7 @@ database:
             keys:
               MONGO_USER: ""
               MONGO_PASSWORD: ""
-        secretManagement: 
+        secretManagement:
           externalSecretsOperator:
             - secretStore:
                 name: ""
@@ -185,7 +183,7 @@ database:
             keys:
               MONGO_USER: ""
               MONGO_PASSWORD: ""
-        secretManagement: 
+        secretManagement:
           externalSecretsOperator:
             - secretStore:
                 name: ""
@@ -208,7 +206,7 @@ database:
             keys:
               MONGO_USER: ""
               MONGO_PASSWORD: ""
-        secretManagement: 
+        secretManagement:
           externalSecretsOperator:
             - secretStore:
                 name: ""
@@ -231,7 +229,7 @@ database:
             keys:
               MONGO_USER: ""
               MONGO_PASSWORD: ""
-        secretManagement: 
+        secretManagement:
           externalSecretsOperator:
             - secretStore:
                 name: ""
@@ -254,7 +252,7 @@ database:
             keys:
               MONGO_USER: ""
               MONGO_PASSWORD: ""
-        secretManagement: 
+        secretManagement:
           externalSecretsOperator:
             - secretStore:
                 name: ""
@@ -277,7 +275,7 @@ database:
             keys:
               MONGO_USER: ""
               MONGO_PASSWORD: ""
-        secretManagement: 
+        secretManagement:
           externalSecretsOperator:
             - secretStore:
                 name: ""
@@ -289,7 +287,6 @@ database:
                 MONGO_PASSWORD:
                   name: ""
                   property: ""
-
 # -- deployment.updateStrategy.type Deployment strategy type
 ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#update-strategies
 ## e.g:
@@ -396,7 +393,6 @@ podAnnotations: {}
 # e.g.:
 ## fsGroup: 2000
 podSecurityContext: {}
-
 # -- containerSecurityContext
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @param provisioning.containerSecurityContext.enabled Enable container Security Context
@@ -412,7 +408,6 @@ containerSecurityContext:
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
-
 ## Configure extra options for liveness probe
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
 # -- livenessProbe.enabled Enable livenessProbe
@@ -461,7 +456,6 @@ startupProbe:
   timeoutSeconds: 10
   successThreshold: 1
   failureThreshold: 90
-
 #-- Service properties
 ##
 service:
@@ -581,11 +575,8 @@ nodeSelector: {}
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 ##
 tolerations: []
-
 additionalConfigs: {}
-
 java17flags: ""
-
 secrets:
   default:
   kubernetesSecrets:

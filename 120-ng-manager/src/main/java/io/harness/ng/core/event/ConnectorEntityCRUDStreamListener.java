@@ -13,6 +13,7 @@ import static io.harness.eventsframework.EventsFrameworkMetadataConstants.ACTION
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.CREATE_ACTION;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.DELETE_ACTION;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.ENTITY_TYPE;
+import static io.harness.eventsframework.EventsFrameworkMetadataConstants.MOVE_ACTION;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.ORGANIZATION_ENTITY;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.PROJECT_ENTITY;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.RESTORE_ACTION;
@@ -161,6 +162,8 @@ public class ConnectorEntityCRUDStreamListener implements MessageListener {
           return processProjectDeleteEvent(projectEntityChangeDTO);
         case RESTORE_ACTION:
           return processProjectRestoreEvent(projectEntityChangeDTO);
+        case MOVE_ACTION:
+          return processProjectMoveEvent(projectEntityChangeDTO);
         default:
       }
     }
@@ -188,6 +191,28 @@ public class ConnectorEntityCRUDStreamListener implements MessageListener {
   }
 
   private boolean processProjectRestoreEvent(ProjectEntityChangeDTO projectEntityChangeDTO) {
+    return true;
+  }
+
+  private boolean processProjectMoveEvent(ProjectEntityChangeDTO projectEntityChangeDTO) {
+    String accountIdentifier = projectEntityChangeDTO.getAccountIdentifier();
+    Boolean isBuiltInSMDisabled = Boolean.FALSE;
+
+    try {
+      isBuiltInSMDisabled = parseBoolean(
+          NGRestUtils
+              .getResponse(settingsClient.getSetting(
+                  SettingIdentifiers.DISABLE_HARNESS_BUILT_IN_SECRET_MANAGER, accountIdentifier, null, null))
+              .getValue());
+    } catch (Exception ex) {
+      log.error("For account {} and setting identifier {} getting account setting value failed with exception: ",
+          accountIdentifier, SettingIdentifiers.DISABLE_HARNESS_BUILT_IN_SECRET_MANAGER, ex);
+    }
+
+    if (!isBuiltInSMDisabled) {
+      harnessSMManager.createHarnessSecretManager(projectEntityChangeDTO.getAccountIdentifier(),
+          projectEntityChangeDTO.getOrgIdentifier(), projectEntityChangeDTO.getIdentifier());
+    }
     return true;
   }
 }

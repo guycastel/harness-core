@@ -16,7 +16,6 @@ import io.harness.ng.core.user.UserInfo;
 import io.harness.persistence.UserProvider;
 import io.harness.remote.client.CGRestUtils;
 import io.harness.repositories.remediation_tracker.RemediationTrackerRepository;
-import io.harness.security.NextGenAuthenticationFilter;
 import io.harness.spec.server.ssca.v1.model.ComponentFilter;
 import io.harness.spec.server.ssca.v1.model.CreateTicketRequest;
 import io.harness.spec.server.ssca.v1.model.ExcludeArtifactRequest;
@@ -58,6 +57,7 @@ import io.harness.ssca.services.NormalisedSbomComponentService;
 import io.harness.ssca.ticket.TicketServiceRestClientService;
 import io.harness.ssca.utils.PageResponseUtils;
 import io.harness.ssca.utils.PipelineUtils;
+import io.harness.ticketserviceclient.TicketServiceUtils;
 import io.harness.user.remote.UserClient;
 
 import com.google.inject.Inject;
@@ -113,7 +113,11 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
 
   @Inject TicketServiceRestClientService ticketServiceRestClientService;
 
+  @Inject TicketServiceUtils ticketServiceUtils;
+
   private String sscaManagerServiceSecret;
+
+  private static final String API_KEY = "ApiKey ";
 
   @Inject
   public RemediationTrackerServiceImpl(@Named("sscaManagerServiceSecret") String sscaManagerServiceSecret) {
@@ -367,7 +371,7 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
           String.format("Remediation Tracker: %s is already closed.", remediationTrackerId));
     }
 
-    String authToken = NextGenAuthenticationFilter.AUTHORIZATION_HEADER;
+    String authToken = API_KEY + ticketServiceUtils.getTicketServiceToken(accountId);
 
     if (!isEmpty(body.getArtifactId())) {
       ArtifactInfo artifactInfo = remediationTracker.getArtifactInfos().get(body.getArtifactId());

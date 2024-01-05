@@ -86,6 +86,7 @@ import io.harness.testlib.module.MongoRuleMixin;
 import io.harness.testlib.module.TestMongoModule;
 import io.harness.threading.CurrentThreadExecutor;
 import io.harness.threading.ExecutorModule;
+import io.harness.ticketserviceclient.TicketServiceUtils;
 import io.harness.time.TimeModule;
 import io.harness.user.remote.UserClient;
 
@@ -255,6 +256,7 @@ public class SSCAManagerTestRule implements InjectorRuleMixin, MethodRule, Mongo
         bind(ElasticSearchIndexManager.class).annotatedWith(Names.named("SSCA")).to(SSCAIndexManager.class);
         bind(RemediationTrackerService.class).to(RemediationTrackerServiceImpl.class);
         bind(TicketServiceRestClientService.class).toInstance(mock(TicketServiceRestClientService.class));
+        bind(TicketServiceUtils.class).toInstance(mock(TicketServiceUtils.class));
         bind(ExemptionService.class).to(ExemptionServiceImpl.class);
         bind(UserService.class).toInstance(mock(UserServiceImpl.class));
         MapBinder<PolicyType, PolicyEvaluationService> policyEvaluationServiceMapBinder =

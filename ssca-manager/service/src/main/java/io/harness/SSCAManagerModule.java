@@ -108,6 +108,7 @@ import io.harness.ssca.services.user.UserService;
 import io.harness.ssca.services.user.UserServiceImpl;
 import io.harness.ssca.ticket.TicketServiceRestClientService;
 import io.harness.ssca.ticket.TicketServiceRestClientServiceImpl;
+import io.harness.ticketserviceclient.TicketServiceClientModule;
 import io.harness.time.TimeModule;
 import io.harness.token.TokenClientModule;
 import io.harness.user.UserClientModule;
@@ -224,6 +225,7 @@ public class SSCAManagerModule extends AbstractModule {
         this.configuration.getAccessControlClientConfiguration(), SSCA_SERVICE.getServiceId()));
     install(UserClientModule.getInstance(this.configuration.getManagerClientConfig(),
         this.configuration.getNgManagerServiceSecret(), SSCA_SERVICE.getServiceId()));
+    install(new TicketServiceClientModule(this.configuration.getTicketServiceConfig()));
   }
 
   @Provides

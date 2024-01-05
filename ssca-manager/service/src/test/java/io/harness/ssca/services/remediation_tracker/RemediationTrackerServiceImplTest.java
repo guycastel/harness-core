@@ -63,6 +63,7 @@ import io.harness.ssca.services.NormalisedSbomComponentService;
 import io.harness.ssca.ticket.TicketServiceRestClientService;
 import io.harness.ssca.utils.PageResponseUtils;
 import io.harness.ssca.utils.PipelineUtils;
+import io.harness.ticketserviceclient.TicketServiceUtils;
 import io.harness.user.remote.UserClient;
 
 import com.google.inject.Inject;
@@ -99,6 +100,8 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
 
   @Mock private PipelineUtils pipelineUtils;
 
+  @Mock private TicketServiceUtils ticketServiceUtils;
+
   private BuilderFactory builderFactory;
 
   private RemediationTrackerCreateRequestBody remediationTrackerCreateRequestBody;
@@ -130,6 +133,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
             builderFactory.getCdInstanceSummaryBuilder().artifactCorrelationId("pending").build()));
     when(ticketServiceRestClientService.createTicket(any(), any(), any(), any(), any()))
         .thenReturn(builderFactory.getTicketResponseDto());
+    when(ticketServiceUtils.getTicketServiceToken(any())).thenReturn("token");
     FieldUtils.writeField(
         remediationTrackerService, "ticketServiceRestClientService", ticketServiceRestClientService, true);
     FieldUtils.writeField(remediationTrackerService, "userClient", userClient, true);

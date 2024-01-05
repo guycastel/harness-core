@@ -163,6 +163,10 @@ ticketServiceRestClientConfig:
   connectTimeOutSeconds: 15
   readTimeOutSeconds: 15
 
+ticketServiceConfig:
+  baseUrl: http://localhost:4444
+  internalUrl: ""
+  globalToken: "token"
 
 ngManagerServiceSecret: IC04LYMBf1lDP5oeY4hupxd4HJhLmN6azUku3xEbeE3SUx5G3ZYzhbiwVtK4i7AmqyU9OZkwB4v8E9qM
 sscaManagerServiceSecret: IC04LYMBf1lDP5oeY4hupxd4HJhLmN6azUku3xEbeE3SUx5G3ZYzhbiwVtK4i7AmqyU9OZkwB4v8E9qM

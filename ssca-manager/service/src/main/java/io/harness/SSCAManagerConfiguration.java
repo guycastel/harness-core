@@ -25,6 +25,7 @@ import io.harness.reflection.HarnessReflections;
 import io.harness.remote.client.ServiceHttpClientConfig;
 import io.harness.ssca.S3Config;
 import io.harness.ssca.beans.ElasticSearchConfig;
+import io.harness.sto.beans.entities.TicketServiceConfig;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -94,6 +95,7 @@ public class SSCAManagerConfiguration extends Configuration {
   @JsonProperty("accessControlClientConfig") private AccessControlClientConfiguration accessControlClientConfiguration;
   @JsonProperty("iteratorsConfig") private SSCAIteratorsConfig iteratorsConfig;
   @JsonProperty("ticketServiceRestClientConfig") private ServiceHttpClientConfig ticketServiceRestClientConfig;
+  @JsonProperty("ticketServiceConfig") private TicketServiceConfig ticketServiceConfig;
 
   public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
     SwaggerBundleConfiguration defaultSwaggerBundleConfiguration = new SwaggerBundleConfiguration();

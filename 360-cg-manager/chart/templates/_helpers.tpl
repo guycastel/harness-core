@@ -138,6 +138,9 @@ Create the name of the delegate upgrader image to use
 {{- if .Values.global.cet.enabled }}
 {{- $flags = printf "%s,%s" $flags .Values.featureFlags.CET }}
 {{- end }}
+{{- if .Values.global.ssca.enabled }}
+{{- $flags = printf "%s,%s" $flags .Values.featureFlags.SSCA }}
+{{- end }}
 {{- $length2 := len .Values.featureFlags.ADDITIONAL }}
 {{- if gt $length2 0}}
 {{- $flags = printf "%s,%s" $flags .Values.featureFlags.ADDITIONAL }}

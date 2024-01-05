@@ -485,7 +485,7 @@ public class ServiceOverridesServiceV2ImplTest extends CDNGTestBase {
         getTestOverrideEntityForRuntimeInput(ServiceOverridesType.ENV_GLOBAL_OVERRIDE, true);
     serviceOverridesServiceV2.create(testOverrideEntity);
     String envOverrideInputsYaml = serviceOverridesServiceV2.createEnvOverrideInputsYaml(
-        ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, testOverrideEntity.getEnvironmentRef());
+        ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, testOverrideEntity.getEnvironmentRef(), false);
     String expectedInputString = "environmentInputs:\n"
         + "  overrides:\n"
         + "    manifests:\n"
@@ -518,7 +518,7 @@ public class ServiceOverridesServiceV2ImplTest extends CDNGTestBase {
 
     serviceOverridesServiceV2.create(testOverrideEntity);
     String envOverrideInputsYaml = serviceOverridesServiceV2.createEnvOverrideInputsYaml(
-        ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, testOverrideEntity.getEnvironmentRef());
+        ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, testOverrideEntity.getEnvironmentRef(), false);
     String expectedInputString = "environmentInputs:\n"
         + "  overrides:\n"
         + "    manifests:\n"
@@ -544,7 +544,7 @@ public class ServiceOverridesServiceV2ImplTest extends CDNGTestBase {
     testOverrideEntity.getSpec().setManifests(Collections.EMPTY_LIST);
     serviceOverridesServiceV2.create(testOverrideEntity);
     String envOverrideInputsYaml = serviceOverridesServiceV2.createEnvOverrideInputsYaml(
-        ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, testOverrideEntity.getEnvironmentRef());
+        ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, testOverrideEntity.getEnvironmentRef(), false);
     String expectedInputString = "environmentInputs:\n"
         + "  variables:\n"
         + "    - name: varA\n"
@@ -564,7 +564,7 @@ public class ServiceOverridesServiceV2ImplTest extends CDNGTestBase {
         getTestOverrideEntityForRuntimeInput(ServiceOverridesType.ENV_GLOBAL_OVERRIDE, false);
     serviceOverridesServiceV2.create(testOverrideEntity);
     String envOverrideInputsYaml = serviceOverridesServiceV2.createEnvOverrideInputsYaml(
-        ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, testOverrideEntity.getEnvironmentRef());
+        ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, testOverrideEntity.getEnvironmentRef(), false);
     assertThat(envOverrideInputsYaml).isNull();
   }
 

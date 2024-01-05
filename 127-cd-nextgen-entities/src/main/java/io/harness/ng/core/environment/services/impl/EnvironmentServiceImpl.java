@@ -1072,7 +1072,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
   private String createEnvironmentInputYamlFromOverride(
       String accountId, String orgIdentifier, String projectIdentifier, String envIdentifierRef) {
     return serviceOverridesServiceV2.createEnvOverrideInputsYaml(
-        accountId, orgIdentifier, projectIdentifier, envIdentifierRef);
+        accountId, orgIdentifier, projectIdentifier, envIdentifierRef, true);
   }
 
   @Override

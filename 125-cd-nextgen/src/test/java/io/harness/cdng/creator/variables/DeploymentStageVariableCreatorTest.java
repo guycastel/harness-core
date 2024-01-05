@@ -490,7 +490,8 @@ public class DeploymentStageVariableCreatorTest extends CategoryTest {
             .build();
     Map<Scope, NGServiceOverridesEntity> infraMap = new HashMap<>();
     infraMap.put(PROJECT, infraEntity);
-    when(serviceOverridesServiceV2.getInfraOverride(any(), any(), any(), any(), any(), any())).thenReturn(infraMap);
+    when(serviceOverridesServiceV2.getInfraOverride(any(), any(), any(), any(), any(), any(), anyBoolean()))
+        .thenReturn(infraMap);
     NGServiceOverridesEntity envEntity =
         NGServiceOverridesEntity.builder()
             .spec(ServiceOverridesSpec.builder()
@@ -499,7 +500,7 @@ public class DeploymentStageVariableCreatorTest extends CategoryTest {
             .build();
     Map<Scope, NGServiceOverridesEntity> envMap = new HashMap<>();
     envMap.put(PROJECT, envEntity);
-    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any())).thenReturn(envMap);
+    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any(), anyBoolean())).thenReturn(envMap);
     NGServiceOverridesEntity envSvcEntity =
         NGServiceOverridesEntity.builder()
             .spec(ServiceOverridesSpec.builder()
@@ -508,7 +509,7 @@ public class DeploymentStageVariableCreatorTest extends CategoryTest {
             .build();
     Map<Scope, NGServiceOverridesEntity> envSvcMap = new HashMap<>();
     envSvcMap.put(PROJECT, envSvcEntity);
-    when(serviceOverridesServiceV2.getEnvServiceOverride(any(), any(), any(), any(), any(), any()))
+    when(serviceOverridesServiceV2.getEnvServiceOverride(any(), any(), any(), any(), any(), any(), anyBoolean()))
         .thenReturn(envSvcMap);
     NGServiceOverridesEntity infraSvcEntity =
         NGServiceOverridesEntity.builder()
@@ -518,7 +519,8 @@ public class DeploymentStageVariableCreatorTest extends CategoryTest {
             .build();
     Map<Scope, NGServiceOverridesEntity> infraSvcMap = new HashMap<>();
     infraSvcMap.put(PROJECT, infraSvcEntity);
-    when(serviceOverridesServiceV2.getInfraServiceOverride(any(), any(), any(), any(), any(), any(), any()))
+    when(serviceOverridesServiceV2.getInfraServiceOverride(
+             any(), any(), any(), any(), any(), any(), any(), anyBoolean()))
         .thenReturn(infraSvcMap);
     YamlField fullYamlField = YamlUtils.readTree(pipelineJson);
 

@@ -52,24 +52,24 @@ public interface ServiceOverridesServiceV2 {
   Pair<NGServiceOverridesEntity, Boolean> upsert(@NonNull NGServiceOverridesEntity requestedServiceOverride)
       throws IOException;
 
-  Map<Scope, NGServiceOverridesEntity> getEnvOverride(
-      @NonNull String accountId, String orgId, String projectId, @NonNull String envRef, NGLogCallback logCallback);
+  Map<Scope, NGServiceOverridesEntity> getEnvOverride(@NonNull String accountId, String orgId, String projectId,
+      @NonNull String envRef, NGLogCallback logCallback, boolean loadFromCache);
 
   Map<Scope, NGServiceOverridesEntity> getEnvServiceOverride(@NonNull String accountId, String orgId, String projectId,
-      @NonNull String envRef, @NonNull String serviceRef, NGLogCallback logCallback);
+      @NonNull String envRef, @NonNull String serviceRef, NGLogCallback logCallback, boolean loadFromCache);
 
   Map<Scope, NGServiceOverridesEntity> getInfraOverride(@NonNull String accountId, String orgId, String projectId,
-      @NonNull String envRef, @NonNull String infraId, NGLogCallback logCallback);
+      @NonNull String envRef, @NonNull String infraId, NGLogCallback logCallback, boolean loadFromCache);
 
   Map<Scope, NGServiceOverridesEntity> getInfraServiceOverride(@NonNull String accountId, String orgId,
       String projectId, @NonNull String envRef, @NonNull String serviceRef, @NonNull String infraId,
-      NGLogCallback logCallback);
+      NGLogCallback logCallback, boolean loadFromCache);
 
   String createServiceOverrideInputsYaml(@NonNull String accountId, String orgIdentifier, String projectIdentifier,
       @NonNull String environmentRef, @NonNull String serviceRef);
 
-  String createEnvOverrideInputsYaml(
-      @NonNull String accountId, String orgIdentifier, String projectIdentifier, @NonNull String environmentRef);
+  String createEnvOverrideInputsYaml(@NonNull String accountId, String orgIdentifier, String projectIdentifier,
+      @NonNull String environmentRef, boolean loadFromCache);
 
   Optional<NGServiceOverrideConfigV2> mergeOverridesGroupedByType(
       @NonNull List<NGServiceOverridesEntity> overridesEntities);

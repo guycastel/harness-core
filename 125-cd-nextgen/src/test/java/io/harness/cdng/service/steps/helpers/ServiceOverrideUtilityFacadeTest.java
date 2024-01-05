@@ -11,6 +11,7 @@ import static io.harness.rule.OwnerRule.TATHAGAT;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -196,7 +197,7 @@ public class ServiceOverrideUtilityFacadeTest extends CDNGTestBase {
     doReturn(Map.of(Scope.PROJECT, basicOverrideEntity))
         .when(serviceOverridesServiceV2)
         .getEnvServiceOverride(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(NGLogCallback.class));
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(NGLogCallback.class), anyBoolean());
 
     doCallRealMethod().when(serviceOverridesServiceV2).mergeOverridesGroupedByType(anyList());
 
@@ -334,7 +335,7 @@ public class ServiceOverrideUtilityFacadeTest extends CDNGTestBase {
     doReturn(Map.of(Scope.PROJECT, basicOverrideEntity))
         .when(serviceOverridesServiceV2)
         .getEnvServiceOverride(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(NGLogCallback.class));
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(NGLogCallback.class), anyBoolean());
 
     doCallRealMethod().when(serviceOverridesServiceV2).mergeOverridesGroupedByType(anyList());
 
@@ -395,7 +396,7 @@ public class ServiceOverrideUtilityFacadeTest extends CDNGTestBase {
     doReturn(Response.success(ResponseDTO.newResponse(settingValueResponseDTO))).when(request).execute();
     doReturn(Map.of(Scope.PROJECT, basicOverrideEntity))
         .when(serviceOverridesServiceV2)
-        .getEnvOverride(anyString(), anyString(), anyString(), anyString(), any());
+        .getEnvOverride(anyString(), anyString(), anyString(), anyString(), any(), anyBoolean());
     doReturn(List.of(basicOverrideEntity))
         .doReturn(null)
         .doReturn(Collections.emptyList())
@@ -477,7 +478,7 @@ public class ServiceOverrideUtilityFacadeTest extends CDNGTestBase {
     doReturn(Response.success(ResponseDTO.newResponse(settingValueResponseDTO))).when(request).execute();
     doReturn(Map.of(Scope.PROJECT, basicOverrideEntity))
         .when(serviceOverridesServiceV2)
-        .getEnvOverride(anyString(), anyString(), anyString(), anyString(), any(NGLogCallback.class));
+        .getEnvOverride(anyString(), anyString(), anyString(), anyString(), any(NGLogCallback.class), anyBoolean());
 
     doCallRealMethod().when(serviceOverridesServiceV2).mergeOverridesGroupedByType(anyList());
 
@@ -604,7 +605,7 @@ public class ServiceOverrideUtilityFacadeTest extends CDNGTestBase {
     doReturn(Response.success(ResponseDTO.newResponse(settingValueResponseDTO))).when(request).execute();
     doReturn(Map.of(Scope.PROJECT, basicOverrideEntity))
         .when(serviceOverridesServiceV2)
-        .getEnvOverride(anyString(), anyString(), anyString(), anyString(), any(NGLogCallback.class));
+        .getEnvOverride(anyString(), anyString(), anyString(), anyString(), any(NGLogCallback.class), anyBoolean());
     doCallRealMethod().when(serviceOverridesServiceV2).mergeOverridesGroupedByType(anyList());
 
     stepParameters.setEnvInputs(null);

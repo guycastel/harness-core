@@ -8,6 +8,7 @@
 package io.harness.ng.core.utils;
 
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
+import static io.harness.template.resources.beans.NGTemplateConstants.GIT_BRANCH;
 
 import static java.lang.String.format;
 
@@ -17,8 +18,14 @@ import io.harness.data.structure.EmptyPredicate;
 import io.harness.exception.ScmException;
 import io.harness.gitsync.beans.StoreType;
 import io.harness.persistence.gitaware.GitAware;
+import io.harness.pms.yaml.YamlField;
+import io.harness.pms.yaml.YamlNode;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import org.jetbrains.annotations.Nullable;
 
 @UtilityClass
 @OwnedBy(HarnessTeam.CDC)
@@ -62,6 +69,30 @@ public class GitXUtils {
   }
 
   public static boolean isInlineEntity(GitAware gitAwareEntity) {
-    return !StoreType.REMOTE.equals(gitAwareEntity.getStoreType());
+    return !isRemoteEntity(gitAwareEntity);
+  }
+
+  public static boolean isRemoteEntity(GitAware gitAwareEntity) {
+    return StoreType.REMOTE.equals(gitAwareEntity.getStoreType());
+  }
+
+  @Nullable
+  public static String getBranchFromNode(@NonNull JsonNode jsonNode) {
+    return jsonNode.get(GIT_BRANCH) != null ? jsonNode.get(GIT_BRANCH).asText() : null;
+  }
+
+  @Nullable
+  public static String getBranchFromNode(@NonNull ObjectNode objectNode) {
+    return objectNode.get(GIT_BRANCH) != null ? objectNode.get(GIT_BRANCH).asText() : null;
+  }
+
+  @Nullable
+  public static String getBranchFromNode(YamlNode yamlNode) {
+    YamlField gitBranchField = yamlNode.getField(GIT_BRANCH);
+    if (gitBranchField != null) {
+      JsonNode gitBranchNode = gitBranchField.getNode().getCurrJsonNode();
+      return gitBranchNode.asText();
+    }
+    return null;
   }
 }

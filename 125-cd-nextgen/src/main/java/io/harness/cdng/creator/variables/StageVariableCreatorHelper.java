@@ -90,7 +90,7 @@ public class StageVariableCreatorHelper {
         if (overrideV2ValidationHelper.isOverridesV2Enabled(accountIdentifier, orgIdentifier, projectIdentifier)) {
           // add all env global overrides
           Map<Scope, NGServiceOverridesEntity> envOverride = serviceOverridesServiceV2.getEnvOverride(
-              accountIdentifier, orgIdentifier, projectIdentifier, environmentRef.getValue(), null);
+              accountIdentifier, orgIdentifier, projectIdentifier, environmentRef.getValue(), null, true);
           envVariables.addAll(getVariablesList(envOverride));
 
           // add all infra global overrides
@@ -231,7 +231,7 @@ public class StageVariableCreatorHelper {
   private List<NGVariable> getInfraVarsList(String accountIdentifier, String orgIdentifier, String projectIdentifier,
       ParameterField<String> environmentRef, String infraId) {
     Map<Scope, NGServiceOverridesEntity> infraOverride = serviceOverridesServiceV2.getInfraOverride(
-        accountIdentifier, orgIdentifier, projectIdentifier, environmentRef.getValue(), infraId, null);
+        accountIdentifier, orgIdentifier, projectIdentifier, environmentRef.getValue(), infraId, null, true);
     return getVariablesList(infraOverride);
   }
 

@@ -4625,7 +4625,8 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
     overridesEntityMap.put(Scope.ORG, createTestOverrideInOrg());
     overridesEntityMap.put(Scope.ACCOUNT, createTestOverrideInAccount());
     when(serviceOverrideV2ValidationHelper.isOverridesV2Enabled(any(), any(), any())).thenReturn(true);
-    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any())).thenReturn(overridesEntityMap);
+    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any(), anyBoolean()))
+        .thenReturn(overridesEntityMap);
     List<YamlField> yamlFields =
         artifactResourceUtils.getAliasYamlFields(ACCOUNT_ID, ORG_ID, PROJECT_ID, null, "env1", new HashedMap());
     assertThat(yamlFields.toString()).contains("\"name\":\"variable1\",\"value\":\"project\"");
@@ -4649,7 +4650,8 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
     overridesEntityMap.put(Scope.ORG, createTestOverrideInOrg());
     overridesEntityMap.put(Scope.ACCOUNT, createTestOverrideInAccount());
     when(serviceOverrideV2ValidationHelper.isOverridesV2Enabled(any(), any(), any())).thenReturn(true);
-    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any())).thenReturn(overridesEntityMap);
+    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any(), anyBoolean()))
+        .thenReturn(overridesEntityMap);
     List<YamlField> yamlFields =
         artifactResourceUtils.getAliasYamlFields(ACCOUNT_ID, ORG_ID, PROJECT_ID, null, "env1", new HashedMap());
     assertThat(yamlFields.toString()).contains("\"name\":\"variable1\",\"value\":\"org\"");
@@ -4672,7 +4674,8 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
     Map<Scope, NGServiceOverridesEntity> overridesEntityMap = new HashedMap();
     overridesEntityMap.put(Scope.ACCOUNT, createTestOverrideInAccount());
     when(serviceOverrideV2ValidationHelper.isOverridesV2Enabled(any(), any(), any())).thenReturn(true);
-    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any())).thenReturn(overridesEntityMap);
+    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any(), anyBoolean()))
+        .thenReturn(overridesEntityMap);
     List<YamlField> yamlFields =
         artifactResourceUtils.getAliasYamlFields(ACCOUNT_ID, ORG_ID, PROJECT_ID, null, "env1", new HashedMap());
     assertThat(yamlFields.toString()).contains("\"name\":\"variable1\",\"value\":\"account\"");
@@ -4694,7 +4697,8 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
                                     .build()));
     Map<Scope, NGServiceOverridesEntity> overridesEntityMap = new HashedMap();
     when(serviceOverrideV2ValidationHelper.isOverridesV2Enabled(any(), any(), any())).thenReturn(true);
-    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any())).thenReturn(overridesEntityMap);
+    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any(), anyBoolean()))
+        .thenReturn(overridesEntityMap);
     List<YamlField> yamlFields =
         artifactResourceUtils.getAliasYamlFields(ACCOUNT_ID, ORG_ID, PROJECT_ID, null, "env1", new HashedMap());
     assertThat(yamlFields.toString())
@@ -4718,7 +4722,8 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
     Map<Scope, NGServiceOverridesEntity> overridesEntityMap = new HashedMap();
     overridesEntityMap.put(Scope.ACCOUNT, createTestOverrideInAccount());
     when(serviceOverrideV2ValidationHelper.isOverridesV2Enabled(any(), any(), any())).thenReturn(false);
-    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any())).thenReturn(overridesEntityMap);
+    when(serviceOverridesServiceV2.getEnvOverride(any(), any(), any(), any(), any(), anyBoolean()))
+        .thenReturn(overridesEntityMap);
     List<YamlField> yamlFields =
         artifactResourceUtils.getAliasYamlFields(ACCOUNT_ID, ORG_ID, PROJECT_ID, null, "env1", new HashedMap());
     assertThat(yamlFields.toString())

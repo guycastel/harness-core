@@ -819,6 +819,7 @@ public class ArtifactResourceUtils {
         Optional<Environment> optionalEnvironment =
             environmentService.get(accountId, orgIdentifier, projectIdentifier, environmentId, false);
         if (optionalEnvironment.isPresent()) {
+          // use envGitBranch to fetch env global overrides
           YamlField envYamlField =
               getYamlField(optionalEnvironment.get().fetchNonEmptyYaml(), YAMLFieldNameConstants.ENVIRONMENT);
           addGlobalEnvOverrideYamlField(envYamlField, accountId, orgIdentifier, projectIdentifier, environmentId);
@@ -838,7 +839,7 @@ public class ArtifactResourceUtils {
       String envRef =
           IdentifierRefHelper.getRefFromIdentifierOrRef(accountId, orgIdentifier, projectIdentifier, environmentId);
       Map<Scope, NGServiceOverridesEntity> envOverrideMap =
-          serviceOverridesServiceV2.getEnvOverride(accountId, orgIdentifier, projectIdentifier, envRef, null);
+          serviceOverridesServiceV2.getEnvOverride(accountId, orgIdentifier, projectIdentifier, envRef, null, true);
       List<Scope> scopeList = Arrays.asList(Scope.ACCOUNT, Scope.ORG, Scope.PROJECT);
       Map<String, NGVariable> finalVariableMap = new HashMap<>();
 

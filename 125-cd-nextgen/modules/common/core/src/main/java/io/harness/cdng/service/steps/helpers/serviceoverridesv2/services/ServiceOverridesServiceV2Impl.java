@@ -170,6 +170,7 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
   @Override
   public Optional<NGServiceOverridesEntity> getOverridesContainingYaml(@NonNull String accountId, String orgIdentifier,
       String projectIdentifier, @NonNull String serviceOverridesIdentifier) {
+    // get overrides with yaml field from db since v1 overrides do not exist remotely
     return serviceOverrideRepositoryV2
         .findByAccountIdAndOrgIdentifierAndProjectIdentifierAndIdentifierAndTypeAndYamlExistsAndYamlNotNull(accountId,
             orgIdentifier, projectIdentifier, serviceOverridesIdentifier, ServiceOverridesType.ENV_SERVICE_OVERRIDE);
@@ -340,8 +341,8 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
   }
 
   @Override
-  public Map<Scope, NGServiceOverridesEntity> getEnvOverride(
-      @NonNull String accountId, String orgId, String projectId, @NonNull String envRef, NGLogCallback logCallback) {
+  public Map<Scope, NGServiceOverridesEntity> getEnvOverride(@NonNull String accountId, String orgId, String projectId,
+      @NonNull String envRef, NGLogCallback logCallback, boolean loadFromCache) {
     Criteria criteria = new Criteria()
                             .and(NGServiceOverridesEntityKeys.environmentRef)
                             .is(envRef)
@@ -350,12 +351,13 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
                             .and(NGServiceOverridesEntityKeys.spec)
                             .exists(true);
 
-    return getScopedEntities(accountId, orgId, projectId, criteria, logCallback);
+    return getScopedEntities(accountId, orgId, projectId, criteria, logCallback, loadFromCache);
   }
 
   @Override
   public Map<Scope, NGServiceOverridesEntity> getEnvServiceOverride(@NonNull String accountId, String orgId,
-      String projectId, @NonNull String envRef, @NonNull String serviceRef, NGLogCallback logCallback) {
+      String projectId, @NonNull String envRef, @NonNull String serviceRef, NGLogCallback logCallback,
+      boolean loadFromCache) {
     Criteria criteria = new Criteria()
                             .and(NGServiceOverridesEntityKeys.environmentRef)
                             .is(envRef)
@@ -365,12 +367,13 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
                             .is(ServiceOverridesType.ENV_SERVICE_OVERRIDE)
                             .and(NGServiceOverridesEntityKeys.spec)
                             .exists(true);
-    return getScopedEntities(accountId, orgId, projectId, criteria, logCallback);
+    return getScopedEntities(accountId, orgId, projectId, criteria, logCallback, loadFromCache);
   }
 
   @Override
   public Map<Scope, NGServiceOverridesEntity> getInfraOverride(@NonNull String accountId, String orgId,
-      String projectId, @NonNull String envRef, @NonNull String infraId, NGLogCallback logCallback) {
+      String projectId, @NonNull String envRef, @NonNull String infraId, NGLogCallback logCallback,
+      boolean loadFromCache) {
     Criteria criteria = new Criteria()
                             .and(NGServiceOverridesEntityKeys.environmentRef)
                             .is(envRef)
@@ -380,13 +383,13 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
                             .is(ServiceOverridesType.INFRA_GLOBAL_OVERRIDE)
                             .and(NGServiceOverridesEntityKeys.spec)
                             .exists(true);
-    return getScopedEntities(accountId, orgId, projectId, criteria, logCallback);
+    return getScopedEntities(accountId, orgId, projectId, criteria, logCallback, loadFromCache);
   }
 
   @Override
   public Map<Scope, NGServiceOverridesEntity> getInfraServiceOverride(@NonNull String accountId, String orgId,
       String projectId, @NonNull String envRef, @NonNull String serviceRef, @NonNull String infraId,
-      NGLogCallback logCallback) {
+      NGLogCallback logCallback, boolean loadFromCache) {
     Criteria criteria = new Criteria()
                             .and(NGServiceOverridesEntityKeys.environmentRef)
                             .is(envRef)
@@ -398,7 +401,7 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
                             .is(ServiceOverridesType.INFRA_SERVICE_OVERRIDE)
                             .and(NGServiceOverridesEntityKeys.spec)
                             .exists(true);
-    return getScopedEntities(accountId, orgId, projectId, criteria, logCallback);
+    return getScopedEntities(accountId, orgId, projectId, criteria, logCallback, loadFromCache);
   }
 
   @Override
@@ -449,10 +452,10 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
   }
 
   @Override
-  public String createEnvOverrideInputsYaml(
-      @NonNull String accountId, String orgIdentifier, String projectIdentifier, @NonNull String environmentRef) {
+  public String createEnvOverrideInputsYaml(@NonNull String accountId, String orgIdentifier, String projectIdentifier,
+      @NonNull String environmentRef, boolean loadFromCache) {
     Map<String, Object> yamlInputs =
-        createEnvOverrideInputsYamlInternal(accountId, orgIdentifier, projectIdentifier, environmentRef);
+        createEnvOverrideInputsYamlInternal(accountId, orgIdentifier, projectIdentifier, environmentRef, loadFromCache);
     if (isEmpty(yamlInputs)) {
       return null;
     }
@@ -460,11 +463,11 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
   }
 
   private Map<String, Object> createEnvOverrideInputsYamlInternal(
-      String accountId, String orgIdentifier, String projectIdentifier, String environmentRef) {
+      String accountId, String orgIdentifier, String projectIdentifier, String environmentRef, boolean loadFromCache) {
     Map<String, Object> yamlInputs = new HashMap<>();
 
     Map<Scope, NGServiceOverridesEntity> envOverrideAtAllScopes =
-        getEnvOverride(accountId, orgIdentifier, projectIdentifier, environmentRef, null);
+        getEnvOverride(accountId, orgIdentifier, projectIdentifier, environmentRef, null, loadFromCache);
     Optional<NGServiceOverrideConfigV2> ngServiceOverrideConfigV2 = Optional.empty();
     if (isNotEmpty(envOverrideAtAllScopes)) {
       ngServiceOverrideConfigV2 = mergeOverridesGroupedByType(new ArrayList<>(envOverrideAtAllScopes.values()));
@@ -512,7 +515,7 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
     Map<String, Object> yamlInputs = new HashMap<>();
 
     Map<Scope, NGServiceOverridesEntity> envServiceOverrideAtAllScopes =
-        getEnvServiceOverride(accountId, orgIdentifier, projectIdentifier, environmentRef, serviceRef, null);
+        getEnvServiceOverride(accountId, orgIdentifier, projectIdentifier, environmentRef, serviceRef, null, false);
     Optional<NGServiceOverrideConfigV2> ngServiceOverrideConfigV2 = Optional.empty();
     if (isNotEmpty(envServiceOverrideAtAllScopes)) {
       ngServiceOverrideConfigV2 = mergeOverridesGroupedByType(new ArrayList<>(envServiceOverrideAtAllScopes.values()));
@@ -805,8 +808,8 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
         additionalCriteria);
   }
 
-  private Map<Scope, NGServiceOverridesEntity> getScopedEntities(
-      @NonNull String accountId, String orgId, String projectId, Criteria criteria, NGLogCallback logCallback) {
+  private Map<Scope, NGServiceOverridesEntity> getScopedEntities(@NonNull String accountId, String orgId,
+      String projectId, Criteria criteria, NGLogCallback logCallback, boolean loadFromCache) {
     Map<Scope, NGServiceOverridesEntity> scopedEntities = new HashMap<>();
     if (isNotEmpty(projectId)) {
       List<NGServiceOverridesEntity> projectScopedEntity =
@@ -816,8 +819,12 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
             "Found more than one override at project scope. Only one entity will be considered at execution time",
             LogLevel.WARN);
       }
-      projectScopedEntity.stream().findFirst().ifPresent(
-          overrideEntity -> scopedEntities.put(Scope.PROJECT, overrideEntity));
+      projectScopedEntity.stream().findFirst().ifPresent(overrideEntity -> {
+        if (GitXUtils.isRemoteEntity(overrideEntity)) {
+          serviceOverrideRepositoryV2.getRemoteOverridesWithYaml(overrideEntity, loadFromCache, false);
+        }
+        scopedEntities.put(Scope.PROJECT, overrideEntity);
+      });
     }
 
     if (isNotEmpty(orgId)) {
@@ -827,7 +834,12 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
             "Found more than one override at org scope. Only one entity will be considered at execution time",
             LogLevel.WARN);
       }
-      orgScopedEntity.stream().findFirst().ifPresent(overrideEntity -> scopedEntities.put(Scope.ORG, overrideEntity));
+      orgScopedEntity.stream().findFirst().ifPresent(overrideEntity -> {
+        if (GitXUtils.isRemoteEntity(overrideEntity)) {
+          serviceOverrideRepositoryV2.getRemoteOverridesWithYaml(overrideEntity, loadFromCache, false);
+        }
+        scopedEntities.put(Scope.ORG, overrideEntity);
+      });
     }
 
     List<NGServiceOverridesEntity> accountScopedEntity = findAll(addAccountScopeCriteria(accountId, criteria));
@@ -836,8 +848,12 @@ public class ServiceOverridesServiceV2Impl implements ServiceOverridesServiceV2 
           "Found more than one override at account scope. Only one entity will be considered at execution time",
           LogLevel.WARN);
     }
-    accountScopedEntity.stream().findFirst().ifPresent(
-        overrideEntity -> scopedEntities.put(Scope.ACCOUNT, overrideEntity));
+    accountScopedEntity.stream().findFirst().ifPresent(overrideEntity -> {
+      if (GitXUtils.isRemoteEntity(overrideEntity)) {
+        serviceOverrideRepositoryV2.getRemoteOverridesWithYaml(overrideEntity, loadFromCache, false);
+      }
+      scopedEntities.put(Scope.ACCOUNT, overrideEntity);
+    });
     return scopedEntities;
   }
 

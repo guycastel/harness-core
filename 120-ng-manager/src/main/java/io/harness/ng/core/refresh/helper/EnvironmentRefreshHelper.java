@@ -7,8 +7,6 @@
 
 package io.harness.ng.core.refresh.helper;
 
-import static io.harness.template.resources.beans.NGTemplateConstants.GIT_BRANCH;
-
 import io.harness.account.AccountClient;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
@@ -19,6 +17,7 @@ import io.harness.cdng.visitor.YamlTypes;
 import io.harness.common.NGExpressionUtils;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.exception.InvalidRequestException;
+import io.harness.gitx.GitXTransientBranchGuard;
 import io.harness.ng.core.environment.services.EnvironmentService;
 import io.harness.ng.core.infrastructure.dto.NoInputMergeInputAction;
 import io.harness.ng.core.infrastructure.services.InfrastructureEntityService;
@@ -26,6 +25,7 @@ import io.harness.ng.core.refresh.bean.EntityRefreshContext;
 import io.harness.ng.core.serviceoverride.services.ServiceOverrideService;
 import io.harness.ng.core.serviceoverridev2.service.ServiceOverridesServiceV2;
 import io.harness.ng.core.template.refresh.v2.InputsValidationResponse;
+import io.harness.ng.core.utils.GitXUtils;
 import io.harness.ng.core.utils.ServiceOverrideV2ValidationHelper;
 import io.harness.pms.merger.YamlConfig;
 import io.harness.pms.merger.fqn.FQN;
@@ -95,7 +95,7 @@ public class EnvironmentRefreshHelper {
         return;
       }
 
-      String gitBranch = envJsonNode.get(GIT_BRANCH) != null ? envJsonNode.get(GIT_BRANCH).asText() : null;
+      String gitBranch = GitXUtils.getBranchFromNode(envJsonNode);
       // If envInputs not valid, no need to check infraDefs inputs
       if (!validateEnvInputs(context, errorNodeSummary, envRefValue, mapper, envInputsNode, gitBranch)) {
         return;
@@ -267,7 +267,7 @@ public class EnvironmentRefreshHelper {
           envNodeInResolvedTemplatesYaml.getField(YamlTypes.ENVIRONMENT_REF).getNode().getCurrJsonNode();
       String envRefValue = envRefNode.asText();
 
-      String environmentBranch = RefreshInputsHelper.getBranchFromNode(envNodeInResolvedTemplatesYaml);
+      String environmentBranch = GitXUtils.getBranchFromNode(envNodeInResolvedTemplatesYaml);
       return validateInfraDefsInput(context, errorNodeSummary, envRefValue, environmentBranch, mapper, infraDefsNode);
     }
     return true;
@@ -277,7 +277,7 @@ public class EnvironmentRefreshHelper {
     ObjectNode envObjectNode = (ObjectNode) entityNode.getCurrJsonNode();
     removeNotRequiredInputFieldsFromEnvObject(entityNode, context, envObjectNode);
     JsonNode envRefJsonNode = envObjectNode.get(YamlTypes.ENVIRONMENT_REF);
-    String environmentBranch = RefreshInputsHelper.getBranchFromNode(entityNode);
+    String environmentBranch = GitXUtils.getBranchFromNode(entityNode);
     String envRefValue;
     ObjectMapper mapper = new ObjectMapper();
     JsonNode infraDefsNode = envObjectNode.get(YamlTypes.INFRASTRUCTURE_DEFS);
@@ -451,7 +451,7 @@ public class EnvironmentRefreshHelper {
         return;
       }
       envRefValue = envRefNode.asText();
-      String environmentBranch = RefreshInputsHelper.getBranchFromNode(envNodeInResolvedTemplatesYaml);
+      String environmentBranch = GitXUtils.getBranchFromNode(envNodeInResolvedTemplatesYaml);
       refreshInfraDefsInput(context, envRefValue, environmentBranch, mapper, envObjectNode, infraDefsNode);
     }
   }
@@ -498,11 +498,13 @@ public class EnvironmentRefreshHelper {
     String envInputsYaml = null;
     boolean overridesV2Enabled = overrideV2ValidationHelper.isOverridesV2Enabled(
         context.getAccountId(), context.getOrgId(), context.getProjectId());
+    String gitBranch = GitXUtils.getBranchFromNode(envObjectNode);
     if (overridesV2Enabled) {
-      envInputsYaml = serviceOverridesServiceV2.createEnvOverrideInputsYaml(
-          context.getAccountId(), context.getOrgId(), context.getProjectId(), envRefValue);
+      try (GitXTransientBranchGuard ignore = new GitXTransientBranchGuard(gitBranch)) {
+        envInputsYaml = serviceOverridesServiceV2.createEnvOverrideInputsYaml(
+            context.getAccountId(), context.getOrgId(), context.getProjectId(), envRefValue, false);
+      }
     } else {
-      String gitBranch = envObjectNode.get(GIT_BRANCH) != null ? envObjectNode.get(GIT_BRANCH).asText() : null;
       envInputsYaml = environmentService.createEnvironmentInputsYaml(
           context.getAccountId(), context.getOrgId(), context.getProjectId(), envRefValue, gitBranch);
     }
@@ -576,8 +578,10 @@ public class EnvironmentRefreshHelper {
 
     String envInputsYaml = null;
     if (overridesV2Enabled) {
-      envInputsYaml = serviceOverridesServiceV2.createEnvOverrideInputsYaml(
-          context.getAccountId(), context.getOrgId(), context.getProjectId(), envRefValue);
+      try (GitXTransientBranchGuard ignore = new GitXTransientBranchGuard(gitBranch)) {
+        envInputsYaml = serviceOverridesServiceV2.createEnvOverrideInputsYaml(
+            context.getAccountId(), context.getOrgId(), context.getProjectId(), envRefValue, false);
+      }
     } else {
       envInputsYaml = environmentService.createEnvironmentInputsYaml(
           context.getAccountId(), context.getOrgId(), context.getProjectId(), envRefValue, gitBranch);

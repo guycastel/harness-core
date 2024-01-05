@@ -311,12 +311,12 @@ public class DeploymentStageVariableCreator extends AbstractStageVariableCreator
       if (overrideV2ValidationHelper.isOverridesV2Enabled(accountIdentifier, orgIdentifier, projectIdentifier)) {
         Map<Scope, NGServiceOverridesEntity> envServiceOverride =
             serviceOverridesServiceV2.getEnvServiceOverride(accountIdentifier, orgIdentifier, projectIdentifier,
-                environmentRef.getValue(), serviceRef.getValue(), null);
+                environmentRef.getValue(), serviceRef.getValue(), null, true);
         addOverrideVariablesToSet(serviceVariables, envServiceOverride);
         if (isNotEmpty(infraIdentifier)) {
           Map<Scope, NGServiceOverridesEntity> infraServiceOverride =
               serviceOverridesServiceV2.getInfraServiceOverride(accountIdentifier, orgIdentifier, projectIdentifier,
-                  environmentRef.getValue(), serviceRef.getValue(), infraIdentifier, null);
+                  environmentRef.getValue(), serviceRef.getValue(), infraIdentifier, null, true);
           addOverrideVariablesToSet(serviceVariables, infraServiceOverride);
         }
       } else {

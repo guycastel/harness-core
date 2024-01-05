@@ -7,7 +7,6 @@
 
 package io.harness.ngmigration.service.step;
 import static io.harness.ngmigration.beans.MigrationInputSettingsType.MIGRATE_SHELL_VARIABLES_WITH_ALIAS;
-import static io.harness.ngmigration.beans.MigrationInputSettingsType.SIMULTANEOUS_DEPLOYMENT_ON_SAME_INFRA;
 
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;

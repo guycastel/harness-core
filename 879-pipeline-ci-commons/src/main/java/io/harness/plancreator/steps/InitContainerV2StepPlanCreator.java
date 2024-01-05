@@ -29,21 +29,25 @@ import lombok.experimental.UtilityClass;
 public class InitContainerV2StepPlanCreator {
   public PlanNode createPlanForField(String runStepNodeId, StepParameters stepElementParameters,
       AdviserObtainment adviserObtainment, String stepType) {
-    return PlanNode.builder()
-        .uuid(runStepNodeId)
-        .name(ContainerCommandUnitConstants.InitContainer)
-        .identifier(ContainerCommandUnitConstants.InitContainer)
-        .stepType(StepType.newBuilder().setType(stepType).setStepCategory(StepCategory.STEP).build())
-        .group(StepOutcomeGroup.STEP.name())
-        .stepParameters(stepElementParameters)
-        .facilitatorObtainment(
-            FacilitatorObtainment.newBuilder()
-                .setType(FacilitatorType.newBuilder().setType(OrchestrationFacilitatorType.TASK).build())
-                .build())
-        .adviserObtainment(adviserObtainment)
-        .skipGraphType(SkipType.NOOP)
-        .skipExpressionChain(false)
-        .expressionMode(ExpressionMode.RETURN_ORIGINAL_EXPRESSION_IF_UNRESOLVED)
-        .build();
+    PlanNode.PlanNodeBuilder planNodeBuilder =
+        PlanNode.builder()
+            .uuid(runStepNodeId)
+            .name(ContainerCommandUnitConstants.InitContainer)
+            .identifier(ContainerCommandUnitConstants.InitContainer)
+            .stepType(StepType.newBuilder().setType(stepType).setStepCategory(StepCategory.STEP).build())
+            .group(StepOutcomeGroup.STEP.name())
+            .stepParameters(stepElementParameters)
+            .facilitatorObtainment(
+                FacilitatorObtainment.newBuilder()
+                    .setType(FacilitatorType.newBuilder().setType(OrchestrationFacilitatorType.TASK).build())
+                    .build())
+            .skipGraphType(SkipType.NOOP)
+            .skipExpressionChain(false)
+            .expressionMode(ExpressionMode.RETURN_ORIGINAL_EXPRESSION_IF_UNRESOLVED);
+
+    if (adviserObtainment != null) {
+      planNodeBuilder.adviserObtainment(adviserObtainment);
+    }
+    return planNodeBuilder.build();
   }
 }

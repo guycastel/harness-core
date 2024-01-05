@@ -47,26 +47,28 @@ public class ChangeDataCaptureBulkMigrationHelper {
         mongoDatabase.getCollection(changeTracker.getCollectionName(subscriptionEntity));
 
     FindIterable<Document> documents;
+    boolean isPartialSyncEvent = false;
     if (filter == null) {
       documents = collection.find();
     } else {
+      isPartialSyncEvent = true;
       documents = collection.find(filter);
     }
 
     try (MongoCursor<Document> cursor = documents.iterator()) {
       while (cursor.hasNext()) {
-        runSyncForEntity(subscriptionEntity, cursor, changeHandler, changeType);
+        runSyncForEntity(subscriptionEntity, cursor, changeHandler, changeType, isPartialSyncEvent);
         counter++;
       }
     }
     return counter;
   }
 
-  private <T extends PersistentEntity> void runSyncForEntity(
-      Class<T> subscriptionEntity, MongoCursor<Document> cursor, String handler, ChangeType changeType) {
+  private <T extends PersistentEntity> void runSyncForEntity(Class<T> subscriptionEntity, MongoCursor<Document> cursor,
+      String handler, ChangeType changeType, boolean isPartialSyncEvent) {
     final Document document = cursor.next();
     changeEventProcessor.processChangeEvent(
-        CDCEntityBulkTaskConverter.convert(subscriptionEntity, document, handler, changeType));
+        CDCEntityBulkTaskConverter.convert(subscriptionEntity, document, handler, changeType, isPartialSyncEvent));
   }
 
   public void doBulkSync(Iterable<CDCEntity<?>> entitiesToBulkSync) {

@@ -34,6 +34,10 @@ public class GitXWebhookUtils {
   private final String NULL_COMMIT_ID = "0000000000000000000000000000000000000000";
 
   public List<String> compareFolderPaths(List<String> webhookFolderPaths, List<String> modifiedFilePaths) {
+    if (isEmpty(webhookFolderPaths)) {
+      log.info("No folderPaths mentioned in the webhook, parsing all the modifiedFilePaths");
+      return modifiedFilePaths;
+    }
     ArrayList<String> matchingFolderPaths = new ArrayList<>();
     if (isEmpty(modifiedFilePaths)) {
       return matchingFolderPaths;
@@ -85,8 +89,7 @@ public class GitXWebhookUtils {
     List<GitXWebhook> webhooksWithMatchingFolderPaths = new ArrayList<>();
     if (isNotEmpty(gitXWebhookList)) {
       gitXWebhookList.forEach(gitXWebhook -> {
-        if (isEmpty(gitXWebhook.getFolderPaths())
-            || isNotEmpty(compareFolderPaths(gitXWebhook.getFolderPaths(), Collections.singletonList(filepath)))) {
+        if (isNotEmpty(compareFolderPaths(gitXWebhook.getFolderPaths(), Collections.singletonList(filepath)))) {
           webhooksWithMatchingFolderPaths.add(gitXWebhook);
         }
       });

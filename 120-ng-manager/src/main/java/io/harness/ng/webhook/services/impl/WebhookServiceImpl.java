@@ -108,15 +108,12 @@ public class WebhookServiceImpl implements WebhookService, WebhookEventService {
 
   private void enqueueWebhookEvents(WebhookDTO webhookDTO, String topic, String moduleName, String uuid) {
     // Consumer for webhook events stream: WebhookEventQueueProcessor (in Pipeline service)
-    EnqueueRequest enqueueRequest = EnqueueRequest.builder()
-                                        .topic(topic + WEBHOOK_EVENT)
-                                        .subTopic(webhookDTO.getAccountId())
-                                        .producerName(moduleName + WEBHOOK_EVENT)
-                                        .payload(RecastOrchestrationUtils.toJson(webhookDTO))
-                                        .build();
+    boolean shouldExecuteTriggerSequentially = shouldExecuteTriggerSequentially(webhookDTO);
+    EnqueueRequest enqueueRequest =
+        getFirstEnqueueRequest(shouldExecuteTriggerSequentially, moduleName, topic, webhookDTO);
     EnqueueResponse execute = hsqsClientService.enqueue(enqueueRequest);
     log.info("Webhook event queued. message id: {}, uuid: {}", execute.getItemId(), uuid);
-    if (webhookDTO.hasParsedResponse() && webhookDTO.hasGitDetails()) {
+    if (!shouldExecuteTriggerSequentially && webhookDTO.hasParsedResponse() && webhookDTO.hasGitDetails()) {
       enqueueRequest = getEnqueueRequestBasedOnGitEvent(moduleName, topic, webhookDTO);
       if (enqueueRequest != null) {
         execute = hsqsClientService.enqueue(enqueueRequest);
@@ -160,5 +157,32 @@ public class WebhookServiceImpl implements WebhookService, WebhookEventService {
     return Boolean.TRUE.equals(upsertWebhookRequestDTO.getIsHarnessScm())
         ? harnessSCMWebhookService.upsertWebhook(upsertWebhookRequestDTO)
         : defaultWebhookService.upsertWebhook(upsertWebhookRequestDTO);
+  }
+
+  private boolean shouldExecuteTriggerSequentially(WebhookDTO webhookDTO) {
+    return ngFeatureFlagHelperService.isEnabled(webhookDTO.getAccountId(), FeatureName.PIE_PROCESS_TRIGGER_SEQUENTIALLY)
+        && isGitPushEvent(webhookDTO)
+        && gitSyncSdkService.isGitSimplificationEnabled(webhookDTO.getAccountId(), "", "");
+  }
+
+  private boolean isGitPushEvent(WebhookDTO webhookDTO) {
+    return webhookDTO.hasParsedResponse() && webhookDTO.hasGitDetails()
+        && PUSH == webhookDTO.getGitDetails().getEvent();
+  }
+
+  private EnqueueRequest getFirstEnqueueRequest(
+      boolean shouldExecuteTriggerSequentially, String moduleName, String topic, WebhookDTO webhookDTO) {
+    EnqueueRequest enqueueRequest;
+    if (shouldExecuteTriggerSequentially) {
+      enqueueRequest = getEnqueueRequestBasedOnGitEvent(moduleName, topic, webhookDTO);
+    } else {
+      enqueueRequest = EnqueueRequest.builder()
+                           .topic(topic + WEBHOOK_EVENT)
+                           .subTopic(webhookDTO.getAccountId())
+                           .producerName(moduleName + WEBHOOK_EVENT)
+                           .payload(RecastOrchestrationUtils.toJson(webhookDTO))
+                           .build();
+    }
+    return enqueueRequest;
   }
 }

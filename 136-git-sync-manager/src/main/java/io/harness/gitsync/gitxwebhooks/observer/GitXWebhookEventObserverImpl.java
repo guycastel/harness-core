@@ -12,11 +12,12 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.eventsframework.webhookpayloads.webhookdata.WebhookDTO;
+import io.harness.beans.FeatureName;
 import io.harness.gitsync.common.beans.GitXWebhookEventStatus;
 import io.harness.gitsync.gitxwebhooks.dtos.GitXWebhookEventUpdateInfo;
 import io.harness.gitsync.gitxwebhooks.helper.GitXWebhookTriggerHelper;
 import io.harness.gitsync.gitxwebhooks.loggers.GitXWebhookEventLogContext;
+import io.harness.utils.NGFeatureFlagHelperService;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -28,12 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 @OwnedBy(PIPELINE)
 public class GitXWebhookEventObserverImpl implements GitXWebhookEventUpdateObserver {
   @Inject private GitXWebhookTriggerHelper gitXWebhookTriggerHelper;
+  @Inject NGFeatureFlagHelperService ngFeatureFlagHelperService;
 
   @Override
   public void onGitXWebhookEventUpdate(GitXWebhookEventUpdateInfo gitXWebhookEventUpdateInfo) {
     try (GitXWebhookEventLogContext context =
              new GitXWebhookEventLogContext(gitXWebhookEventUpdateInfo.getWebhookDTO())) {
-      if (shouldStartTriggerExecution(gitXWebhookEventUpdateInfo.getEventStatus())) {
+      if (shouldStartTriggerExecution(
+              gitXWebhookEventUpdateInfo.getWebhookDTO().getAccountId(), gitXWebhookEventUpdateInfo.getEventStatus())) {
         try {
           log.info(String.format(
               "Starting the trigger execution for event status %s", gitXWebhookEventUpdateInfo.getEventStatus()));
@@ -46,8 +49,9 @@ public class GitXWebhookEventObserverImpl implements GitXWebhookEventUpdateObser
     }
   }
 
-  private boolean shouldStartTriggerExecution(String eventStatus) {
-    return getAllowedTriggerExecutionEventStatus().contains(eventStatus);
+  private boolean shouldStartTriggerExecution(String accountIdentifier, String eventStatus) {
+    return ngFeatureFlagHelperService.isEnabled(accountIdentifier, FeatureName.PIE_PROCESS_TRIGGER_SEQUENTIALLY)
+        && getAllowedTriggerExecutionEventStatus().contains(eventStatus);
   }
 
   private List<String> getAllowedTriggerExecutionEventStatus() {

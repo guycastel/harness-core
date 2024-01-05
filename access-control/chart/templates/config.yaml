@@ -11,7 +11,7 @@ metadata:
   annotations: {{- include "harnesscommon.tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-{- include "harnesscommon.tplvalues.render" ( dict "value" .Values.config "context" $) | nindent 2}}
+{{- include "harnesscommon.tplvalues.render" ( dict "value" .Values.config "context" $) | nindent 2}}
   EVENTS_CONFIG_USE_SENTINEL: '{{ .Values.global.database.redis.installed }}'
   EVENTS_CONFIG_REDIS_SENTINELS: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}
   EVENTS_CONFIG_REDIS_URL: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}

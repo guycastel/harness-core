@@ -8,6 +8,7 @@
 package io.harness.pcf.cfsdk;
 
 import static io.harness.annotations.dev.HarnessTeam.CDP;
+import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.exception.ExceptionUtils;
@@ -41,10 +42,23 @@ public class CloudFoundryClientProvider {
       throws PivotalClientApiException {
     try {
       if (StringUtils.isNotBlank(refreshToken)) {
-        log.debug("Generating API TAS Token provider using refresh token");
+        String clientId = System.getenv("TAS_REFRESH_TOKEN_CLIENT_ID");
+        String clientSecret = System.getenv("TAS_REFRESH_TOKEN_CLIENT_SECRET");
+        String enableTokenClientId = System.getenv("ENABLE_TAS_REFRESH_TOKEN_CLIENT_ID");
+
+        if (isNotEmpty(enableTokenClientId) && enableTokenClientId.equalsIgnoreCase("true") && isNotEmpty(clientId)) {
+          log.info("Generating API TAS Token provider using client id, client secret and refresh token");
+          return RefreshTokenGrantTokenProvider.builder()
+              .clientId(clientId)
+              .clientSecret(clientSecret != null ? clientSecret : "")
+              .token(refreshToken)
+              .build();
+        }
+
+        log.info("Generating API TAS Token provider using refresh token");
         return RefreshTokenGrantTokenProvider.builder().token(refreshToken).build();
       }
-      log.debug("Generating API TAS Token provider using username and password");
+      log.info("Generating API TAS Token provider using username and password");
       return PasswordGrantTokenProvider.builder().username(username).password(password).build();
     } catch (Exception t) {
       throw new PivotalClientApiException(ExceptionUtils.getMessage(t));

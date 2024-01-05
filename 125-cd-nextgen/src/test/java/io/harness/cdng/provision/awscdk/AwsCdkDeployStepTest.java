@@ -51,6 +51,7 @@ import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.rule.Owner;
 import io.harness.serializer.KryoSerializer;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.PluginUtils;
 import io.harness.waiter.WaitNotifyEngine;
 import io.harness.yaml.extended.ci.container.ContainerResource;
@@ -223,6 +224,19 @@ public class AwsCdkDeployStepTest extends CategoryTest {
     assertThat(awsCdkConfig.getEnvVariables().get("key1")).isEqualTo("value1");
     assertThat(awsCdkConfig.getEnvVariables().get(PLUGIN_AWS_CDK_STACK_NAMES)).isEqualTo("stack1 stack2");
     assertThat(awsCdkConfig.getCommitId()).isEqualTo("testvaluee");
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = getAmbiance();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().build();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        awsCdkDeployStep.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(AwsCdkDeployStep.STEP_TYPE.getType());
   }
 
   private Ambiance getAmbiance() {

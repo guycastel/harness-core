@@ -51,6 +51,7 @@ import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.serializer.KryoSerializer;
 import io.harness.tasks.BinaryResponseData;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.IdentifierRefHelper;
 import io.harness.yaml.core.timeout.Timeout;
 import io.harness.yaml.utils.NGVariablesUtils;
@@ -281,5 +282,11 @@ public class AwsSamDeployStep extends AbstractContainerStepV2<StepElementParamet
   @Override
   public void validateResources(Ambiance ambiance, StepElementParameters stepParameters) {
     // we need to check if rbac check is req or not.
+  }
+
+  @Override
+  public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
+      Ambiance ambiance, StepElementParameters stepElementParameters) {
+    return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
   }
 }

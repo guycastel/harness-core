@@ -8,7 +8,9 @@
 package io.harness.cdng.containerStepGroup;
 
 import static io.harness.rule.OwnerRule.PIYUSH_BHUWALKA;
+import static io.harness.rule.OwnerRule.TMACARI;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,6 +37,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.rule.Owner;
 import io.harness.steps.container.execution.plugin.StepImageConfig;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -132,5 +135,18 @@ public class DownloadAwsS3StepTest extends CategoryTest {
 
     downloadAwsS3Step.getSerialisedStep(ambiance, stepElementParameters, accountId, logKey, timeout, parkedTaskId);
     verify(pluginExecutionConfig, times(1)).getDownloadAwsS3Config();
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = Ambiance.newBuilder().build();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().build();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        downloadAwsS3Step.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(DownloadAwsS3Step.STEP_TYPE.getType());
   }
 }

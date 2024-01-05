@@ -5,10 +5,11 @@
  * https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
  */
 
-package io.harness.cdng.sam;
+package io.harness.cdng.aws.sam;
 
 import static io.harness.connector.ConnectorModule.DEFAULT_CONNECTOR_SERVICE;
 import static io.harness.rule.OwnerRule.PIYUSH_BHUWALKA;
+import static io.harness.rule.OwnerRule.TMACARI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,12 +26,7 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.IdentifierRef;
 import io.harness.callback.DelegateCallbackToken;
 import io.harness.category.element.UnitTests;
-import io.harness.cdng.aws.sam.AwsSamDeployStep;
-import io.harness.cdng.aws.sam.AwsSamDeployStepParameters;
-import io.harness.cdng.aws.sam.AwsSamStepHelper;
 import io.harness.cdng.expressions.CDExpressionResolver;
-import io.harness.cdng.infra.beans.AwsSamInfrastructureOutcome;
-import io.harness.cdng.infra.beans.InfrastructureOutcome;
 import io.harness.cdng.instance.info.InstanceInfoService;
 import io.harness.cdng.manifest.steps.outcome.ManifestsOutcome;
 import io.harness.cdng.manifest.yaml.AwsSamDirectoryManifestOutcome;
@@ -39,11 +35,10 @@ import io.harness.connector.ConnectorInfoDTO;
 import io.harness.connector.ConnectorResponseDTO;
 import io.harness.connector.services.ConnectorService;
 import io.harness.delegate.beans.connector.ConnectorConfigDTO;
-import io.harness.delegate.beans.connector.awsconnector.AwsConnectorDTO;
-import io.harness.delegate.beans.connector.awsconnector.AwsCredentialDTO;
-import io.harness.delegate.beans.connector.awsconnector.AwsCredentialType;
-import io.harness.delegate.beans.connector.awsconnector.AwsManualConfigSpecDTO;
-import io.harness.delegate.beans.instancesync.ServerInstanceInfo;
+import io.harness.delegate.beans.connector.docker.DockerAuthType;
+import io.harness.delegate.beans.connector.docker.DockerAuthenticationDTO;
+import io.harness.delegate.beans.connector.docker.DockerConnectorDTO;
+import io.harness.delegate.beans.connector.docker.DockerUserNamePasswordDTO;
 import io.harness.encryption.SecretRefData;
 import io.harness.ng.core.NGAccess;
 import io.harness.plancreator.steps.common.StepElementParameters;
@@ -54,17 +49,15 @@ import io.harness.pms.sdk.core.plugin.ContainerStepExecutionResponseHelper;
 import io.harness.pms.sdk.core.plugin.ContainerUnitStepUtils;
 import io.harness.pms.sdk.core.resolver.outcome.OutcomeService;
 import io.harness.pms.sdk.core.resolver.outputs.ExecutionSweepingOutputService;
-import io.harness.pms.sdk.core.steps.io.StepResponse.StepOutcome;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.rule.Owner;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.IdentifierRefHelper;
 
 import com.google.inject.name.Named;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -83,7 +76,7 @@ import org.mockito.junit.MockitoRule;
 
 @OwnedBy(HarnessTeam.CDP)
 @Slf4j
-public class AwsSamDeployStepTest extends CategoryTest {
+public class AwsSamBuildStepTest extends CategoryTest {
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Mock private ExecutionSweepingOutputService executionSweepingOutputService;
@@ -91,17 +84,17 @@ public class AwsSamDeployStepTest extends CategoryTest {
 
   @Mock private AwsSamStepHelper awsSamStepHelper;
 
-  @Mock CDExpressionResolver cdExpressionResolver;
-
-  @Mock private ContainerStepExecutionResponseHelper containerStepExecutionResponseHelper;
-
   @Mock private OutcomeService outcomeService;
 
   @Named(DEFAULT_CONNECTOR_SERVICE) @Mock private ConnectorService connectorService;
 
+  @Mock private CDExpressionResolver cdExpressionResolver;
+
+  @Mock private ContainerStepExecutionResponseHelper containerStepExecutionResponseHelper;
+
   @Mock Supplier<DelegateCallbackToken> delegateCallbackTokenSupplier;
 
-  @InjectMocks @Spy private AwsSamDeployStep awsSamDeployStep;
+  @InjectMocks @Spy private AwsSamBuildStep awsSamBuildStep;
 
   @Before
   public void setup() {}
@@ -113,22 +106,12 @@ public class AwsSamDeployStepTest extends CategoryTest {
   public void testGetAnyOutComeForStep() {
     String accountId = "accountId";
     Ambiance ambiance = Ambiance.newBuilder().putSetupAbstractions("accountId", accountId).build();
-    AwsSamDeployStepParameters stepParameters =
-        AwsSamDeployStepParameters.infoBuilder().image(ParameterField.<String>builder().value("sdaf").build()).build();
+    AwsSamBuildStepParameters stepParameters =
+        AwsSamBuildStepParameters.infoBuilder().image(ParameterField.<String>builder().value("sdaf").build()).build();
     StepElementParameters stepElementParameters = StepElementParameters.builder().spec(stepParameters).build();
 
     Map<String, ResponseData> responseDataMap = new HashMap<>();
-
-    List<ServerInstanceInfo> serverInstanceInfoList = Collections.emptyList();
-    when(awsSamStepHelper.fetchServerInstanceInfoFromDelegateResponse(any())).thenReturn(serverInstanceInfoList);
-
-    InfrastructureOutcome infrastructureOutcome = mock(InfrastructureOutcome.class);
-    doReturn(infrastructureOutcome).when(awsSamStepHelper).getInfrastructureOutcome(any());
-
-    StepOutcome stepOutcome = mock(StepOutcome.class);
-    when(instanceInfoService.saveServerInstancesIntoSweepingOutput(any(), any())).thenReturn(stepOutcome);
-    assertThat(awsSamDeployStep.getAnyOutComeForStep(ambiance, stepElementParameters, responseDataMap))
-        .isEqualTo(stepOutcome);
+    assertThat(awsSamBuildStep.getAnyOutComeForStep(ambiance, stepElementParameters, responseDataMap)).isNull();
   }
 
   @SneakyThrows
@@ -144,8 +127,8 @@ public class AwsSamDeployStepTest extends CategoryTest {
     String logKey = "logKey";
     Ambiance ambiance = Ambiance.newBuilder().putSetupAbstractions("accountId", accountId).build();
 
-    doReturn(1).when(awsSamDeployStep).getPort(any(), any());
-    doReturn(122L).when(awsSamDeployStep).getTimeout(any(), any());
+    doReturn(1).when(awsSamBuildStep).getPort(any(), any());
+    doReturn(122L).when(awsSamBuildStep).getTimeout(any(), any());
     UnitStep unitStep = mock(UnitStep.class);
     doReturn(accountId).when(unitStep).getAccountId();
     doReturn(port).when(unitStep).getContainerPort();
@@ -159,6 +142,9 @@ public class AwsSamDeployStepTest extends CategoryTest {
     when(ContainerUnitStepUtils.serializeStepWithStepParameters(anyInt(), anyString(), anyString(), anyString(),
              anyLong(), anyString(), anyString(), any(), any(), any(), anyString(), any()))
         .thenReturn(unitStep);
+
+    String connectorRef = "ref";
+
     Mockito.mockStatic(AmbianceUtils.class);
     NGAccess ngAccess = mock(NGAccess.class);
     when(AmbianceUtils.getNgAccess(any())).thenReturn(ngAccess);
@@ -175,40 +161,22 @@ public class AwsSamDeployStepTest extends CategoryTest {
     when(identifierRef.getProjectIdentifier()).thenReturn("account");
     when(identifierRef.getIdentifier()).thenReturn("account");
 
-    String connectorRef = "ref";
-    String stackName = "stackName";
-
-    AwsSamDeployStepParameters stepParameters = AwsSamDeployStepParameters.infoBuilder()
-                                                    .image(ParameterField.<String>builder().value("sdaf").build())
-                                                    .connectorRef(ParameterField.createValueField("ref"))
-                                                    .stackName(ParameterField.createValueField(stackName))
-                                                    .build();
-    StepElementParameters stepElementParameters =
-        StepElementParameters.builder().identifier("identifier").name("name").spec(stepParameters).build();
-    long timeout = 1000;
-    String parkedTaskId = "parkedTaskId";
-
     ConnectorConfigDTO connectorConfigDTO =
-        AwsConnectorDTO.builder()
-            .credential(
-                AwsCredentialDTO.builder()
-                    .awsCredentialType(AwsCredentialType.MANUAL_CREDENTIALS)
-                    .config(AwsManualConfigSpecDTO.builder()
-                                .accessKey("accessKey")
-                                .secretKeyRef(SecretRefData.builder().decryptedValue(new char[] {'a', 'b'}).build())
-                                .build())
-                    .build())
+        DockerConnectorDTO.builder()
+            .dockerRegistryUrl("url")
+            .auth(DockerAuthenticationDTO.builder()
+                      .authType(DockerAuthType.ANONYMOUS)
+                      .credentials(DockerUserNamePasswordDTO.builder()
+                                       .username("username")
+                                       .passwordRef(SecretRefData.builder().decryptedValue(new char[] {'a'}).build())
+                                       .build())
+                      .build())
             .build();
-
     ConnectorInfoDTO connectorInfoDTO = mock(ConnectorInfoDTO.class);
     ConnectorResponseDTO connectorResponseDTO = mock(ConnectorResponseDTO.class);
     when(connectorService.get(any(), any(), any(), any())).thenReturn(Optional.of(connectorResponseDTO));
     when(connectorResponseDTO.getConnector()).thenReturn(connectorInfoDTO);
     when(connectorInfoDTO.getConnectorConfig()).thenReturn(connectorConfigDTO);
-
-    AwsSamInfrastructureOutcome awsSamInfrastructureOutcome =
-        AwsSamInfrastructureOutcome.builder().connectorRef(connectorRef).region("region").build();
-    when(outcomeService.resolve(any(), any())).thenReturn(awsSamInfrastructureOutcome);
 
     AwsSamDirectoryManifestOutcome awsSamDirectoryManifestOutcome = AwsSamDirectoryManifestOutcome.builder().build();
     HashMap<String, ManifestOutcome> manifestOutcomeHashMap = new HashMap<>();
@@ -222,13 +190,36 @@ public class AwsSamDeployStepTest extends CategoryTest {
     doReturn(samDir).when(awsSamStepHelper).getSamDirectoryPathFromAwsSamDirectoryManifestOutcome(any());
     doReturn(new HashMap<>()).when(awsSamStepHelper).validateEnvVariables(any());
 
+    AwsSamBuildStepParameters stepParameters =
+        AwsSamBuildStepParameters.infoBuilder()
+            .image(ParameterField.<String>builder().value("sdaf").build())
+            .samBuildDockerRegistryConnectorRef(ParameterField.createValueField(connectorRef))
+            .connectorRef(ParameterField.createValueField("ref"))
+            .build();
+    StepElementParameters stepElementParameters =
+        StepElementParameters.builder().identifier("identifier").name("name").spec(stepParameters).build();
+    long timeout = 1000;
+    String parkedTaskId = "parkedTaskId";
     UnitStep unit =
-        awsSamDeployStep.getSerialisedStep(ambiance, stepElementParameters, accountId, logKey, timeout, parkedTaskId);
+        awsSamBuildStep.getSerialisedStep(ambiance, stepElementParameters, accountId, logKey, timeout, parkedTaskId);
     assertThat(unit.getContainerPort()).isEqualTo(port);
     assertThat(unit.getAccountId()).isEqualTo(accountId);
     assertThat(unit.getCallbackToken()).isEqualTo(callbackToken);
     assertThat(unit.getDisplayName()).isEqualTo(displayName);
     assertThat(unit.getId()).isEqualTo(id);
     assertThat(unit.getLogKey()).isEqualTo(logKey);
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = Ambiance.newBuilder().build();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().build();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        awsSamBuildStep.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(awsSamBuildStep.STEP_TYPE.getType());
   }
 }

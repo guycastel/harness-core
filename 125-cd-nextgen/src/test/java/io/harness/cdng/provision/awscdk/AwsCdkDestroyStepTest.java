@@ -36,6 +36,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.rule.Owner;
 import io.harness.serializer.KryoSerializer;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.PluginUtils;
 import io.harness.waiter.WaitNotifyEngine;
 
@@ -116,6 +117,19 @@ public class AwsCdkDestroyStepTest extends CategoryTest {
             .build();
 
     assertThat(awsCdkDestroyStep.getTimeout(ambiance, stepElementParameters)).isEqualTo(1200000L);
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = getAmbiance();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().build();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        awsCdkDestroyStep.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(AwsCdkDestroyStep.STEP_TYPE.getType());
   }
 
   private Ambiance getAmbiance() {

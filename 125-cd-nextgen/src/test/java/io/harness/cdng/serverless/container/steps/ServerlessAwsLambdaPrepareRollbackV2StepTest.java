@@ -8,6 +8,7 @@
 package io.harness.cdng.serverless.container.steps;
 
 import static io.harness.rule.OwnerRule.PIYUSH_BHUWALKA;
+import static io.harness.rule.OwnerRule.TMACARI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +44,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.rule.Owner;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -234,5 +236,19 @@ public class ServerlessAwsLambdaPrepareRollbackV2StepTest extends CategoryTest {
                                                       .build();
 
     assertThat(serverlessAwsLambdaPrepareRollbackV2Step.getTimeout(ambiance, stepElementParameters)).isEqualTo(1000);
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = Ambiance.newBuilder().build();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().build();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        serverlessAwsLambdaPrepareRollbackV2Step.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType())
+        .isEqualTo(ServerlessAwsLambdaPrepareRollbackV2Step.STEP_TYPE.getType());
   }
 }

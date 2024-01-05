@@ -41,6 +41,7 @@ import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.yaml.core.timeout.Timeout;
 import io.harness.yaml.extended.ci.container.ContainerResource;
 
@@ -184,5 +185,11 @@ public class AwsCdkDeployStep extends AbstractContainerStepV2<StepElementParamet
     environmentVariablesMap.put(PLUGIN_AWS_CDK_ACTION, DEPLOY);
 
     return environmentVariablesMap;
+  }
+
+  @Override
+  public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
+      Ambiance ambiance, StepElementParameters stepElementParameters) {
+    return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
   }
 }

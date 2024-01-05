@@ -45,6 +45,7 @@ import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.rule.Owner;
 import io.harness.serializer.KryoSerializer;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.PluginUtils;
 import io.harness.waiter.WaitNotifyEngine;
 
@@ -172,6 +173,19 @@ public class AwsCdkSynthStepTest extends CategoryTest {
     assertThat(stepMapOutput.getMap().get("teststack")).isEqualTo("testvaluee");
     assertThat(stepMapOutput.getMap().get("test")).isEqualTo("notEncodedValue");
     verify(awsCdkStepHelper).getDecodedOutput(eq("dGVzdHZhbHVlZQ--"));
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = getAmbiance();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().build();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        awsCdkSynthStep.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(AwsCdkSynthStep.STEP_TYPE.getType());
   }
 
   private Ambiance getAmbiance() {

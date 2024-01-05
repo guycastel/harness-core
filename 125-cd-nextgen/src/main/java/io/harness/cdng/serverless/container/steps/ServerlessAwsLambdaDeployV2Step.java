@@ -37,6 +37,7 @@ import io.harness.pms.sdk.core.resolver.outputs.ExecutionSweepingOutputService;
 import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.yaml.core.timeout.Timeout;
 
 import com.google.inject.Inject;
@@ -173,5 +174,11 @@ public class ServerlessAwsLambdaDeployV2Step extends AbstractContainerStepV2<Ste
   @Override
   public void validateResources(Ambiance ambiance, StepElementParameters stepParameters) {
     // we need to check if rbac check is req or not.
+  }
+
+  @Override
+  public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
+      Ambiance ambiance, StepElementParameters stepElementParameters) {
+    return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
   }
 }

@@ -8,6 +8,7 @@
 package io.harness.cdng.provision.awscdk;
 
 import static io.harness.rule.OwnerRule.LOVISH_BANSAL;
+import static io.harness.rule.OwnerRule.TMACARI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +37,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.rule.Owner;
 import io.harness.serializer.KryoSerializer;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.PluginUtils;
 import io.harness.waiter.WaitNotifyEngine;
 
@@ -118,6 +120,20 @@ public class AwsCdkDiffStepTest extends CategoryTest {
 
     assertThat(awsCdkDiffStep.getTimeout(ambiance, stepElementParameters)).isEqualTo(1200000L);
   }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = getAmbiance();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().build();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        awsCdkDiffStep.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(AwsCdkDiffStep.STEP_TYPE.getType());
+  }
+
   private Ambiance getAmbiance() {
     Map<String, String> setupAbstractions = new HashMap<>();
     setupAbstractions.put(SetupAbstractionKeys.accountId, "test-account");

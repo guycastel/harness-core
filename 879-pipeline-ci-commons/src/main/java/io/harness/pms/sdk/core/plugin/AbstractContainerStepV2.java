@@ -37,6 +37,8 @@ import io.harness.steps.executable.AsyncExecutableWithRbac;
 import io.harness.steps.plugin.ContainerStepConstants;
 import io.harness.tasks.BinaryResponseData;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.PluginUtils;
 import io.harness.waiter.WaitNotifyEngine;
 
@@ -63,8 +65,9 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
   @Inject ContainerPortHelper containerPortHelper;
   @Inject Supplier<DelegateCallbackToken> delegateCallbackTokenSupplier;
   @Inject ExecutionSweepingOutputService executionSweepingOutputService;
-
   @Inject PluginUtils pluginUtils;
+  @Inject private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+
   public static String DELEGATE_SVC_ENDPOINT = "delegate-service:8080";
 
   @Override
@@ -75,6 +78,7 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
     }
 
     log.info("Starting run in container step");
+    handleTelemetryEventDTO(ambiance, stepElementParameters);
     String accountId = AmbianceUtils.getAccountId(ambiance);
 
     long timeout = getTimeout(ambiance, stepElementParameters);
@@ -165,6 +169,18 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
       stepIdentifier = stepGroupIdentifier + "_" + stepIdentifier;
     }
     return containerPortHelper.getPort(ambiance, stepIdentifier, false);
+  }
+
+  private void handleTelemetryEventDTO(Ambiance ambiance, T stepElementParameters) {
+    StepExecutionTelemetryEventDTO telemetryEventDTO =
+        getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+    if (telemetryEventDTO != null) {
+      deploymentsInstrumentationHelper.publishStepEvent(ambiance, telemetryEventDTO);
+    }
+  }
+
+  public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(Ambiance ambiance, T stepElementParameters) {
+    return null;
   }
 
   public boolean shouldSkip(Ambiance ambiance, T stepElementParameters) {

@@ -577,23 +577,33 @@ public class NGTemplateResourceImpl implements NGTemplateResource {
       MergeTemplateRequestDTO mergeTemplateRequestDTO, boolean loadFromFallbackBranch, String loadFromCache) {
     ResponseDTO<TemplateResponseDTO> templateResponseDTO = get(accountId, orgId, projectId, templateIdentifier,
         versionLabel, deleted, gitEntityBasicInfo, loadFromCache, loadFromFallbackBranch);
-    if (mergeTemplateRequestDTO.isTemplatesResolvedYaml() && templateResponseDTO != null
-        && templateResponseDTO.getData() != null) {
-      TemplateApplyRequestDTO templateApplyRequestDTO =
-          TemplateApplyRequestDTO.builder()
-              .originalEntityYaml(templateResponseDTO.getData().getYaml())
-              .checkForAccess(mergeTemplateRequestDTO.isCheckForAccess())
-              .getMergedYamlWithTemplateField(mergeTemplateRequestDTO.isGetMergedYamlWithTemplateField())
-              .getOnlyFileContent(mergeTemplateRequestDTO.isGetOnlyFileContent())
-              .yamlVersion(mergeTemplateRequestDTO.getYamlVersion())
-              .build();
-      TemplateMergeResponseDTO templateMergeResponseDTO = applyTemplatesV2(
-          accountId, orgId, projectId, gitEntityBasicInfo, templateApplyRequestDTO, loadFromCache, false)
-                                                              .getData();
-      if (templateMergeResponseDTO != null) {
-        templateResponseDTO.getData().setMergedYaml(templateMergeResponseDTO.getMergedPipelineYaml());
+
+    TemplateMergeResponseDTO templateMergeResponseDTO = null;
+
+    try {
+      if (mergeTemplateRequestDTO.isTemplatesResolvedYaml() && templateResponseDTO != null
+          && templateResponseDTO.getData() != null) {
+        TemplateApplyRequestDTO templateApplyRequestDTO =
+            TemplateApplyRequestDTO.builder()
+                .originalEntityYaml(templateResponseDTO.getData().getYaml())
+                .checkForAccess(mergeTemplateRequestDTO.isCheckForAccess())
+                .getMergedYamlWithTemplateField(mergeTemplateRequestDTO.isGetMergedYamlWithTemplateField())
+                .getOnlyFileContent(mergeTemplateRequestDTO.isGetOnlyFileContent())
+                .yamlVersion(mergeTemplateRequestDTO.getYamlVersion())
+                .build();
+
+        templateMergeResponseDTO = applyTemplatesV2(
+            accountId, orgId, projectId, gitEntityBasicInfo, templateApplyRequestDTO, loadFromCache, false)
+                                       .getData();
       }
+    } catch (Exception e) {
+      log.error("[TEMPLATE_GET_API]: Error caught while making applyTemplatesV2 call", e);
     }
+
+    if (templateMergeResponseDTO != null) {
+      templateResponseDTO.getData().setMergedYaml(templateMergeResponseDTO.getMergedPipelineYaml());
+    }
+
     return templateResponseDTO;
   }
 }

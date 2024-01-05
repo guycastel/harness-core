@@ -17,6 +17,10 @@ java_library(
     deps = [
         "//:lombok",
         "//951-opa-contracts:opa_contracts_java_proto",
+        "//954-connector-beans/src/main/java/io/harness/connector/task/rancher:module",
+        "//954-connector-beans/src/main/java/io/harness/connector/task/spot:module",
+        "//954-connector-beans/src/main/java/io/harness/delegate/beans/connector/cv:module",
+        "//954-connector-beans/src/main/java/io/harness/delegate/beans/connector/scm/utils:module",
         "//960-api-services/src/main/java/io/harness/git:module",
         "//970-api-services-beans/src/main/java/io/harness/azure:module",
         "//970-api-services-beans/src/main/java/io/harness/delegate/beans/connector/docker:module",

@@ -13,6 +13,7 @@ java_library(
         "//idp-service/src/test/resources:resource",
     ],
     resources = [
+        "//idp-service/src/main/resources:resource",
         "//idp-service/src/test/resources:resource",
     ],
     visibility = ["//visibility:public"],

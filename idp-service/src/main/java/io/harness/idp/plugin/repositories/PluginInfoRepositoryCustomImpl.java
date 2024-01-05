@@ -83,7 +83,9 @@ public class PluginInfoRepositoryCustomImpl implements PluginInfoRepositoryCusto
     }
 
     if (CUSTOM.equals(pluginInfoEntity.getType())) {
-      update.set(CustomPluginInfoEntityKeys.artifact, ((CustomPluginInfoEntity) pluginInfoEntity).getArtifact());
+      CustomPluginInfoEntity customPluginInfoEntity = ((CustomPluginInfoEntity) pluginInfoEntity);
+      update.set(CustomPluginInfoEntityKeys.artifact, customPluginInfoEntity.getArtifact());
+      update.set(CustomPluginInfoEntityKeys.packageName, customPluginInfoEntity.getPackageName());
     } else if (DEFAULT.equals(pluginInfoEntity.getType())) {
       update.set(DefaultPluginInfoEntityKeys.core, ((DefaultPluginInfoEntity) pluginInfoEntity).isCore());
     }

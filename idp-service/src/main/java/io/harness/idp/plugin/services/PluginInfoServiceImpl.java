@@ -85,24 +85,26 @@ import org.springframework.data.mongodb.core.query.Criteria;
 public class PluginInfoServiceImpl implements PluginInfoService {
   private static final String METADATA_FOLDER = "metadata/";
   private static final String YAML_EXT = ".yaml";
-  private static final int RANDOM_STRING_LENGTH = 6;
-  private static final String CUSTOM_PLUGIN_IDENTIFIER_FORMAT = "my_custom_plugin_%s";
-  public static final String CUSTOM_PLUGINS_BUCKET_NAME = "idp-custom-plugins";
+  static final int RANDOM_STRING_LENGTH = 6;
+  static final String CUSTOM_PLUGIN_IDENTIFIER_FORMAT = "my_custom_plugin_%s";
+  static final String CUSTOM_PLUGINS_BUCKET_NAME = "idp-custom-plugins";
   private static final String PATH_SEPARATOR = "/";
   private static final String FILE_NAME_SEPARATOR = "_";
   private static final String ZIP_EXTENSION = "zip";
   private static final String TAR_GZ_EXTENSION = "tar.gz";
+  private static final String TGZ_EXTENSION = "tgz";
   private static final String TAR_BZ2_EXTENSION = "tar.bz2";
   private static final String JPEG_EXTENSION = "jpeg";
   private static final String JPG_EXTENSION = "jpg";
   private static final String PNG_EXTENSION = "png";
+  private static final String SVG_EXTENSION = "svg";
   private static final List<String> SUPPORTED_PLUGIN_FILE_FORMATS =
-      Arrays.asList(ZIP_EXTENSION, TAR_GZ_EXTENSION, TAR_BZ2_EXTENSION);
+      Arrays.asList(ZIP_EXTENSION, TAR_GZ_EXTENSION, TAR_BZ2_EXTENSION, TGZ_EXTENSION);
   private static final List<String> SUPPORTED_IMAGE_FILE_FORMATS =
-      Arrays.asList(JPEG_EXTENSION, JPG_EXTENSION, PNG_EXTENSION);
-  private static final String METADATA_FILE_NAME = "metadata.yaml";
+      Arrays.asList(JPEG_EXTENSION, JPG_EXTENSION, PNG_EXTENSION, SVG_EXTENSION);
+  static final String METADATA_FILE_NAME = "metadata.yaml";
   private static final String PLUGINS_DIR = "plugins";
-  private static final String IMAGES_DIR = "static";
+  static final String IMAGES_DIR = "static";
   private PluginInfoRepository pluginInfoRepository;
   private PluginRequestRepository pluginRequestRepository;
   private ConfigManagerService configManagerService;
@@ -253,10 +255,6 @@ public class PluginInfoServiceImpl implements PluginInfoService {
     mapper.addFileUploadDetails(entity, fileType, gcsBucketUrl);
     CustomPluginInfoEntity updatedEntity =
         (CustomPluginInfoEntity) pluginInfoRepository.update(pluginId, harnessAccount, entity);
-    if (updatedEntity == null) {
-      throw new NotFoundException(
-          String.format("Could not find plugin with identifier %s in account %s", pluginId, harnessAccount));
-    }
     updatePluginsMetadataOnGcs(harnessAccount);
     return buildDtoWithAdditionalDetails(updatedEntity, harnessAccount);
   }
@@ -275,10 +273,6 @@ public class PluginInfoServiceImpl implements PluginInfoService {
     mapper.removeFileDetails(entity, fileType, fileUrl);
     CustomPluginInfoEntity updatedEntity =
         (CustomPluginInfoEntity) pluginInfoRepository.update(pluginId, harnessAccount, entity);
-    if (updatedEntity == null) {
-      throw new NotFoundException(
-          String.format("Could not find plugin with identifier %s in account %s", pluginId, harnessAccount));
-    }
     return buildDtoWithAdditionalDetails(updatedEntity, harnessAccount);
   }
 

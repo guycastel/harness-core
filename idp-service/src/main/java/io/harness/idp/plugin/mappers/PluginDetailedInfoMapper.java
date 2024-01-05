@@ -79,21 +79,24 @@ public interface PluginDetailedInfoMapper<S extends PluginDetailedInfo, T extend
     entity.setConfig(dto.getConfig());
 
     List<ExportsData.ExportDetails> exportDetailsList = new ArrayList<>();
-    for (ExportDetails exportDetailsFromDto : dto.getExports().getExportDetails()) {
-      ExportsData.ExportDetails exportDetails = ExportsData.ExportDetails.builder()
-                                                    .name(exportDetailsFromDto.getName())
-                                                    .type(ExportType.valueOf(exportDetailsFromDto.getType()))
-                                                    .addByDefault(String.valueOf(exportDetailsFromDto.isAddByDefault()))
-                                                    .defaultRoute(exportDetailsFromDto.getDefaultRoute())
-                                                    .layoutSchemaSpecs(exportDetailsFromDto.getLayoutSchemaSpecs())
-                                                    .build();
-      exportDetailsList.add(exportDetails);
+    if (dto.getExports() != null) {
+      for (ExportDetails exportDetailsFromDto : dto.getExports().getExportDetails()) {
+        ExportsData.ExportDetails exportDetails =
+            ExportsData.ExportDetails.builder()
+                .name(exportDetailsFromDto.getName())
+                .type(ExportType.valueOf(exportDetailsFromDto.getType()))
+                .addByDefault(String.valueOf(exportDetailsFromDto.isAddByDefault()))
+                .defaultRoute(exportDetailsFromDto.getDefaultRoute())
+                .layoutSchemaSpecs(exportDetailsFromDto.getLayoutSchemaSpecs())
+                .build();
+        exportDetailsList.add(exportDetails);
+      }
+      ExportsData exportsData = ExportsData.builder()
+                                    .exportDetails(exportDetailsList)
+                                    .defaultEntityTypes(dto.getExports().getDefaultEntityTypes())
+                                    .build();
+      entity.setExports(exportsData);
     }
-    ExportsData exportsData = ExportsData.builder()
-                                  .exportDetails(exportDetailsList)
-                                  .defaultEntityTypes(dto.getExports().getDefaultEntityTypes())
-                                  .build();
-    entity.setExports(exportsData);
 
     PluginInfo pluginDetails = dto.getPluginDetails();
     entity.setSource(pluginDetails.getSource());

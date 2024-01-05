@@ -3523,4 +3523,43 @@ public class TerraformStepHelperTest extends CategoryTest {
     assertThat(((RemoteTerraformVarFileInfo) varFileInfos.get(0)).getGitFetchFilesConfig().getManifestType())
         .isEqualTo("GIT VAR_FILES");
   }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testHasOptionalVarFiles() {
+    StoreConfig storeVarFiles;
+
+    RemoteTerraformVarFileSpec remoteTerraformVarFileSpec = new RemoteTerraformVarFileSpec();
+
+    TerraformStepDataGenerator.GitStoreConfig gitStoreVarFiles =
+        TerraformStepDataGenerator.GitStoreConfig.builder()
+            .branch("master")
+            .fetchType(FetchType.BRANCH)
+            .folderPath(ParameterField.createValueField("VarFiles/"))
+            .connectoref(ParameterField.createValueField("terraform"))
+            .build();
+
+    storeVarFiles = GithubStore.builder()
+                        .branch(ParameterField.createValueField(gitStoreVarFiles.getBranch()))
+                        .gitFetchType(gitStoreVarFiles.getFetchType())
+                        .repoName(ParameterField.createValueField("testRepo"))
+                        .paths(ParameterField.createValueField(List.of("testPath1, testPath2")))
+                        .folderPath(ParameterField.createValueField(gitStoreVarFiles.getFolderPath().getValue()))
+                        .connectorRef(ParameterField.createValueField(gitStoreVarFiles.getConnectoref().getValue()))
+                        .build();
+    remoteTerraformVarFileSpec.setOptional(ParameterField.createValueField(true));
+    remoteTerraformVarFileSpec.setStore(
+        StoreConfigWrapper.builder().spec(storeVarFiles).type(StoreConfigType.GITHUB).build());
+
+    LinkedHashMap<String, TerraformVarFile> varFilesMap = new LinkedHashMap<>();
+    varFilesMap.put("var-file-02",
+        TerraformVarFile.builder().identifier("var-file-02").type("Remote").spec(remoteTerraformVarFileSpec).build());
+
+    assertThat(helper.hasOptionalVarFiles(varFilesMap)).isTrue();
+
+    remoteTerraformVarFileSpec.setOptional(ParameterField.createValueField(false));
+
+    assertThat(helper.hasOptionalVarFiles(varFilesMap)).isFalse();
+  }
 }

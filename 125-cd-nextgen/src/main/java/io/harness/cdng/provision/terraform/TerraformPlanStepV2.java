@@ -7,6 +7,8 @@
 
 package io.harness.cdng.provision.terraform;
 
+import static io.harness.cdng.provision.terraform.TerraformStepHelper.OPTIONAL_VAR_FILES;
+
 import io.harness.EntityType;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
@@ -177,7 +179,15 @@ public class TerraformPlanStepV2 extends CdTaskChainExecutable {
   @Override
   protected StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
       Ambiance ambiance, StepBaseParameters stepParameters, PassThroughData passThroughData) {
-    return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
+    HashMap<String, Object> telemetryProperties = new HashMap<>();
+    TerraformPlanStepParameters terraformPlanStepParameters = (TerraformPlanStepParameters) stepParameters.getSpec();
+    boolean hasOptionalVarFiles =
+        helper.hasOptionalVarFiles(terraformPlanStepParameters.getConfiguration().getVarFiles());
+    telemetryProperties.put(OPTIONAL_VAR_FILES, hasOptionalVarFiles);
+    return StepExecutionTelemetryEventDTO.builder()
+        .stepType(STEP_TYPE.getType())
+        .properties(telemetryProperties)
+        .build();
   }
 
   @Override

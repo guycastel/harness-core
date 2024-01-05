@@ -222,6 +222,7 @@ public class TerraformStepHelper {
   public static final String TF_JSON_OUTPUT_SECRET_FORMAT = "terraform_output_%s_%s";
   public static final String TF_ENCRYPTED_JSON_OUTPUT_NAME = "TF_JSON_OUTPUT_ENCRYPTED";
   public static final String TF_JSON_OUTPUT_SECRET_IDENTIFIER_FORMAT = "<+secrets.getValue(\"%s\")>";
+  public static final String OPTIONAL_VAR_FILES = "optional_var_files";
 
   @Inject private HPersistence persistence;
   @Inject private K8sStepHelper k8sStepHelper;
@@ -1239,6 +1240,16 @@ public class TerraformStepHelper {
       }
     }
     return fileInfo;
+  }
+
+  public boolean hasOptionalVarFiles(LinkedHashMap<String, TerraformVarFile> varFiles) {
+    if (EmptyPredicate.isNotEmpty(varFiles)) {
+      return varFiles.entrySet().stream().anyMatch(terraformVarFileEntry
+          -> terraformVarFileEntry.getValue().getType().equals(TerraformVarFileTypes.Remote)
+              && ParameterFieldHelper.getBooleanParameterFieldValue(
+                  ((RemoteTerraformVarFileSpec) terraformVarFileEntry.getValue().getSpec()).getOptional()));
+    }
+    return false;
   }
 
   private InlineTerraformBackendConfigFileInfo harnessFileStoreToInlineBackendConfig(

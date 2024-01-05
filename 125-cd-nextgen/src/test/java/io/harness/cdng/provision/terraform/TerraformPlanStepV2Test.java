@@ -7,6 +7,7 @@
 
 package io.harness.cdng.provision.terraform;
 
+import static io.harness.cdng.provision.terraform.TerraformStepHelper.OPTIONAL_VAR_FILES;
 import static io.harness.rule.OwnerRule.TMACARI;
 import static io.harness.rule.OwnerRule.VLICA;
 
@@ -81,6 +82,7 @@ import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
 import io.harness.steps.TaskRequestsUtils;
 import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 
 import software.wings.beans.GcpKmsConfig;
 
@@ -88,6 +90,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
@@ -1124,5 +1127,27 @@ public class TerraformPlanStepV2Test extends CategoryTest {
         StepInputPackage.builder().build(), terraformPassThroughData, () -> gitFetchResponse);
 
     verify(terraformStepHelper, times(1)).executeNextLink(any(), any(), any(), any(), any(), any());
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = getAmbiance();
+    LinkedHashMap<String, TerraformVarFile> varFiles = new LinkedHashMap();
+    varFiles.put("", TerraformVarFile.builder().build());
+    TerraformPlanStepParameters stepParameters =
+        TerraformPlanStepParameters.infoBuilder()
+            .configuration(TerraformPlanExecutionDataParameters.builder().varFiles(varFiles).build())
+            .build();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().spec(stepParameters).build();
+    doReturn(true).when(terraformStepHelper).hasOptionalVarFiles(any());
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        terraformPlanStepV2.getStepExecutionTelemetryEventDTO(
+            ambiance, stepElementParameters, TerraformPassThroughData.builder().build());
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(TerraformPlanStepV2.STEP_TYPE.getType());
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(OPTIONAL_VAR_FILES)).isEqualTo(true);
   }
 }

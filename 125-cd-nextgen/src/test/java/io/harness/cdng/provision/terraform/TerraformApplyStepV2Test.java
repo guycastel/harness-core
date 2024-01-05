@@ -7,9 +7,11 @@
 
 package io.harness.cdng.provision.terraform;
 
+import static io.harness.cdng.provision.terraform.TerraformStepHelper.OPTIONAL_VAR_FILES;
 import static io.harness.cdng.provision.terraform.TerraformStepHelper.TF_BACKEND_CONFIG_FILE;
 import static io.harness.cdng.provision.terraform.TerraformStepHelper.TF_CONFIG_FILES;
 import static io.harness.cdng.provision.terraform.TerraformStepHelper.TF_ENCRYPTED_JSON_OUTPUT_NAME;
+import static io.harness.rule.OwnerRule.TMACARI;
 import static io.harness.rule.OwnerRule.VLICA;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,10 +75,12 @@ import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
 import io.harness.steps.TaskRequestsUtils;
 import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
@@ -950,7 +954,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     TerraformPassThroughData terraformPassThroughData =
         TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -999,7 +1003,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     TerraformPassThroughData terraformPassThroughData =
         TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -1043,7 +1047,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     TerraformPassThroughData terraformPassThroughData =
         TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
@@ -1101,7 +1105,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
       TerraformPassThroughData terraformPassThroughData =
           TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-      terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+      terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
           ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
     } catch (InvalidRequestException invalidRequestException) {
       assertThat(invalidRequestException.getMessage()).isEqualTo(message);
@@ -1154,7 +1158,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     TerraformPassThroughData terraformPassThroughData =
         TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponseFailure);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.FAILED);
     assertThat(stepResponse.getStepOutcomes()).isNotNull();
@@ -1164,7 +1168,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
                                                                  .commandExecutionStatus(CommandExecutionStatus.RUNNING)
                                                                  .unitProgressData(unitProgressData)
                                                                  .build();
-    stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponseRunning);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.RUNNING);
     assertThat(stepResponse.getStepOutcomes()).isNotNull();
@@ -1174,7 +1178,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
                                                                 .commandExecutionStatus(CommandExecutionStatus.QUEUED)
                                                                 .unitProgressData(unitProgressData)
                                                                 .build();
-    stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponseQueued);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.QUEUED);
     assertThat(stepResponse.getStepOutcomes()).isNotNull();
@@ -1186,7 +1190,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
               .commandExecutionStatus(CommandExecutionStatus.SKIPPED)
               .unitProgressData(unitProgressData)
               .build();
-      terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+      terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
           ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponseSkipped);
     } catch (InvalidRequestException invalidRequestException) {
       assertThat(invalidRequestException.getMessage()).isEqualTo(message);
@@ -1242,7 +1246,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     TerraformPassThroughData terraformPassThroughData =
         TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
     assertThat(stepResponse.getStepOutcomes()).isNotNull();
@@ -1308,7 +1312,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     TerraformPassThroughData terraformPassThroughData =
         TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
     assertThat(stepResponse.getStepOutcomes()).isNotNull();
@@ -1366,7 +1370,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     TerraformPassThroughData terraformPassThroughData =
         TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
     assertThat(stepResponse.getStepOutcomes()).isNotNull();
@@ -1425,7 +1429,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     TerraformPassThroughData terraformPassThroughData =
         TerraformPassThroughData.builder().hasGitFiles(false).hasS3Files(false).build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
     assertThat(stepResponse.getStepOutcomes()).isNotNull();
@@ -1474,7 +1478,7 @@ public class TerraformApplyStepV2Test extends CategoryTest {
                                                           .unitProgressData(UnitProgressData.builder().build())
                                                           .build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
 
     assertThat(stepResponse.getStatus()).isEqualTo(Status.FAILED);
@@ -1519,10 +1523,35 @@ public class TerraformApplyStepV2Test extends CategoryTest {
                                                             .unitProgresses(unitProgressesFetch)
                                                             .build();
 
-    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContext(
+    StepResponse stepResponse = terraformApplyStepV2.finalizeExecutionWithSecurityContextAndNodeInfo(
         ambiance, stepElementParameters, terraformPassThroughData, () -> terraformTaskNGResponse);
     assertThat(stepResponse.getStatus()).isEqualTo(Status.SUCCEEDED);
     assertThat(stepResponse.getStepOutcomes()).isNotNull();
     assertThat(stepResponse.getUnitProgressList().size()).isEqualTo(2);
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = getAmbiance();
+    LinkedHashMap<String, TerraformVarFile> varFiles = new LinkedHashMap();
+    varFiles.put("", TerraformVarFile.builder().build());
+    TerraformApplyStepParameters stepParameters =
+        TerraformApplyStepParameters.infoBuilder()
+            .configuration(TerraformStepConfigurationParameters.builder()
+                               .type(TerraformStepConfigurationType.INLINE)
+                               .spec(TerraformExecutionDataParameters.builder().varFiles(varFiles).build())
+                               .build())
+            .build();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().spec(stepParameters).build();
+    doReturn(true).when(terraformStepHelper).hasOptionalVarFiles(any());
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        terraformApplyStepV2.getStepExecutionTelemetryEventDTO(
+            ambiance, stepElementParameters, TerraformPassThroughData.builder().build());
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(TerraformApplyStepV2.STEP_TYPE.getType());
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(OPTIONAL_VAR_FILES)).isEqualTo(true);
   }
 }

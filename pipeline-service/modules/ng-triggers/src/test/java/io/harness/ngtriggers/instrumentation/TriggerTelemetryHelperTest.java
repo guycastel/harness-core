@@ -8,6 +8,8 @@
 package io.harness.ngtriggers.instrumentation;
 
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
+import static io.harness.ngtriggers.beans.source.WebhookTriggerType.GITHUB;
+import static io.harness.rule.OwnerRule.SRIDHAR;
 import static io.harness.rule.OwnerRule.VED;
 import static io.harness.telemetry.helpers.InstrumentationConstants.ACCOUNT;
 import static io.harness.telemetry.helpers.InstrumentationConstants.COUNT;
@@ -24,16 +26,26 @@ import static org.mockito.Mockito.verify;
 import io.harness.CategoryTest;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.category.element.UnitTests;
+import io.harness.ngtriggers.beans.config.NGTriggerConfigV2;
 import io.harness.ngtriggers.beans.dto.BulkTriggerDetailDTO;
 import io.harness.ngtriggers.beans.dto.BulkTriggersDataRequestDTO;
 import io.harness.ngtriggers.beans.dto.BulkTriggersFilterRequestDTO;
 import io.harness.ngtriggers.beans.dto.BulkTriggersRequestDTO;
 import io.harness.ngtriggers.beans.dto.BulkTriggersResponseDTO;
+import io.harness.ngtriggers.beans.dto.TriggerDetails;
+import io.harness.ngtriggers.beans.entity.NGTriggerEntity;
+import io.harness.ngtriggers.beans.entity.metadata.NGTriggerMetadata;
+import io.harness.ngtriggers.beans.entity.metadata.WebhookMetadata;
+import io.harness.ngtriggers.beans.source.NGTriggerSourceV2;
 import io.harness.ngtriggers.beans.source.NGTriggerType;
+import io.harness.ngtriggers.beans.source.webhook.v2.WebhookTriggerConfigV2;
+import io.harness.ngtriggers.beans.source.webhook.v2.github.GithubSpec;
+import io.harness.ngtriggers.beans.target.TargetType;
 import io.harness.rule.Owner;
 import io.harness.telemetry.TelemetryReporter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -48,6 +60,13 @@ import org.mockito.MockitoAnnotations;
 
 @OwnedBy(PIPELINE)
 public class TriggerTelemetryHelperTest extends CategoryTest {
+  private final String ACCOUNT_ID = "account_id";
+  private final String ORG_IDENTIFIER = "orgId";
+  private final String PROJ_IDENTIFIER = "projId";
+  private final String IDENTIFIER = "first_trigger";
+  private final String NAME = "first trigger";
+  private final String PIPELINE_IDENTIFIER = "myPipeline";
+  private final String WEBHOOK_ID = "webhook_id";
   @InjectMocks TriggerTelemetryHelper triggerTelemetryHelper;
   @Mock TelemetryReporter telemetryReporter;
   @Before
@@ -123,6 +142,57 @@ public class TriggerTelemetryHelperTest extends CategoryTest {
     assert (eventPropertiesMap.get(TriggerTelemetryHelper.TRIGGER_TOGGLE)).equals(true);
     assert (eventPropertiesMap.get(TIME_TAKEN)).equals(100l);
     assert (eventPropertiesMap.get(COUNT)).equals(3l);
+
+    assertTrue(telemetryTask.isDone());
+  }
+
+  @Test
+  @Owner(developers = SRIDHAR)
+  @Category(UnitTests.class)
+  public void testTriggerCreateWebhookEvent() {
+    NGTriggerEntity ngTriggerEntity = NGTriggerEntity.builder()
+                                          .accountId(ACCOUNT_ID)
+                                          .orgIdentifier(ORG_IDENTIFIER)
+                                          .projectIdentifier(PROJ_IDENTIFIER)
+                                          .targetIdentifier(PIPELINE_IDENTIFIER)
+                                          .identifier(IDENTIFIER)
+                                          .name(NAME)
+                                          .targetType(TargetType.PIPELINE)
+                                          .type(NGTriggerType.WEBHOOK)
+                                          .yaml("yaml")
+                                          .pollInterval("1m")
+                                          .version(0L)
+                                          .build();
+    TriggerDetails triggerDetails = TriggerDetails.builder()
+                                        .ngTriggerEntity(ngTriggerEntity)
+                                        .ngTriggerConfigV2(NGTriggerConfigV2.builder()
+                                                               .source(NGTriggerSourceV2.builder()
+                                                                           .type(NGTriggerType.WEBHOOK)
+                                                                           .spec(WebhookTriggerConfigV2.builder()
+                                                                                     .type(GITHUB)
+                                                                                     .spec(GithubSpec.builder().build())
+                                                                                     .build())
+                                                                           .build())
+                                                               .inputSetRefs(Collections.emptyList())
+                                                               .build())
+                                        .build();
+
+    CompletableFuture<Void> telemetryTask =
+        triggerTelemetryHelper.sendTriggersCreateEvent(ngTriggerEntity, triggerDetails);
+
+    ArgumentCaptor<HashMap> captor = ArgumentCaptor.forClass(HashMap.class);
+
+    telemetryTask.join();
+
+    verify(telemetryReporter, times(1)).sendTrackEvent(any(), any(), any(), captor.capture(), any(), any(), any());
+
+    HashMap<String, Object> eventPropertiesMap = captor.getValue();
+
+    assert (eventPropertiesMap.get(ACCOUNT)).equals(ACCOUNT_ID);
+    assert (eventPropertiesMap.get(ORG)).equals(ORG_IDENTIFIER);
+    assert (eventPropertiesMap.get(PROJECT)).equals(PROJ_IDENTIFIER);
+    assert (eventPropertiesMap.get(TriggerTelemetryHelper.TRIGGER_TYPE)).equals(NGTriggerType.WEBHOOK.name());
+    assert (eventPropertiesMap.get(TriggerTelemetryHelper.TRIGGER_SUB_TYPE)).equals(GITHUB.getValue());
 
     assertTrue(telemetryTask.isDone());
   }

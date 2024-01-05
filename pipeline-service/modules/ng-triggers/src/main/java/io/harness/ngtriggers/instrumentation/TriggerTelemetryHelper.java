@@ -18,6 +18,15 @@ import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.ngtriggers.beans.dto.BulkTriggersRequestDTO;
 import io.harness.ngtriggers.beans.dto.BulkTriggersResponseDTO;
+import io.harness.ngtriggers.beans.dto.TriggerDetails;
+import io.harness.ngtriggers.beans.entity.NGTriggerEntity;
+import io.harness.ngtriggers.beans.source.NGTriggerSourceV2;
+import io.harness.ngtriggers.beans.source.artifact.ArtifactTriggerConfig;
+import io.harness.ngtriggers.beans.source.artifact.ManifestTriggerConfig;
+import io.harness.ngtriggers.beans.source.artifact.MultiRegionArtifactTriggerConfig;
+import io.harness.ngtriggers.beans.source.scheduled.CronTriggerSpec;
+import io.harness.ngtriggers.beans.source.scheduled.ScheduledTriggerConfig;
+import io.harness.ngtriggers.beans.source.webhook.v2.WebhookTriggerConfigV2;
 import io.harness.telemetry.helpers.InstrumentationHelper;
 
 import com.google.inject.Singleton;
@@ -30,7 +39,10 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 public class TriggerTelemetryHelper extends InstrumentationHelper {
   public static final String TRIGGER_TYPE = "trigger_type";
+  public static final String TRIGGER_SUB_TYPE = "trigger_sub_type";
   public static final String TRIGGER_TOGGLE = "trigger_toggle";
+  public static final String TRIGGER_CREATION_EVENT = "trigger_creation_event";
+  public static final String BULK_TOGGLE_TRIGGERS_API = "bulk_toggle_triggers_api";
 
   public CompletableFuture<Void> sendBulkToggleTriggersApiEvent(String accountId,
       BulkTriggersRequestDTO bulkTriggersRequestDTO, BulkTriggersResponseDTO bulkTriggersResponseDTO, long timeTaken) {
@@ -58,7 +70,65 @@ public class TriggerTelemetryHelper extends InstrumentationHelper {
     }
 
     return publishBulkToggleTriggersApiInfo(
-        "bulk_toggle_triggers_api", accountId, orgId, projectId, pipelineId, type, enable, timeTaken, modifiedCount);
+        BULK_TOGGLE_TRIGGERS_API, accountId, orgId, projectId, pipelineId, type, enable, timeTaken, modifiedCount);
+  }
+
+  public CompletableFuture<Void> sendTriggersCreateEvent(
+      NGTriggerEntity ngTriggerEntity, TriggerDetails triggerDetails) {
+    String orgId = null;
+    String projectId = null;
+    String accountId = null;
+    String type = null;
+    String triggerSubtype = null;
+
+    if (ngTriggerEntity != null && ngTriggerEntity.getType() != null) {
+      orgId = ngTriggerEntity.getOrgIdentifier();
+      projectId = ngTriggerEntity.getProjectIdentifier();
+      accountId = ngTriggerEntity.getAccountId();
+      type = ngTriggerEntity.getType().name();
+      triggerSubtype = getTriggerSpecType(ngTriggerEntity, triggerDetails);
+    }
+
+    return publishTriggerCreateEvent(TRIGGER_CREATION_EVENT, accountId, orgId, projectId, type, triggerSubtype);
+  }
+
+  private CompletableFuture<Void> publishTriggerCreateEvent(String triggerCreationEvent, String accountId, String orgId,
+      String projectId, String type, String triggerSubtype) {
+    HashMap<String, Object> eventPropertiesMap = new HashMap<>();
+    eventPropertiesMap.put(ACCOUNT, accountId);
+    eventPropertiesMap.put(ORG, orgId);
+    eventPropertiesMap.put(PROJECT, projectId);
+    eventPropertiesMap.put(TRIGGER_TYPE, type);
+    eventPropertiesMap.put(TRIGGER_SUB_TYPE, triggerSubtype);
+
+    return sendEvent(triggerCreationEvent, accountId, eventPropertiesMap);
+  }
+
+  private String getTriggerSpecType(NGTriggerEntity ngTriggerEntity, TriggerDetails triggerDetails) {
+    if (triggerDetails != null && triggerDetails.getNgTriggerConfigV2() != null
+        && triggerDetails.getNgTriggerConfigV2().getSource() != null) {
+      NGTriggerSourceV2 sourceV2 = triggerDetails.getNgTriggerConfigV2().getSource();
+      switch (ngTriggerEntity.getType()) {
+        case WEBHOOK:
+          WebhookTriggerConfigV2 webhookTriggerConfig = (WebhookTriggerConfigV2) sourceV2.getSpec();
+          return webhookTriggerConfig.getType().getValue();
+        case ARTIFACT:
+          ArtifactTriggerConfig artifactTriggerConfig = (ArtifactTriggerConfig) sourceV2.getSpec();
+          return artifactTriggerConfig.getType().getValue();
+        case MULTI_REGION_ARTIFACT:
+          MultiRegionArtifactTriggerConfig multiRegionArtifactTriggerConfig =
+              (MultiRegionArtifactTriggerConfig) sourceV2.getSpec();
+          return multiRegionArtifactTriggerConfig.getType().getValue();
+        case MANIFEST:
+          ManifestTriggerConfig manifestTriggerConfig = (ManifestTriggerConfig) sourceV2.getSpec();
+          return manifestTriggerConfig.getType().getValue();
+        case SCHEDULED:
+          ScheduledTriggerConfig scheduledTriggerConfig = (ScheduledTriggerConfig) sourceV2.getSpec();
+          CronTriggerSpec spec = (CronTriggerSpec) scheduledTriggerConfig.getSpec();
+          return spec.getType();
+      }
+    }
+    return null;
   }
 
   private CompletableFuture<Void> publishBulkToggleTriggersApiInfo(String eventName, String accountId, String orgId,

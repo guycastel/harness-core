@@ -50,6 +50,7 @@ import io.harness.ngtriggers.beans.entity.NGTriggerEntity;
 import io.harness.ngtriggers.beans.entity.NGTriggerEntity.NGTriggerEntityKeys;
 import io.harness.ngtriggers.beans.entity.metadata.catalog.TriggerCatalogItem;
 import io.harness.ngtriggers.beans.source.GitMoveOperationType;
+import io.harness.ngtriggers.beans.source.NGTriggerSpecV2;
 import io.harness.ngtriggers.beans.source.TriggerUpdateCount;
 import io.harness.ngtriggers.exceptions.InvalidTriggerYamlException;
 import io.harness.ngtriggers.instrumentation.TriggerTelemetryHelper;
@@ -129,6 +130,13 @@ public class NGTriggerResourceImpl implements NGTriggerResource {
         ngTriggerService.validatePipelineRef(triggerDetails);
         createdEntity = ngTriggerService.create(triggerDetails.getNgTriggerEntity());
       }
+      try {
+        triggerTelemetryHelper.sendTriggersCreateEvent(createdEntity, triggerDetails);
+      } catch (Exception e) {
+        log.error(
+            "Error while publishing telemetry for the Triggers Create with id {}.", createdEntity.getIdentifier(), e);
+      }
+
       return ResponseDTO.newResponse(
           createdEntity.getVersion().toString(), ngTriggerElementMapper.toResponseDTO(createdEntity));
     } catch (InvalidTriggerYamlException e) {

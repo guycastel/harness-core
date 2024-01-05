@@ -31,6 +31,7 @@ import io.harness.delegate.task.aws.asg.AsgCommandRequest;
 import io.harness.delegate.task.aws.asg.AsgCommandResponse;
 import io.harness.delegate.task.aws.asg.AsgTaskHelper;
 import io.harness.exception.InvalidArgumentsException;
+import io.harness.exception.sanitizer.ExceptionMessageSanitizer;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.logging.LogCallback;
 
@@ -82,7 +83,8 @@ public class AsgCanaryDeleteCommandTaskHandler extends AsgCommandTaskNGHandler {
     } catch (Exception e) {
       logCallback.saveExecutionLog(
           color(format("Deletion Failed."), LogColor.Red, LogWeight.Bold), ERROR, CommandExecutionStatus.FAILURE);
-      throw new AsgNGException(e);
+      log.error("Exception AsgCanaryDelete", e);
+      throw new AsgNGException(ExceptionMessageSanitizer.sanitizeException(e));
     }
   }
 

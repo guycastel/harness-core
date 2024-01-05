@@ -49,6 +49,7 @@ import io.harness.delegate.task.aws.asg.AsgInfraConfig;
 import io.harness.delegate.task.aws.asg.AsgTaskHelper;
 import io.harness.exception.InvalidArgumentsException;
 import io.harness.exception.InvalidRequestException;
+import io.harness.exception.sanitizer.ExceptionMessageSanitizer;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.logging.LogCallback;
 
@@ -209,7 +210,8 @@ public class AsgBlueGreenPrepareRollbackCommandTaskHandler extends AsgCommandTas
     } catch (Exception e) {
       logCallback.saveExecutionLog(color(format("BG Prepare Rollback Failed."), LogColor.Red, LogWeight.Bold), ERROR,
           CommandExecutionStatus.FAILURE);
-      throw new AsgNGException(e);
+      log.error("Exception AsgBGPrepareRollback", e);
+      throw new AsgNGException(ExceptionMessageSanitizer.sanitizeException(e));
     }
   }
 

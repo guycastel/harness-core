@@ -40,6 +40,7 @@ import io.harness.delegate.task.aws.asg.AsgPrepareRollbackDataResponse;
 import io.harness.delegate.task.aws.asg.AsgPrepareRollbackDataResult;
 import io.harness.delegate.task.aws.asg.AsgTaskHelper;
 import io.harness.exception.InvalidArgumentsException;
+import io.harness.exception.sanitizer.ExceptionMessageSanitizer;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.logging.LogCallback;
 
@@ -97,7 +98,8 @@ public class AsgPrepareRollbackDataCommandTaskHandler extends AsgCommandTaskNGHa
           color(format("Prepare Rollback Data Failed with error: %s", asgTaskHelper.getExceptionMessage(e)),
               LogColor.Red, LogWeight.Bold),
           ERROR, CommandExecutionStatus.FAILURE);
-      throw new AsgNGException(e);
+      log.error("Exception AsgRollingPrepareRollback", e);
+      throw new AsgNGException(ExceptionMessageSanitizer.sanitizeException(e));
     }
   }
 

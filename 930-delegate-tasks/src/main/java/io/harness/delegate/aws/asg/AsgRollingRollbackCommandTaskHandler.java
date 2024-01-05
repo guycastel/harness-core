@@ -46,6 +46,7 @@ import io.harness.delegate.task.aws.asg.AsgRollingRollbackResult;
 import io.harness.delegate.task.aws.asg.AsgTaskHelper;
 import io.harness.delegate.task.aws.asg.AutoScalingGroupContainer;
 import io.harness.exception.InvalidArgumentsException;
+import io.harness.exception.sanitizer.ExceptionMessageSanitizer;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.logging.LogCallback;
 
@@ -115,7 +116,8 @@ public class AsgRollingRollbackCommandTaskHandler extends AsgCommandTaskNGHandle
     } catch (Exception e) {
       logCallback.saveExecutionLog(
           color(format("Rollback Failed"), LogColor.Red, LogWeight.Bold), ERROR, CommandExecutionStatus.FAILURE);
-      throw new AsgNGException(e);
+      log.error("Exception AsgRollingRollback", e);
+      throw new AsgNGException(ExceptionMessageSanitizer.sanitizeException(e));
     }
   }
 

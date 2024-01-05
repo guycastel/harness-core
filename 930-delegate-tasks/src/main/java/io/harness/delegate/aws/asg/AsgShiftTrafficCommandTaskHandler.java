@@ -39,6 +39,7 @@ import io.harness.delegate.task.aws.asg.AsgShiftTrafficResult;
 import io.harness.delegate.task.aws.asg.AsgTaskHelper;
 import io.harness.delegate.task.aws.asg.AutoScalingGroupContainer;
 import io.harness.exception.InvalidArgumentsException;
+import io.harness.exception.sanitizer.ExceptionMessageSanitizer;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.logging.LogCallback;
 import io.harness.logging.LogLevel;
@@ -144,7 +145,8 @@ public class AsgShiftTrafficCommandTaskHandler extends AsgCommandTaskNGHandler {
       shiftTrafficLogCallback.saveExecutionLog(
           color(format("Shifting traffic Failed. %n"), LogColor.Red, LogWeight.Bold), LogLevel.ERROR,
           CommandExecutionStatus.FAILURE);
-      throw new AsgNGException(e);
+      log.error("Exception AsgShiftTraffic", e);
+      throw new AsgNGException(ExceptionMessageSanitizer.sanitizeException(e));
     }
   }
 }

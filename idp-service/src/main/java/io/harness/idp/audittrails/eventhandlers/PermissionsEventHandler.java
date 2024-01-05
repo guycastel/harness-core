@@ -30,6 +30,8 @@ import io.harness.spec.server.idp.v1.model.BackstagePermissions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -65,13 +67,15 @@ public class PermissionsEventHandler implements OutboxEventHandler {
     PermissionsCreateEvent permissionsCreateEvent =
         objectMapper.readValue(outboxEvent.getEventData(), PermissionsCreateEvent.class);
     BackstagePermissions newBackstagePermissions = permissionsCreateEvent.getNewBackstagePermissions();
+    List<String> newBackstagePermissionList = newBackstagePermissions.getPermissions();
+    Collections.sort(newBackstagePermissionList);
 
     AuditEntry auditEntry =
         AuditEntry.builder()
             .action(Action.CREATE)
             .module(ModuleType.IDP)
             .newYaml(NGYamlUtils.getYamlString(PermissionsDTO.builder()
-                                                   .permissions(newBackstagePermissions.getPermissions())
+                                                   .permissions(newBackstagePermissionList)
                                                    .userGroupIdentifier(newBackstagePermissions.getUserGroup())
                                                    .build(),
                 objectMapper))
@@ -90,19 +94,23 @@ public class PermissionsEventHandler implements OutboxEventHandler {
         objectMapper.readValue(outboxEvent.getEventData(), PermissionsUpdateEvent.class);
 
     BackstagePermissions newBackstagePermissions = permissionsUpdateEvent.getNewBackstagePermissions();
+    List<String> newBackstagePermissionList = newBackstagePermissions.getPermissions();
+    Collections.sort(newBackstagePermissionList);
     BackstagePermissions oldBackstagePermissions = permissionsUpdateEvent.getOldBackstagePermissions();
+    List<String> oldBackstagePermissionsList = oldBackstagePermissions.getPermissions();
+    Collections.sort(oldBackstagePermissionsList);
 
     AuditEntry auditEntry =
         AuditEntry.builder()
             .action(Action.UPDATE)
             .module(ModuleType.IDP)
             .newYaml(NGYamlUtils.getYamlString(PermissionsDTO.builder()
-                                                   .permissions(newBackstagePermissions.getPermissions())
+                                                   .permissions(newBackstagePermissionList)
                                                    .userGroupIdentifier(newBackstagePermissions.getUserGroup())
                                                    .build(),
                 objectMapper))
             .oldYaml(NGYamlUtils.getYamlString(PermissionsDTO.builder()
-                                                   .permissions(oldBackstagePermissions.getPermissions())
+                                                   .permissions(oldBackstagePermissionsList)
                                                    .userGroupIdentifier(oldBackstagePermissions.getUserGroup())
                                                    .build(),
                 objectMapper))

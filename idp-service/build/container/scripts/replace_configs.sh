@@ -349,6 +349,54 @@ if [[ "" != "$VM_SECURITY_IMAGE" ]]; then
   export VM_SECURITY_IMAGE; yq -i '.ciExecutionServiceConfig.stepConfig.vmImageConfig.security=env(VM_SECURITY_IMAGE)' $CONFIG_FILE
 fi
 
+if [[ "" != "$IDP_COOKIECUTTER_IMAGE" ]]; then
+  export IDP_COOKIECUTTER_IMAGE; yq -i '.ciExecutionServiceConfig.stepConfig.cookieCutter.image=env(IDP_COOKIECUTTER_IMAGE)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_COOKICUTTER_IMAGE_VM" ]]; then
+  export IDP_COOKICUTTER_IMAGE_VM; yq -i '.ciExecutionServiceConfig.stepConfig.vmImageConfig.cookieCutter=env(IDP_COOKICUTTER_IMAGE_VM)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_CREATEREPO_IMAGE" ]]; then
+  export IDP_CREATEREPO_IMAGE; yq -i '.ciExecutionServiceConfig.stepConfig.createRepo.image=env(IDP_CREATEREPO_IMAGE)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_CREATEREPO_IMAGE_VM" ]]; then
+  export IDP_CREATEREPO_IMAGE_VM; yq -i '.ciExecutionServiceConfig.stepConfig.vmImageConfig.createRepo=env(IDP_CREATEREPO_IMAGE_VM)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_DIRECTPUSH_IMAGE" ]]; then
+  export IDP_DIRECTPUSH_IMAGE; yq -i '.ciExecutionServiceConfig.stepConfig.directPush.image=env(IDP_DIRECTPUSH_IMAGE)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_DIRECTPUSH_IMAGE_VM" ]]; then
+  export IDP_DIRECTPUSH_IMAGE_VM; yq -i '.ciExecutionServiceConfig.stepConfig.vmImageConfig.directPush=env(IDP_DIRECTPUSH_IMAGE_VM)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_REGISTERCATALOG_IMAGE" ]]; then
+  export IDP_REGISTERCATALOG_IMAGE; yq -i '.ciExecutionServiceConfig.stepConfig.registerCatalog.image=env(IDP_REGISTERCATALOG_IMAGE)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_REGISTERCATALOG_IMAGE_VM" ]]; then
+  export IDP_REGISTERCATALOG_IMAGE_VM; yq -i '.ciExecutionServiceConfig.stepConfig.vmImageConfig.registerCatalog=env(IDP_REGISTERCATALOG_IMAGE_VM)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_CREATECATALOG_IMAGE" ]]; then
+  export IDP_CREATECATALOG_IMAGE; yq -i '.ciExecutionServiceConfig.stepConfig.createCatalog.image=env(IDP_CREATECATALOG_IMAGE)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_CREATECATALOG_IMAGE_VM" ]]; then
+  export IDP_CREATECATALOG_IMAGE_VM; yq -i '.ciExecutionServiceConfig.stepConfig.vmImageConfig.createCatalog=env(IDP_CREATECATALOG_IMAGE_VM)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_SLACKNOTIFY_IMAGE" ]]; then
+  export IDP_SLACKNOTIFY_IMAGE; yq -i '.ciExecutionServiceConfig.stepConfig.slackNotify.image=env(IDP_SLACKNOTIFY_IMAGE)' $CONFIG_FILE
+fi
+
+if [[ "" != "$IDP_SLACKNOTIFY_IMAGE_VM" ]]; then
+  export IDP_SLACKNOTIFY_IMAGE_VM; yq -i '.ciExecutionServiceConfig.stepConfig.vmImageConfig.slackNotify=env(IDP_SLACKNOTIFY_IMAGE_VM)' $CONFIG_FILE
+fi
+
 if [[ "" != "$CACHE_BUCKET" ]]; then
   export CACHE_BUCKET; yq -i '.ciExecutionServiceConfig.cacheIntelligenceConfig.bucket=env(CACHE_BUCKET)' $CONFIG_FILE
 fi

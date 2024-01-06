@@ -28,6 +28,8 @@ data:
 kind: ConfigMap
 metadata:
   namespace: {{ .Release.Namespace }}
+  name: platform-service
+  labels:
     {{- if .Values.global.commonLabels }}
     {{- include "harnesscommon.tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}

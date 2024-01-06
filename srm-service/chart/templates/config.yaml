@@ -12,16 +12,12 @@ metadata:
   {{- end }}
 data:
   {{- include "harnesscommon.tplvalues.render" ( dict "value" .Values.config "context" $) | nindent 2}}
-  DEPLOY_MODE: '{{ .Values.config.DEPLOY_MODE }}'
-  ENV: '{{ .Values.config.ENV }}'
   LOGGING_LEVEL: '{{ .Values.appLogLevel }}'
   MANAGER_URL: http://harness-manager.{{ .Release.Namespace }}.svc.cluster.local:9090/
   NG_MANAGER_URL: http://ng-manager.{{ .Release.Namespace }}.svc.cluster.local:7090/
   MEMORY: '{{ .Values.java.memory }}'
   STACK_DRIVER_LOGGING_ENABLED: '{{ .Values.global.stackDriverLoggingEnabled }}'
-  VERIFICATION_PORT: '{{ .Values.config.VERIFICATION_PORT }}'
   NOTIFICATION_BASE_URL: http://platform-service.{{ .Release.Namespace }}.svc.cluster.local:9005/api/
-  SHOULD_CONFIGURE_WITH_NOTIFICATION: '{{ .Values.config.SHOULD_CONFIGURE_WITH_NOTIFICATION }}'
   PORTAL_URL: '{{ .Values.global.loadbalancerURL }}'
   MANAGER_CLIENT_BASEURL: http://harness-manager.{{ .Release.Namespace }}.svc.cluster.local:9090/
   ET_SERVICE_BASE_URL: http://et-service.{{ .Release.Namespace }}.svc.cluster.local:9191/api/
@@ -35,7 +31,6 @@ data:
   CACHE_CONFIG_USE_SENTINEL: '{{ .Values.global.database.redis.installed }}'
   LOCK_CONFIG_REDIS_URL: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}
   ACCESS_CONTROL_BASE_URL:  http://access-control.{{ .Release.Namespace }}.svc.cluster.local:9006/api/
-  ACCESS_CONTROL_ENABLED: '{{ .Values.config.ACCESS_CONTROL_ENABLED }}'
   AUDIT_CLIENT_BASEURL: 'http://platform-service.{{ .Release.Namespace }}.svc.cluster.local:9005/api/'
   WEBHOOK_BASEURL: '{{ .Values.global.loadbalancerURL }}/gateway/cv/api/'
   {{ include "harnesscommon.harnessfunctions.java17flags" (dict "context" $) | nindent 2 }}

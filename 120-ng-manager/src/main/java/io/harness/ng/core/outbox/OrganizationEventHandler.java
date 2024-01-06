@@ -31,6 +31,8 @@ import io.harness.eventsframework.api.EventsFrameworkDownException;
 import io.harness.eventsframework.api.Producer;
 import io.harness.eventsframework.entity_crud.organization.OrganizationEntityChangeDTO;
 import io.harness.eventsframework.producer.Message;
+import io.harness.eventsframework.schemas.entity.ScopeInfo;
+import io.harness.eventsframework.schemas.entity.ScopeProtoEnum;
 import io.harness.exception.InvalidArgumentsException;
 import io.harness.ng.core.OrgScope;
 import io.harness.ng.core.dto.OrganizationRequest;
@@ -49,6 +51,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.StringValue;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -89,8 +92,9 @@ public class OrganizationEventHandler implements OutboxEventHandler {
   private boolean handleOrganizationCreateEvent(OutboxEvent outboxEvent) throws IOException {
     GlobalContext globalContext = outboxEvent.getGlobalContext();
     String accountIdentifier = ((OrgScope) outboxEvent.getResourceScope()).getAccountIdentifier();
-    boolean publishedToRedis = publishOrganizationChangeEventToRedis(
-        accountIdentifier, outboxEvent.getResource().getIdentifier(), EventsFrameworkMetadataConstants.CREATE_ACTION);
+    boolean publishedToRedis =
+        publishOrganizationChangeEventToRedis(accountIdentifier, outboxEvent.getResource().getIdentifier(),
+            EventsFrameworkMetadataConstants.CREATE_ACTION, outboxEvent.getResource().getUniqueId());
     OrganizationCreateEvent organizationCreateEvent =
         objectMapper.readValue(outboxEvent.getEventData(), OrganizationCreateEvent.class);
     AuditEntry auditEntry =
@@ -118,8 +122,9 @@ public class OrganizationEventHandler implements OutboxEventHandler {
   private boolean handleOrganizationUpdateEvent(OutboxEvent outboxEvent) throws IOException {
     GlobalContext globalContext = outboxEvent.getGlobalContext();
     String accountIdentifier = ((OrgScope) outboxEvent.getResourceScope()).getAccountIdentifier();
-    boolean publishedToRedis = publishOrganizationChangeEventToRedis(
-        accountIdentifier, outboxEvent.getResource().getIdentifier(), EventsFrameworkMetadataConstants.UPDATE_ACTION);
+    boolean publishedToRedis =
+        publishOrganizationChangeEventToRedis(accountIdentifier, outboxEvent.getResource().getIdentifier(),
+            EventsFrameworkMetadataConstants.UPDATE_ACTION, outboxEvent.getResource().getUniqueId());
     OrganizationUpdateEvent organizationUpdateEvent =
         objectMapper.readValue(outboxEvent.getEventData(), OrganizationUpdateEvent.class);
     AuditEntry auditEntry =
@@ -142,8 +147,9 @@ public class OrganizationEventHandler implements OutboxEventHandler {
   private boolean handleOrganizationDeleteEvent(OutboxEvent outboxEvent) throws IOException {
     GlobalContext globalContext = outboxEvent.getGlobalContext();
     String accountIdentifier = ((OrgScope) outboxEvent.getResourceScope()).getAccountIdentifier();
-    boolean publishedToRedis = publishOrganizationChangeEventToRedis(
-        accountIdentifier, outboxEvent.getResource().getIdentifier(), EventsFrameworkMetadataConstants.DELETE_ACTION);
+    boolean publishedToRedis =
+        publishOrganizationChangeEventToRedis(accountIdentifier, outboxEvent.getResource().getIdentifier(),
+            EventsFrameworkMetadataConstants.DELETE_ACTION, outboxEvent.getResource().getUniqueId());
     OrganizationDeleteEvent organizationDeleteEvent =
         objectMapper.readValue(outboxEvent.getEventData(), OrganizationDeleteEvent.class);
     AuditEntry auditEntry =
@@ -164,8 +170,9 @@ public class OrganizationEventHandler implements OutboxEventHandler {
   private boolean handleOrganizationRestoreEvent(OutboxEvent outboxEvent) throws IOException {
     GlobalContext globalContext = outboxEvent.getGlobalContext();
     String accountIdentifier = ((OrgScope) outboxEvent.getResourceScope()).getAccountIdentifier();
-    boolean publishedToRedis = publishOrganizationChangeEventToRedis(
-        accountIdentifier, outboxEvent.getResource().getIdentifier(), EventsFrameworkMetadataConstants.RESTORE_ACTION);
+    boolean publishedToRedis =
+        publishOrganizationChangeEventToRedis(accountIdentifier, outboxEvent.getResource().getIdentifier(),
+            EventsFrameworkMetadataConstants.RESTORE_ACTION, outboxEvent.getResource().getUniqueId());
     OrganizationRestoreEvent organizationRestoreEvent =
         objectMapper.readValue(outboxEvent.getEventData(), OrganizationRestoreEvent.class);
     AuditEntry auditEntry =
@@ -183,13 +190,14 @@ public class OrganizationEventHandler implements OutboxEventHandler {
     return publishedToRedis && auditClientService.publishAudit(auditEntry, globalContext);
   }
 
-  private boolean publishOrganizationChangeEventToRedis(String accountIdentifier, String identifier, String action) {
+  private boolean publishOrganizationChangeEventToRedis(
+      String accountIdentifier, String identifier, String action, String uniqueId) {
     try {
       String eventId = eventProducer.send(Message.newBuilder()
                                               .putAllMetadata(ImmutableMap.of("accountId", accountIdentifier,
                                                   EventsFrameworkMetadataConstants.ENTITY_TYPE, ORGANIZATION_ENTITY,
                                                   EventsFrameworkMetadataConstants.ACTION, action))
-                                              .setData(getOrganizationPayload(accountIdentifier, identifier))
+                                              .setData(getOrganizationPayload(accountIdentifier, identifier, uniqueId))
                                               .build());
       log.info("Produced event id:[{}] for orgId:[{}], accountId: [{}], action:[{}]", eventId, identifier,
           accountIdentifier, action);
@@ -200,10 +208,15 @@ public class OrganizationEventHandler implements OutboxEventHandler {
     return true;
   }
 
-  private ByteString getOrganizationPayload(String accountIdentifier, String identifier) {
+  private ByteString getOrganizationPayload(String accountIdentifier, String identifier, String uniqueId) {
     return OrganizationEntityChangeDTO.newBuilder()
         .setIdentifier(identifier)
         .setAccountIdentifier(accountIdentifier)
+        .setUniqueId(uniqueId)
+        .setScopeInfo(ScopeInfo.newBuilder()
+                          .setUniqueId(StringValue.of(accountIdentifier))
+                          .setScope(ScopeProtoEnum.ACCOUNT)
+                          .build())
         .build()
         .toByteString();
   }

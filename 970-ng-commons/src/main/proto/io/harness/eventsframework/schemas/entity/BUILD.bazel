@@ -20,6 +20,7 @@ proto_library(
         "input_set_ref.proto",
         "pipeline_execution_usage_data.proto",
         "scope.proto",
+        "scope_info.proto",
         "template_reference.proto",
         "trigger_reference.proto",
     ],

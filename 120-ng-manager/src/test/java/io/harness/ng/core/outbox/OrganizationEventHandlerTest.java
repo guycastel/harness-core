@@ -88,7 +88,9 @@ public class OrganizationEventHandlerTest extends CategoryTest {
   public void testCreate() throws JsonProcessingException {
     String accountIdentifier = randomAlphabetic(10);
     String identifier = randomAlphabetic(10);
+    String orgUniqueId = randomAlphabetic(10);
     OrganizationDTO organizationDTO = getOrganizationDTO(identifier);
+    organizationDTO.setUniqueId(orgUniqueId);
     OrganizationCreateEvent organizationCreateEvent = new OrganizationCreateEvent(accountIdentifier, organizationDTO);
     String eventData = objectMapper.writeValueAsString(organizationCreateEvent);
     GlobalContext globalContext = new GlobalContext();
@@ -138,8 +140,11 @@ public class OrganizationEventHandlerTest extends CategoryTest {
   public void testUpdate() throws JsonProcessingException {
     String accountIdentifier = randomAlphabetic(10);
     String identifier = randomAlphabetic(10);
+    String orgUniqueId = randomAlphabetic(10);
     OrganizationDTO oldOrganizationDTO = getOrganizationDTO(identifier);
     OrganizationDTO newOrganizationDTO = getOrganizationDTO(identifier);
+    oldOrganizationDTO.setUniqueId(orgUniqueId);
+    newOrganizationDTO.setUniqueId(orgUniqueId);
     OrganizationUpdateEvent organizationUpdateEvent =
         new OrganizationUpdateEvent(accountIdentifier, newOrganizationDTO, oldOrganizationDTO);
     String eventData = objectMapper.writeValueAsString(organizationUpdateEvent);
@@ -176,7 +181,9 @@ public class OrganizationEventHandlerTest extends CategoryTest {
   public void testDelete() throws JsonProcessingException {
     String accountIdentifier = randomAlphabetic(10);
     String identifier = randomAlphabetic(10);
+    String orgUniqueId = randomAlphabetic(10);
     OrganizationDTO organizationDTO = getOrganizationDTO(identifier);
+    organizationDTO.setUniqueId(orgUniqueId);
     OrganizationDeleteEvent organizationDeleteEvent = new OrganizationDeleteEvent(accountIdentifier, organizationDTO);
     String eventData = objectMapper.writeValueAsString(organizationDeleteEvent);
     OutboxEvent outboxEvent = OutboxEvent.builder()
@@ -211,7 +218,9 @@ public class OrganizationEventHandlerTest extends CategoryTest {
   public void testRestore() throws JsonProcessingException {
     String accountIdentifier = randomAlphabetic(10);
     String identifier = randomAlphabetic(10);
+    String orgUniqueId = randomAlphabetic(10);
     OrganizationDTO organizationDTO = getOrganizationDTO(identifier);
+    organizationDTO.setUniqueId(orgUniqueId);
     OrganizationRestoreEvent organizationRestoreEvent =
         new OrganizationRestoreEvent(accountIdentifier, organizationDTO);
     String eventData = objectMapper.writeValueAsString(organizationRestoreEvent);

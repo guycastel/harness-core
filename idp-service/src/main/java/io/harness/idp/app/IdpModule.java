@@ -1082,6 +1082,13 @@ public class IdpModule extends AbstractModule {
 
   @Provides
   @Singleton
+  @Named("allowedKindsForAudit")
+  public List<String> allowedKindsForAudit() {
+    return this.appConfig.getAllowedKindsForAudit();
+  }
+
+  @Provides
+  @Singleton
   @Named("customPlugins")
   public CustomPluginsConfig customPluginsConfig() {
     return this.appConfig.getCustomPluginsConfig();

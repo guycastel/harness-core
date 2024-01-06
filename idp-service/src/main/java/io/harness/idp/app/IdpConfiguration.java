@@ -163,6 +163,7 @@ public class IdpConfiguration extends Configuration {
   @JsonProperty("segmentConfiguration") private SegmentConfiguration segmentConfiguration;
   @JsonProperty("enableMetrics") private boolean enableMetrics;
   @JsonProperty("allowedKindsForCatalogSync") private List<String> allowedKindsForCatalogSync;
+  @JsonProperty("allowedKindsForAudit") private List<String> allowedKindsForAudit;
   @JsonProperty("customPlugins") private CustomPluginsConfig customPluginsConfig;
   @JsonProperty("debeziumConsumersConfigs") DebeziumConsumersConfig debeziumConsumersConfigs;
   @JsonProperty("enableDashboardTimescale") private Boolean enableDashboardTimescale;

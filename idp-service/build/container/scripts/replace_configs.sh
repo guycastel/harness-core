@@ -681,6 +681,11 @@ if [[ "" != "$ALLOWED_KINDS_FOR_CATALOG_SYNC" ]]; then
   export ALLOWED_KINDS_FOR_CATALOG_SYNC; yq -i '.allowedKindsForCatalogSync=(env(ALLOWED_KINDS_FOR_CATALOG_SYNC) | split(",") | map(trim))' $CONFIG_FILE
 fi
 
+if [[ "" != "$ALLOWED_KINDS_FOR_AUDIT" ]]; then
+  yq -i 'del(.allowedKindsForAudit)' $CONFIG_FILE
+  export ALLOWED_KINDS_FOR_AUDIT; yq -i '.allowedKindsForAudit=(env(ALLOWED_KINDS_FOR_AUDIT) | split(",") | map(trim))' $CONFIG_FILE
+fi
+
 if [[ "" != "$DEBEZIUM_BACKSTAGE_CATALOG_CONSUMER_TOPIC_NAME" ]]; then
   export DEBEZIUM_BACKSTAGE_CATALOG_CONSUMER_TOPIC_NAME; yq -i '.debeziumConsumersConfigs.backstageCatalog.topic=env(DEBEZIUM_BACKSTAGE_CATALOG_CONSUMER_TOPIC_NAME)' $CONFIG_FILE
 fi

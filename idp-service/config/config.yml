@@ -463,6 +463,14 @@ allowedKindsForCatalogSync:
   - Template
   - User
 
+allowedKindsForAudit:
+  - API
+  - Component
+  - Domain
+  - Resource
+  - System
+  - Template
+
 customPlugins:
   triggerPipelineUrl: ""
 

@@ -48,9 +48,7 @@ import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -72,6 +70,7 @@ public class BackstageServiceImpl implements BackstageService {
   private static final String ENTITY_NOT_FOUND_MAPPED_ERROR = "HTTP Error Status (404 - Resource Not Found) received. ";
 
   @Inject @Named("allowedKindsForCatalogSync") private List<String> allowedKindsForCatalogSync;
+  @Inject @Named("allowedKindsForAudit") private List<String> allowedKindsForAudit;
   @Inject NamespaceService namespaceService;
   @Inject BackstageResourceClient backstageResourceClient;
   @Inject BackstageCatalogEntityRepository backstageCatalogEntityRepository;
@@ -155,6 +154,10 @@ public class BackstageServiceImpl implements BackstageService {
         .collect(Collectors.toList());
   }
 
+  private boolean shouldPublishAudit(BackstageCatalogEntity backstageCatalogEntity) {
+    return allowedKindsForAudit.contains(backstageCatalogEntity.getKind());
+  }
+
   private void syncInternal(String accountIdentifier, String entityUid, String action,
       List<BackstageCatalogEntity> backstageCatalogEntities) {
     if (backstageCatalogEntities.isEmpty()) {
@@ -166,36 +169,11 @@ public class BackstageServiceImpl implements BackstageService {
     List<Pair<BackstageCatalogEntity, BackstageCatalogEntity>> entitiesList =
         prepareEntitiesForSave(accountIdentifier, backstageCatalogEntities);
 
-    Map<BackstageCatalogEntity, String> entitiesActions = categorizeEntitiesActions(backstageCatalogEntities);
-    for (Map.Entry<BackstageCatalogEntity, String> entry : entitiesActions.entrySet()) {
-      if (BackstageHarnessSyncRequest.ActionEnum.CREATE.toString().equals(entry.getValue())) {
-        String uuid = entry.getKey().getMetadata().getUid();
-        boolean producerResult =
-            idpEntityCrudStreamProducer.publishAsyncScoreComputationChangeEventToRedis(accountIdentifier, null, uuid);
-        if (!producerResult) {
-          log.error(
-              "Error in producing event for async score computation. AccountIdentifier = {} BackstageCatalogEntityUid = {} Action = {}",
-              accountIdentifier, uuid, action);
-        }
-      }
-    }
-
     AtomicReference<Iterable<BackstageCatalogEntity>> savedBackstageCatalogEntities = new AtomicReference<>();
     Failsafe.with(transactionRetryPolicy).get(() -> transactionTemplate.execute(status -> {
       savedBackstageCatalogEntities.set(backstageCatalogEntityRepository.saveAll(backstageCatalogEntities));
       if (StringUtils.isNotBlank(entityUid)) {
-        for (Pair<BackstageCatalogEntity, BackstageCatalogEntity> entityPair : entitiesList) {
-          BackstageCatalogEntity oldEntity = entityPair.getFirst();
-          BackstageCatalogEntity newEntity = entityPair.getSecond();
-          if (oldEntity == null) {
-            outboxService.save(new BackstageCatalogEntityCreateEvent(
-                accountIdentifier, newEntity.getEntityUid(), newEntity.getYaml()));
-          } else if (!oldEntity.getYaml().equals(newEntity.getYaml())) {
-            outboxService.save(new BackstageCatalogEntityUpdateEvent(
-                accountIdentifier, newEntity.getEntityUid(), oldEntity.getYaml(), newEntity.getYaml()));
-            handleEntityDeletionIfRequired(accountIdentifier, oldEntity, newEntity);
-          }
-        }
+        publishAuditEventForUpsert(accountIdentifier, entityUid, entitiesList);
       }
       return true;
     }));
@@ -206,6 +184,34 @@ public class BackstageServiceImpl implements BackstageService {
     publishBackstageCatalogEntityChange(accountIdentifier, savedBackstageCatalogEntities.get(), action);
     log.info("Synced IDP catalog entities as Harness entities for accountIdentifier = {} EntityUid = {} Action = {}",
         accountIdentifier, entityUid, action);
+  }
+
+  private void publishAuditEventForUpsert(String accountIdentifier, String entityUid,
+      List<Pair<BackstageCatalogEntity, BackstageCatalogEntity>> entitiesList) {
+    for (Pair<BackstageCatalogEntity, BackstageCatalogEntity> entityPair : entitiesList) {
+      BackstageCatalogEntity oldEntity = entityPair.getFirst();
+      BackstageCatalogEntity newEntity = entityPair.getSecond();
+
+      if (oldEntity == null) {
+        boolean producerResult = idpEntityCrudStreamProducer.publishAsyncScoreComputationChangeEventToRedis(
+            accountIdentifier, null, entityUid);
+        if (!producerResult) {
+          log.error(
+              "Error in producing event for async score computation. AccountIdentifier = {} BackstageCatalogEntityUid = {}",
+              accountIdentifier, entityUid);
+        }
+        if (shouldPublishAudit(newEntity)) {
+          outboxService.save(
+              new BackstageCatalogEntityCreateEvent(accountIdentifier, newEntity.getEntityUid(), newEntity.getYaml()));
+        }
+      } else if (!oldEntity.getYaml().equals(newEntity.getYaml())) {
+        if (shouldPublishAudit(newEntity)) {
+          outboxService.save(new BackstageCatalogEntityUpdateEvent(
+              accountIdentifier, newEntity.getEntityUid(), oldEntity.getYaml(), newEntity.getYaml()));
+        }
+        handleEntityDeletionIfRequired(accountIdentifier, oldEntity, newEntity);
+      }
+    }
   }
 
   private void handleEntityDeletionIfRequired(
@@ -279,19 +285,6 @@ public class BackstageServiceImpl implements BackstageService {
     return entitesList;
   }
 
-  private Map<BackstageCatalogEntity, String> categorizeEntitiesActions(
-      List<BackstageCatalogEntity> backstageCatalogEntities) {
-    Map<BackstageCatalogEntity, String> entitiesActions = new HashMap<>();
-    backstageCatalogEntities.forEach(backstageCatalogEntity -> {
-      if (backstageCatalogEntity.getCreatedAt() == 0) {
-        entitiesActions.put(backstageCatalogEntity, BackstageHarnessSyncRequest.ActionEnum.CREATE.value());
-      } else {
-        entitiesActions.put(backstageCatalogEntity, BackstageHarnessSyncRequest.ActionEnum.UPDATE.value());
-      }
-    });
-    return entitiesActions;
-  }
-
   private String getEntityUniqueId(BackstageCatalogEntity backstageCatalogEntity) {
     return getEntityUniqueId(backstageCatalogEntity.getKind(), backstageCatalogEntity.getMetadata().getNamespace(),
         backstageCatalogEntity.getMetadata().getName());
@@ -344,8 +337,10 @@ public class BackstageServiceImpl implements BackstageService {
           accountIdentifier, entityUid);
       Failsafe.with(transactionRetryPolicy).get(() -> transactionTemplate.execute(status -> {
         backstageCatalogEntityRepository.delete(backstageCatalogEntityExisting);
-        outboxService.save(new BackstageCatalogEntityDeleteEvent(accountIdentifier,
-            backstageCatalogEntityExisting.getEntityUid(), backstageCatalogEntityExisting.getYaml()));
+        if (shouldPublishAudit(backstageCatalogEntityExisting)) {
+          outboxService.save(new BackstageCatalogEntityDeleteEvent(accountIdentifier,
+              backstageCatalogEntityExisting.getEntityUid(), backstageCatalogEntityExisting.getYaml()));
+        }
         return true;
       }));
     });

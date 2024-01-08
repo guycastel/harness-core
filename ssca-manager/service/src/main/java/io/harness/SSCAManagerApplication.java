@@ -49,6 +49,7 @@ import io.harness.security.NextGenAuthenticationFilter;
 import io.harness.security.annotations.InternalApi;
 import io.harness.security.annotations.NextGenManagerAuth;
 import io.harness.ssca.jobs.ElkMigrationJob;
+import io.harness.ssca.jobs.ExemptionExpirationIteratorHandler;
 import io.harness.ssca.jobs.RemediationTrackerUpdateArtifactsIteratorHandler;
 import io.harness.ssca.migration.SSCAMigrationProvider;
 import io.harness.ssca.ticket.TicketServiceRestClientModule;
@@ -327,5 +328,7 @@ public class SSCAManagerApplication extends Application<SSCAManagerConfiguration
   public static void registerIterators(Injector injector, SSCAIteratorsConfig iteratorsConfig) {
     injector.getInstance(RemediationTrackerUpdateArtifactsIteratorHandler.class)
         .registerIterators(iteratorsConfig.getRemediationTrackerUpdateIteratorConfig());
+    injector.getInstance(ExemptionExpirationIteratorHandler.class)
+        .registerIterators(iteratorsConfig.getExemptionExpirationIteratorConfig());
   }
 }

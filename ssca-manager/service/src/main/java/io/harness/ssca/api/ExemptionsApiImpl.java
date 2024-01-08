@@ -7,6 +7,17 @@
 
 package io.harness.ssca.api;
 
+import static io.harness.ssca.utils.Constants.SSCA_ENFORCEMENT_EXEMPTION;
+import static io.harness.ssca.utils.Constants.SSCA_ENFORCEMENT_EXEMPTION_DELETE_PERMISSION;
+import static io.harness.ssca.utils.Constants.SSCA_ENFORCEMENT_EXEMPTION_EDIT_PERMISSION;
+import static io.harness.ssca.utils.Constants.SSCA_ENFORCEMENT_EXEMPTION_REVIEW_PERMISSION;
+import static io.harness.ssca.utils.Constants.SSCA_ENFORCEMENT_EXEMPTION_VIEW_PERMISSION;
+
+import io.harness.accesscontrol.AccountIdentifier;
+import io.harness.accesscontrol.NGAccessControlCheck;
+import io.harness.accesscontrol.OrgIdentifier;
+import io.harness.accesscontrol.ProjectIdentifier;
+import io.harness.accesscontrol.ResourceIdentifier;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.security.annotations.NextGenManagerAuth;
@@ -31,9 +42,13 @@ import org.springframework.data.domain.PageRequest;
 @NextGenManagerAuth
 public class ExemptionsApiImpl implements ExemptionsApi {
   @Inject ExemptionService exemptionService;
+
   @Override
-  public Response createExemptionForArtifact(
-      String project, String org, String artifact, @Valid ExemptionRequestDTO body, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_EDIT_PERMISSION)
+  public Response
+  createExemptionForArtifact(@ProjectIdentifier String project, @OrgIdentifier String org, String artifact,
+      @Valid ExemptionRequestDTO body, @AccountIdentifier String harnessAccount) {
     populateInitiationDetails(project, artifact, body);
     return Response.status(Status.CREATED)
         .entity(exemptionService.createExemption(harnessAccount, project, org, artifact, body))
@@ -41,8 +56,11 @@ public class ExemptionsApiImpl implements ExemptionsApi {
   }
 
   @Override
-  public Response createExemptionForProject(
-      String org, String project, @Valid ExemptionRequestDTO body, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_EDIT_PERMISSION)
+  public Response
+  createExemptionForProject(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @Valid ExemptionRequestDTO body, @AccountIdentifier String harnessAccount) {
     populateInitiationDetails(project, body);
     return Response.status(Status.CREATED)
         .entity(exemptionService.createExemption(harnessAccount, project, org, null, body))
@@ -50,61 +68,93 @@ public class ExemptionsApiImpl implements ExemptionsApi {
   }
 
   @Override
-  public Response deleteExemptionForArtifact(
-      String org, String project, String exemption, String artifact, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_DELETE_PERMISSION)
+  public Response
+  deleteExemptionForArtifact(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @ResourceIdentifier String exemption, String artifact, @AccountIdentifier String harnessAccount) {
     exemptionService.deleteExemption(harnessAccount, org, project, artifact, exemption);
     return Response.ok().build();
   }
 
   @Override
-  public Response deleteExemptionForProject(String org, String project, String exemption, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_DELETE_PERMISSION)
+  public Response
+  deleteExemptionForProject(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @ResourceIdentifier String exemption, @AccountIdentifier String harnessAccount) {
     exemptionService.deleteExemption(harnessAccount, org, project, null, exemption);
     return Response.ok().build();
   }
 
   @Override
-  public Response getExemptionForArtifact(
-      String org, String project, String exemption, String artifact, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_VIEW_PERMISSION)
+  public Response
+  getExemptionForArtifact(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @ResourceIdentifier String exemption, String artifact, @AccountIdentifier String harnessAccount) {
     return Response.ok(exemptionService.getExemption(harnessAccount, org, project, artifact, exemption)).build();
   }
 
   @Override
-  public Response getExemptionForProject(String org, String project, String exemption, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_VIEW_PERMISSION)
+  public Response
+  getExemptionForProject(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @ResourceIdentifier String exemption, @AccountIdentifier String harnessAccount) {
     return Response.ok(exemptionService.getExemption(harnessAccount, org, project, null, exemption)).build();
   }
 
   @Override
-  public Response listExemptionsForProject(String org, String project, String harnessAccount,
-      @Min(1L) @Max(1000L) Integer limit, @Min(0L) Integer page, List<ExemptionStatusDTO> status, String artifactId,
-      String searchTerm) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_VIEW_PERMISSION)
+  public Response
+  listExemptionsForProject(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @AccountIdentifier String harnessAccount, @Min(1L) @Max(1000L) Integer limit, @Min(0L) Integer page,
+      List<ExemptionStatusDTO> status, String artifactId, String searchTerm) {
     return PageResponseUtils.getPagedResponse(exemptionService.getExemptions(
         harnessAccount, org, project, artifactId, status, searchTerm, PageRequest.of(page, limit)));
   }
 
   @Override
-  public Response reviewExemptionForArtifact(String org, String project, String exemption, String artifact,
-      @Valid ExemptionReviewRequestDTO body, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_REVIEW_PERMISSION)
+  public Response
+  reviewExemptionForArtifact(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @ResourceIdentifier String exemption, String artifact, @Valid ExemptionReviewRequestDTO body,
+      @AccountIdentifier String harnessAccount) {
     return Response.ok(exemptionService.reviewExemption(harnessAccount, project, org, artifact, exemption, body))
         .build();
   }
 
   @Override
-  public Response reviewExemptionForProject(
-      String org, String project, String exemption, @Valid ExemptionReviewRequestDTO body, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_REVIEW_PERMISSION)
+  public Response
+  reviewExemptionForProject(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @ResourceIdentifier String exemption, @Valid ExemptionReviewRequestDTO body,
+      @AccountIdentifier String harnessAccount) {
     return Response.ok(exemptionService.reviewExemption(harnessAccount, project, org, null, exemption, body)).build();
   }
 
   @Override
-  public Response updateExemptionForArtifact(String org, String project, String exemption, String artifact,
-      @Valid ExemptionRequestDTO body, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_EDIT_PERMISSION)
+  public Response
+  updateExemptionForArtifact(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @ResourceIdentifier String exemption, String artifact, @Valid ExemptionRequestDTO body,
+      @AccountIdentifier String harnessAccount) {
     populateInitiationDetails(project, artifact, body);
     return Response.ok(exemptionService.updateExemption(harnessAccount, project, org, artifact, exemption, body))
         .build();
   }
 
   @Override
-  public Response updateExemptionForProject(
-      String org, String project, String exemption, @Valid ExemptionRequestDTO body, String harnessAccount) {
+  @NGAccessControlCheck(
+      resourceType = SSCA_ENFORCEMENT_EXEMPTION, permission = SSCA_ENFORCEMENT_EXEMPTION_EDIT_PERMISSION)
+  public Response
+  updateExemptionForProject(@OrgIdentifier String org, @ProjectIdentifier String project,
+      @ResourceIdentifier String exemption, @Valid ExemptionRequestDTO body, @AccountIdentifier String harnessAccount) {
     populateInitiationDetails(project, body);
     return Response.ok(exemptionService.updateExemption(harnessAccount, project, org, null, exemption, body)).build();
   }

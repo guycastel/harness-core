@@ -3895,6 +3895,7 @@ components:
     ExemptionStatusDTO:
       x-stoplight:
         id: gsebm50nj364e
+      type: string
       enum:
         - PENDING
         - APPROVED

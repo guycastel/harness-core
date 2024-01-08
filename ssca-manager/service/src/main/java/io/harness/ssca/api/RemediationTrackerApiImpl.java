@@ -6,10 +6,10 @@
  */
 package io.harness.ssca.api;
 
-import static io.harness.ssca.search.framework.Constants.REMEDIATION_TRACKER_CLOSE;
-import static io.harness.ssca.search.framework.Constants.REMEDIATION_TRACKER_EDIT;
-import static io.harness.ssca.search.framework.Constants.REMEDIATION_TRACKER_RESOURCE;
-import static io.harness.ssca.search.framework.Constants.REMEDIATION_TRACKER_VIEW;
+import static io.harness.ssca.utils.Constants.REMEDIATION_TRACKER_CLOSE;
+import static io.harness.ssca.utils.Constants.REMEDIATION_TRACKER_EDIT;
+import static io.harness.ssca.utils.Constants.REMEDIATION_TRACKER_RESOURCE;
+import static io.harness.ssca.utils.Constants.REMEDIATION_TRACKER_VIEW;
 
 import io.harness.accesscontrol.AccountIdentifier;
 import io.harness.accesscontrol.NGAccessControlCheck;

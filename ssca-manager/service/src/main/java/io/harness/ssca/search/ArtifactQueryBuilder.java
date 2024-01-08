@@ -8,7 +8,7 @@
 package io.harness.ssca.search;
 
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
-import static io.harness.ssca.search.framework.Constants.SBOM_COMPONENT_ENTITY;
+import static io.harness.ssca.utils.Constants.SBOM_COMPONENT_ENTITY;
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;

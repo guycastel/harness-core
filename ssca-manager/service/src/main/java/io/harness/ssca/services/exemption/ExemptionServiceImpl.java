@@ -153,15 +153,30 @@ public class ExemptionServiceImpl implements ExemptionService {
     existingExemption.setReviewedBy(userId);
     existingExemption.setReviewedAt(now.toEpochMilli());
     existingExemption.setReviewComment(exemptionReviewRequestDTO.getReviewComment());
+    Long vaidUntil = null;
     if (updatedStatus.equals(ExemptionStatus.APPROVED)) {
-      existingExemption.setValidUntil(getValidUntilValue(now, existingExemption.getExemptionDuration()));
-    } else {
-      existingExemption.setValidUntil(0L);
+      vaidUntil = getValidUntilValue(now, existingExemption.getExemptionDuration());
     }
+    existingExemption.setValidUntil(vaidUntil);
+    existingExemption.setIteration(vaidUntil);
     Exemption updatedExemption = exemptionRepository.save(existingExemption);
     log.info("Reviewed exemption {} for accountId {} orgIdentifier {} projectIdentifier {} artifactId {} ", exemptionId,
         accountId, orgIdentifier, projectIdentifier, artifactId);
     return ExemptionMapper.toExemptionResponseDTO(updatedExemption, fetchUsers(List.of(updatedExemption)));
+  }
+
+  @Override
+  public void expireExemption(
+      String accountId, String orgIdentifier, String projectIdentifier, String artifactId, String exemptionId) {
+    Exemption existingExemption =
+        getExemptionByScopeAndUuid(accountId, orgIdentifier, projectIdentifier, artifactId, exemptionId);
+    validateCurrentExemptionStatus(existingExemption, ExemptionStatus.APPROVED);
+    validateCurrentExemptionValidity(existingExemption);
+    existingExemption.setExemptionStatus(ExemptionStatus.EXPIRED);
+    existingExemption.setUpdatedBy("SYSTEM");
+    exemptionRepository.save(existingExemption);
+    log.info("Expired exemption {} for accountId {} orgIdentifier {} projectIdentifier {} artifactId {} ", exemptionId,
+        accountId, orgIdentifier, projectIdentifier, artifactId);
   }
 
   private static Long getValidUntilValue(Instant now, ExemptionDuration exemptionDuration) {
@@ -210,6 +225,15 @@ public class ExemptionServiceImpl implements ExemptionService {
           "Exemption for accountId %s orgIdentifier %s projectIdentifier %s artifactId %s exemptionId %s not in %s state",
           exemption.getAccountId(), exemption.getOrgIdentifier(), exemption.getProjectIdentifier(),
           exemption.getArtifactId(), exemption.getUuid(), exemptionStatus.name()));
+    }
+  }
+
+  private void validateCurrentExemptionValidity(Exemption exemption) {
+    if (Long.compare(exemption.getValidUntil(), System.currentTimeMillis()) != -1) {
+      throw new BadRequestException(String.format(
+          "Exemption for accountId %s orgIdentifier %s projectIdentifier %s artifactId %s exemptionId %s can not be expired",
+          exemption.getAccountId(), exemption.getOrgIdentifier(), exemption.getProjectIdentifier(),
+          exemption.getArtifactId(), exemption.getUuid()));
     }
   }
 

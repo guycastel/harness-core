@@ -7,7 +7,7 @@
 
 package io.harness.ssca.search.mapper;
 
-import static io.harness.ssca.search.framework.Constants.ARTIFACT_ENTITY;
+import static io.harness.ssca.utils.Constants.ARTIFACT_ENTITY;
 
 import io.harness.ssca.beans.Scorecard;
 import io.harness.ssca.entities.artifact.ArtifactEntity;

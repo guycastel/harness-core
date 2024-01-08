@@ -253,7 +253,6 @@ public class ExemptionServiceImplTest extends SSCAManagerTestBase {
     Exemption exemption = getSavedExemption();
     when(exemptionRepository.findExemptions(any()))
         .thenReturn(List.of(exemption.toBuilder().exemptionStatus(ExemptionStatus.APPROVED).build()));
-    ExemptionRequestDTO exemptionRequestDTO = getExemptionRequestDTO();
     assertThatThrownBy(
         () -> exemptionService.deleteExemption(accountId, orgIdentifier, projectIdentifier, artifactId, exemptionId))
         .isInstanceOf(BadRequestException.class);
@@ -341,7 +340,7 @@ public class ExemptionServiceImplTest extends SSCAManagerTestBase {
         .isCloseTo(
             Instant.now().plus(reviewExemptionRequest.getExemptionDuration().getDays(), ChronoUnit.DAYS).toEpochMilli(),
             offset(60000L));
-
+    assertThat(reviewExemptionRequest.getIteration()).isEqualTo(reviewExemptionRequest.getValidUntil());
     assertThat(exemptionResponseDTO.getComponentName()).isEqualTo(savedExemption.getComponentName());
     assertThat(exemptionResponseDTO.getComponentVersion()).isEqualTo(savedExemption.getComponentVersion());
     assertThat(exemptionResponseDTO.getVersionOperator().name()).isEqualTo(savedExemption.getVersionOperator().name());
@@ -382,7 +381,8 @@ public class ExemptionServiceImplTest extends SSCAManagerTestBase {
     assertThat(reviewExemptionRequest.getReviewedAt()).isCloseTo(System.currentTimeMillis(), offset(60000L));
     assertThat(reviewExemptionRequest.getReviewedBy()).isEqualTo(testUserProvider.activeUser().getUuid());
     assertThat(reviewExemptionRequest.getReviewComment()).isEqualTo(exemptionReviewRequestDTO.getReviewComment());
-    assertThat(reviewExemptionRequest.getValidUntil()).isZero();
+    assertThat(reviewExemptionRequest.getValidUntil()).isNull();
+    assertThat(reviewExemptionRequest.getIteration()).isNull();
 
     assertThat(exemptionResponseDTO.getComponentName()).isEqualTo(savedExemption.getComponentName());
     assertThat(exemptionResponseDTO.getComponentVersion()).isEqualTo(savedExemption.getComponentVersion());
@@ -398,6 +398,72 @@ public class ExemptionServiceImplTest extends SSCAManagerTestBase {
         .isEqualTo(savedExemption.getExemptionDuration().getDays());
     assertThat(exemptionResponseDTO.getExemptionDuration().isAlwaysExempt())
         .isEqualTo(savedExemption.getExemptionDuration().isAlwaysExempt());
+  }
+
+  @Test
+  @Owner(developers = DHRUVX)
+  @Category(UnitTests.class)
+  public void testExpireExemption_exemptionDoesNotExist() {
+    when(exemptionRepository.findExemptions(any())).thenReturn(Collections.emptyList());
+    assertThatThrownBy(
+        () -> exemptionService.expireExemption(accountId, orgIdentifier, projectIdentifier, artifactId, exemptionId))
+        .isInstanceOf(NotFoundException.class);
+  }
+
+  @Test
+  @Owner(developers = DHRUVX)
+  @Category(UnitTests.class)
+  public void testExpireExemption_existingExemptionStatusIsNotApproved() {
+    Exemption exemption = getSavedExemption();
+    when(exemptionRepository.findExemptions(any()))
+        .thenReturn(List.of(exemption.toBuilder().exemptionStatus(ExemptionStatus.PENDING).build()));
+    assertThatThrownBy(
+        () -> exemptionService.expireExemption(accountId, orgIdentifier, projectIdentifier, artifactId, exemptionId))
+        .isInstanceOf(BadRequestException.class);
+    when(exemptionRepository.findExemptions(any()))
+        .thenReturn(List.of(exemption.toBuilder().exemptionStatus(ExemptionStatus.REJECTED).build()));
+    assertThatThrownBy(
+        () -> exemptionService.expireExemption(accountId, orgIdentifier, projectIdentifier, artifactId, exemptionId))
+        .isInstanceOf(BadRequestException.class);
+    when(exemptionRepository.findExemptions(any()))
+        .thenReturn(List.of(exemption.toBuilder().exemptionStatus(ExemptionStatus.EXPIRED).build()));
+    assertThatThrownBy(
+        () -> exemptionService.expireExemption(accountId, orgIdentifier, projectIdentifier, artifactId, exemptionId))
+        .isInstanceOf(BadRequestException.class);
+  }
+
+  @Test
+  @Owner(developers = DHRUVX)
+  @Category(UnitTests.class)
+  public void testExpireExemption_existingExemptionisStillValid() {
+    Exemption exemption = getSavedExemption();
+    when(exemptionRepository.findExemptions(any()))
+        .thenReturn(List.of(exemption.toBuilder()
+                                .exemptionStatus(ExemptionStatus.APPROVED)
+                                .validUntil(Instant.now().plusSeconds(60).toEpochMilli())
+                                .build()));
+    assertThatThrownBy(
+        () -> exemptionService.expireExemption(accountId, orgIdentifier, projectIdentifier, artifactId, exemptionId))
+        .isInstanceOf(BadRequestException.class);
+  }
+
+  @Test
+  @Owner(developers = DHRUVX)
+  @Category(UnitTests.class)
+  public void testExpireExemption() {
+    Exemption exemption = getSavedExemption();
+    when(exemptionRepository.findExemptions(any()))
+        .thenReturn(List.of(exemption.toBuilder()
+                                .exemptionStatus(ExemptionStatus.APPROVED)
+                                .validUntil(Instant.now().minusSeconds(60).toEpochMilli())
+                                .build()));
+    when(exemptionRepository.save(any())).thenReturn(exemption);
+    exemptionService.expireExemption(accountId, orgIdentifier, projectIdentifier, artifactId, exemptionId);
+    ArgumentCaptor<Exemption> argument = ArgumentCaptor.forClass(Exemption.class);
+    verify(exemptionRepository, times(1)).save(argument.capture());
+    Exemption expireExemptionRequest = argument.getValue();
+    assertThat(expireExemptionRequest.getExemptionStatus()).isEqualTo(ExemptionStatus.EXPIRED);
+    assertThat(expireExemptionRequest.getUpdatedBy()).isEqualTo("SYSTEM");
   }
 
   private Exemption getSavedExemption() {

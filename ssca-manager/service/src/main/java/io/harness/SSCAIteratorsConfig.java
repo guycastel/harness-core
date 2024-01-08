@@ -19,4 +19,5 @@ import lombok.Value;
 @Builder
 public class SSCAIteratorsConfig {
   SSCAIteratorConfig remediationTrackerUpdateIteratorConfig;
+  SSCAIteratorConfig exemptionExpirationIteratorConfig;
 }

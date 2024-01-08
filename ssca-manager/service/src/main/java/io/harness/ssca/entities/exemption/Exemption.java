@@ -11,10 +11,13 @@ import io.harness.annotation.HarnessEntity;
 import io.harness.annotations.StoreIn;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
+import io.harness.iterator.PersistentIterable;
+import io.harness.iterator.PersistentRegularIterable;
 import io.harness.ng.DbAliases;
 import io.harness.ssca.entities.OperatorEntity;
 
 import dev.morphia.annotations.Entity;
+import java.util.Objects;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
@@ -35,7 +38,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @FieldNameConstants(innerTypeName = "ExemptionKeys")
 // TODO: Add indexes
 @OwnedBy(HarnessTeam.SSCA)
-public class Exemption {
+public class Exemption implements PersistentIterable, PersistentRegularIterable {
   @Id String uuid;
   @NotBlank String componentName;
   String componentVersion;
@@ -56,6 +59,25 @@ public class Exemption {
   @LastModifiedDate Long updatedAt;
   Long validUntil;
   Long reviewedAt;
+  Long iteration;
+
+  @Override
+  public Long obtainNextIteration(String fieldName) {
+    if (fieldName.equals(ExemptionKeys.iteration)) {
+      return Objects.isNull(iteration) ? 0L : iteration;
+    } else {
+      throw new IllegalArgumentException("Invalid fieldName " + fieldName);
+    }
+  }
+
+  @Override
+  public void updateNextIteration(String fieldName, long nextIteration) {
+    if (fieldName.equals(ExemptionKeys.iteration)) {
+      iteration = nextIteration;
+    } else {
+      throw new IllegalArgumentException("Invalid fieldName " + fieldName);
+    }
+  }
 
   @Data
   @Builder

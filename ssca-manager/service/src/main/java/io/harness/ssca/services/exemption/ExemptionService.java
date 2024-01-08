@@ -40,4 +40,7 @@ public interface ExemptionService {
 
   ExemptionResponseDTO reviewExemption(String accountId, String orgIdentifier, String projectIdentifier,
       String artifactId, String exemptionId, ExemptionReviewRequestDTO exemptionReviewRequestDTO);
+
+  void expireExemption(
+      String accountId, String orgIdentifier, String projectIdentifier, String artifactId, String exemptionId);
 }

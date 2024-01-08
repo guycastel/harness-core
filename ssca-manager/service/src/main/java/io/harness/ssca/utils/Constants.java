@@ -5,13 +5,14 @@
  * https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
  */
 
-package io.harness.ssca.search.framework;
+package io.harness.ssca.utils;
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 
 @OwnedBy(HarnessTeam.SSCA)
 public class Constants {
+  private Constants() {}
   public static final String ARTIFACT_ENTITY = "artifact";
   public static final String SBOM_COMPONENT_ENTITY = "component";
   public static final String REMEDIATION_TRACKER_RESOURCE = "SSCA_REMEDIATION_TRACKER";
@@ -21,4 +22,9 @@ public class Constants {
   public static final String REMEDIATION_TRACKER_VIEW = "ssca_remediationtracker_view";
 
   public static final String REMEDIATION_TRACKER_CLOSE = "ssca_remediationtracker_close";
+  public static final String SSCA_ENFORCEMENT_EXEMPTION = "SSCA_ENFORCEMENT_EXEMPTION";
+  public static final String SSCA_ENFORCEMENT_EXEMPTION_EDIT_PERMISSION = "ssca_enforcementexemption_edit";
+  public static final String SSCA_ENFORCEMENT_EXEMPTION_VIEW_PERMISSION = "ssca_enforcementexemption_view";
+  public static final String SSCA_ENFORCEMENT_EXEMPTION_REVIEW_PERMISSION = "ssca_enforcementexemption_review";
+  public static final String SSCA_ENFORCEMENT_EXEMPTION_DELETE_PERMISSION = "ssca_enforcementexemption_delete";
 }

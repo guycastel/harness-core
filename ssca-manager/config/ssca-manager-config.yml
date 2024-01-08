@@ -157,6 +157,10 @@ iteratorsConfig:
      threadPoolSize: 3
      enabled: true
      targetIntervalInSeconds: 1800
+   exemptionExpirationIteratorConfig:
+     threadPoolSize: 3
+     enabled: true
+     targetIntervalInSeconds: 60
 
 ticketServiceRestClientConfig:
   baseUrl: http://localhost:4444/api/

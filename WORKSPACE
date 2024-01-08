@@ -6644,7 +6644,7 @@ plain_artifacts = [
     "io.swagger.core.v3:swagger-models:2.2.0",
     "io.swagger.core.v3:swagger-integration:2.2.0",
     "io.opentelemetry:opentelemetry-api:1.18.0",
-    "io.harness:smp-license:1.0.11",
+    "io.harness:smp-license:1.0.12",
     "com.clickhouse:clickhouse-jdbc:0.4.6",
 ]
 

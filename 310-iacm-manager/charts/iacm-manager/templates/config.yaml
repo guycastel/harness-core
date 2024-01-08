@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "iacm-manager.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- if .Values.global.commonLabels }}
+    {{- include "harnesscommon.tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.global.commonAnnotations }}
+  annotations: {{- include "harnesscommon.tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  DEPLOY_MODE: {{.Values.config.DEPLOY_MODE | quote}}
+  MEMORY: {{.Values.config.MEMORY | quote}}
+  MANAGER_TARGET: harness-manager:9879
+  MANAGER_AUTHORITY: harness-manager:9879
+  MANAGER_URL: 'http://harness-manager.{{ .Release.Namespace }}.svc.cluster.local:9090/api/'
+  SCM_SERVICE_URI: "scm-service:8091"
+  LOG_SERVICE_ENDPOINT: '{{ .Values.global.loadbalancerURL }}/gateway/log-service/'
+  LOG_SERVICE_INTERNAL_URL: 'http://log-service.{{ .Release.Namespace }}.svc.cluster.local:8079/'
+  TI_SERVICE_ENDPOINT: '{{ .Values.global.loadbalancerURL }}/ti-service/'
+  TI_SERVICE_INTERNAL_ENDPOINT: 'http://ti-service.{{ .Release.Namespace }}.svc.cluster.local:8078/'
+  NG_MANAGER_URL: 'http://ng-manager.{{ .Release.Namespace }}.svc.cluster.local:7090/'
+  ENABLE_APPDYNAMICS: "false"
+  DISABLE_NEW_RELIC: "true"
+  SHOULD_CONFIGURE_WITH_PMS: {{.Values.config.SHOULD_CONFIGURE_WITH_PMS | quote}}
+  PMS_TARGET: pipeline-service:12011
+  PMS_AUTHORITY: pipeline-service:12011
+  GRPC_SERVER_PORT: "9979"
+  DEFAULT_INTERNAL_IMAGE_CONNECTOR: {{ .Values.config.DEFAULT_INTERNAL_IMAGE_CONNECTOR }}
+  API_URL: '{{ .Values.global.loadbalancerURL }}/ng/#/'
+  DEFAULT_CPU_LIMIT: {{.Values.config.DEFAULT_CPU_LIMIT | quote}}
+  DEFAULT_MEMORY_LIMIT: {{.Values.config.DEFAULT_MEMORY_LIMIT | quote}}
+  MONGO_INDEX_MANAGER_MODE: {{.Values.config.MONGO_INDEX_MANAGER_MODE | quote}}
+  STACK_DRIVER_LOGGING_ENABLED: {{ .Values.global.stackDriverLoggingEnabled | quote }}
+  GOOGLE_APPLICATION_CREDENTIALS: /opt/harness/svc/cloud_stackdriver.json
+  EVENTS_FRAMEWORK_ENV_NAMESPACE: {{ .Values.config.EVENTS_FRAMEWORK_ENV_NAMESPACE | quote }}
+  EVENTS_FRAMEWORK_USE_SENTINEL: {{ .Values.global.database.redis.installed | quote }}
+  EVENTS_FRAMEWORK_SENTINEL_MASTER_NAME: 'harness-redis'
+  EVENTS_FRAMEWORK_REDIS_SENTINELS: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}
+  EVENTS_FRAMEWORK_REDIS_URL: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}
+  EVENTS_FRAMEWORK_REDIS_SSL_ENABLED: {{ .Values.config.EVENTS_FRAMEWORK_REDIS_SSL_ENABLED | quote }}
+  EVENTS_FRAMEWORK_REDIS_SSL_CA_TRUST_STORE_PATH: {{ .Values.config.EVENTS_FRAMEWORK_REDIS_SSL_CA_TRUST_STORE_PATH | quote }}
+  LOCK_CONFIG_USE_SENTINEL: {{ .Values.global.database.redis.installed | quote }}
+  LOCK_CONFIG_SENTINEL_MASTER_NAME: "harness-redis"
+  LOCK_CONFIG_REDIS_SENTINELS: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}
+  LOCK_CONFIG_REDIS_URL: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}
+  USE_REDIS_FOR_SDK_RESPONSE_EVENTS: {{.Values.config.USE_REDIS_FOR_SDK_RESPONSE_EVENTS | quote}}
+  ENABLE_DASHBOARD_TIMESCALE: {{.Values.config.ENABLE_DASHBOARD_TIMESCALE | quote}}
+  CACHE_BACKEND: REDIS
+  CACHE_CONFIG_USE_SENTINEL: {{ .Values.global.database.redis.installed | quote }}
+  CACHE_CONFIG_SENTINEL_MASTER_NAME: "harness-redis"
+  CACHE_CONFIG_REDIS_SENTINELS: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}
+  CACHE_CONFIG_REDIS_URL: {{ include "harnesscommon.dbconnectionv2.redisConnection" (dict "context" $) }}
+  {{- if .Values.config.scalabilityTest}}
+  PLAN_CREATOR_SERVICE_EXECUTOR_POOL_CORE_SIZE: {{ .Values.config.PLAN_CREATOR_SERVICE_EXECUTOR_POOL_CORE_SIZE }}
+  PLAN_CREATOR_SERVICE_EXECUTOR_POOL_MAX_SIZE: {{ .Values.config.PLAN_CREATOR_SERVICE_EXECUTOR_POOL_MAX_SIZE }}
+  ASYNC_DELEGATE_RESPONSE_THREAD_COUNT: {{ .Values.config.ASYNC_DELEGATE_RESPONSE_THREAD_COUNT }}
+  {{- end}}
+  ENFORCEMENT_CHECK_ENABLED: {{.Values.config.ENFORCEMENT_CHECK_ENABLED | quote}}
+  PMS_SDK_ORCHESTRATION_EVENT_POOL_CORE_SIZE: {{.Values.config.PMS_SDK_ORCHESTRATION_EVENT_POOL_CORE_SIZE | quote}}
+  USE_DMS: {{.Values.config.USE_DMS | quote}}
+  {{- if .Values.global.opa.enabled }}
+  OPA_SERVER_BASEURL: 'http://policy-mgmt.{{ .Release.Namespace }}.svc.cluster.local:3000/'
+  {{- end }}
+
+  IACM_INFRACOST_API_ENDPOINT: '{{ .Values.global.loadbalancerURL }}/iac-pricing/'
+  IACM_EXTERNAL_SERVICE_ENDPOINT: '{{ .Values.global.loadbalancerURL }}/iacm/'
+  IACM_SERVICE_ENDPOINT: http://iac-server.{{ .Release.Namespace }}.svc.cluster.local/
+  IACM_TERRAFORM_IMAGE: {{.Values.config.IACM_TERRAFORM_IMAGE | quote}}
+  IACM_TERRAFORM_VM_IMAGE: {{.Values.config.IACM_TERRAFORM_VM_IMAGE | quote}}
+
+  SECRET_MANAGER_URI: {{.Values.config.SECRET_MANAGER_URI | quote}}
+  LOG_SERVICE_INTERNAL_ENDPOINT: 'http://log-service.{{ .Release.Namespace }}.svc.cluster.local:8079/'
+  ENABLE_PROMETHEUS_COLLECTOR: {{.Values.config.ENABLE_PROMETHEUS_COLLECTOR | quote}}
+
+  HOSTED_VM_SPLIT_LINUX_AMD64_POOL: {{.Values.config.HOSTED_VM_SPLIT_LINUX_AMD64_POOL | quote}}
+  HOSTED_VM_SPLIT_LINUX_ARM64_POOL: {{.Values.config.HOSTED_VM_SPLIT_LINUX_ARM64_POOL | quote}}
+  HOSTED_VM_SPLIT_WINDOWS_AMD64_POOL: {{.Values.config.HOSTED_VM_SPLIT_WINDOWS_AMD64_POOL | quote}}
+
+  {{- if .Values.additionalConfigs }}
+  {{- toYaml .Values.additionalConfigs | nindent 2 }}
+  {{- end }}
+  {{ include "harnesscommon.harnessfunctions.java17flags" (dict "context" $) | nindent 2 }}

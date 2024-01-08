@@ -589,6 +589,7 @@ paths:
             type: string
             enum:
               - artifactsourcetemplate
+              - artifactsource
               - customdeployment
               - monitoredservice
               - secretmanager
@@ -596,6 +597,7 @@ paths:
               - pipeline
               - step
               - stepgroup
+              - group
               - template
           in: query
           name: node_group

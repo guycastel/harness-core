@@ -264,7 +264,7 @@ public class IDPModuleLicenseUsageImplTest extends CategoryTest {
 
     assertNotNull(activeDevelopersTrendCountDTOList);
     assertEquals(1, activeDevelopersTrendCountDTOList.size());
-    assertEquals(1, activeDevelopersTrendCountDTOList.get(0).getCount());
+    assertEquals(3, activeDevelopersTrendCountDTOList.get(0).getCount());
   }
 
   @Test

@@ -164,7 +164,8 @@ public class IDPModuleLicenseUsageImpl implements IDPModuleLicenseUsage {
       int year = localDate.getYear();
       int month = localDate.getMonthValue();
 
-      monthlyTrend.put(year + "-" + month, monthlyTrend.getOrDefault(year + "-" + month, 0) + 1);
+      monthlyTrend.put(year + "-" + month,
+          (int) (monthlyTrend.getOrDefault(year + "-" + month, 0) + activeDevelopersDailyCountEntity.getCount()));
     });
 
     monthlyTrend.forEach(

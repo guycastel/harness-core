@@ -92,15 +92,19 @@ public class ShellScriptStepMapperImpl extends StepMapper {
   @Override
   public List<CgEntityId> getReferencedEntities(
       String accountId, Workflow workflow, GraphNode graphNode, Map<String, String> stepIdToServiceIdMap) {
-    List<CgEntityId> refs = new ArrayList<>();
+    ShellScriptState state = (ShellScriptState) getState(graphNode);
+    List<CgEntityId> refs =
+        new ArrayList<>(secretRefUtils.getSecretRefFromExpressions(accountId, getExpressions(graphNode)));
+
+    if (StringUtils.isNotBlank(state.getSshKeyRef())) {
+      refs.add(CgEntityId.builder().id(state.getSshKeyRef()).type(NGMigrationEntityType.CONNECTOR).build());
+    }
+    if (StringUtils.isNotBlank(state.getConnectionAttributes())) {
+      refs.add(CgEntityId.builder().id(state.getConnectionAttributes()).type(NGMigrationEntityType.CONNECTOR).build());
+    }
     String templateId = graphNode.getTemplateUuid();
     if (StringUtils.isNotBlank(templateId)) {
       refs.add(CgEntityId.builder().id(templateId).type(NGMigrationEntityType.TEMPLATE).build());
-    }
-    refs.addAll(secretRefUtils.getSecretRefFromExpressions(accountId, getExpressions(graphNode)));
-    ShellScriptState state = (ShellScriptState) getState(graphNode);
-    if (StringUtils.isNotBlank(state.getConnectionAttributes())) {
-      refs.add(CgEntityId.builder().id(state.getConnectionAttributes()).type(NGMigrationEntityType.CONNECTOR).build());
     }
     return refs;
   }
@@ -158,7 +162,7 @@ public class ShellScriptStepMapperImpl extends StepMapper {
                                        .type(NGVariableType.STRING)
                                        .value(ParameterField.createValueField(str))
                                        .build())
-                            .collect(Collectors.toList()));
+                            .toList());
     }
     if (StringUtils.isNotBlank(state.getSecretOutputVars())) {
       outputVars.addAll(Arrays.stream(state.getSecretOutputVars().split("\\s*,\\s*"))
@@ -169,7 +173,7 @@ public class ShellScriptStepMapperImpl extends StepMapper {
                                        .type(NGVariableType.SECRET)
                                        .value(ParameterField.createValueField(str))
                                        .build())
-                            .collect(Collectors.toList()));
+                            .toList());
     }
 
     var exportScope = getSweepingOutputScope(state);
@@ -181,7 +185,6 @@ public class ShellScriptStepMapperImpl extends StepMapper {
                                                    .scope(exportScope)
                                                    .build()
                                              : null)
-            .onDelegate(ParameterField.createValueField(state.isExecuteOnDelegate()))
             .includeInfraSelectors(ParameterField.createValueField(state.getIncludeInfraSelectors()))
             .shell(ScriptType.BASH.equals(state.getScriptType()) ? ShellType.Bash : ShellType.PowerShell)
             .source(ShellScriptSourceWrapper.builder()
@@ -274,7 +277,7 @@ public class ShellScriptStepMapperImpl extends StepMapper {
     ShellScriptState state = (ShellScriptState) getState(graphNode);
 
     JsonNode envVars = templateInputs.at("/spec/environmentVariables");
-    JsonNode executionTarget = templateInputs.at("/spec/onDelegate");
+    JsonNode executionTarget = templateInputs.at("/spec/executionTarget");
     CgEntityNode entityNode = context.getEntities().get(
         CgEntityId.builder().type(NGMigrationEntityType.TEMPLATE).id(templateFile.getCgBasicInfo().getId()).build());
     Template template = (Template) entityNode.getEntity();
@@ -322,17 +325,16 @@ public class ShellScriptStepMapperImpl extends StepMapper {
     }
     if (executionTarget instanceof TextNode) {
       ObjectNode spec = (ObjectNode) templateInputs.get("spec");
-      spec.put("onDelegate", state.isExecuteOnDelegate());
+      ObjectMapper mapper = new ObjectMapper();
+      ObjectNode hostNode = mapper.createObjectNode();
       if (!state.isExecuteOnDelegate()) {
         ParameterField<String> connectorRef = MigratorUtility.getIdentifierWithScopeDefaultsRuntime(
             migrationContext.getMigratedEntities(), state.getSshKeyRef(), NGMigrationEntityType.CONNECTOR);
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode hostNode = mapper.createObjectNode();
         hostNode.put("host", state.getHost());
         hostNode.put("connectorRef", connectorRef.getValue());
         hostNode.put("workingDirectory", state.getCommandPath());
-        spec.put("executionTarget", hostNode);
       }
+      spec.put("executionTarget", hostNode);
     }
 
     // Fix delegate selectors in the workflow

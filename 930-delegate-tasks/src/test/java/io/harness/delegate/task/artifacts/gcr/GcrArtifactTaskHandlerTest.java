@@ -7,6 +7,9 @@
 
 package io.harness.delegate.task.artifacts.gcr;
 
+import static io.harness.exception.ExplanationException.INVALID_OIDC_AUTH_HEADER;
+import static io.harness.exception.HintException.CHECK_SERVICE_ACCOUNT_PERMISSIONS_FOR_OIDC;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 import static io.harness.rule.OwnerRule.vivekveman;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,11 +28,15 @@ import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorCredentialDT
 import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorDTO;
 import io.harness.delegate.beans.connector.gcpconnector.GcpCredentialType;
 import io.harness.delegate.beans.connector.gcpconnector.GcpManualDetailsDTO;
+import io.harness.delegate.beans.connector.gcpconnector.GcpOidcDetailsDTO;
 import io.harness.delegate.task.artifacts.response.ArtifactTaskExecutionResponse;
 import io.harness.delegate.task.gcp.helpers.GcpHelperService;
 import io.harness.encryption.SecretRefData;
 import io.harness.exception.InvalidRequestException;
 import io.harness.exception.runtime.GcpClientRuntimeException;
+import io.harness.oidc.exception.OidcException;
+import io.harness.oidc.gcp.constants.GcpOidcServiceAccountAccessTokenResponse;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 import io.harness.security.encryption.SecretDecryptionService;
 
@@ -53,6 +60,7 @@ public class GcrArtifactTaskHandlerTest extends CategoryTest {
   @Mock GcpHelperService gcpHelperService;
   @Mock GcrApiService gcrApiService;
   @Mock SecretDecryptionService secretDecryptionService;
+  @Mock private GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate;
 
   private static final String TEST_PROJECT_ID = "project-a";
   private static final String TEST_ACCESS_TOKEN = String.format("{\"access_token\": \"%s\"}", TEST_PROJECT_ID);
@@ -206,6 +214,89 @@ public class GcrArtifactTaskHandlerTest extends CategoryTest {
     assertThat(attributes.getTag()).isEqualTo(VERSION);
   }
 
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testGetBuildsOIDC() throws IOException {
+    googleCredential = new GoogleCredential();
+
+    BuildDetailsInternal buildDetailsInternal = BuildDetailsInternal.builder().number(VERSION).build();
+
+    List<BuildDetailsInternal> ls = new ArrayList<>();
+    ls.add(buildDetailsInternal);
+    GcrInternalConfig garInternalConfig;
+
+    garInternalConfig =
+        GcrInternalConfig.builder().basicAuthHeader("Bearer accessToken").registryHostname("registryHostname").build();
+    doReturn(ls).when(gcrApiService).getBuilds(garInternalConfig, IMAGE_PATH, 10000);
+
+    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false, null);
+
+    GcrArtifactDelegateRequest gcrDelegateRequest =
+        GcrArtifactDelegateRequest.builder()
+            .gcpConnectorDTO(GcpConnectorDTO.builder()
+                                 .credential(GcpConnectorCredentialDTO.builder()
+                                                 .gcpCredentialType(GcpCredentialType.OIDC_AUTHENTICATION)
+                                                 .config(GcpOidcDetailsDTO.builder().build())
+                                                 .build())
+                                 .build())
+            .registryHostname("registryHostname")
+            .gcpOidcTokenExchangeDetailsForDelegate(gcpOidcTokenExchangeDetailsForDelegate)
+            .imagePath(IMAGE_PATH)
+            .build();
+    GcpOidcServiceAccountAccessTokenResponse gcpOidcServiceAccountAccessTokenResponse =
+        new GcpOidcServiceAccountAccessTokenResponse("accessToken", 12344L);
+    doReturn(gcpOidcServiceAccountAccessTokenResponse)
+        .when(gcpOidcTokenExchangeDetailsForDelegate)
+        .exchangeOidcServiceAccountAccessToken();
+    ArtifactTaskExecutionResponse builds = gcrArtifactTaskHandler.getBuilds(gcrDelegateRequest);
+
+    assertThat(builds).isNotNull();
+    assertThat(builds.getArtifactDelegateResponses().size()).isEqualTo(1);
+    assertThat(builds.getArtifactDelegateResponses().get(0)).isInstanceOf(GcrArtifactDelegateResponse.class);
+    GcrArtifactDelegateResponse attributes = (GcrArtifactDelegateResponse) builds.getArtifactDelegateResponses().get(0);
+    assertThat(attributes.getTag()).isEqualTo(VERSION);
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void getRepositoriesTestOIDCThrowsException() throws IOException {
+    googleCredential = new GoogleCredential();
+
+    BuildDetailsInternal buildDetailsInternal = BuildDetailsInternal.builder().number(VERSION).build();
+
+    List<BuildDetailsInternal> ls = new ArrayList<>();
+    ls.add(buildDetailsInternal);
+    GcrInternalConfig garInternalConfig;
+
+    garInternalConfig =
+        GcrInternalConfig.builder().basicAuthHeader("Bearer accessToken").registryHostname("registryHostname").build();
+    doReturn(ls).when(gcrApiService).getBuilds(garInternalConfig, IMAGE_PATH, 10000);
+
+    doReturn(googleCredential).when(gcpHelperService).getGoogleCredential(serviceAccountKeyFileContent, false, null);
+
+    GcrArtifactDelegateRequest gcrDelegateRequest =
+        GcrArtifactDelegateRequest.builder()
+            .gcpConnectorDTO(GcpConnectorDTO.builder()
+                                 .credential(GcpConnectorCredentialDTO.builder()
+                                                 .gcpCredentialType(GcpCredentialType.OIDC_AUTHENTICATION)
+                                                 .config(GcpOidcDetailsDTO.builder().build())
+                                                 .build())
+                                 .build())
+            .registryHostname("registryHostname")
+            .gcpOidcTokenExchangeDetailsForDelegate(gcpOidcTokenExchangeDetailsForDelegate)
+            .imagePath(IMAGE_PATH)
+            .build();
+    doThrow(new OidcException("bad access token"))
+        .when(gcpOidcTokenExchangeDetailsForDelegate)
+        .exchangeOidcServiceAccountAccessToken();
+    assertThatThrownBy(() -> gcrArtifactTaskHandler.getBuilds(gcrDelegateRequest))
+        .isInstanceOf(InvalidRequestException.class)
+        .hasMessageContaining(
+            String.format(CHECK_SERVICE_ACCOUNT_PERMISSIONS_FOR_OIDC, gcrDelegateRequest.getSourceType()))
+        .hasMessageContaining(String.format(INVALID_OIDC_AUTH_HEADER, "bad access token"));
+  }
   @Test
   @Owner(developers = vivekveman)
   @Category(UnitTests.class)

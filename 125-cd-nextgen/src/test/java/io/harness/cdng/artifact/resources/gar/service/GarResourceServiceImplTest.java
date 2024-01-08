@@ -42,6 +42,7 @@ import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorCredentialDT
 import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorDTO;
 import io.harness.delegate.beans.connector.gcpconnector.GcpDelegateDetailsDTO;
 import io.harness.delegate.task.artifacts.ArtifactTaskType;
+import io.harness.delegate.task.artifacts.gar.GarDelegateRequest;
 import io.harness.delegate.task.artifacts.gar.GarDelegateResponse;
 import io.harness.delegate.task.artifacts.request.ArtifactTaskParameters;
 import io.harness.delegate.task.artifacts.response.ArtifactBuildDetailsNG;
@@ -54,6 +55,7 @@ import io.harness.exception.InvalidRequestException;
 import io.harness.exception.WingsException;
 import io.harness.exception.exceptionmanager.ExceptionManager;
 import io.harness.logging.CommandExecutionStatus;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 import io.harness.secretmanagerclient.services.api.SecretManagerClientService;
 import io.harness.security.encryption.EncryptedDataDetail;
@@ -106,10 +108,14 @@ public class GarResourceServiceImplTest extends CategoryTest {
   @Mock ExceptionManager exceptionManager;
   @Mock OidcHelperUtility oidcHelperUtility;
 
+  GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate;
+
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(anyString(), any())).thenReturn(null);
+    gcpOidcTokenExchangeDetailsForDelegate = GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(anyString(), any()))
+        .thenReturn(gcpOidcTokenExchangeDetailsForDelegate);
   }
 
   private ConnectorResponseDTO getConnector() {
@@ -159,6 +165,9 @@ public class GarResourceServiceImplTest extends CategoryTest {
     DelegateTaskRequest delegateTaskRequest = delegateTaskRequestCaptor.getValue();
     ArtifactTaskParameters artifactTaskParameters = (ArtifactTaskParameters) delegateTaskRequest.getTaskParameters();
     assertThat(artifactTaskParameters.getArtifactTaskType()).isEqualTo(ArtifactTaskType.GET_BUILDS);
+    assertThat(
+        ((GarDelegateRequest) artifactTaskParameters.getAttributes()).getGcpOidcTokenExchangeDetailsForDelegate())
+        .isEqualTo(gcpOidcTokenExchangeDetailsForDelegate);
   }
   @Test
   @Owner(developers = vivekveman)
@@ -430,6 +439,9 @@ public class GarResourceServiceImplTest extends CategoryTest {
     DelegateTaskRequest delegateTaskRequest = delegateTaskRequestCaptor.getValue();
     ArtifactTaskParameters artifactTaskParameters = (ArtifactTaskParameters) delegateTaskRequest.getTaskParameters();
     assertThat(artifactTaskParameters.getArtifactTaskType()).isEqualTo(ArtifactTaskType.GET_LAST_SUCCESSFUL_BUILD);
+    assertThat(
+        ((GarDelegateRequest) artifactTaskParameters.getAttributes()).getGcpOidcTokenExchangeDetailsForDelegate())
+        .isEqualTo(gcpOidcTokenExchangeDetailsForDelegate);
   }
 
   @Test
@@ -665,6 +677,9 @@ public class GarResourceServiceImplTest extends CategoryTest {
     DelegateTaskRequest delegateTaskRequest = delegateTaskRequestCaptor.getValue();
     ArtifactTaskParameters artifactTaskParameters = (ArtifactTaskParameters) delegateTaskRequest.getTaskParameters();
     assertThat(artifactTaskParameters.getArtifactTaskType()).isEqualTo(ArtifactTaskType.GET_GAR_REPOSITORIES);
+    assertThat(
+        ((GarDelegateRequest) artifactTaskParameters.getAttributes()).getGcpOidcTokenExchangeDetailsForDelegate())
+        .isEqualTo(gcpOidcTokenExchangeDetailsForDelegate);
   }
   @Test
   @Owner(developers = RAKSHIT_AGARWAL)
@@ -699,5 +714,8 @@ public class GarResourceServiceImplTest extends CategoryTest {
     DelegateTaskRequest delegateTaskRequest = delegateTaskRequestCaptor.getValue();
     ArtifactTaskParameters artifactTaskParameters = (ArtifactTaskParameters) delegateTaskRequest.getTaskParameters();
     assertThat(artifactTaskParameters.getArtifactTaskType()).isEqualTo(ArtifactTaskType.GET_GAR_PACKAGES);
+    assertThat(
+        ((GarDelegateRequest) artifactTaskParameters.getAttributes()).getGcpOidcTokenExchangeDetailsForDelegate())
+        .isEqualTo(gcpOidcTokenExchangeDetailsForDelegate);
   }
 }

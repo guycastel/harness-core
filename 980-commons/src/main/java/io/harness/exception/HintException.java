@@ -165,6 +165,9 @@ public class HintException extends WingsException {
       "Please check HTTP/S is enabled on host machine and provide valid setup on configuration page.";
   public static final String CHECK_IF_PRINCIPAL_IS_CORRECT = "Please check if provided Principal is correct.";
   public static final String CHECK_IF_PASSWORD_IS_CORRECT = "Please check if provided password is correct.";
+  public static final String CHECK_SERVICE_ACCOUNT_PERMISSIONS_FOR_OIDC =
+      "\n Hint: \n 1) Please validate that the permissions required for %s are assigned to service account."
+      + "\n2) Workload Identity Federation has been configured correctly.";
 
   public HintException(String message) {
     super(message, null, HINT, INFO, null, null);

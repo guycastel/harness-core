@@ -120,9 +120,9 @@ public class GARResourceServiceImpl implements GARResourceService {
     List<EncryptedDataDetail> encryptionDetails = getEncryptionDetails(connector, baseNGAccess);
     GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
         oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(baseNGAccess.getAccountIdentifier(), connector);
-    GarDelegateRequest googleArtifactDelegateRequest =
-        ArtifactDelegateRequestUtils.getGoogleArtifactDelegateRequest(region, null, project, null, null, null,
-            connector, encryptionDetails, ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, MAXBUILDS);
+    GarDelegateRequest googleArtifactDelegateRequest = ArtifactDelegateRequestUtils.getGoogleArtifactDelegateRequest(
+        region, null, project, null, null, null, connector, encryptionDetails,
+        ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, MAXBUILDS, gcpOidcTokenExchangeDetailsForDelegate);
     try {
       ArtifactTaskExecutionResponse artifactTaskExecutionResponse =
           executeSyncTask(googleArtifactDelegateRequest, ArtifactTaskType.GET_GAR_REPOSITORIES, baseNGAccess,
@@ -149,9 +149,9 @@ public class GARResourceServiceImpl implements GARResourceService {
     List<EncryptedDataDetail> encryptionDetails = getEncryptionDetails(connector, baseNGAccess);
     GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
         oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(baseNGAccess.getAccountIdentifier(), connector);
-    GarDelegateRequest googleArtifactDelegateRequest =
-        ArtifactDelegateRequestUtils.getGoogleArtifactDelegateRequest(region, repositoryName, project, pkg, version,
-            versionRegex, connector, encryptionDetails, ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, MAXBUILDS);
+    GarDelegateRequest googleArtifactDelegateRequest = ArtifactDelegateRequestUtils.getGoogleArtifactDelegateRequest(
+        region, repositoryName, project, pkg, version, versionRegex, connector, encryptionDetails,
+        ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, MAXBUILDS, gcpOidcTokenExchangeDetailsForDelegate);
 
     try {
       ArtifactTaskExecutionResponse artifactTaskExecutionResponse = executeSyncTask(googleArtifactDelegateRequest,
@@ -178,9 +178,9 @@ public class GARResourceServiceImpl implements GARResourceService {
     List<EncryptedDataDetail> encryptionDetails = getEncryptionDetails(connector, baseNGAccess);
     GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
         oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(baseNGAccess.getAccountIdentifier(), connector);
-    GarDelegateRequest googleArtifactDelegateRequest =
-        ArtifactDelegateRequestUtils.getGoogleArtifactDelegateRequest(region, repositoryName, project, null, null, null,
-            connector, encryptionDetails, ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, MAXBUILDS);
+    GarDelegateRequest googleArtifactDelegateRequest = ArtifactDelegateRequestUtils.getGoogleArtifactDelegateRequest(
+        region, repositoryName, project, null, null, null, connector, encryptionDetails,
+        ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, MAXBUILDS, gcpOidcTokenExchangeDetailsForDelegate);
 
     try {
       ArtifactTaskExecutionResponse artifactTaskExecutionResponse =
@@ -212,9 +212,10 @@ public class GARResourceServiceImpl implements GARResourceService {
     List<EncryptedDataDetail> encryptionDetails = getEncryptionDetails(connector, baseNGAccess);
     GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
         oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(baseNGAccess.getAccountIdentifier(), connector);
-    GarDelegateRequest googleArtifactDelegateRequest = ArtifactDelegateRequestUtils.getGoogleArtifactDelegateRequest(
-        region, repositoryName, project, pkg, garRequestDTO.getVersion(), garRequestDTO.getVersionRegex(), connector,
-        encryptionDetails, ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, MAXBUILDS);
+    GarDelegateRequest googleArtifactDelegateRequest =
+        ArtifactDelegateRequestUtils.getGoogleArtifactDelegateRequest(region, repositoryName, project, pkg,
+            garRequestDTO.getVersion(), garRequestDTO.getVersionRegex(), connector, encryptionDetails,
+            ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, MAXBUILDS, gcpOidcTokenExchangeDetailsForDelegate);
 
     try {
       ArtifactTaskExecutionResponse artifactTaskExecutionResponse =

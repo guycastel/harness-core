@@ -7,15 +7,20 @@
 
 package io.harness.delegate.task.artifacts.googleartifactregistry;
 
+import static io.harness.exception.ExplanationException.INVALID_OIDC_AUTH_HEADER;
+import static io.harness.exception.HintException.CHECK_SERVICE_ACCOUNT_PERMISSIONS_FOR_OIDC;
 import static io.harness.rule.OwnerRule.ABHISHEK;
 import static io.harness.rule.OwnerRule.RAKSHIT_AGARWAL;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,9 +32,16 @@ import io.harness.artifacts.beans.BuildDetailsInternal;
 import io.harness.artifacts.gar.service.GARApiServiceImpl;
 import io.harness.beans.ArtifactMetaInfo;
 import io.harness.category.element.UnitTests;
+import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorCredentialDTO;
+import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorDTO;
+import io.harness.delegate.beans.connector.gcpconnector.GcpCredentialType;
+import io.harness.delegate.beans.connector.gcpconnector.GcpOidcDetailsDTO;
 import io.harness.delegate.task.artifacts.gar.GarDelegateRequest;
 import io.harness.delegate.task.artifacts.response.ArtifactDelegateResponse;
 import io.harness.delegate.task.artifacts.response.ArtifactTaskExecutionResponse;
+import io.harness.exception.InvalidRequestException;
+import io.harness.oidc.exception.OidcException;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.rule.Owner;
 
 import java.io.IOException;
@@ -66,7 +78,7 @@ public class GARArtifactTaskHandlerTest extends CategoryTest {
     ArtifactMetaInfo artifactMetaInfo = ArtifactMetaInfo.builder().sha(SHA).shaV2(SHA_V2).build();
     BuildDetailsInternal buildDetailsInternal =
         BuildDetailsInternal.builder().artifactMetaInfo(artifactMetaInfo).build();
-    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean());
+    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean(), any());
     when(garApiService.verifyBuildNumber(any(), anyString())).thenReturn(buildDetailsInternal);
     ArtifactTaskExecutionResponse artifactTaskExecutionResponse =
         garArtifactTaskHandler1.getLastSuccessfulBuild(garDelegateRequest);
@@ -86,7 +98,7 @@ public class GARArtifactTaskHandlerTest extends CategoryTest {
     List<BuildDetailsInternal> builds = Collections.singletonList(buildDetailsInternal);
 
     when(garApiService.getRepository(any(), anyString())).thenReturn(builds);
-    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean());
+    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean(), any());
 
     ArtifactTaskExecutionResponse response = garArtifactTaskHandler1.getRepositories(garDelegateRequest);
 
@@ -95,6 +107,68 @@ public class GARArtifactTaskHandlerTest extends CategoryTest {
 
     List<ArtifactDelegateResponse> responseList = response.getArtifactDelegateResponses();
     assertThat(responseList).hasSize(1);
+  }
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void getRepositoriesTestOIDC() throws IOException {
+    GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
+        GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+    GARArtifactTaskHandler garArtifactTaskHandler1 = spy(garArtifactTaskHandler);
+    GarDelegateRequest garDelegateRequest =
+        GarDelegateRequest.builder()
+            .region(REGION)
+            .gcpConnectorDTO(GcpConnectorDTO.builder()
+                                 .credential(GcpConnectorCredentialDTO.builder()
+                                                 .gcpCredentialType(GcpCredentialType.OIDC_AUTHENTICATION)
+                                                 .config(GcpOidcDetailsDTO.builder().build())
+                                                 .build())
+                                 .build())
+            .gcpOidcTokenExchangeDetailsForDelegate(gcpOidcTokenExchangeDetailsForDelegate)
+            .build();
+    BuildDetailsInternal buildDetailsInternal = BuildDetailsInternal.builder().build();
+    List<BuildDetailsInternal> builds = Collections.singletonList(buildDetailsInternal);
+
+    when(garApiService.getRepository(any(), anyString())).thenReturn(builds);
+    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean(), any());
+
+    ArtifactTaskExecutionResponse response = garArtifactTaskHandler1.getRepositories(garDelegateRequest);
+
+    verify(garApiService, times(1)).getRepository(any(), eq(REGION));
+    assertThat(response).isNotNull();
+
+    List<ArtifactDelegateResponse> responseList = response.getArtifactDelegateResponses();
+    assertThat(responseList).hasSize(1);
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void getRepositoriesTestOIDCThrowsException() throws IOException {
+    GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
+        GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+    GARArtifactTaskHandler garArtifactTaskHandler1 = spy(garArtifactTaskHandler);
+    GarDelegateRequest garDelegateRequest =
+        GarDelegateRequest.builder()
+            .region(REGION)
+            .gcpConnectorDTO(GcpConnectorDTO.builder()
+                                 .credential(GcpConnectorCredentialDTO.builder()
+                                                 .gcpCredentialType(GcpCredentialType.OIDC_AUTHENTICATION)
+                                                 .config(GcpOidcDetailsDTO.builder().build())
+                                                 .build())
+                                 .build())
+            .gcpOidcTokenExchangeDetailsForDelegate(gcpOidcTokenExchangeDetailsForDelegate)
+            .build();
+    BuildDetailsInternal buildDetailsInternal = BuildDetailsInternal.builder().build();
+    List<BuildDetailsInternal> builds = Collections.singletonList(buildDetailsInternal);
+
+    when(garApiService.getRepository(any(), anyString())).thenReturn(builds);
+    doThrow(new OidcException("bad access token")).when(garArtifactTaskHandler1).getToken(any(), anyBoolean(), any());
+    assertThatThrownBy(() -> garArtifactTaskHandler1.getRepositories(garDelegateRequest))
+        .isInstanceOf(InvalidRequestException.class)
+        .hasMessageContaining(
+            String.format(CHECK_SERVICE_ACCOUNT_PERMISSIONS_FOR_OIDC, garDelegateRequest.getSourceType()))
+        .hasMessageContaining(String.format(INVALID_OIDC_AUTH_HEADER, "bad access token"));
   }
 
   @Test
@@ -108,7 +182,7 @@ public class GARArtifactTaskHandlerTest extends CategoryTest {
     List<BuildDetailsInternal> builds = Collections.singletonList(buildDetailsInternal);
 
     when(garApiService.getPackages(any(), anyString(), anyString())).thenReturn(builds);
-    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean());
+    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean(), any());
 
     ArtifactTaskExecutionResponse response = garArtifactTaskHandler1.getPackages(garDelegateRequest);
     verify(garApiService, times(1)).getPackages(any(), eq(REGION), eq(REPO_NAME));
@@ -127,7 +201,7 @@ public class GARArtifactTaskHandlerTest extends CategoryTest {
     ArtifactMetaInfo artifactMetaInfo = ArtifactMetaInfo.builder().sha(SHA).shaV2(SHA_V2).build();
     BuildDetailsInternal buildDetailsInternal =
         BuildDetailsInternal.builder().artifactMetaInfo(artifactMetaInfo).build();
-    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean());
+    doReturn(TOKEN).when(garArtifactTaskHandler1).getToken(any(), anyBoolean(), any());
     when(garApiService.getLastSuccessfulBuildFromRegex(any(), anyString())).thenReturn(buildDetailsInternal);
     ArtifactTaskExecutionResponse artifactTaskExecutionResponse =
         garArtifactTaskHandler1.getLastSuccessfulBuild(garDelegateRequest);

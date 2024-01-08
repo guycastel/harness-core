@@ -13,6 +13,7 @@ import static io.harness.rule.OwnerRule.MLUKIC;
 import static io.harness.rule.OwnerRule.PIYUSH_BHUWALKA;
 import static io.harness.rule.OwnerRule.PRAGYESH;
 import static io.harness.rule.OwnerRule.SHIVAM;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 import static io.harness.rule.OwnerRule.VINICIUS;
 import static io.harness.rule.OwnerRule.vivekveman;
 
@@ -20,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -89,6 +91,7 @@ import io.harness.exception.InvalidArtifactServerException;
 import io.harness.exception.InvalidRequestException;
 import io.harness.exception.exceptionmanager.ExceptionManager;
 import io.harness.metrics.intfc.DelegateMetricsService;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.plan.execution.SetupAbstractionKeys;
 import io.harness.pms.yaml.ParameterField;
@@ -138,7 +141,7 @@ public class ArtifactConfigToDelegateReqMapperTest extends CategoryTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     when(instrumentationHelper.sendLastPublishedTagExpressionEvent(any(), any(), any(), any())).thenReturn(null);
-    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(anyString(), any())).thenReturn(null);
+    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(eq(ACCOUNT), any())).thenReturn(null);
     artifactConfigToDelegateReqMapper =
         spy(new ArtifactConfigToDelegateReqMapper(instrumentationHelper, oidcHelperUtility));
   }
@@ -1485,8 +1488,41 @@ public class ArtifactConfigToDelegateReqMapperTest extends CategoryTest {
     assertThat(amiArtifactDelegateRequest.getSourceType()).isEqualTo(ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY);
     assertThat(amiArtifactDelegateRequest.getVersionRegex()).isEqualTo(TAG);
     assertThat(amiArtifactDelegateRequest.getVersion()).isEmpty();
+    assertThat(amiArtifactDelegateRequest.getGcpOidcTokenExchangeDetailsForDelegate()).isNull();
   }
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testGetGARDelegateRequestRegexTagAsInputValidators() {
+    GoogleArtifactRegistryConfig garArtifactInfo = GoogleArtifactRegistryConfig.builder()
+                                                       .region(ParameterField.createValueField("region"))
+                                                       .version(LAST_PUBLISHED_EXPRESSION_REGEX)
+                                                       .repositoryName(ParameterField.createValueField("repo"))
+                                                       .pkg(ParameterField.createValueField("pkg"))
+                                                       .project(ParameterField.createValueField("project"))
+                                                       .build();
+    Ambiance ambiance1 = Ambiance.newBuilder()
+                             .putSetupAbstractions(SetupAbstractionKeys.accountId, "account1")
+                             .putSetupAbstractions(SetupAbstractionKeys.orgIdentifier, ORG)
+                             .putSetupAbstractions(SetupAbstractionKeys.projectIdentifier, PROJECT)
+                             .build();
+    GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate =
+        GcpOidcTokenExchangeDetailsForDelegate.builder().build();
+    when(oidcHelperUtility.getOidcTokenExchangeDetailsForDelegate(eq("account1"), any()))
+        .thenReturn(gcpOidcTokenExchangeDetailsForDelegate);
+    GcpConnectorDTO connectorDTO = GcpConnectorDTO.builder().build();
+    List<EncryptedDataDetail> encryptedDataDetailList = Collections.emptyList();
 
+    GarDelegateRequest amiArtifactDelegateRequest = artifactConfigToDelegateReqMapper.getGarDelegateRequest(
+        garArtifactInfo, connectorDTO, encryptedDataDetailList, "", ambiance1);
+    assertThat(amiArtifactDelegateRequest.getGcpConnectorDTO()).isEqualTo(connectorDTO);
+    assertThat(amiArtifactDelegateRequest.getEncryptedDataDetails()).isEqualTo(encryptedDataDetailList);
+    assertThat(amiArtifactDelegateRequest.getSourceType()).isEqualTo(ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY);
+    assertThat(amiArtifactDelegateRequest.getVersionRegex()).isEqualTo(TAG);
+    assertThat(amiArtifactDelegateRequest.getVersion()).isEmpty();
+    assertThat(amiArtifactDelegateRequest.getGcpOidcTokenExchangeDetailsForDelegate())
+        .isEqualTo(gcpOidcTokenExchangeDetailsForDelegate);
+  }
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)

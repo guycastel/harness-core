@@ -639,7 +639,8 @@ public class ArtifactConfigToDelegateReqMapper {
         (String) garArtifactConfig.getRepositoryName().fetchFinalValue(),
         (String) garArtifactConfig.getProject().fetchFinalValue(),
         (String) garArtifactConfig.getPkg().fetchFinalValue(), version, versionRegex, gcpConnectorDTO,
-        encryptedDataDetails, ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, Integer.MAX_VALUE);
+        encryptedDataDetails, ArtifactSourceType.GOOGLE_ARTIFACT_REGISTRY, Integer.MAX_VALUE,
+        gcpOidcTokenExchangeDetailsForDelegate);
   }
 
   public EcrArtifactDelegateRequest getEcrDelegateRequest(EcrArtifactConfig ecrArtifactConfig,

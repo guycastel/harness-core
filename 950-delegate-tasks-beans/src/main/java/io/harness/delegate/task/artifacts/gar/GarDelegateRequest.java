@@ -21,6 +21,7 @@ import io.harness.delegate.task.artifacts.ArtifactSourceType;
 import io.harness.delegate.task.mixin.HttpConnectionExecutionCapabilityGenerator;
 import io.harness.exception.UnknownEnumTypeException;
 import io.harness.expression.ExpressionEvaluator;
+import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.security.encryption.EncryptedDataDetail;
 
 import java.util.ArrayList;
@@ -50,6 +51,9 @@ public class GarDelegateRequest implements ArtifactSourceDelegateRequest {
   /** Artifact Source type.*/
   ArtifactSourceType sourceType;
 
+  /** GCP Token Exchange Details */
+  GcpOidcTokenExchangeDetailsForDelegate gcpOidcTokenExchangeDetailsForDelegate;
+
   @Override
   public List<ExecutionCapability> fetchRequiredExecutionCapabilities(ExpressionEvaluator maskingEvaluator) {
     List<ExecutionCapability> capabilities =
@@ -63,6 +67,8 @@ public class GarDelegateRequest implements ArtifactSourceDelegateRequest {
         populateDelegateSelectorCapability(capabilities, gcpConnectorDTO.getDelegateSelectors());
         capabilities.add(HttpConnectionExecutionCapabilityGenerator.buildHttpConnectionExecutionCapability(
             "https://" + registryHostname, maskingEvaluator));
+      } else if (gcpConnectorDTO.getCredential().getGcpCredentialType() == GcpCredentialType.OIDC_AUTHENTICATION) {
+        populateDelegateSelectorCapability(capabilities, gcpConnectorDTO.getDelegateSelectors());
       } else {
         throw new UnknownEnumTypeException(
             "Gcr Credential Type", String.valueOf(gcpConnectorDTO.getCredential().getGcpCredentialType()));

@@ -18,6 +18,7 @@ import static io.harness.delegate.beans.connector.ConnectorType.CODECOMMIT;
 import static io.harness.delegate.beans.connector.ConnectorType.GIT;
 import static io.harness.delegate.beans.connector.ConnectorType.GITHUB;
 import static io.harness.delegate.beans.connector.ConnectorType.GITLAB;
+import static io.harness.delegate.beans.connector.ConnectorType.HARNESS;
 import static io.harness.encryption.FieldWithPlainTextOrSecretValueHelper.getSecretAsStringFromPlainTextOrSecretRef;
 import static io.harness.govern.Switch.unhandled;
 
@@ -849,7 +850,7 @@ public class SecretSpecBuilder {
 
   public static boolean isScmConnectorType(ConnectorType type) {
     return type == GITHUB || type == AZURE_REPO || type == GITLAB || type == BITBUCKET || type == CODECOMMIT
-        || type == GIT;
+        || type == GIT || type == HARNESS;
   }
 
   private String getValidK8SecretIdentifier(String identifier) {

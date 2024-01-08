@@ -6,6 +6,7 @@
  */
 
 package io.harness.ci.execution.serializer.vm;
+import static io.harness.data.structure.EmptyPredicate.isEmpty;
 
 import io.harness.beans.plugin.compatible.PluginCompatibleStep;
 import io.harness.beans.steps.stepinfo.GitCloneStepInfo;
@@ -78,7 +79,7 @@ public class VmPluginCompatibleStepSerializer {
         .entrypoint(Arrays.asList("plugin", "-kind", "harness", "-name", name))
         .envVariables(envVars)
         .timeoutSecs(timeout)
-        .connector(getStepConnectorDetails(ngAccess, pluginCompatibleStep))
+        .connector(getStepConnectorDetails(ngAccess, pluginCompatibleStep, ambiance))
         .build();
   }
 
@@ -96,21 +97,23 @@ public class VmPluginCompatibleStepSerializer {
             .envVariables(envVars)
             .timeoutSecs(timeout)
             .imageConnector(harnessInternalImageConnector)
-            .connector(getStepConnectorDetails(ngAccess, pluginCompatibleStep));
+            .connector(getStepConnectorDetails(ngAccess, pluginCompatibleStep, ambiance));
     return vmPluginStepBuilder.build();
   }
 
-  private ConnectorDetails getStepConnectorDetails(NGAccess ngAccess, PluginCompatibleStep pluginCompatibleStep) {
+  private ConnectorDetails getStepConnectorDetails(
+      NGAccess ngAccess, PluginCompatibleStep pluginCompatibleStep, Ambiance ambiance) {
     String connectorRef = PluginSettingUtils.getConnectorRef(pluginCompatibleStep);
-    if (connectorRef == null) {
+    if (connectorRef == null && !isGitCloneStep(pluginCompatibleStep)) {
       return null;
     }
 
     Map<EnvVariableEnum, String> additionalSecretsMap =
         PluginSettingUtils.getConnectorSecretEnvMap(pluginCompatibleStep.getNonYamlInfo().getStepInfoType());
     ConnectorDetails connectorDetails;
-    if (pluginCompatibleStep instanceof GitCloneStepInfo) {
-      connectorDetails = connectorUtils.getConnectorDetails(ngAccess, connectorRef, true);
+    if (isEmpty(connectorRef) && isGitCloneStep(pluginCompatibleStep)) {
+      connectorDetails = connectorUtils.getConnectorDetailsWithToken(
+          ngAccess, connectorRef, true, ambiance, ((GitCloneStepInfo) pluginCompatibleStep).getRepoName().getValue());
     } else {
       connectorDetails = connectorUtils.getConnectorDetails(ngAccess, connectorRef);
     }
@@ -122,6 +125,11 @@ public class VmPluginCompatibleStepSerializer {
 
     return connectorDetails;
   }
+
+  public static boolean isGitCloneStep(PluginCompatibleStep pluginCompatibleStep) {
+    return pluginCompatibleStep instanceof GitCloneStepInfo;
+  }
+
   public Set<String> preProcessStep(Ambiance ambiance, PluginCompatibleStep pluginCompatibleStep,
       StageInfraDetails stageInfraDetails, String identifier, boolean isBareMetalUsed) {
     Set<String> secretSet = new HashSet<>();

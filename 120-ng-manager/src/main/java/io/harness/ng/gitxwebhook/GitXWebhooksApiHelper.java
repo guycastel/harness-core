@@ -49,47 +49,37 @@ public class GitXWebhooksApiHelper {
       String harnessAccount, String org, String project, CreateGitXWebhookRequest body) {
     CreateGitXWebhookRequestDTO createGitXWebhookRequestDTO =
         GitXWebhookMapper.buildCreateGitXWebhookRequestDTO(Scope.of(harnessAccount, org, project), body);
-    CreateGitXWebhookResponseDTO createGitXWebhookResponseDTO =
-        gitXWebhookService.createGitXWebhook(createGitXWebhookRequestDTO);
-    return createGitXWebhookResponseDTO;
+    return gitXWebhookService.createGitXWebhook(createGitXWebhookRequestDTO);
   }
 
   public Optional<GetGitXWebhookResponseDTO> getGitXWebhook(
       String harnessAccount, String org, String project, String gitXWebhookIdentifier) {
     GetGitXWebhookRequestDTO getGitXWebhookRequestDTO =
         GitXWebhookMapper.buildGetGitXWebhookRequestDTO(Scope.of(harnessAccount, org, project), gitXWebhookIdentifier);
-    Optional<GetGitXWebhookResponseDTO> optionalGetGitXWebhookResponseDTO =
-        gitXWebhookService.getGitXWebhook(getGitXWebhookRequestDTO);
-    return optionalGetGitXWebhookResponseDTO;
+    return gitXWebhookService.getGitXWebhook(getGitXWebhookRequestDTO);
   }
 
   public UpdateGitXWebhookResponseDTO updateGitXWebhook(
       String harnessAccount, String org, String project, String gitXWebhookIdentifier, UpdateGitXWebhookRequest body) {
     UpdateGitXWebhookRequestDTO updateGitXWebhookRequestDTO = GitXWebhookMapper.buildUpdateGitXWebhookRequestDTO(body);
-    UpdateGitXWebhookResponseDTO updateGitXWebhookResponseDTO =
-        gitXWebhookService.updateGitXWebhook(UpdateGitXWebhookCriteriaDTO.builder()
-                                                 .scope(Scope.of(harnessAccount, org, project))
-                                                 .webhookIdentifier(gitXWebhookIdentifier)
-                                                 .build(),
-            updateGitXWebhookRequestDTO);
-    return updateGitXWebhookResponseDTO;
+    return gitXWebhookService.updateGitXWebhook(UpdateGitXWebhookCriteriaDTO.builder()
+                                                    .scope(Scope.of(harnessAccount, org, project))
+                                                    .webhookIdentifier(gitXWebhookIdentifier)
+                                                    .build(),
+        updateGitXWebhookRequestDTO);
   }
 
   public DeleteGitXWebhookResponseDTO deleteGitXWebhook(
       String harnessAccount, String org, String project, String gitXWebhookIdentifier) {
     DeleteGitXWebhookRequestDTO deleteGitXWebhookRequestDTO = GitXWebhookMapper.buildDeleteGitXWebhookRequestDTO(
         Scope.of(harnessAccount, org, project), gitXWebhookIdentifier);
-    DeleteGitXWebhookResponseDTO deleteGitXWebhookResponse =
-        gitXWebhookService.deleteGitXWebhook(deleteGitXWebhookRequestDTO);
-    return deleteGitXWebhookResponse;
+    return gitXWebhookService.deleteGitXWebhook(deleteGitXWebhookRequestDTO);
   }
 
   public ListGitXWebhookResponseDTO listGitXWebhooks(
       String harnessAccount, String org, String project, String webhookIdentifier) {
     ListGitXWebhookRequestDTO listGitXWebhookRequestDTO =
         GitXWebhookMapper.buildListGitXWebhookRequestDTO(Scope.of(harnessAccount, org, project), webhookIdentifier);
-    ListGitXWebhookResponseDTO listGitXWebhookResponseDTO =
-        gitXWebhookService.listGitXWebhooks(listGitXWebhookRequestDTO);
-    return listGitXWebhookResponseDTO;
+    return gitXWebhookService.listGitXWebhooks(listGitXWebhookRequestDTO);
   }
 }

@@ -359,9 +359,21 @@ public class NGTriggerResourceImplTest extends CategoryTest {
         .checkForAccessOrThrow(any(), any(), eq(PipelineRbacPermissions.PIPELINE_EXECUTE));
     assertThat(responseDTO).isEqualTo(ngTriggerResponseDTO);
 
+    doThrow(new InvalidRequestException("message")).when(request2).execute();
+
+    responseDTO =
+        ngTriggerResource
+            .create(ACCOUNT_ID, ORG_IDENTIFIER, PROJ_IDENTIFIER, PIPELINE_IDENTIFIER, ngTriggerYaml, true, false)
+            .getData();
+    verify(accessControlClient, times(2))
+        .checkForAccessOrThrow(any(), any(), eq(PipelineRbacPermissions.PIPELINE_CREATE_AND_EDIT));
+    verify(accessControlClient, times(3))
+        .checkForAccessOrThrow(any(), any(), eq(PipelineRbacPermissions.PIPELINE_EXECUTE));
+    assertThat(responseDTO).isEqualTo(ngTriggerResponseDTO);
+
     SettingValueResponseDTO settingValueResponseTrue =
         SettingValueResponseDTO.builder().value("true").valueType(SettingValueType.BOOLEAN).build();
-    when(request2.execute()).thenReturn(Response.success(ResponseDTO.newResponse(settingValueResponseTrue)));
+    doReturn(Response.success(ResponseDTO.newResponse(settingValueResponseTrue))).when(request2).execute();
   }
 
   @Test(expected = InvalidRequestException.class)
@@ -569,9 +581,20 @@ public class NGTriggerResourceImplTest extends CategoryTest {
         .checkForAccessOrThrow(any(), any(), eq(PipelineRbacPermissions.PIPELINE_EXECUTE));
     assertThat(responseDTO).isEqualTo(ngTriggerResponseDTO);
 
+    doThrow(new InvalidRequestException("message")).when(request2).execute();
+    responseDTO = ngTriggerResource
+                      .update("0", ACCOUNT_ID, ORG_IDENTIFIER, PROJ_IDENTIFIER, PIPELINE_IDENTIFIER, IDENTIFIER,
+                          ngTriggerYaml, true)
+                      .getData();
+    verify(accessControlClient, times(2))
+        .checkForAccessOrThrow(any(), any(), eq(PipelineRbacPermissions.PIPELINE_CREATE_AND_EDIT));
+    verify(accessControlClient, times(3))
+        .checkForAccessOrThrow(any(), any(), eq(PipelineRbacPermissions.PIPELINE_EXECUTE));
+    assertThat(responseDTO).isEqualTo(ngTriggerResponseDTO);
+
     SettingValueResponseDTO settingValueResponseTrue =
         SettingValueResponseDTO.builder().value("true").valueType(SettingValueType.BOOLEAN).build();
-    when(request2.execute()).thenReturn(Response.success(ResponseDTO.newResponse(settingValueResponseTrue)));
+    doReturn(Response.success(ResponseDTO.newResponse(settingValueResponseTrue))).when(request2).execute();
   }
 
   @Test(expected = EntityNotFoundException.class)

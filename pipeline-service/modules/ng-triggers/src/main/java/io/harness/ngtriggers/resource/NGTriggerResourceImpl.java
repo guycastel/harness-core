@@ -343,12 +343,20 @@ public class NGTriggerResourceImpl implements NGTriggerResource {
 
   private boolean getMandatoryPipelineCreateEditPermissionToCreateEditTriggers(
       String accountId, String orgIdentifier, String projectIdentifier) {
-    return Objects.equals(
-        NGRestUtils
-            .getResponse(settingsClient.getSetting(MANDATE_PIPELINE_CREATE_EDIT_PERMISSION_TO_CREATE_EDIT_TRIGGERS,
-                accountId, orgIdentifier, projectIdentifier))
-            .getValue(),
-        "true");
+    String response;
+    try {
+      response =
+          NGRestUtils
+              .getResponse(settingsClient.getSetting(MANDATE_PIPELINE_CREATE_EDIT_PERMISSION_TO_CREATE_EDIT_TRIGGERS,
+                  accountId, orgIdentifier, projectIdentifier))
+              .getValue();
+    } catch (Exception ex) {
+      log.error("Failed to fetch setting {} for accountId {} orgId {} and projectId {}",
+          MANDATE_PIPELINE_CREATE_EDIT_PERMISSION_TO_CREATE_EDIT_TRIGGERS, accountId, orgIdentifier, projectIdentifier,
+          ex);
+      return true;
+    }
+    return Objects.equals(response, "true");
   }
 
   public ResponseDTO<BulkTriggersResponseDTO> bulkToggleTriggers(@NotNull @AccountIdentifier String accountIdentifier,

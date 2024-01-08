@@ -1712,7 +1712,12 @@ public class NGTemplateServiceImpl implements NGTemplateService {
   private Page<TemplateEntity> getRBACFilteredTemplates(String accountIdentifier, String orgIdentifier,
       String projectIdentifier, Criteria criteria, Pageable pageable, FilterParamsDTO filterParamsDTO) {
     Page<TemplateEntity> templateEntities;
-    if (hasViewPermissionForAll(accountIdentifier, orgIdentifier, projectIdentifier)) {
+    /*
+    if isIncludeAllTemplatesAccessibleAtScope flag is true means we need to include templates at all scopes
+    and we do not have a function to check if user has access to templates at all scopes.
+     */
+    if (hasViewPermissionForAll(accountIdentifier, orgIdentifier, projectIdentifier)
+        && !filterParamsDTO.isIncludeAllTemplatesAccessibleAtScope()) {
       templateEntities = templateServiceHelper.listTemplate(accountIdentifier, orgIdentifier, projectIdentifier,
           criteria, pageable, filterParamsDTO.isGetDistinctFromBranches());
 
@@ -1736,7 +1741,7 @@ public class NGTemplateServiceImpl implements NGTemplateService {
       populateInFilter(criteria, TemplateEntityKeys.identifier,
           templateEntityList.stream().map(TemplateEntity::getIdentifier).collect(toList()));
       templateEntities = templateServiceHelper.listTemplate(accountIdentifier, orgIdentifier, projectIdentifier,
-          criteria, Pageable.unpaged(), filterParamsDTO.isGetDistinctFromBranches());
+          criteria, pageable, filterParamsDTO.isGetDistinctFromBranches());
     }
     return templateEntities;
   }

@@ -169,6 +169,7 @@ public enum FeatureName {
   CDS_TERRAFORM_TERRAGRUNT_PLAN_ENCRYPTION_ON_MANAGER_NG(
       "To encrypt and decrypt terraform and terragrunt plan on manager side instead of delegate side for NG",
       HarnessTeam.CDP),
+  CDS_HARNESS_DOWNTIME_NOTIFICATION("Feature flag for Harness downtime notification", HarnessTeam.CDC),
   CDS_TERRAFORM_SUPPORT_OPTIONAL_VAR_FILE_PATHS_NG(
       "Feature flag to support remote optional var file paths", HarnessTeam.CDP),
   CDS_USE_HTTP_CHECK_IGNORE_RESPONSE_INSTEAD_OF_SOCKET_NG(

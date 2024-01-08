@@ -14,6 +14,7 @@ import static java.util.stream.Collectors.toSet;
 
 import io.harness.AccessControlClientConfiguration;
 import io.harness.ScmConnectionConfig;
+import io.harness.accesscontrol.AccessControlAdminClientConfiguration;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.entities.IACMServiceConfig;
@@ -39,6 +40,7 @@ import io.harness.notification.NotificationClientConfiguration;
 import io.harness.redis.RedisConfig;
 import io.harness.reflection.HarnessReflections;
 import io.harness.remote.client.ServiceHttpClientConfig;
+import io.harness.resourcegroupclient.remote.ResourceGroupClientConfig;
 import io.harness.secret.ConfigSecret;
 import io.harness.ssca.beans.entities.SSCAServiceConfig;
 import io.harness.sto.beans.entities.STOServiceConfig;
@@ -171,6 +173,10 @@ public class IdpConfiguration extends Configuration {
   @JsonProperty("numberOfThreadsToUseForConsumers") private HashMap<String, Integer> numberOfThreadsToUseForConsumers;
   @JsonProperty("okHttpClientConnectionPoolConfigs")
   private HashMap<String, OkHttpClientConnectionPoolConfig> okHttpClientConnectionPoolConfigs;
+  @JsonProperty("accessControlAdminClient")
+  @ConfigSecret
+  private AccessControlAdminClientConfiguration accessControlAdminClientConfiguration;
+  @JsonProperty("resourceGroupClientConfig") @ConfigSecret private ResourceGroupClientConfig resourceGroupClientConfig;
 
   public static final Collection<Class<?>> HARNESS_RESOURCE_CLASSES = getResourceClasses();
   public static final String IDP_SPEC_PACKAGE = "io.harness.spec.server.idp.v1";

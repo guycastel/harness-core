@@ -15,6 +15,8 @@ java_library(
         "//958-migration-sdk:module",
         "//960-persistence/src/main/java/io/harness/ng:module",
         "//999-annotations:module",
+        "//clients/access-control/admin-client:module",
+        "//clients/resource-group:module",
         "//idp-service/src/main/java/io/harness/idp/plugin:module",
         "//idp-service/src/main/java/io/harness/idp/scorecard:module",
         "//idp-service/src/main/java/io/harness/idp/user:module",

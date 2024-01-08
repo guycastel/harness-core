@@ -28,6 +28,7 @@ import static io.harness.pms.listener.NgOrchestrationNotifyEventListener.NG_ORCH
 
 import io.harness.AccessControlClientModule;
 import io.harness.ScmConnectionConfig;
+import io.harness.accesscontrol.AccessControlAdminClientModule;
 import io.harness.account.AccountClientModule;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
@@ -241,6 +242,7 @@ import io.harness.queue.QueueController;
 import io.harness.redis.RedisConfig;
 import io.harness.remote.client.ClientMode;
 import io.harness.remote.client.ServiceHttpClientConfig;
+import io.harness.resourcegroupclient.ResourceGroupClientModule;
 import io.harness.secrets.SecretDecryptor;
 import io.harness.secrets.SecretNGManagerClientModule;
 import io.harness.serializer.KryoRegistrar;
@@ -481,6 +483,10 @@ public class IdpModule extends AbstractModule {
         appConfig.getNgManagerServiceSecret(), IDP_SERVICE.getServiceId()));
     install(new TunnelResourceClientModule(appConfig.getNgManagerServiceHttpClientConfig(),
         appConfig.getNgManagerServiceSecret(), IDP_SERVICE.getServiceId()));
+    install(new AccessControlAdminClientModule(
+        appConfig.getAccessControlAdminClientConfiguration(), IDP_SERVICE.getServiceId()));
+    install(new ResourceGroupClientModule(appConfig.getResourceGroupClientConfig().getServiceConfig(),
+        appConfig.getResourceGroupClientConfig().getSecret(), IDP_SERVICE.getServiceId()));
     // Keeping it to 1 thread to start with. Assuming executor service is used only to
     // serve health checks. If it's being used for other tasks also, max pool size should be increased.
     bind(ExecutorService.class)

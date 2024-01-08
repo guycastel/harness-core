@@ -93,3 +93,4 @@ data:
   BACKSTAGE_HTTP_CLIENT_CP_MAX_IDLE_CONNECTIONS: {{.Values.backstageHttpClientCpMaxIdleConnections}}
   BACKSTAGE_HTTP_CLIENT_CP_KEEP_ALIVE_DURATION: {{.Values.backstageHttpClientCpKeepAliveDuration}}
   BACKSTAGE_HTTP_CLIENT_CP_TIME_UNIT: {{.Values.backstageHttpClientCpTimeUnit}}
+  RESOURCE_GROUP_BASE_URL: 'http://platform-service.{{ .Release.Namespace }}.svc.cluster.local:9005/api/'

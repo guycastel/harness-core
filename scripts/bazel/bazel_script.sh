@@ -187,7 +187,6 @@ BAZEL_MODULES="\
   //941-filestore-client:module \
   //942-enforcement-sdk:module \
   //943-enforcement-beans:module \
-  //945-account-mgmt:module \
   //945-license-usage-sdk:module \
   //clients/audit:module \
   //947-scim-core:module \

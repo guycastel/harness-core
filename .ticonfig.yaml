@@ -26,6 +26,7 @@ config:
     - "dockerization/**/*"
     - "queue-service/**/*"
     - "scripts/jenkins/*"
+    - "scripts/bazel/*"
     - "product/**/*"
     - "commons/**/*"
     - "**/*.hash"

@@ -16,7 +16,7 @@ shared_dependencies = [
     "//930-ng-license-manager:module",
     "//940-feature-flag:module",
     "//clients/notification:module",
-    "//945-account-mgmt:module",
+    "//955-account-mgmt:module",
     "//950-ng-authentication-service:module",
     "//960-ng-core-beans:module",
     "//platform-service/modules/notification-service/contracts:module",

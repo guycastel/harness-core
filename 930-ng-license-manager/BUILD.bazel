@@ -18,7 +18,7 @@ java_library(
         "//930-ng-core-clients:module",
         "//935-subscription-sdk:module",
         "//940-feature-flag:module",
-        "//945-account-mgmt:module",
+        "//955-account-mgmt:module",
         "//955-outbox-sdk:module",
         "//958-migration-sdk:module",
         "//960-ng-core-beans:module",

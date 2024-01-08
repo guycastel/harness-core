@@ -16,7 +16,7 @@ shared_dependencies = [
     "//878-ng-common-utilities/src/main/java/io/harness/beans/common:module",
     "//930-ng-core-clients:module",
     "//940-primary-version-manager:module",
-    "//945-account-mgmt:module",
+    "//955-account-mgmt:module",
     "//950-ng-core:module",
     "//950-opa-client:module",
     "//955-outbox-sdk:module",

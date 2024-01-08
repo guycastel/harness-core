@@ -12,7 +12,7 @@ shared_dependencies = [
     "//295-cdng-contracts:module",
     "//878-ng-common-utilities:module",
     "//930-ng-core-clients:module",
-    "//945-account-mgmt:module",
+    "//955-account-mgmt:module",
     "//965-ng-filter:module",
     "//960-persistence:module",
     "//980-commons:module",

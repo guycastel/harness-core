@@ -19,7 +19,7 @@ java_library(
     deps = [
         "//:lombok",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/ng:module",
-        "//945-account-mgmt:module",
+        "//955-account-mgmt:module",
         "//970-ng-commons:module",
         "//980-commons/src/main/java/io/harness/data/structure:module",
         "@maven//:com_google_inject_guice",

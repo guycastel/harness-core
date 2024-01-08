@@ -13,6 +13,8 @@ java_library(
     deps = [
         "//954-connector-beans:module",
         "//oidc-core/src/main/java/io/harness/oidc/accesstoken:module",
+        "//oidc-core/src/main/java/io/harness/oidc/aws/dto:module",
+        "//oidc-core/src/main/java/io/harness/oidc/aws/utility:module",
         "//oidc-core/src/main/java/io/harness/oidc/gcp/delegate:module",
         "//oidc-core/src/main/java/io/harness/oidc/gcp/dto:module",
         "//oidc-core/src/main/java/io/harness/oidc/gcp/utility:module",

@@ -201,7 +201,7 @@ public class AwsDelegateTaskTest extends CategoryTest {
                                       .build();
 
     AwsConfig awsConfig = AwsConfig.builder().build();
-    doReturn(awsConfig).when(awsNgConfigMapper).mapAwsConfigWithDecryption(any(), any());
+    doReturn(awsConfig).when(awsNgConfigMapper).mapAwsConfigWithDecryption(any(), any(), any());
     on(task).set("awsValidationHandler", awsValidationHandler);
 
     DelegateResponseData result = task.run(awsTaskParams);
@@ -212,7 +212,7 @@ public class AwsDelegateTaskTest extends CategoryTest {
         .isEqualTo(ConnectivityStatus.SUCCESS);
     assertThat(awsValidateTaskResponse.getConnectorValidationResult().getTestedAt()).isNotNull();
 
-    verify(awsNgConfigMapper, times(1)).mapAwsConfigWithDecryption(any(), any());
+    verify(awsNgConfigMapper, times(1)).mapAwsConfigWithDecryption(any(), any(), any());
     verify(awsClient, times(1)).validateAwsAccountCredential(eq(awsConfig), eq("us-east-1"));
   }
 
@@ -233,7 +233,7 @@ public class AwsDelegateTaskTest extends CategoryTest {
 
     AwsConfig awsConfig = AwsConfig.builder().isIRSA(true).build();
 
-    doReturn(awsConfig).when(awsNgConfigMapper).mapAwsConfigWithDecryption(any(), any());
+    doReturn(awsConfig).when(awsNgConfigMapper).mapAwsConfigWithDecryption(any(), any(), any());
     on(task).set("awsValidationHandler", awsValidationHandler);
 
     DelegateResponseData result = task.run(awsTaskParams);
@@ -245,7 +245,7 @@ public class AwsDelegateTaskTest extends CategoryTest {
     assertThat(awsValidateTaskResponse.getConnectorValidationResult().getTestedAt()).isNotNull();
     assertThat(awsConfig.isIRSA()).isEqualTo(true);
 
-    verify(awsNgConfigMapper, times(1)).mapAwsConfigWithDecryption(any(), any());
+    verify(awsNgConfigMapper, times(1)).mapAwsConfigWithDecryption(any(), any(), any());
     verify(awsClient, times(1)).validateAwsAccountCredential(eq(awsConfig), eq("us-east-1"));
   }
 

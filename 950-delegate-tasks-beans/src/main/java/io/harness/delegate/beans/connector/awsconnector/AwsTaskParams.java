@@ -34,6 +34,7 @@ public class AwsTaskParams extends ConnectorTaskParams implements TaskParameters
   String filePathRegex;
   String filePath;
   boolean shouldFetchObjectMetadata;
+  String oidcToken;
 
   @Override
   public List<ExecutionCapability> fetchRequiredExecutionCapabilities(ExpressionEvaluator maskingEvaluator) {

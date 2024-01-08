@@ -9,6 +9,7 @@ package io.harness.connector.validator;
 
 import static software.wings.beans.TaskType.NG_AWS_TASK;
 
+import io.harness.cdng.oidc.OidcHelperUtility;
 import io.harness.connector.ConnectorResponseDTO;
 import io.harness.connector.ConnectorValidationResult;
 import io.harness.delegate.beans.connector.ConnectorConfigDTO;
@@ -19,7 +20,12 @@ import io.harness.delegate.beans.connector.awsconnector.AwsTaskParams;
 import io.harness.delegate.beans.connector.awsconnector.AwsTaskType;
 import io.harness.delegate.task.TaskParameters;
 
+import com.google.inject.Inject;
+import java.util.Optional;
+
 public class AwsConnectorValidator extends AbstractCloudProviderConnectorValidator {
+  @Inject private OidcHelperUtility oidcHelperUtility;
+
   @Override
   public <T extends ConnectorConfigDTO> TaskParameters getTaskParameters(
       T connectorConfig, String accountIdentifier, String orgIdentifier, String projectIdentifier) {
@@ -28,12 +34,15 @@ public class AwsConnectorValidator extends AbstractCloudProviderConnectorValidat
         connectorDTO.getCredential().getAwsCredentialType() == AwsCredentialType.MANUAL_CREDENTIALS
         ? ((AwsManualConfigSpecDTO) connectorDTO.getCredential().getConfig())
         : null;
-    return AwsTaskParams.builder()
-        .awsTaskType(AwsTaskType.VALIDATE)
-        .awsConnector(connectorDTO)
-        .encryptionDetails(
-            super.getEncryptionDetail(awsCredentialDTO, accountIdentifier, orgIdentifier, projectIdentifier))
-        .build();
+    AwsTaskParams taskParams = AwsTaskParams.builder()
+                                   .awsTaskType(AwsTaskType.VALIDATE)
+                                   .awsConnector(connectorDTO)
+                                   .encryptionDetails(super.getEncryptionDetail(
+                                       awsCredentialDTO, accountIdentifier, orgIdentifier, projectIdentifier))
+                                   .build();
+    Optional<String> oidcToken = oidcHelperUtility.getOidcTokenForAwsConnector(connectorDTO, accountIdentifier);
+    oidcToken.ifPresent(taskParams::setOidcToken);
+    return taskParams;
   }
 
   @Override

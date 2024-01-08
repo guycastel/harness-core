@@ -14,4 +14,5 @@ import lombok.Data;
 @Builder
 public class AwsOidcAttributes {
   private String iamRoleArn;
+  private String oidcToken;
 }

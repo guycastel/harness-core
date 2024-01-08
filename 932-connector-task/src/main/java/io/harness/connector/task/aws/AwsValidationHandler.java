@@ -46,7 +46,7 @@ public class AwsValidationHandler implements ConnectorValidationHandler {
       final AwsValidationParams awsValidationParams = (AwsValidationParams) connectorValidationParams;
       final AwsConnectorDTO connectorDTO = awsValidationParams.getAwsConnectorDTO();
       final List<EncryptedDataDetail> encryptedDataDetails = awsValidationParams.getEncryptedDataDetails();
-      return validateInternal(connectorDTO, encryptedDataDetails);
+      return validateInternal(connectorDTO, encryptedDataDetails, awsValidationParams.getOidcToken());
     } catch (Exception e) {
       throw exceptionManager.processException(e, MANAGER, log);
     }
@@ -54,12 +54,12 @@ public class AwsValidationHandler implements ConnectorValidationHandler {
 
   public ConnectorValidationResult validate(AwsTaskParams awsTaskParams, List<EncryptedDataDetail> encryptionDetails) {
     final AwsConnectorDTO awsConnector = awsTaskParams.getAwsConnector();
-    return validateInternal(awsConnector, encryptionDetails);
+    return validateInternal(awsConnector, encryptionDetails, awsTaskParams.getOidcToken());
   }
 
   private ConnectorValidationResult validateInternal(
-      AwsConnectorDTO awsConnectorDTO, List<EncryptedDataDetail> encryptedDataDetails) {
-    AwsConfig awsConfig = ngConfigMapper.mapAwsConfigWithDecryption(awsConnectorDTO, encryptedDataDetails);
+      AwsConnectorDTO awsConnectorDTO, List<EncryptedDataDetail> encryptedDataDetails, String oidcToken) {
+    AwsConfig awsConfig = ngConfigMapper.mapAwsConfigWithDecryption(awsConnectorDTO, encryptedDataDetails, oidcToken);
     String region = DEFAULT_REGION.getName();
     if (EmptyPredicate.isNotEmpty(awsConnectorDTO.getCredential().getTestRegion())) {
       region = awsConnectorDTO.getCredential().getTestRegion();

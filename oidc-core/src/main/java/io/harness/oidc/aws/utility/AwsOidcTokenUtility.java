@@ -85,6 +85,7 @@ public class AwsOidcTokenUtility {
     String iss = updateBaseClaims(baseOidcIdTokenPayloadStructure.getIss(), awsOidcTokenRequestDto);
 
     Long iat = currentTimeMillis() / CONVERSION_FACTOR_FOR_MS;
+
     Long expiryDuration = baseOidcIdTokenPayloadStructure.getExp();
     Long exp = iat + expiryDuration;
 

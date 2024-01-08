@@ -7,19 +7,25 @@
 
 package io.harness.cdng.oidc;
 
+import io.harness.delegate.beans.connector.awsconnector.AwsConnectorDTO;
+import io.harness.delegate.beans.connector.awsconnector.AwsOidcSpecDTO;
 import io.harness.delegate.beans.connector.gcpconnector.GcpConnectorDTO;
 import io.harness.delegate.beans.connector.gcpconnector.GcpCredentialType;
 import io.harness.delegate.beans.connector.gcpconnector.GcpOidcDetailsDTO;
 import io.harness.oidc.accesstoken.OidcWorkloadAccessTokenRequest;
+import io.harness.oidc.aws.dto.AwsOidcTokenRequestDto;
+import io.harness.oidc.aws.utility.AwsOidcTokenUtility;
 import io.harness.oidc.gcp.delegate.GcpOidcTokenExchangeDetailsForDelegate;
 import io.harness.oidc.gcp.dto.GcpOidcAccessTokenRequestDTO;
 import io.harness.oidc.gcp.dto.GcpOidcTokenRequestDTO;
 import io.harness.oidc.gcp.utility.GcpOidcTokenUtility;
 
 import com.google.inject.Inject;
+import java.util.Optional;
 
 public class OidcHelperUtility {
   @Inject GcpOidcTokenUtility gcpOidcTokenUtility;
+  @Inject private AwsOidcTokenUtility awsOidcTokenUtility;
 
   /**
    * Utility function to get the OIDC Token Exchange Details based on the GCP connector info.
@@ -64,5 +70,17 @@ public class OidcHelperUtility {
         .gcpServiceAccountEmail(gcpOidcDetailsDTO.getServiceAccountEmail())
         .oidcWorkloadAccessTokenRequestStructure(oidcWorkloadAccessTokenRequest)
         .build();
+  }
+
+  public Optional<String> getOidcTokenForAwsConnector(AwsConnectorDTO connectorDTO, String accountIdentifier) {
+    if (connectorDTO.getCredential() == null || connectorDTO.getCredential().getConfig() == null) {
+      return Optional.empty();
+    }
+    if (connectorDTO.getCredential().getConfig() instanceof AwsOidcSpecDTO) {
+      AwsOidcTokenRequestDto awsOidcTokenRequestDto =
+          AwsOidcTokenRequestDto.builder().accountId(accountIdentifier).build();
+      return Optional.of(awsOidcTokenUtility.generateAwsOidcIdToken(awsOidcTokenRequestDto));
+    }
+    return Optional.empty();
   }
 }

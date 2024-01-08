@@ -49,7 +49,7 @@ public class AwsNgConfigMapper {
   }
 
   public AwsConfig mapAwsConfigWithDecryption(
-      AwsConnectorDTO awsConnectorDTO, List<EncryptedDataDetail> encryptionDetails) {
+      AwsConnectorDTO awsConnectorDTO, List<EncryptedDataDetail> encryptionDetails, String oidcToken) {
     AwsCredentialDTO credential = awsConnectorDTO.getCredential();
     AwsCredentialType awsCredentialType = awsConnectorDTO.getCredential().getAwsCredentialType();
     boolean executeOnDelegate = awsConnectorDTO.getExecuteOnDelegate();
@@ -91,10 +91,12 @@ public class AwsNgConfigMapper {
         break;
       case OIDC_AUTHENTICATION:
         AwsOidcSpecDTO oidcSpecDTO = (AwsOidcSpecDTO) credential.getConfig();
-        awsConfig = AwsConfig.builder()
-                        .isOidc(true)
-                        .oidcAttributes(AwsOidcAttributes.builder().iamRoleArn(oidcSpecDTO.getIamRoleArn()).build())
-                        .build();
+        awsConfig =
+            AwsConfig.builder()
+                .isOidc(true)
+                .oidcAttributes(
+                    AwsOidcAttributes.builder().iamRoleArn(oidcSpecDTO.getIamRoleArn()).oidcToken(oidcToken).build())
+                .build();
         break;
       default:
         Switch.unhandled(awsCredentialType);

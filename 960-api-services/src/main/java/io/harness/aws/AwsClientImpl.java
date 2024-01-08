@@ -50,6 +50,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import com.amazonaws.auth.WebIdentityFederationSessionCredentialsProvider;
 import com.amazonaws.auth.WebIdentityTokenCredentialsProvider;
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.client.builder.AwsClientBuilder;
@@ -310,6 +311,11 @@ public class AwsClientImpl implements AwsClient {
       providerBuilder.roleSessionName("IRSA" + UUIDGenerator.generateUuid());
 
       credentialsProvider = providerBuilder.build();
+    }
+
+    else if (awsConfig.isOidc()) {
+      return new WebIdentityFederationSessionCredentialsProvider(
+          awsConfig.getOidcAttributes().getOidcToken(), null, awsConfig.getOidcAttributes().getIamRoleArn());
     }
 
     else {

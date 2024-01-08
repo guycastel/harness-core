@@ -26,6 +26,7 @@ public class AwsValidationParams
   AwsConnectorDTO awsConnectorDTO;
   List<EncryptedDataDetail> encryptedDataDetails;
   String connectorName;
+  String oidcToken;
 
   @Override
   public ConnectorType getConnectorType() {

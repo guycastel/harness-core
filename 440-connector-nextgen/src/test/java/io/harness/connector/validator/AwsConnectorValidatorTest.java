@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import io.harness.CategoryTest;
 import io.harness.aws.AwsClient;
 import io.harness.category.element.UnitTests;
+import io.harness.cdng.oidc.OidcHelperUtility;
 import io.harness.connector.ConnectivityStatus;
 import io.harness.connector.ConnectorInfoDTO;
 import io.harness.connector.ConnectorResponseDTO;
@@ -71,6 +72,7 @@ public class AwsConnectorValidatorTest extends CategoryTest {
   @Mock private DecryptionHelper decryptionHelper;
   @Mock private AwsClient awsClient;
   @Mock private DefaultConnectorServiceImpl connectorService;
+  @Mock private OidcHelperUtility oidcHelperUtility;
   @InjectMocks private AwsConnectorValidator awsConnectorValidator;
   @InjectMocks private AwsNgConfigMapper ngConfigMapper;
   @Mock private ExceptionManager exceptionManager;
@@ -173,6 +175,7 @@ public class AwsConnectorValidatorTest extends CategoryTest {
 
     AwsValidationParamsProvider awsValidationParamsProvider = new AwsValidationParamsProvider();
     on(awsValidationParamsProvider).set("encryptionHelper", encryptionHelper);
+    on(awsValidationParamsProvider).set("oidcHelperUtility", oidcHelperUtility);
     when(connectorValidationParamsProviderMap.get(ArgumentMatchers.eq("Aws"))).thenReturn(awsValidationParamsProvider);
     when(connectorService.get(any(), any(), any(), any()))
         .thenReturn(Optional.of(ConnectorResponseDTO.builder()
@@ -216,6 +219,7 @@ public class AwsConnectorValidatorTest extends CategoryTest {
 
     AwsValidationParamsProvider awsValidationParamsProvider = new AwsValidationParamsProvider();
     on(awsValidationParamsProvider).set("encryptionHelper", encryptionHelper);
+    on(awsValidationParamsProvider).set("oidcHelperUtility", oidcHelperUtility);
     when(connectorValidationParamsProviderMap.get(ArgumentMatchers.eq("Aws"))).thenReturn(awsValidationParamsProvider);
     when(connectorService.get(any(), any(), any(), any()))
         .thenReturn(Optional.of(ConnectorResponseDTO.builder()

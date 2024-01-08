@@ -10,6 +10,7 @@ package io.harness.connector.heartbeat;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 
 import io.harness.beans.DecryptableEntity;
+import io.harness.cdng.oidc.OidcHelperUtility;
 import io.harness.connector.ConnectorInfoDTO;
 import io.harness.connector.helper.EncryptionHelper;
 import io.harness.delegate.beans.connector.ConnectorValidationParams;
@@ -20,10 +21,12 @@ import io.harness.security.encryption.EncryptedDataDetail;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public class AwsValidationParamsProvider implements ConnectorValidationParamsProvider {
   @Inject EncryptionHelper encryptionHelper;
+  @Inject private OidcHelperUtility oidcHelperUtility;
 
   @Override
   public ConnectorValidationParams getConnectorValidationParams(ConnectorInfoDTO connectorInfoDTO, String connectorName,
@@ -34,12 +37,16 @@ public class AwsValidationParamsProvider implements ConnectorValidationParamsPro
     if (isNotEmpty(decryptableEntityList)) {
       decryptableEntity = decryptableEntityList.get(0);
     }
+
     final List<EncryptedDataDetail> encryptionDetail =
         encryptionHelper.getEncryptionDetail(decryptableEntity, accountIdentifier, orgIdentifier, projectIdentifier);
-    return AwsValidationParams.builder()
-        .awsConnectorDTO(connectorConfig)
-        .connectorName(connectorName)
-        .encryptedDataDetails(encryptionDetail)
-        .build();
+    AwsValidationParams awsValidationParams = AwsValidationParams.builder()
+                                                  .awsConnectorDTO(connectorConfig)
+                                                  .connectorName(connectorName)
+                                                  .encryptedDataDetails(encryptionDetail)
+                                                  .build();
+    Optional<String> oidcToken = oidcHelperUtility.getOidcTokenForAwsConnector(connectorConfig, accountIdentifier);
+    oidcToken.ifPresent(awsValidationParams::setOidcToken);
+    return awsValidationParams;
   }
 }

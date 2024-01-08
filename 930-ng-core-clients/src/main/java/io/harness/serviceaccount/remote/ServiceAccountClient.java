@@ -11,11 +11,13 @@ import io.harness.NGCommonEntityConstants;
 import io.harness.NGResourceFilterConstants;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.serviceaccount.ServiceAccountDTO;
+import io.harness.serviceaccount.ServiceAccountDTOInternal;
 
 import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ServiceAccountClient {
@@ -23,6 +25,13 @@ public interface ServiceAccountClient {
 
   @GET(SERVICE_ACCOUNTS_API)
   Call<ResponseDTO<List<ServiceAccountDTO>>> listServiceAccounts(
+      @Query(NGCommonEntityConstants.ACCOUNT_KEY) @NotEmpty String accountIdentifier,
+      @Query(NGCommonEntityConstants.ORG_KEY) String orgIdentifier,
+      @Query(NGCommonEntityConstants.PROJECT_KEY) String projectIdentifier,
+      @Query(NGResourceFilterConstants.IDENTIFIERS) List<String> serviceAccountIdentifiers);
+
+  @GET(SERVICE_ACCOUNTS_API + "/internal")
+  Call<ResponseDTO<List<ServiceAccountDTOInternal>>> listServiceAccountsInternal(
       @Query(NGCommonEntityConstants.ACCOUNT_KEY) @NotEmpty String accountIdentifier,
       @Query(NGCommonEntityConstants.ORG_KEY) String orgIdentifier,
       @Query(NGCommonEntityConstants.PROJECT_KEY) String projectIdentifier,

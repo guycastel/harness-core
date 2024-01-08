@@ -10,6 +10,7 @@ package io.harness.ng.serviceaccounts.service.impl;
 import static io.harness.accesscontrol.principals.PrincipalType.SERVICE_ACCOUNT;
 import static io.harness.annotations.dev.HarnessTeam.PL;
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
+import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.enforcement.constants.FeatureRestrictionName.MULTIPLE_SERVICE_ACCOUNTS;
 import static io.harness.exception.WingsException.USER_SRE;
 import static io.harness.ng.accesscontrol.PlatformPermissions.VIEW_SERVICEACCOUNT_PERMISSION;
@@ -56,6 +57,8 @@ import io.harness.ng.core.dto.ServiceAccountFilterDTO;
 import io.harness.ng.core.events.ServiceAccountCreateEvent;
 import io.harness.ng.core.events.ServiceAccountDeleteEvent;
 import io.harness.ng.core.events.ServiceAccountUpdateEvent;
+import io.harness.ng.core.services.OrganizationService;
+import io.harness.ng.core.services.ProjectService;
 import io.harness.ng.serviceaccounts.dto.ServiceAccountAggregateDTO;
 import io.harness.ng.serviceaccounts.entities.ServiceAccount;
 import io.harness.ng.serviceaccounts.entities.ServiceAccount.ServiceAccountKeys;
@@ -99,6 +102,9 @@ public class ServiceAccountServiceImpl implements ServiceAccountService {
   @Inject @Named(OUTBOX_TRANSACTION_TEMPLATE) private TransactionTemplate transactionTemplate;
   @Inject private TokenService tokenService;
 
+  @Inject private ProjectService projectService;
+  @Inject private OrganizationService organizationService;
+
   @Override
   @FeatureRestrictionCheck(MULTIPLE_SERVICE_ACCOUNTS)
   public ServiceAccountDTO createServiceAccount(@AccountIdentifier String accountIdentifier, String orgIdentifier,
@@ -106,6 +112,22 @@ public class ServiceAccountServiceImpl implements ServiceAccountService {
     validateCreateServiceAccountRequest(accountIdentifier, orgIdentifier, projectIdentifier, requestDTO);
     ServiceAccount serviceAccount = ServiceAccountDTOMapper.getServiceAccountFromDTO(requestDTO);
     validate(serviceAccount);
+    if (isEmpty(serviceAccount.getOrgIdentifier()) && isEmpty(serviceAccount.getProjectIdentifier())) {
+      serviceAccount.setParentUniqueId(accountIdentifier);
+    } else if (isEmpty(serviceAccount.getProjectIdentifier())) {
+      organizationService.get(accountIdentifier, serviceAccount.getOrgIdentifier()).ifPresent(org -> {
+        if (isNotEmpty(org.getUniqueId())) {
+          serviceAccount.setParentUniqueId(org.getUniqueId());
+        }
+      });
+    } else {
+      projectService.get(accountIdentifier, serviceAccount.getOrgIdentifier(), serviceAccount.getProjectIdentifier())
+          .ifPresent(proj -> {
+            if (isNotEmpty(proj.getUniqueId())) {
+              serviceAccount.setParentUniqueId(proj.getUniqueId());
+            }
+          });
+    }
     try {
       return Failsafe.with(DEFAULT_RETRY_POLICY).get(() -> transactionTemplate.execute(status -> {
         ServiceAccount savedAccount = serviceAccountRepository.save(serviceAccount);
@@ -149,6 +171,12 @@ public class ServiceAccountServiceImpl implements ServiceAccountService {
     ServiceAccount newAccount = ServiceAccountDTOMapper.getServiceAccountFromDTO(requestDTO);
     newAccount.setUuid(serviceAccount.getUuid());
     newAccount.setCreatedAt(serviceAccount.getCreatedAt());
+    if (isNotEmpty(serviceAccount.getUniqueId())) {
+      newAccount.setUniqueId(serviceAccount.getUniqueId());
+    }
+    if (isNotEmpty(serviceAccount.getParentUniqueId())) {
+      newAccount.setParentUniqueId(serviceAccount.getParentUniqueId());
+    }
     validate(newAccount);
     return Failsafe.with(DEFAULT_RETRY_POLICY).get(() -> transactionTemplate.execute(status -> {
       ServiceAccount savedAccount = serviceAccountRepository.save(newAccount);

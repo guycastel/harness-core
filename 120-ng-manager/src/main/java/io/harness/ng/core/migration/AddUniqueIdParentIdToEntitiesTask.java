@@ -29,6 +29,7 @@ import io.harness.ng.core.entities.Project;
 import io.harness.ng.core.entities.Project.ProjectKeys;
 import io.harness.ng.core.entities.migration.NGManagerUniqueIdParentIdMigrationStatus;
 import io.harness.ng.core.entities.migration.NGManagerUniqueIdParentIdMigrationStatus.NGManagerUniqueIdParentIdMigrationStatusKeys;
+import io.harness.ng.serviceaccounts.entities.ServiceAccount;
 import io.harness.persistence.UniqueIdAccess;
 import io.harness.persistence.UniqueIdAware;
 
@@ -59,9 +60,11 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
   private static final String NG_MANAGER_ENTITIES_MIGRATION_LOG =
       "[NGManagerAddUniqueIdAndParentUniqueIdToEntitiesTask]:";
   private static final int BATCH_SIZE = 500;
+
   private static final Map<Class<? extends UniqueIdAware>, List<String>> entityWithOrgProjectKeysMap =
       Map.of(Organization.class, new ArrayList<>(), Project.class, List.of(NGCommonEntityConstants.ORG_KEY),
-          Connector.class, List.of(NGCommonEntityConstants.ORG_KEY, NGCommonEntityConstants.PROJECT_KEY));
+          Connector.class, List.of(NGCommonEntityConstants.ORG_KEY, NGCommonEntityConstants.PROJECT_KEY),
+          ServiceAccount.class, List.of(NGCommonEntityConstants.ORG_KEY, NGCommonEntityConstants.PROJECT_KEY));
 
   @Inject
   public AddUniqueIdParentIdToEntitiesTask(MongoTemplate mongoTemplate, PersistentLocker persistentLocker) {
@@ -145,6 +148,8 @@ public class AddUniqueIdParentIdToEntitiesTask implements Runnable {
                 idValue = ((Project) entity).getId();
               } else if (entity instanceof Organization) {
                 idValue = ((Organization) entity).getId();
+              } else if (entity instanceof ServiceAccount) {
+                idValue = ((ServiceAccount) entity).getUuid();
               } else if (entity instanceof Connector) {
                 idValue = ((Connector) entity).getId();
               }

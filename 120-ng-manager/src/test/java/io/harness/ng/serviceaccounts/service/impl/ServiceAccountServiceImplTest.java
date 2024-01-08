@@ -39,6 +39,8 @@ import io.harness.ng.core.AccountOrgProjectValidator;
 import io.harness.ng.core.api.ApiKeyService;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.ng.core.dto.ServiceAccountFilterDTO;
+import io.harness.ng.core.services.OrganizationService;
+import io.harness.ng.core.services.ProjectService;
 import io.harness.ng.serviceaccounts.dto.ServiceAccountAggregateDTO;
 import io.harness.ng.serviceaccounts.entities.ServiceAccount;
 import io.harness.ng.serviceaccounts.service.ServiceAccountDTOMapper;
@@ -79,6 +81,9 @@ public class ServiceAccountServiceImplTest extends NgManagerTestBase {
   private ApiKeyService apiKeyService;
   private TransactionTemplate transactionTemplate;
 
+  private ProjectService projectService;
+  private OrganizationService organizationService;
+
   @Before
   public void setup() throws IllegalAccessException {
     accountIdentifier = "accountId";
@@ -94,6 +99,9 @@ public class ServiceAccountServiceImplTest extends NgManagerTestBase {
     accessControlAdminClient = mock(AccessControlAdminClient.class);
     apiKeyService = mock(ApiKeyService.class);
     transactionTemplate = mock(TransactionTemplate.class);
+    projectService = mock(ProjectService.class);
+    organizationService = mock(OrganizationService.class);
+
     serviceAccountRequestDTO = ServiceAccountDTO.builder()
                                    .identifier(identifier)
                                    .name(name)
@@ -111,6 +119,8 @@ public class ServiceAccountServiceImplTest extends NgManagerTestBase {
     FieldUtils.writeField(serviceAccountService, "accessControlClient", accessControlClient, true);
     FieldUtils.writeField(serviceAccountService, "accessControlAdminClient", accessControlAdminClient, true);
     FieldUtils.writeField(serviceAccountService, "apiKeyService", apiKeyService, true);
+    FieldUtils.writeField(serviceAccountService, "projectService", projectService, true);
+    FieldUtils.writeField(serviceAccountService, "organizationService", organizationService, true);
   }
 
   @Test

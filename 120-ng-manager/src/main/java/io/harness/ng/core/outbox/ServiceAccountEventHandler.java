@@ -28,9 +28,10 @@ import io.harness.eventsframework.EventsFrameworkConstants;
 import io.harness.eventsframework.EventsFrameworkMetadataConstants;
 import io.harness.eventsframework.api.EventsFrameworkDownException;
 import io.harness.eventsframework.api.Producer;
-import io.harness.eventsframework.entity_crud.EntityChangeDTO;
+import io.harness.eventsframework.entity_crud.serviceaccount.ServiceAccountEntityChangeDTO;
 import io.harness.eventsframework.producer.Message;
 import io.harness.exception.InvalidArgumentsException;
+import io.harness.ng.core.Resource;
 import io.harness.ng.core.dto.ServiceAccountRequest;
 import io.harness.ng.core.events.ServiceAccountCreateEvent;
 import io.harness.ng.core.events.ServiceAccountDeleteEvent;
@@ -43,7 +44,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.google.protobuf.StringValue;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -87,9 +87,10 @@ public class ServiceAccountEventHandler implements OutboxEventHandler {
     String accountIdentifier = scope.getAccountIdentifier();
     String orgIdentifier = scope.getOrgIdentifier();
     String projectIdentifier = scope.getProjectIdentifier();
+    Resource resource = outboxEvent.getResource();
 
     boolean publishedToRedis = publishEvent(accountIdentifier, orgIdentifier, projectIdentifier,
-        outboxEvent.getResource().getIdentifier(), EventsFrameworkMetadataConstants.CREATE_ACTION);
+        outboxEvent.getResource().getIdentifier(), resource, EventsFrameworkMetadataConstants.CREATE_ACTION);
 
     ServiceAccountCreateEvent serviceAccountCreateEvent =
         objectMapper.readValue(outboxEvent.getEventData(), ServiceAccountCreateEvent.class);
@@ -110,12 +111,13 @@ public class ServiceAccountEventHandler implements OutboxEventHandler {
   private boolean handleServiceAccountUpdateEvent(OutboxEvent outboxEvent) throws IOException {
     GlobalContext globalContext = outboxEvent.getGlobalContext();
     Scope scope = ResourceScopeMapper.getScopeFromResourceScope(outboxEvent.getResourceScope());
+    Resource resource = outboxEvent.getResource();
     String accountIdentifier = scope.getAccountIdentifier();
     String orgIdentifier = scope.getOrgIdentifier();
     String projectIdentifier = scope.getProjectIdentifier();
 
     boolean publishedToRedis = publishEvent(accountIdentifier, orgIdentifier, projectIdentifier,
-        outboxEvent.getResource().getIdentifier(), EventsFrameworkMetadataConstants.UPDATE_ACTION);
+        outboxEvent.getResource().getIdentifier(), resource, EventsFrameworkMetadataConstants.UPDATE_ACTION);
     ServiceAccountUpdateEvent serviceAccountUpdateEvent =
         objectMapper.readValue(outboxEvent.getEventData(), ServiceAccountUpdateEvent.class);
     AuditEntry auditEntry =
@@ -142,9 +144,10 @@ public class ServiceAccountEventHandler implements OutboxEventHandler {
     String accountIdentifier = scope.getAccountIdentifier();
     String orgIdentifier = scope.getOrgIdentifier();
     String projectIdentifier = scope.getProjectIdentifier();
+    Resource resource = outboxEvent.getResource();
 
     boolean publishedToRedis = publishEvent(accountIdentifier, orgIdentifier, projectIdentifier,
-        outboxEvent.getResource().getIdentifier(), EventsFrameworkMetadataConstants.DELETE_ACTION);
+        outboxEvent.getResource().getIdentifier(), resource, EventsFrameworkMetadataConstants.DELETE_ACTION);
     ServiceAccountDeleteEvent serviceAccountDeleteEvent =
         objectMapper.readValue(outboxEvent.getEventData(), ServiceAccountDeleteEvent.class);
     AuditEntry auditEntry =
@@ -161,19 +164,20 @@ public class ServiceAccountEventHandler implements OutboxEventHandler {
     return publishedToRedis && auditClientService.publishAudit(auditEntry, globalContext);
   }
 
-  private boolean publishEvent(
-      String accountIdentifier, String orgIdentifier, String projectIdentifier, String identifier, String action) {
+  private boolean publishEvent(String accountIdentifier, String orgIdentifier, String projectIdentifier,
+      String identifier, Resource resource, String action) {
     try {
       eventProducer.send(
           Message.newBuilder()
               .putAllMetadata(ImmutableMap.of("accountId", accountIdentifier,
                   EventsFrameworkMetadataConstants.ENTITY_TYPE, EventsFrameworkMetadataConstants.SERVICE_ACCOUNT_ENTITY,
                   EventsFrameworkMetadataConstants.ACTION, action))
-              .setData(EntityChangeDTO.newBuilder()
-                           .setIdentifier(StringValue.of(identifier))
-                           .setOrgIdentifier(StringValue.of(orgIdentifier))
-                           .setAccountIdentifier(StringValue.of(accountIdentifier))
-                           .setProjectIdentifier(StringValue.of(projectIdentifier))
+              .setData(ServiceAccountEntityChangeDTO.newBuilder()
+                           .setIdentifier(identifier)
+                           .setOrgIdentifier(orgIdentifier)
+                           .setAccountIdentifier(accountIdentifier)
+                           .setProjectIdentifier(projectIdentifier)
+                           .setUniqueId(resource != null ? resource.getUniqueId() : null)
                            .build()
                            .toByteString())
               .build());

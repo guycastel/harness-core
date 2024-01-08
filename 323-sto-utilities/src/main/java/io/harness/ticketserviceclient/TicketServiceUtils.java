@@ -57,11 +57,9 @@ public class TicketServiceUtils {
     log.info("Initiating token request to Ticket service: {}", this.serviceConfig.getInternalUrl());
     JsonObject responseBody;
     if (accountId == null) {
-      responseBody = makeAPICallForTokenWithRetry(
-          ticketServiceClient.generateTokenAllAccounts(this.serviceConfig.getGlobalToken()));
+      responseBody = makeAPICallForTokenWithRetry(ticketServiceClient.generateTokenAllAccounts(this.serviceConfig.getGlobalToken()), DEFAULT_ACCOUNT);
     } else {
-      responseBody = makeAPICallForTokenWithRetry(
-          ticketServiceClient.generateToken(accountId, this.serviceConfig.getGlobalToken()));
+      responseBody = makeAPICallForTokenWithRetry(ticketServiceClient.generateToken(accountId, this.serviceConfig.getGlobalToken()), accountId);
     }
 
     if (responseBody.has(TOKEN)) {
@@ -81,16 +79,14 @@ public class TicketServiceUtils {
     return makeAPICallWithRetry(ticketServiceClient.deleteAccountData(accessToken, accountId)).get("status").toString();
   }
 
-  private JsonObject makeAPICallForTokenWithRetry(Call<JsonObject> apiCall) {
+  private JsonObject makeAPICallForTokenWithRetry(Call<JsonObject> apiCall, String accountId) {
     JsonObject responseBody = null;
     responseBody = Failsafe.with(TOKEN_RETRY_POLICY).get(() -> {
       JsonObject tokenResponseBody = makeAPICall(apiCall);
       if (tokenResponseBody.has(TOKEN)) {
         String token = API_TOKEN_PREFIX + tokenResponseBody.get(TOKEN).getAsString();
-        JsonObject ticketsResponseBody = makeAPICall(
-            ticketServiceClient.getAllExternalTickets(token, DEFAULT_ACCOUNT, PAGE, PAGE, "", "", MODULE, "", "", ""));
-        if (ticketsResponseBody.has("status")
-            && ticketsResponseBody.get("status").getAsInt() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED)
+        JsonObject ticketsResponseBody = makeAPICall(ticketServiceClient.getAllExternalTickets(token, accountId, PAGE, PAGE, "", "", MODULE, "", "", ""));
+        if (ticketsResponseBody.has("status") && ticketsResponseBody.get("status").getAsInt() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED)
           throw new GeneralException("Invalid Token");
       }
       return tokenResponseBody;

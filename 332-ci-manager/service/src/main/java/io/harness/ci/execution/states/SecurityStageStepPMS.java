@@ -79,11 +79,11 @@ public class SecurityStageStepPMS implements ChildExecutable<StageElementParamet
     String stageRuntimeId = AmbianceUtils.getStageRuntimeIdAmbiance(ambiance);
 
     stepExecutionParametersRepository.save(StepExecutionParameters.builder()
-            .accountId(AmbianceUtils.getAccountId(ambiance))
-            .stageRunTimeId(stageRuntimeId)
-            .runTimeId(AmbianceUtils.obtainCurrentRuntimeId(ambiance))
-            .stepParameters(RecastOrchestrationUtils.toJson(stepParameters))
-            .build());
+                                               .accountId(AmbianceUtils.getAccountId(ambiance))
+                                               .stageRunTimeId(stageRuntimeId)
+                                               .runTimeId(AmbianceUtils.obtainCurrentRuntimeId(ambiance))
+                                               .stepParameters(RecastOrchestrationUtils.toJson(stepParameters))
+                                               .build());
 
     IntegrationStageStepParametersPMS integrationStageStepParametersPMS =
         (IntegrationStageStepParametersPMS) stepParameters.getSpecConfig();

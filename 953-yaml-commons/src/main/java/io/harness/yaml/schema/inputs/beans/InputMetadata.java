@@ -7,36 +7,46 @@
 
 package io.harness.yaml.schema.inputs.beans;
 
-import java.util.ArrayList;
+import io.harness.annotations.dev.CodePulse;
+import io.harness.annotations.dev.HarnessModuleComponent;
+import io.harness.annotations.dev.ProductModule;
+import io.harness.yaml.individualschema.InputFieldMetadata;
+
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
-@Getter
+@CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_PIPELINE})
+@Data
 @Builder
 @AllArgsConstructor
 public class InputMetadata {
   DependencyDetails dependencyDetails;
-  List<InputDetailsPerField> inputDetailsPerFieldList;
+  InputDetails inputDetails;
+  List<InputFieldMetadata> requiredFieldMetadata;
 
   public InputMetadata() {
     dependencyDetails = new DependencyDetails();
   }
 
   @Data
+  @Builder
   @AllArgsConstructor
-  public class InputDetailsPerField {
+  public static class InputDetails {
     String inputType;
-    String internalAPIType;
+    String entityGroup;
+    String entityType;
+    String fqnFromEntityRoot;
   }
 
-  public void addInputDetailsPerField(String inputType, String internalAPIType) {
-    if (this.inputDetailsPerFieldList == null) {
-      this.inputDetailsPerFieldList = new ArrayList<>();
-    }
-    this.inputDetailsPerFieldList.add(new InputDetailsPerField(inputType, internalAPIType));
+  public void setInputDetails(String inputType, String entityGroup, String entityType, String fqnFromEntityRoot) {
+    inputDetails = InputDetails.builder()
+                       .inputType(inputType)
+                       .entityGroup(entityGroup)
+                       .entityType(entityType)
+                       .fqnFromEntityRoot(fqnFromEntityRoot)
+                       .build();
   }
 
   public void addDependencyDetails(DependencyDetails dependencyDetails) {

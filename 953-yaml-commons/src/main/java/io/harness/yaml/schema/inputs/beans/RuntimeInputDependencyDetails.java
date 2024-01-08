@@ -7,11 +7,16 @@
 
 package io.harness.yaml.schema.inputs.beans;
 
+import io.harness.annotations.dev.CodePulse;
+import io.harness.annotations.dev.HarnessModuleComponent;
+import io.harness.annotations.dev.ProductModule;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_PIPELINE})
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,4 +24,7 @@ import lombok.NoArgsConstructor;
 public class RuntimeInputDependencyDetails {
   String fieldName;
   String inputName;
+  String entityGroup;
+  String entityType;
+  String fqnFromEntityRoot;
 }

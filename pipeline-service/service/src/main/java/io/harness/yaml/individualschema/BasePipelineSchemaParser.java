@@ -9,7 +9,10 @@ package io.harness.yaml.individualschema;
 
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
 
+import io.harness.annotations.dev.CodePulse;
+import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
+import io.harness.annotations.dev.ProductModule;
 import io.harness.plancreator.steps.StepGroupElementConfig;
 import io.harness.plancreator.strategy.StrategyConfig;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -24,6 +27,7 @@ import com.google.inject.Inject;
 import java.util.HashSet;
 import lombok.extern.slf4j.Slf4j;
 
+@CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_PIPELINE})
 @Slf4j
 @OwnedBy(PIPELINE)
 public abstract class BasePipelineSchemaParser extends AbstractStaticSchemaParser {
@@ -46,19 +50,25 @@ public abstract class BasePipelineSchemaParser extends AbstractStaticSchemaParse
   }
 
   @Override
-  public JsonNode getFieldNode(InputFieldMetadata inputFieldMetadata) {
+  public FieldSchemaNodeInfo getFieldSchemaNodeInfo(InputFieldMetadata inputFieldMetadata) {
     String fqnFromParentNode = inputFieldMetadata.getFqnFromParentNode();
+    String nodeGroup = getFormattedNodeGroup(inputFieldMetadata.getParentTypeOfNodeGroup());
     PipelineSchemaRequest pipelineSchemaRequest =
         PipelineSchemaRequest.builder()
-            .individualSchemaMetadata(
-                PipelineSchemaMetadata.builder()
-                    .nodeGroup(getFormattedNodeGroup(inputFieldMetadata.getParentTypeOfNodeGroup()))
-                    .nodeType(inputFieldMetadata.getParentNodeType())
-                    .build())
+            .individualSchemaMetadata(PipelineSchemaMetadata.builder()
+                                          .nodeGroup(nodeGroup)
+                                          .nodeType(inputFieldMetadata.getParentNodeType())
+                                          .build())
             .fqnFromParentNode(fqnFromParentNode)
             .build();
 
-    return super.getFieldNode(pipelineSchemaRequest);
+    JsonNode inputMetadataField = super.getFieldNode(pipelineSchemaRequest);
+    return FieldSchemaNodeInfo.builder()
+        .metadataField(inputMetadataField)
+        .fqnFromRootEntity(fqnFromParentNode)
+        .entityGroup(nodeGroup)
+        .entityType(inputFieldMetadata.getParentNodeType())
+        .build();
   }
 
   @Override

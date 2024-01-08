@@ -1527,7 +1527,11 @@ components:
         details:
           $ref: '#/components/schemas/TemplateYamlInputDTO'
         metadata:
-          $ref: '#/components/schemas/TemplateYamlInputMetadataDTO'
+          type: array
+          x-stoplight:
+            id: 3qnzd0bsqj2ls
+          items:
+            $ref: '#/components/schemas/TemplateYamlInputMetadataDTO'
     TemplateYamlInputDTO:
       title: TemplateYamlInputDTO
       x-stoplight:
@@ -1570,15 +1574,11 @@ components:
       x-internal: true
       properties:
         field_properties:
-          type: array
-          x-stoplight:
-            id: 3qnzd0bsqj2ls
-          items:
-            $ref: '#/components/schemas/InputDetailsPerFieldDTO'
+          $ref: '#/components/schemas/InputDetailsDTO'
         dependencies:
           $ref: '#/components/schemas/YamlInputDependencyDetailsDTO'
-    InputDetailsPerFieldDTO:
-      title: InputDetailsPerFieldDTO
+    InputDetailsDTO:
+      title: InputDetailsDTO
       x-stoplight:
         id: 1pwsuzht6te0l
       type: object
@@ -1588,17 +1588,17 @@ components:
           type: string
           x-stoplight:
             id: x2gyzuy7skrlw
-        internal_type:
-          type: string
-          x-stoplight:
-            id: eye30wp6mepd5
-        entity_type:
+        entity_group:
           x-stoplight:
             id: p9imuzgb7t32y
           enum:
             - STAGE
             - STEP
             - STEP_GROUP
+        entity_type:
+          type: string
+        path:
+          type: string
         stage_type:
           type: string
           x-stoplight:

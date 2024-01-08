@@ -4716,15 +4716,11 @@ components:
       x-internal: true
       properties:
         field_properties:
-          x-stoplight:
-            id: 0sw513ugbfw6l
-          type: array
-          items:
-            $ref: '#/components/schemas/InputDetailsPerFieldDTO'
+          $ref: '#/components/schemas/InputDetailsDTO'
         dependencies:
           $ref: '#/components/schemas/YamlInputDependencyDetailsDTO'
-    InputDetailsPerFieldDTO:
-      title: InputDetailsPerFieldDTO
+    InputDetailsDTO:
+      title: InputDetailsDTO
       x-stoplight:
         id: kt1gm8g8pagzv
       type: object
@@ -4733,11 +4729,13 @@ components:
         input_type:
           type: string
           x-stoplight:
-            id: 6w1168wby0lcd
-        internal_type:
+            id: 5g0eseqsft1f9
+        entity_group:
           type: string
-          x-stoplight:
-            id: v8icsq9t35xhy
+        entity_type:
+          type: string
+        path:
+          type: string
     RuntimeInputDependencyDetailsDTO:
       title: RuntimeInputDependencyDetailsDTO
       x-stoplight:
@@ -4752,7 +4750,13 @@ components:
         input_name:
           type: string
           x-stoplight:
-            id: a7yfaqb4snvni
+            id: uz01uwaj14sqy
+        entity_group:
+          type: string
+        entity_type:
+          type: string
+        path:
+          type: string
     FixedValueFieldDependencyDetailsDTO:
       title: FixedValueFieldDependencyDetailsDTO
       x-stoplight:
@@ -4800,7 +4804,9 @@ components:
         details:
           $ref: '#/components/schemas/PipelineYamlInputDTO'
         metadata:
-          $ref: '#/components/schemas/PipelineYamlInputMetadataDTO'
+          type: array
+          items:
+            $ref: '#/components/schemas/PipelineYamlInputMetadataDTO'
       x-internal: true
     StepPalleteFilterRequestBody:
       title: StepPalleteFilterWrapper

@@ -7,10 +7,11 @@
 
 package io.harness.yaml.schema.inputs;
 
-import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
 import static io.harness.yaml.individualschema.InputFieldMetadata.parentTypesOfNodeGroups;
 
-import io.harness.annotations.dev.OwnedBy;
+import io.harness.annotations.dev.CodePulse;
+import io.harness.annotations.dev.HarnessModuleComponent;
+import io.harness.annotations.dev.ProductModule;
 import io.harness.exception.InvalidRequestException;
 import io.harness.jackson.JsonNodeUtils;
 import io.harness.pms.merger.fqn.FQN;
@@ -38,9 +39,9 @@ import java.util.Set;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+@CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_PIPELINE})
 @UtilityClass
 @Slf4j
-@OwnedBy(PIPELINE)
 public class YamlInputUtils {
   public List<InputDetails> getYamlInputList(String yaml) {
     List<InputDetails> inputDetails = new ArrayList<>();
@@ -95,7 +96,7 @@ public class YamlInputUtils {
         value = value.substring(0, value.length() - 1);
       }
       if (allInputExpressions.contains(value)) {
-        if (!FQNListForEachInput.containsKey(fqn)) {
+        if (!FQNListForEachInput.containsKey(value)) {
           FQNListForEachInput.put(value, new ArrayList<>());
         }
         FQNListForEachInput.get(value).add(fqn);

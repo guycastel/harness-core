@@ -46,7 +46,7 @@ import io.harness.spec.server.template.v1.model.GitCreateDetails;
 import io.harness.spec.server.template.v1.model.GitFindDetails;
 import io.harness.spec.server.template.v1.model.GitImportDetails;
 import io.harness.spec.server.template.v1.model.GitUpdateDetails;
-import io.harness.spec.server.template.v1.model.InputDetailsPerFieldDTO;
+import io.harness.spec.server.template.v1.model.InputDetailsDTO;
 import io.harness.spec.server.template.v1.model.RuntimeInputDependencyDetailsDTO;
 import io.harness.spec.server.template.v1.model.TemplateCreateRequestBody;
 import io.harness.spec.server.template.v1.model.TemplateImportRequestDTO;
@@ -182,7 +182,14 @@ public class TemplateResourceApiHelper {
   private static TemplateYamlInputDetailsDTO toTemplateYamlInputDetailsDTO(YamlInputDetails yamlInputDetails) {
     TemplateYamlInputDetailsDTO templateYamlInputDetailsDTO = new TemplateYamlInputDetailsDTO();
     templateYamlInputDetailsDTO.setDetails(toTemplateYamlInputDTO(yamlInputDetails.getInputDetails()));
-    templateYamlInputDetailsDTO.setMetadata(toTemplateYamlInputMetadataDTO(yamlInputDetails.getInputMetadata()));
+    if (yamlInputDetails.getInputMetadataWrapper() != null
+        && isNotEmpty(yamlInputDetails.getInputMetadataWrapper().getInputMetadataList())) {
+      templateYamlInputDetailsDTO.setMetadata(yamlInputDetails.getInputMetadataWrapper()
+                                                  .getInputMetadataList()
+                                                  .stream()
+                                                  .map(TemplateResourceApiHelper::toTemplateYamlInputMetadataDTO)
+                                                  .collect(Collectors.toList()));
+    }
     return templateYamlInputDetailsDTO;
   }
 
@@ -202,26 +209,18 @@ public class TemplateResourceApiHelper {
   private static TemplateYamlInputMetadataDTO toTemplateYamlInputMetadataDTO(InputMetadata inputMetadata) {
     TemplateYamlInputMetadataDTO templateYamlInputMetadataDTO = new TemplateYamlInputMetadataDTO();
     if (inputMetadata != null) {
-      templateYamlInputMetadataDTO.setFieldProperties(
-          toInputDetailsPerFieldDTOList(inputMetadata.getInputDetailsPerFieldList()));
+      templateYamlInputMetadataDTO.setFieldProperties(toInputDetailsDTOList(inputMetadata.getInputDetails()));
       templateYamlInputMetadataDTO.setDependencies(
           toYamlInputDependencyDetailsDTO(inputMetadata.getDependencyDetails()));
     }
     return templateYamlInputMetadataDTO;
   }
 
-  private static List<InputDetailsPerFieldDTO> toInputDetailsPerFieldDTOList(
-      List<InputMetadata.InputDetailsPerField> inputDetailsPerFieldList) {
-    List<InputDetailsPerFieldDTO> inputDetailsPerFieldDTOList = new ArrayList<>();
-    if (isNotEmpty(inputDetailsPerFieldList)) {
-      inputDetailsPerFieldList.forEach(inputDetailsPerField -> {
-        InputDetailsPerFieldDTO inputDetailsPerFieldDTO = new InputDetailsPerFieldDTO();
-        inputDetailsPerFieldDTO.setInputType(inputDetailsPerField.getInputType());
-        inputDetailsPerFieldDTO.setInternalType(inputDetailsPerField.getInternalAPIType());
-        inputDetailsPerFieldDTOList.add(inputDetailsPerFieldDTO);
-      });
-    }
-    return inputDetailsPerFieldDTOList;
+  private static InputDetailsDTO toInputDetailsDTOList(InputMetadata.InputDetails inputDetails) {
+    // TODO: Populate entityGroup, entityType, path, stageType
+    InputDetailsDTO inputDetailsPerFieldDTO = new InputDetailsDTO();
+    inputDetailsPerFieldDTO.setInputType(inputDetails.getInputType());
+    return inputDetailsPerFieldDTO;
   }
 
   private static YamlInputDependencyDetailsDTO toYamlInputDependencyDetailsDTO(DependencyDetails dependencyDetails) {

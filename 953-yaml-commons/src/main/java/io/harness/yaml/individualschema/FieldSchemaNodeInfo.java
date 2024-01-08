@@ -12,13 +12,15 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Builder;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_PIPELINE})
-public interface SchemaParserInterface {
-  ObjectNode getIndividualSchema(IndividualSchemaRequest schemaRequest);
-
-  FieldSchemaNodeInfo getFieldSchemaNodeInfo(InputFieldMetadata inputFieldMetadata);
-
-  JsonNode getRootSchemaJsonNode();
+@Value
+@Builder
+public class FieldSchemaNodeInfo {
+  JsonNode metadataField;
+  String entityGroup;
+  String entityType;
+  String fqnFromRootEntity;
 }

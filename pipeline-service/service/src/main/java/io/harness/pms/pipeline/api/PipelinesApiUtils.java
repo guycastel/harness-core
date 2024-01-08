@@ -51,7 +51,7 @@ import io.harness.spec.server.pipeline.v1.model.GitDetails;
 import io.harness.spec.server.pipeline.v1.model.GitImportInfo;
 import io.harness.spec.server.pipeline.v1.model.GitMoveDetails;
 import io.harness.spec.server.pipeline.v1.model.GitUpdateDetails;
-import io.harness.spec.server.pipeline.v1.model.InputDetailsPerFieldDTO;
+import io.harness.spec.server.pipeline.v1.model.InputDetailsDTO;
 import io.harness.spec.server.pipeline.v1.model.NodeInfo;
 import io.harness.spec.server.pipeline.v1.model.ParentStageInfo;
 import io.harness.spec.server.pipeline.v1.model.PipelineCreateRequestBody;
@@ -585,7 +585,14 @@ public class PipelinesApiUtils {
   private static PipelineYamlInputDetailsDTO toPipelineYamlInputDetailsDTO(YamlInputDetails yamlInputDetails) {
     PipelineYamlInputDetailsDTO pipelineYamlInputDetailsDTO = new PipelineYamlInputDetailsDTO();
     pipelineYamlInputDetailsDTO.setDetails(toPipelineYamlInputDTO(yamlInputDetails.getInputDetails()));
-    pipelineYamlInputDetailsDTO.setMetadata(toPipelineYamlInputMetadataDTO(yamlInputDetails.getInputMetadata()));
+    if (yamlInputDetails.getInputMetadataWrapper() != null
+        && isNotEmpty(yamlInputDetails.getInputMetadataWrapper().getInputMetadataList())) {
+      pipelineYamlInputDetailsDTO.setMetadata(yamlInputDetails.getInputMetadataWrapper()
+                                                  .getInputMetadataList()
+                                                  .stream()
+                                                  .map(PipelinesApiUtils::toPipelineYamlInputMetadataDTO)
+                                                  .collect(Collectors.toList()));
+    }
     return pipelineYamlInputDetailsDTO;
   }
 
@@ -605,26 +612,21 @@ public class PipelinesApiUtils {
   private static PipelineYamlInputMetadataDTO toPipelineYamlInputMetadataDTO(InputMetadata inputMetadata) {
     PipelineYamlInputMetadataDTO pipelineYamlInputMetadataDTO = new PipelineYamlInputMetadataDTO();
     if (inputMetadata != null) {
-      pipelineYamlInputMetadataDTO.setFieldProperties(
-          toInputDetailsPerFieldDTOList(inputMetadata.getInputDetailsPerFieldList()));
+      pipelineYamlInputMetadataDTO.setFieldProperties(toInputDetailsDTO(inputMetadata.getInputDetails()));
       pipelineYamlInputMetadataDTO.setDependencies(
           toYamlInputDependencyDetailsDTO(inputMetadata.getDependencyDetails()));
     }
     return pipelineYamlInputMetadataDTO;
   }
 
-  private static List<InputDetailsPerFieldDTO> toInputDetailsPerFieldDTOList(
-      List<InputMetadata.InputDetailsPerField> inputDetailsPerFieldList) {
-    List<InputDetailsPerFieldDTO> inputDetailsPerFieldDTOList = new ArrayList<>();
-    if (isNotEmpty(inputDetailsPerFieldList)) {
-      inputDetailsPerFieldList.forEach(inputDetailsPerField -> {
-        InputDetailsPerFieldDTO inputDetailsPerFieldDTO = new InputDetailsPerFieldDTO();
-        inputDetailsPerFieldDTO.setInputType(inputDetailsPerField.getInputType());
-        inputDetailsPerFieldDTO.setInternalType(inputDetailsPerField.getInternalAPIType());
-        inputDetailsPerFieldDTOList.add(inputDetailsPerFieldDTO);
-      });
-    }
-    return inputDetailsPerFieldDTOList;
+  private static InputDetailsDTO toInputDetailsDTO(InputMetadata.InputDetails inputDetails) {
+    InputDetailsDTO inputDetailsDTO = new InputDetailsDTO();
+    inputDetailsDTO.setInputType(inputDetails.getInputType());
+    inputDetailsDTO.setEntityGroup(inputDetails.getEntityGroup());
+    inputDetailsDTO.entityType(inputDetails.getEntityType());
+    inputDetailsDTO.setPath(inputDetails.getFqnFromEntityRoot());
+
+    return inputDetailsDTO;
   }
 
   private static YamlInputDependencyDetailsDTO toYamlInputDependencyDetailsDTO(DependencyDetails dependencyDetails) {
@@ -638,6 +640,9 @@ public class PipelinesApiUtils {
           RuntimeInputDependencyDetailsDTO runtimeInputDependencyDetailsDTO = new RuntimeInputDependencyDetailsDTO();
           runtimeInputDependencyDetailsDTO.setInputName(inputDependencyDetails.getInputName());
           runtimeInputDependencyDetailsDTO.setFieldName(inputDependencyDetails.getFieldName());
+          runtimeInputDependencyDetailsDTO.setEntityGroup(inputDependencyDetails.getEntityGroup());
+          runtimeInputDependencyDetailsDTO.setEntityType(inputDependencyDetails.getEntityType());
+          runtimeInputDependencyDetailsDTO.setPath(inputDependencyDetails.getFqnFromEntityRoot());
           runtimeInputDependencyDetailsDTOList.add(runtimeInputDependencyDetailsDTO);
         });
       }

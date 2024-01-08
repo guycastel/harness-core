@@ -57,21 +57,27 @@ public abstract class BaseTemplateSchemaParser extends AbstractStaticSchemaParse
         .build();
   }
   @Override
-  public JsonNode getFieldNode(InputFieldMetadata inputFieldMetadata) {
+  public FieldSchemaNodeInfo getFieldSchemaNodeInfo(InputFieldMetadata inputFieldMetadata) {
     String fqnFromParentNode = inputFieldMetadata.getFqnFromParentNode();
+    String nodeGroup = getFormattedNodeGroup(inputFieldMetadata.getParentTypeOfNodeGroup());
     // TODO Refactor: Use TemplateSchemaMetadata and create TemplateSchemaRequest instead of using
     // PipelineSchemaRequest.
     PipelineSchemaRequest schemaRequest =
         PipelineSchemaRequest.builder()
-            .individualSchemaMetadata(
-                PipelineSchemaMetadata.builder()
-                    .nodeGroup(getFormattedNodeGroup(inputFieldMetadata.getParentTypeOfNodeGroup()))
-                    .nodeType(inputFieldMetadata.getParentNodeType())
-                    .build())
+            .individualSchemaMetadata(PipelineSchemaMetadata.builder()
+                                          .nodeGroup(nodeGroup)
+                                          .nodeType(inputFieldMetadata.getParentNodeType())
+                                          .build())
             .fqnFromParentNode(fqnFromParentNode)
             .build();
 
-    return super.getFieldNode(schemaRequest);
+    JsonNode inputMetadataNode = super.getFieldNode(schemaRequest);
+    return FieldSchemaNodeInfo.builder()
+        .metadataField(inputMetadataNode)
+        .fqnFromRootEntity(fqnFromParentNode)
+        .entityGroup(nodeGroup)
+        .entityType(inputFieldMetadata.getParentNodeType())
+        .build();
   }
 
   private String getFormattedNodeGroup(String nodeGroup) {

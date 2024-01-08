@@ -250,6 +250,10 @@ if [[ "" != "$TICKET_SERVICE_GLOBAL_TOKEN" ]]; then
   export TICKET_SERVICE_GLOBAL_TOKEN; yq -i '.ticketServiceConfig.globalToken=env(TICKET_SERVICE_GLOBAL_TOKEN)' $CONFIG_FILE
 fi
 
+if [[ "" != "$TICKET_SERVICE_INTERNAL_ENDPOINT" ]]; then
+  export TICKET_SERVICE_INTERNAL_ENDPOINT; yq -i '.ticketServiceConfig.internalUrl=env(TICKET_SERVICE_INTERNAL_ENDPOINT)' $CONFIG_FILE
+fi
+
 replace_key_value eventsFramework.redis.sentinel $EVENTS_FRAMEWORK_USE_SENTINEL
 replace_key_value eventsFramework.redis.envNamespace $EVENTS_FRAMEWORK_ENV_NAMESPACE
 replace_key_value eventsFramework.redis.redisUrl $EVENTS_FRAMEWORK_REDIS_URL

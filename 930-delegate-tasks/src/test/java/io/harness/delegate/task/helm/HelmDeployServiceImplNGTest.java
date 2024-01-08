@@ -1433,4 +1433,21 @@ public class HelmDeployServiceImplNGTest extends CategoryTest {
     deployUpgradeTest(HelmTaskDTO.builder().kubernetesConfig(kubernetesConfig).build());
     verify(containerDeploymentDelegateBaseHelper, times(0)).createKubernetesConfig(any(), any(), any());
   }
+
+  @Test
+  @Owner(developers = ABHINAV2)
+  @Category(UnitTests.class)
+  public void testIgnoreReleaseHistoryException() throws Exception {
+    helmInstallCommandRequestNG.setIgnoreReleaseHistFailStatus(true);
+    when(helmClient.releaseHistory(any(), eq(true))).thenReturn(helmCliReleaseHistoryResponse);
+    when(helmTaskHelperBase.parseHelmReleaseCommandOutput(any(), eq(RELEASE_HISTORY)))
+        .thenReturn(List.of(ReleaseInfo.builder().status("failed").build()));
+    doThrow(new HelmClientException("error", HelmCliCommandType.RELEASE_HISTORY))
+        .when(helmTaskHelperBase)
+        .processHelmReleaseHistOutput(any(ReleaseInfo.class), anyBoolean());
+    assertThatThrownBy(() -> helmDeployService.deploy(helmInstallCommandRequestNG, taskDTO))
+        .isInstanceOf(HelmNGException.class)
+        .getCause()
+        .isInstanceOf(HelmClientRuntimeException.class);
+  }
 }

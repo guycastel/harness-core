@@ -235,9 +235,7 @@ public class HelmDeployServiceImplNG implements HelmDeployServiceNG {
           helmTaskHelperBase.parseHelmReleaseCommandOutput(helmCliResponse.getOutput(), RELEASE_HISTORY);
 
       if (!isEmpty(releaseInfoList)) {
-        helmTaskHelperBase.processHelmReleaseHistOutput(
-            releaseInfoList.get(releaseInfoList.size() - 1), commandRequest.isIgnoreReleaseHistFailStatus());
-
+        processHelmReleaseHistoryOutput(commandRequest, releaseInfoList);
         List<KubernetesResource> existingManifest = isImprovedHelmTracking
             ? helmSteadyStateService.readManifestFromHelmRelease(
                 HelmCommandDataMapperNG.getHelmCmdDataNG(commandRequest))
@@ -407,6 +405,16 @@ public class HelmDeployServiceImplNG implements HelmDeployServiceNG {
       if (isNotEmpty(commandRequest.getGcpKeyPath())) {
         deleteDirectoryAndItsContentIfExists(Paths.get(commandRequest.getGcpKeyPath()).getParent().toString());
       }
+    }
+  }
+
+  private void processHelmReleaseHistoryOutput(
+      HelmInstallCommandRequestNG commandRequest, List<ReleaseInfo> releaseInfoList) {
+    try {
+      helmTaskHelperBase.processHelmReleaseHistOutput(
+          releaseInfoList.get(releaseInfoList.size() - 1), commandRequest.isIgnoreReleaseHistFailStatus());
+    } catch (HelmClientException e) {
+      throw new HelmClientRuntimeException(e);
     }
   }
 

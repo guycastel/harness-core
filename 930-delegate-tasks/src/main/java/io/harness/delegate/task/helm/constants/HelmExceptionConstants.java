@@ -55,7 +55,8 @@ public class HelmExceptionConstants {
         "Make sure that the helm chart can be installed successfully using the helm cli.";
     public static final String DEFAULT_HINT_HELM_UPGRADE =
         "Make sure that the helm chart can be upgraded successfully using the helm cli.";
-    public static final String DEFAULT_HINT_HELM_HIST = "Helm history command has failed";
+    public static final String DEFAULT_HINT_HELM_HIST =
+        "To disregard the most recent unsuccessful release in Helm's release history, activate the Ignore Release History Failed Status option within the Helm Deploy step configuration. For detailed instructions, visit: https://developer.harness.io/docs/continuous-delivery/deploy-srv-diff-platforms/native-helm-quickstart#ignore-release-history-failed-status";
     public static final String DEFAULT_HINT_HELM_LIST_RELEASE = "Helm List releases command has failed";
     public static final String DEFAULT_HINT_HELM_RENDER_CHART = "Failed to render helm chart";
     public static final String DEFAULT_HINT_HELM_ROLLBACK = "Failed to rollback helm chart";
@@ -96,7 +97,8 @@ public class HelmExceptionConstants {
     public static final String DEFAULT_EXPLAIN_HELM_UPGRADE = "Unable to upgrade helm chart.";
     public static final String EXPLAIN_RESOURCE_CONFLICT =
         "Rendered manifests contain a resource which already exists. Try deleting these resources and re-run";
-    public static final String DEFAULT_EXPLAIN_HELM_HIST = "Unable to execute release history command";
+    public static final String DEFAULT_EXPLAIN_HELM_HIST =
+        "In the release history of this Helm release, the most recent entry either bears a 'failed' status or includes a description message indicating a failure.";
     public static final String DEFAULT_EXPLAIN_LIST_RELEASE = "Unable to execute list release command";
     public static final String DEFAULT_EXPLAIN_RENDER_CHART =
         "Unable to render helm chart, please check logs for further details";

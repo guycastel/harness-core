@@ -5,14 +5,15 @@
  * https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
  */
 
-package io.harness.idp.events.consumers;
+package io.harness.idp.events.consumers.debezium;
 
 import static io.harness.annotations.dev.HarnessTeam.IDP;
-import static io.harness.eventsframework.EventsFrameworkConstants.BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER;
+import static io.harness.eventsframework.EventsFrameworkConstants.BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER;
 
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.debezium.redisconsumer.DebeziumAbstractRedisConsumer;
 import io.harness.eventsframework.api.Consumer;
+import io.harness.idp.events.consumers.IdpRedisConsumer;
 import io.harness.queue.QueueController;
 
 import com.google.inject.Inject;
@@ -24,10 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 @OwnedBy(IDP)
-public class BackstageCatalogRedisEventConsumer extends DebeziumAbstractRedisConsumer implements IdpRedisConsumer {
+public class BackstageScaffolderTasksRedisEventConsumer
+    extends DebeziumAbstractRedisConsumer implements IdpRedisConsumer {
   @Inject
-  public BackstageCatalogRedisEventConsumer(@Named(BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER) Consumer redisConsumer,
-      QueueController queueController, BackstageCatalogChangeEventHandler eventHandler,
+  public BackstageScaffolderTasksRedisEventConsumer(
+      @Named(BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER) Consumer redisConsumer, QueueController queueController,
+      BackstageScaffolderTasksChangeEventHandler eventHandler,
       @Named("debeziumEventsCache") Cache<String, Long> eventsCache) {
     super(redisConsumer, queueController, eventHandler, eventsCache);
   }

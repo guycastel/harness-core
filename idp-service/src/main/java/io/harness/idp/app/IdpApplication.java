@@ -13,8 +13,10 @@ import static io.harness.authorization.AuthorizationServiceHeader.DEFAULT;
 import static io.harness.eventsframework.EventsFrameworkConstants.BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER;
 import static io.harness.eventsframework.EventsFrameworkConstants.BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER;
 import static io.harness.eventsframework.EventsFrameworkConstants.ENTITY_CRUD;
+import static io.harness.eventsframework.EventsFrameworkConstants.IDP_APP_CONFIGS_REDIS_EVENT_CONSUMER;
 import static io.harness.eventsframework.EventsFrameworkConstants.IDP_CATALOG_ENTITIES_SYNC_CAPTURE_EVENT;
 import static io.harness.eventsframework.EventsFrameworkConstants.IDP_MODULE_LICENSE_USAGE_CAPTURE_EVENT;
+import static io.harness.eventsframework.EventsFrameworkConstants.IDP_SCORECARDS_REDIS_EVENT_CONSUMER;
 import static io.harness.idp.app.IdpConfiguration.HARNESS_RESOURCE_CLASSES;
 import static io.harness.logging.LoggingInitializer.initializeLogging;
 import static io.harness.pms.listener.NgOrchestrationNotifyEventListener.NG_ORCHESTRATION;
@@ -48,12 +50,14 @@ import io.harness.idp.annotations.IdpServiceAuthIfHasApiKey;
 import io.harness.idp.backstage.jobs.ScaffolderTasksSyncJob;
 import io.harness.idp.configmanager.jobs.ConfigPurgeJob;
 import io.harness.idp.envvariable.jobs.BackstageEnvVariablesSyncJob;
-import io.harness.idp.events.consumers.BackstageCatalogRedisEventConsumer;
-import io.harness.idp.events.consumers.BackstageScaffolderTasksRedisEventConsumer;
 import io.harness.idp.events.consumers.EntityCrudStreamConsumer;
 import io.harness.idp.events.consumers.IdpCatalogEntitiesSyncCaptureEventConsumer;
 import io.harness.idp.events.consumers.IdpEventConsumerController;
 import io.harness.idp.events.consumers.IdpModuleLicenseUsageCaptureEventConsumer;
+import io.harness.idp.events.consumers.debezium.AppConfigsRedisEventConsumer;
+import io.harness.idp.events.consumers.debezium.BackstageCatalogRedisEventConsumer;
+import io.harness.idp.events.consumers.debezium.BackstageScaffolderTasksRedisEventConsumer;
+import io.harness.idp.events.consumers.debezium.ScorecardsRedisEventConsumer;
 import io.harness.idp.governance.beans.Constants;
 import io.harness.idp.governance.services.ScorecardExpansionHandler;
 import io.harness.idp.license.enforcement.ActiveDevelopersRestrictionUsageImpl;
@@ -324,6 +328,10 @@ public class IdpApplication extends Application<IdpConfiguration> {
         configuration.getNumberOfThreadsToUseForConsumers().get(BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER));
     controller.register(injector.getInstance(BackstageScaffolderTasksRedisEventConsumer.class),
         configuration.getNumberOfThreadsToUseForConsumers().get(BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER));
+    controller.register(injector.getInstance(ScorecardsRedisEventConsumer.class),
+        configuration.getNumberOfThreadsToUseForConsumers().get(IDP_SCORECARDS_REDIS_EVENT_CONSUMER));
+    controller.register(injector.getInstance(AppConfigsRedisEventConsumer.class),
+        configuration.getNumberOfThreadsToUseForConsumers().get(IDP_APP_CONFIGS_REDIS_EVENT_CONSUMER));
   }
 
   private void registerOasResource(IdpConfiguration config, Environment environment, Injector injector) {

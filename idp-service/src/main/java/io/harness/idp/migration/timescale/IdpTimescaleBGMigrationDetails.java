@@ -34,6 +34,8 @@ public class IdpTimescaleBGMigrationDetails implements MigrationDetails {
     return new ImmutableList.Builder<Pair<Integer, Class<? extends NGMigration>>>()
         .add(Pair.of(1, CreateBackstageCatalog.class))
         .add(Pair.of(2, CreateBackstageScaffolderTasks.class))
+        .add(Pair.of(3, CreateScorecards.class))
+        .add(Pair.of(4, CreatePlugins.class))
         .build();
   }
 }

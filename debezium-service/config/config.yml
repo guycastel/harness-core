@@ -131,7 +131,7 @@ debeziumConfigs:
     mongodb.name: ${MONGODB_NAME_IDP:-idpMongo}
     mongodb.ssl.enabled: ${MONGO_DB_SSL_ENABLED_IDP:-false}
     database.include.list: ${DATABASE_INCLUDE_LIST_IDP:-idp-harness}
-    collection.include.list: ${COLLECTION_INCLUDE_LIST_IDP:-idp-harness.backstageCatalog,idp-harness.backstageScaffolderTasks}
+    collection.include.list: ${COLLECTION_INCLUDE_LIST_IDP:-idp-harness.backstageCatalog,idp-harness.backstageScaffolderTasks,idp-harness.scorecards,idp-harness.appConfigs}
     redisStreamSize: ${REDIS_STREAM_SIZE_IDP:-10000}
     snapshot.mode: ${SNAPSHOT_MODE_IDP:-all}
     max.queue.size: ${MAX_QUEUE_SIZE_IDP:-8192}

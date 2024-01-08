@@ -5,7 +5,7 @@
  * https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
  */
 
-package io.harness.idp.events.consumers;
+package io.harness.idp.events.consumers.debezium;
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
@@ -41,7 +41,7 @@ public class BackstageScaffolderTasksChangeEventHandler extends DebeziumAbstract
       log.error("Caught exception while inserting data in backstage_scaffolder_tasks for id {}", id, ex);
       return false;
     }
-    return false;
+    return true;
   }
 
   @Override

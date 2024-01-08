@@ -10,6 +10,8 @@ package io.harness.idp.events;
 import static io.harness.authorization.AuthorizationServiceHeader.IDP_SERVICE;
 import static io.harness.eventsframework.EventsFrameworkConstants.BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER;
 import static io.harness.eventsframework.EventsFrameworkConstants.BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER;
+import static io.harness.eventsframework.EventsFrameworkConstants.IDP_APP_CONFIGS_REDIS_EVENT_CONSUMER;
+import static io.harness.eventsframework.EventsFrameworkConstants.IDP_SCORECARDS_REDIS_EVENT_CONSUMER;
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
@@ -78,6 +80,14 @@ public class EventsFrameworkModule extends AbstractModule {
           .annotatedWith(Names.named(BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER))
           .toInstance(
               NoOpConsumer.of(EventsFrameworkConstants.DUMMY_TOPIC_NAME, EventsFrameworkConstants.DUMMY_GROUP_NAME));
+      bind(Consumer.class)
+          .annotatedWith(Names.named(IDP_SCORECARDS_REDIS_EVENT_CONSUMER))
+          .toInstance(
+              NoOpConsumer.of(EventsFrameworkConstants.DUMMY_TOPIC_NAME, EventsFrameworkConstants.DUMMY_GROUP_NAME));
+      bind(Consumer.class)
+          .annotatedWith(Names.named(IDP_APP_CONFIGS_REDIS_EVENT_CONSUMER))
+          .toInstance(
+              NoOpConsumer.of(EventsFrameworkConstants.DUMMY_TOPIC_NAME, EventsFrameworkConstants.DUMMY_GROUP_NAME));
       bind(Producer.class)
           .annotatedWith(Names.named(EventsFrameworkConstants.SETUP_USAGE))
           .toInstance(NoOpProducer.of(EventsFrameworkConstants.DUMMY_TOPIC_NAME));
@@ -123,6 +133,16 @@ public class EventsFrameworkModule extends AbstractModule {
               IDP_SERVICE.getServiceId(), redissonClient,
               Duration.ofSeconds(debeziumConsumersConfig.getBackstageScaffolderTasks().getMaxProcessingTimeSeconds()),
               debeziumConsumersConfig.getBackstageScaffolderTasks().getBatchSize(), redisConfig.getEnvNamespace()));
+      bind(Consumer.class)
+          .annotatedWith(Names.named(IDP_SCORECARDS_REDIS_EVENT_CONSUMER))
+          .toInstance(RedisConsumer.of(debeziumConsumersConfig.getScorecards().getTopic(), IDP_SERVICE.getServiceId(),
+              redissonClient, Duration.ofSeconds(debeziumConsumersConfig.getScorecards().getMaxProcessingTimeSeconds()),
+              debeziumConsumersConfig.getScorecards().getBatchSize(), redisConfig.getEnvNamespace()));
+      bind(Consumer.class)
+          .annotatedWith(Names.named(IDP_APP_CONFIGS_REDIS_EVENT_CONSUMER))
+          .toInstance(RedisConsumer.of(debeziumConsumersConfig.getAppConfigs().getTopic(), IDP_SERVICE.getServiceId(),
+              redissonClient, Duration.ofSeconds(debeziumConsumersConfig.getAppConfigs().getMaxProcessingTimeSeconds()),
+              debeziumConsumersConfig.getAppConfigs().getBatchSize(), redisConfig.getEnvNamespace()));
       bind(Producer.class)
           .annotatedWith(Names.named(EventsFrameworkConstants.SETUP_USAGE))
           .toInstance(RedisProducer.of(EventsFrameworkConstants.SETUP_USAGE, redissonClient,

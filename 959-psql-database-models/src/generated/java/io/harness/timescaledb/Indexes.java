@@ -23,7 +23,9 @@ import io.harness.timescaledb.tables.PipelineExecutionSummary;
 import io.harness.timescaledb.tables.PipelineExecutionSummaryCd;
 import io.harness.timescaledb.tables.PipelineExecutionSummaryCi;
 import io.harness.timescaledb.tables.Pipelines;
+import io.harness.timescaledb.tables.Plugins;
 import io.harness.timescaledb.tables.PodInfo;
+import io.harness.timescaledb.tables.Scorecards;
 import io.harness.timescaledb.tables.ServiceInfraInfo;
 import io.harness.timescaledb.tables.ServiceInstancesLicenseDailyReport;
 import io.harness.timescaledb.tables.Services;
@@ -225,6 +227,11 @@ public class Indexes {
           new OrderField[] {Pipelines.PIPELINES.ACCOUNT_ID, Pipelines.PIPELINES.CREATED_AT}, false);
   public static final Index PIPELINES_PKEY = Internal.createIndex(
       DSL.name("pipelines_pkey"), Pipelines.PIPELINES, new OrderField[] {Pipelines.PIPELINES.ID}, true);
+  public static final Index PLUGINS_ACCOUNT_IDENTIFIER_CREATED_AT_IDX =
+      Internal.createIndex(DSL.name("plugins_account_identifier_created_at_idx"), Plugins.PLUGINS,
+          new OrderField[] {Plugins.PLUGINS.ACCOUNT_IDENTIFIER, Plugins.PLUGINS.CREATED_AT}, false);
+  public static final Index PLUGINS_UNIQUE_IDX = Internal.createIndex(DSL.name("plugins_unique_idx"), Plugins.PLUGINS,
+      new OrderField[] {Plugins.PLUGINS.ACCOUNT_IDENTIFIER, Plugins.PLUGINS.IDENTIFIER}, true);
   public static final Index POD_INFO_KUBESYSTEM_NAMESPACE_PINDEX =
       Internal.createIndex(DSL.name("pod_info_kubesystem_namespace_pindex"), PodInfo.POD_INFO,
           new OrderField[] {PodInfo.POD_INFO.ACCOUNTID, PodInfo.POD_INFO.CLUSTERID, PodInfo.POD_INFO.NAMESPACE,
@@ -232,6 +239,12 @@ public class Indexes {
           false);
   public static final Index POD_INFO_STARTTIME_IDX = Internal.createIndex(DSL.name("pod_info_starttime_idx"),
       PodInfo.POD_INFO, new OrderField[] {PodInfo.POD_INFO.STARTTIME.desc()}, false);
+  public static final Index SCORECARDS_ACCOUNT_IDENTIFIER_CREATED_AT_IDX =
+      Internal.createIndex(DSL.name("scorecards_account_identifier_created_at_idx"), Scorecards.SCORECARDS,
+          new OrderField[] {Scorecards.SCORECARDS.ACCOUNT_IDENTIFIER, Scorecards.SCORECARDS.CREATED_AT}, false);
+  public static final Index SCORECARDS_UNIQUE_IDX =
+      Internal.createIndex(DSL.name("scorecards_unique_idx"), Scorecards.SCORECARDS,
+          new OrderField[] {Scorecards.SCORECARDS.ACCOUNT_IDENTIFIER, Scorecards.SCORECARDS.IDENTIFIER}, true);
   public static final Index SERVICE_INSTANCES_LICENSE_ACCOUNT_ID_INDEX = Internal.createIndex(
       DSL.name("service_instances_license_account_id_index"),
       ServiceInstancesLicenseDailyReport.SERVICE_INSTANCES_LICENSE_DAILY_REPORT,

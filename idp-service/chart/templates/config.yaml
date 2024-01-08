@@ -88,6 +88,8 @@ data:
   IDP_CATALOG_ENTITIES_SYNC_CAPTURE_EVENT_CONSUMER_THREADS: {{.Values.idpCatalogEntitiesSyncCaptureEventConsumerThreads}}
   BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER_THREADS: {{.Values.backstageCatalogRedisEventConsumerThreads}}
   BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER_THREADS: {{.Values.backstageScaffolderTasksRedisEventConsumerThreads}}
+  SCORECARDS_EVENT_CONSUMER_THREADS: {{.Values.scorecardsRedisEventConsumerThreads}}
+  APP_CONFIGS_REDIS_EVENT_CONSUMER_THREADS: {{.Values.appConfigsRedisEventConsumerThreads}}
   BACKSTAGE_HTTP_CLIENT_CP_MAX_IDLE_CONNECTIONS: {{.Values.backstageHttpClientCpMaxIdleConnections}}
   BACKSTAGE_HTTP_CLIENT_CP_KEEP_ALIVE_DURATION: {{.Values.backstageHttpClientCpKeepAliveDuration}}
   BACKSTAGE_HTTP_CLIENT_CP_TIME_UNIT: {{.Values.backstageHttpClientCpTimeUnit}}

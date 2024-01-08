@@ -24,7 +24,9 @@ import io.harness.timescaledb.tables.NodePoolAggregated;
 import io.harness.timescaledb.tables.PipelineExecutionSummaryCd;
 import io.harness.timescaledb.tables.PipelineExecutionSummaryCi;
 import io.harness.timescaledb.tables.Pipelines;
+import io.harness.timescaledb.tables.Plugins;
 import io.harness.timescaledb.tables.PodInfo;
+import io.harness.timescaledb.tables.Scorecards;
 import io.harness.timescaledb.tables.ServiceInfraInfo;
 import io.harness.timescaledb.tables.ServiceInstancesLicenseDailyReport;
 import io.harness.timescaledb.tables.Services;
@@ -115,6 +117,16 @@ public class Public extends SchemaImpl {
       PipelineExecutionSummaryCd.PIPELINE_EXECUTION_SUMMARY_CD;
 
   /**
+   * The table <code>public.plugins</code>.
+   */
+  public final Plugins PLUGINS = Plugins.PLUGINS;
+
+  /**
+   * The table <code>public.scorecards</code>.
+   */
+  public final Scorecards SCORECARDS = Scorecards.SCORECARDS;
+
+  /**
    * The table <code>public.service_instances_license_daily_report</code>.
    */
   public final ServiceInstancesLicenseDailyReport SERVICE_INSTANCES_LICENSE_DAILY_REPORT =
@@ -187,8 +199,8 @@ public class Public extends SchemaImpl {
         KubernetesUtilizationData.KUBERNETES_UTILIZATION_DATA, ModuleLicenses.MODULE_LICENSES,
         NgInstanceStats.NG_INSTANCE_STATS, NgInstanceStats.NG_INSTANCE_STATS, NodeInfo.NODE_INFO,
         NodePoolAggregated.NODE_POOL_AGGREGATED, PipelineExecutionSummaryCd.PIPELINE_EXECUTION_SUMMARY_CD,
-        PipelineExecutionSummaryCi.PIPELINE_EXECUTION_SUMMARY_CI, Pipelines.PIPELINES, PodInfo.POD_INFO,
-        ServiceInfraInfo.SERVICE_INFRA_INFO, Services.SERVICES,
+        PipelineExecutionSummaryCi.PIPELINE_EXECUTION_SUMMARY_CI, Pipelines.PIPELINES, Plugins.PLUGINS,
+        PodInfo.POD_INFO, Scorecards.SCORECARDS, ServiceInfraInfo.SERVICE_INFRA_INFO, Services.SERVICES,
         ServiceInstancesLicenseDailyReport.SERVICE_INSTANCES_LICENSE_DAILY_REPORT,
         ServicesLicenseDailyReport.SERVICES_LICENSE_DAILY_REPORT, UtilizationData.UTILIZATION_DATA,
         WorkloadInfo.WORKLOAD_INFO, TimeBucketListCdStatus.TIME_BUCKET_LIST_CD_STATUS);

@@ -25,7 +25,9 @@ import io.harness.timescaledb.tables.PipelineExecutionSummary;
 import io.harness.timescaledb.tables.PipelineExecutionSummaryCd;
 import io.harness.timescaledb.tables.PipelineExecutionSummaryCi;
 import io.harness.timescaledb.tables.Pipelines;
+import io.harness.timescaledb.tables.Plugins;
 import io.harness.timescaledb.tables.PodInfo;
+import io.harness.timescaledb.tables.Scorecards;
 import io.harness.timescaledb.tables.ServiceInfraInfo;
 import io.harness.timescaledb.tables.ServiceInstancesLicenseDailyReport;
 import io.harness.timescaledb.tables.Services;
@@ -121,9 +123,19 @@ public class Tables {
   public static final Pipelines PIPELINES = Pipelines.PIPELINES;
 
   /**
+   * The table <code>public.plugins</code>.
+   */
+  public static final Plugins PLUGINS = Plugins.PLUGINS;
+
+  /**
    * The table <code>public.pod_info</code>.
    */
   public static final PodInfo POD_INFO = PodInfo.POD_INFO;
+
+  /**
+   * The table <code>public.scorecards</code>.
+   */
+  public static final Scorecards SCORECARDS = Scorecards.SCORECARDS;
 
   /**
    * The table <code>public.service_infra_info</code>.

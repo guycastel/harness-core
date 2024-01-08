@@ -19,6 +19,8 @@ import io.harness.timescaledb.tables.NodePoolAggregated;
 import io.harness.timescaledb.tables.PipelineExecutionSummary;
 import io.harness.timescaledb.tables.PipelineExecutionSummaryCd;
 import io.harness.timescaledb.tables.PipelineExecutionSummaryCi;
+import io.harness.timescaledb.tables.Plugins;
+import io.harness.timescaledb.tables.Scorecards;
 import io.harness.timescaledb.tables.ServiceInfraInfo;
 import io.harness.timescaledb.tables.ServiceInstancesLicenseDailyReport;
 import io.harness.timescaledb.tables.ServicesLicenseDailyReport;
@@ -32,6 +34,8 @@ import io.harness.timescaledb.tables.records.NodePoolAggregatedRecord;
 import io.harness.timescaledb.tables.records.PipelineExecutionSummaryCdRecord;
 import io.harness.timescaledb.tables.records.PipelineExecutionSummaryCiRecord;
 import io.harness.timescaledb.tables.records.PipelineExecutionSummaryRecord;
+import io.harness.timescaledb.tables.records.PluginsRecord;
+import io.harness.timescaledb.tables.records.ScorecardsRecord;
 import io.harness.timescaledb.tables.records.ServiceInfraInfoRecord;
 import io.harness.timescaledb.tables.records.ServiceInstancesLicenseDailyReportRecord;
 import io.harness.timescaledb.tables.records.ServicesLicenseDailyReportRecord;
@@ -100,6 +104,10 @@ public class Keys {
           new TableField[] {PipelineExecutionSummaryCi.PIPELINE_EXECUTION_SUMMARY_CI.ID,
               PipelineExecutionSummaryCi.PIPELINE_EXECUTION_SUMMARY_CI.STARTTS},
           true);
+  public static final UniqueKey<PluginsRecord> PLUGINS_PKEY =
+      Internal.createUniqueKey(Plugins.PLUGINS, DSL.name("plugins_pkey"), new TableField[] {Plugins.PLUGINS.ID}, true);
+  public static final UniqueKey<ScorecardsRecord> SCORECARDS_PKEY = Internal.createUniqueKey(
+      Scorecards.SCORECARDS, DSL.name("scorecards_pkey"), new TableField[] {Scorecards.SCORECARDS.ID}, true);
   public static final UniqueKey<ServiceInfraInfoRecord> SERVICE_INFRA_INFO_PKEY = Internal.createUniqueKey(
       ServiceInfraInfo.SERVICE_INFRA_INFO, DSL.name("service_infra_info_pkey"),
       new TableField[] {ServiceInfraInfo.SERVICE_INFRA_INFO.ID, ServiceInfraInfo.SERVICE_INFRA_INFO.SERVICE_STARTTS},

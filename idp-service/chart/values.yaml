@@ -289,6 +289,8 @@ idpModuleLicenseUsageCaptureEventConsumerThreads: 2
 idpCatalogEntitiesSyncCaptureEventConsumerThreads: 1
 backstageCatalogRedisEventConsumerThreads: 1
 backstageScaffolderTasksRedisEventConsumerThreads: 1
+scorecardsRedisEventConsumerThreads: 1
+appConfigsRedisEventConsumerThreads: 1
 
 backstageHttpClientCpMaxIdleConnections: 5
 backstageHttpClientCpKeepAliveDuration: 5

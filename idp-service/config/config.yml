@@ -483,6 +483,14 @@ debeziumConsumersConfigs:
     topic: ${DEBEZIUM_BACKSTAGE_SCAFFOLDER_TASKS_CONSUMER_TOPIC_NAME:-DEBEZIUM_idpMongo.idp-harness.backstageScaffolderTasks}
     batchSize: ${DEBEZIUM_BACKSTAGE_SCAFFOLDER_TASKS_CONSUMER_BATCH_SIZE:-100}
     maxProcessingTimeSeconds: ${DEBEZIUM_BACKSTAGE_SCAFFOLDER_TASKS_CONSUMER_MAX_PROCESSING_TIME_SECONDS:-10}
+  scorecards:
+    topic: ${DEBEZIUM_SCORECARDS_CONSUMER_TOPIC_NAME:-DEBEZIUM_idpMongo.idp-harness.scorecards}
+    batchSize: ${DEBEZIUM_SCORECARDS_CONSUMER_BATCH_SIZE:-100}
+    maxProcessingTimeSeconds: ${DEBEZIUM_SCORECARDS_CONSUMER_MAX_PROCESSING_TIME_SECONDS:-10}
+  appConfigs:
+    topic: ${DEBEZIUM_APP_CONFIGS_CONSUMER_TOPIC_NAME:-DEBEZIUM_idpMongo.idp-harness.appConfigs}
+    batchSize: ${DEBEZIUM_APP_CONFIGS_CONSUMER_BATCH_SIZE:-100}
+    maxProcessingTimeSeconds: ${DEBEZIUM_APP_CONFIGS_CONSUMER_MAX_PROCESSING_TIME_SECONDS:-10}
 
 enableDashboardTimescale: false
 
@@ -501,6 +509,8 @@ numberOfThreadsToUseForConsumers:
   idp_catalog_entities_sync_capture: 1
   BACKSTAGE_CATALOG_REDIS_EVENT_CONSUMER: 1
   BACKSTAGE_SCAFFOLDER_TASKS_REDIS_EVENT_CONSUMER: 1
+  IDP_SCORECARDS_REDIS_EVENT_CONSUMER: 1
+  IDP_APP_CONFIGS_REDIS_EVENT_CONSUMER: 1
 
 okHttpClientConnectionPoolConfigs:
   backstageHttpClient:

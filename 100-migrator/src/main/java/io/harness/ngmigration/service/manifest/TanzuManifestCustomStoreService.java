@@ -54,7 +54,7 @@ public class TanzuManifestCustomStoreService implements NgManifestService {
     CustomSourceConfig customSourceConfig = applicationManifest.getCustomSourceConfig();
     TasManifest tasManifest =
         TasManifest.builder()
-            .identifier(MigratorUtility.generateManifestIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateManifestIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .cfCliVersion(CfCliVersionNG.V7)
             .store(ParameterField.createValueField(
                 StoreConfigWrapper.builder()
@@ -71,7 +71,7 @@ public class TanzuManifestCustomStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.TAS_MANIFEST)
                                                        .spec(tasManifest)
                                                        .build())

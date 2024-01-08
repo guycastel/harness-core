@@ -70,7 +70,7 @@ public class HelmChartOverrideRepoStoreService implements NgManifestService {
     }
     HelmRepoOverrideManifest helmRepoOverride =
         HelmRepoOverrideManifest.builder()
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .connectorRef(ParameterField.createValueField(
                 MigratorUtility.getIdentifierWithScope(connectorYamlFile.getNgEntityDetail())))
             .type(type)
@@ -78,7 +78,7 @@ public class HelmChartOverrideRepoStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.HELM_REPO_OVERRIDE)
                                                        .spec(helmRepoOverride)
                                                        .build())

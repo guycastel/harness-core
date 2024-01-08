@@ -82,7 +82,7 @@ public class K8sManifestHelmChartRepoStoreService implements NgManifestService {
             .get(
                 CgEntityId.builder().type(NGMigrationEntityType.SERVICE).id(applicationManifest.getServiceId()).build())
             .getEntity();
-    String identifier = MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat);
+    String identifier = MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat);
 
     HelmChartManifestBuilder helmChartManifest =
         HelmChartManifest.builder()

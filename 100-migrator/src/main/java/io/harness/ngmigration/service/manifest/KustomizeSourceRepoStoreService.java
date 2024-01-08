@@ -61,7 +61,7 @@ public class KustomizeSourceRepoStoreService implements NgManifestService {
     storeConfig.setFolderPath(ParameterField.createValueField(dirPath));
     KustomizeManifest kustomizeManifest =
         KustomizeManifest.builder()
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .skipResourceVersioning(ParameterField.createValueField(
                 Boolean.TRUE.equals(applicationManifest.getSkipVersioningForAllK8sObjects())))
             .store(ParameterField.createValueField(
@@ -74,7 +74,7 @@ public class KustomizeSourceRepoStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.KUSTOMIZE)
                                                        .spec(kustomizeManifest)
                                                        .build())

@@ -52,7 +52,7 @@ public class OpenshiftParamRemoteStoreService implements NgManifestService {
 
     OpenshiftParamManifest openshiftParamManifest =
         OpenshiftParamManifest.builder()
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .store(ParameterField.createValueField(
                 StoreConfigWrapper.builder()
                     .type(StoreConfigType.GIT)
@@ -62,7 +62,7 @@ public class OpenshiftParamRemoteStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.OPEN_SHIFT_PARAM)
                                                        .spec(openshiftParamManifest)
                                                        .build())

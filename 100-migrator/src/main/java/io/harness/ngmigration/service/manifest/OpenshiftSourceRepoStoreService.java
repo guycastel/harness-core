@@ -52,7 +52,7 @@ public class OpenshiftSourceRepoStoreService implements NgManifestService {
 
     OpenshiftManifest openshiftManifest =
         OpenshiftManifest.builder()
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .skipResourceVersioning(ParameterField.createValueField(
                 Boolean.TRUE.equals(applicationManifest.getSkipVersioningForAllK8sObjects())))
             .store(ParameterField.createValueField(
@@ -64,7 +64,7 @@ public class OpenshiftSourceRepoStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.OPEN_SHIFT_TEMPLATE)
                                                        .spec(openshiftManifest)
                                                        .build())

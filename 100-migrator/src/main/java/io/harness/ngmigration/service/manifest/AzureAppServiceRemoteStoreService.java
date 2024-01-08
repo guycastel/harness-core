@@ -53,7 +53,7 @@ public class AzureAppServiceRemoteStoreService implements NgManifestService {
 
     K8sManifest k8sManifest =
         K8sManifest.builder()
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .skipResourceVersioning(ParameterField.createValueField(
                 Boolean.TRUE.equals(applicationManifest.getSkipVersioningForAllK8sObjects())))
             .store(ParameterField.createValueField(
@@ -65,7 +65,7 @@ public class AzureAppServiceRemoteStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.K8_MANIFEST)
                                                        .spec(k8sManifest)
                                                        .build())

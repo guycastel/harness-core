@@ -67,7 +67,7 @@ public class K8sManifestRemoteStoreService implements NgManifestService {
         K8sManifest
             .builder()
             // TODO: There needs to be a logic to build identifier of the manifest
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .skipResourceVersioning(ParameterField.createValueField(
                 Boolean.TRUE.equals(applicationManifest.getSkipVersioningForAllK8sObjects())))
             .store(ParameterField.createValueField(
@@ -79,7 +79,7 @@ public class K8sManifestRemoteStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.K8_MANIFEST)
                                                        .spec(k8sManifest)
                                                        .build())

@@ -75,7 +75,7 @@ public class K8sManifestLocalStoreService implements NgManifestService {
         K8sManifest.builder()
             .enableDeclarativeRollback(ParameterField.createValueField(
                 featureFlagService.isEnabled(CDP_USE_K8S_DECLARATIVE_ROLLBACK, applicationManifest.getAccountId())))
-            .identifier(MigratorUtility.generateManifestIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateManifestIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .skipResourceVersioning(ParameterField.createValueField(
                 Boolean.TRUE.equals(applicationManifest.getSkipVersioningForAllK8sObjects())))
             .store(ParameterField.createValueField(StoreConfigWrapper.builder()
@@ -90,7 +90,7 @@ public class K8sManifestLocalStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.K8_MANIFEST)
                                                        .spec(k8sManifest)
                                                        .build())

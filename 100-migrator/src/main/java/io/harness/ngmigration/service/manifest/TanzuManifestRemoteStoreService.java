@@ -53,7 +53,7 @@ public class TanzuManifestRemoteStoreService implements NgManifestService {
 
     TasManifest tasManifest =
         TasManifest.builder()
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .cfCliVersion(CfCliVersionNG.V7)
             .store(ParameterField.createValueField(
                 StoreConfigWrapper.builder()
@@ -64,7 +64,7 @@ public class TanzuManifestRemoteStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.TAS_MANIFEST)
                                                        .spec(tasManifest)
                                                        .build())

@@ -42,7 +42,7 @@ public class OpenshiftParamLocalStoreService implements NgManifestService {
   public List<ManifestConfigWrapper> getManifestConfigWrapper(ApplicationManifest applicationManifest,
       Map<CgEntityId, CgEntityNode> entities, Map<CgEntityId, NGYamlFile> migratedEntities,
       ManifestProvidedEntitySpec entitySpec, List<NGYamlFile> yamlFileList, CaseFormat identifierCaseFormat) {
-    String identifier = MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat);
+    String identifier = MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat);
     OpenshiftParamManifest openshiftParamManifest =
         OpenshiftParamManifest.builder()
             .identifier(identifier)

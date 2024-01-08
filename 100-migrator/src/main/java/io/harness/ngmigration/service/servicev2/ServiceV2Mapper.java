@@ -7,6 +7,7 @@
 
 package io.harness.ngmigration.service.servicev2;
 
+import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 
 import static software.wings.ngmigration.NGMigrationEntityType.ARTIFACT_STREAM;
@@ -152,7 +153,10 @@ public interface ServiceV2Mapper {
     prefix = StringUtils.isNotBlank(prefix) ? prefix : "manifest_";
 
     for (int i = 0; i < manifests.size(); ++i) {
-      manifests.get(i).getManifest().setIdentifier(prefix + i);
+      var manifestIdentifier = manifests.get(i).getManifest().getIdentifier();
+      if (isEmpty(manifestIdentifier)) {
+        manifests.get(i).getManifest().setIdentifier(prefix + i);
+      }
     }
     return manifests;
   }

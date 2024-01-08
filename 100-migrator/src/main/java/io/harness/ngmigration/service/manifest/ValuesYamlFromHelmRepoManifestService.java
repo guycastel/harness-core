@@ -64,7 +64,7 @@ public class ValuesYamlFromHelmRepoManifestService implements NgManifestService 
         ManifestConfigWrapper.builder()
             .manifest(
                 ManifestConfig.builder()
-                    .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat)
+                    .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat)
                         + HELM_REPO_STORE)
                     .type(ManifestConfigType.VALUES)
                     .spec(valuesManifest)

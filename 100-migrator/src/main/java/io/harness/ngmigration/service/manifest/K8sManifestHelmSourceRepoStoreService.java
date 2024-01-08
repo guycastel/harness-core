@@ -67,7 +67,7 @@ public class K8sManifestHelmSourceRepoStoreService implements NgManifestService 
     gitStore.setFolderPath(ParameterField.createValueField(dirPath));
     HelmChartManifest helmChartManifest =
         HelmChartManifest.builder()
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .skipResourceVersioning(ParameterField.createValueField(
                 Boolean.TRUE.equals(applicationManifest.getSkipVersioningForAllK8sObjects())))
             .helmVersion(service.getHelmVersion())
@@ -80,7 +80,7 @@ public class K8sManifestHelmSourceRepoStoreService implements NgManifestService 
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.HELM_CHART)
                                                        .spec(helmChartManifest)
                                                        .build())

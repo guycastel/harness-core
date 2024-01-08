@@ -65,7 +65,7 @@ public class AzureAppServiceLocalStoreService implements NgManifestService {
 
     ValuesManifest manifest =
         ValuesManifest.builder()
-            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getUuid(), identifierCaseFormat))
+            .identifier(MigratorUtility.generateIdentifier(applicationManifest.getName(), identifierCaseFormat))
             .store(ParameterField.createValueField(StoreConfigWrapper.builder()
                                                        .type(StoreConfigType.HARNESS)
                                                        .spec(manifestMigrationService.getHarnessStore(orderedFiles))
@@ -75,7 +75,7 @@ public class AzureAppServiceLocalStoreService implements NgManifestService {
     return Collections.singletonList(ManifestConfigWrapper.builder()
                                          .manifest(ManifestConfig.builder()
                                                        .identifier(MigratorUtility.generateIdentifier(
-                                                           applicationManifest.getUuid(), identifierCaseFormat))
+                                                           applicationManifest.getName(), identifierCaseFormat))
                                                        .type(ManifestConfigType.VALUES)
                                                        .spec(manifest)
                                                        .build())

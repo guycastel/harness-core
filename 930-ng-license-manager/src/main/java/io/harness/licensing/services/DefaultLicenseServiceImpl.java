@@ -9,6 +9,7 @@ package io.harness.licensing.services;
 
 import static io.harness.configuration.DeployMode.DEPLOY_MODE;
 import static io.harness.configuration.DeployVariant.DEPLOY_VERSION;
+import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.eventsframework.EventsFrameworkConstants.MODULE_LICENSE;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.ACTION;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.CREATE_ACTION;
@@ -92,7 +93,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.cache.Cache;
-import javax.cache.CacheException;
 import javax.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -427,7 +427,7 @@ public class DefaultLicenseServiceImpl implements LicenseService {
   @Override
   public LicensesWithSummaryDTO getLicenseSummary(String accountIdentifier, ModuleType moduleType) {
     List<ModuleLicenseDTO> moduleLicenses = getModuleLicenses(accountIdentifier, moduleType);
-    if (moduleLicenses.isEmpty()) {
+    if (isEmpty(moduleLicenses)) {
       return null;
     }
     return ModuleLicenseSummaryHelper.generateSummary(moduleType, moduleLicenses);
@@ -678,12 +678,12 @@ public class DefaultLicenseServiceImpl implements LicenseService {
 
   private List<ModuleLicenseDTO> getModuleLicensesByAccountIdAndModuleType(
       String accountIdentifier, ModuleType moduleType) {
-    if (checkExistInCache(accountIdentifier, moduleType)) {
-      try {
+    try {
+      if (checkExistInCache(accountIdentifier, moduleType)) {
         return getFromCache(accountIdentifier, moduleType);
-      } catch (Exception e) {
-        log.error("Unable to get license data from cache", e);
       }
+    } catch (Exception e) {
+      log.error("Unable to get license data from cache", e);
     }
 
     List<ModuleLicense> licenses =
@@ -692,7 +692,7 @@ public class DefaultLicenseServiceImpl implements LicenseService {
         licenses.stream().map(licenseObjectConverter::<ModuleLicenseDTO>toDTO).collect(Collectors.toList());
     try {
       setToCache(accountIdentifier, moduleType, result);
-    } catch (CacheException e) {
+    } catch (Exception e) {
       log.error("Unable to set license data into cache", e);
     }
     return result;

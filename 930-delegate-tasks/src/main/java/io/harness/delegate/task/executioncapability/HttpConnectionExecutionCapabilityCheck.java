@@ -23,11 +23,16 @@ import io.harness.delegate.beans.executioncapability.ExecutionCapability;
 import io.harness.delegate.beans.executioncapability.HttpConnectionExecutionCapability;
 import io.harness.network.Http;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
+import javax.net.ssl.SSLException;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true,
     components = {HarnessModuleComponent.CDS_COMMON_STEPS, HarnessModuleComponent.CDS_K8S})
 public class HttpConnectionExecutionCapabilityCheck implements CapabilityCheck, ProtoCapabilityCheck {
+  private final List<Class<? extends Exception>> allowedExceptions = List.of(SSLException.class);
+
   @Override
   public CapabilityResponse performCapabilityCheck(ExecutionCapability delegateCapability) {
     HttpConnectionExecutionCapability httpConnectionExecutionCapability =
@@ -37,19 +42,21 @@ public class HttpConnectionExecutionCapabilityCheck implements CapabilityCheck, 
         isNotBlank(System.getenv().get("NEXT_GEN")) && Boolean.parseBoolean(System.getenv().get("NEXT_GEN"));
     if (isNextGen) {
       valid = Http.connectableHttpUrlWithoutFollowingRedirect(httpConnectionExecutionCapability.fetchConnectableUrl(),
-          httpConnectionExecutionCapability.getHeaders(), httpConnectionExecutionCapability.isIgnoreResponseCode());
+          httpConnectionExecutionCapability.getHeaders(), httpConnectionExecutionCapability.isIgnoreResponseCode(),
+          allowedExceptions);
     } else {
       if (httpConnectionExecutionCapability.getHeaders() != null) {
         valid = Http.connectableHttpUrlWithHeaders(httpConnectionExecutionCapability.fetchConnectableUrl(),
-            httpConnectionExecutionCapability.getHeaders(), httpConnectionExecutionCapability.isIgnoreResponseCode());
+            httpConnectionExecutionCapability.getHeaders(), httpConnectionExecutionCapability.isIgnoreResponseCode(),
+            new ArrayList<>());
       } else {
         if (httpConnectionExecutionCapability.isIgnoreRedirect()) {
           valid = Http.connectableHttpUrlWithoutFollowingRedirect(
               httpConnectionExecutionCapability.fetchConnectableUrl(), httpConnectionExecutionCapability.getHeaders(),
-              httpConnectionExecutionCapability.isIgnoreResponseCode());
+              httpConnectionExecutionCapability.isIgnoreResponseCode(), new ArrayList<>());
         } else {
           valid = Http.connectableHttpUrl(httpConnectionExecutionCapability.fetchConnectableUrl(),
-              httpConnectionExecutionCapability.isIgnoreResponseCode());
+              httpConnectionExecutionCapability.isIgnoreResponseCode(), new ArrayList<>());
         }
       }
     }
@@ -73,14 +80,14 @@ public class HttpConnectionExecutionCapabilityCheck implements CapabilityCheck, 
                       .stream()
                       .map(entry -> KeyValuePair.builder().key(entry.getKey()).value(entry.getValue()).build())
                       .collect(Collectors.toList()),
-                  httpConnectionParameters.getIgnoreResponseCode())
+                  httpConnectionParameters.getIgnoreResponseCode(), allowedExceptions)
                   ? PermissionResult.ALLOWED
                   : PermissionResult.DENIED)
           .build();
     } else {
       return builder
           .permissionResult(Http.connectableHttpUrl(parameters.getHttpConnectionParameters().getUrl(),
-                                httpConnectionParameters.getIgnoreResponseCode())
+                                httpConnectionParameters.getIgnoreResponseCode(), allowedExceptions)
                   ? PermissionResult.ALLOWED
                   : PermissionResult.DENIED)
           .build();

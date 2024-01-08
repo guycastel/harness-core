@@ -18,6 +18,7 @@ import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 import io.harness.beans.KeyValuePair;
+import io.harness.data.structure.EmptyPredicate;
 import io.harness.security.AllTrustingX509TrustManager;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -37,6 +38,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HostnameVerifier;
@@ -61,6 +63,8 @@ import org.apache.http.HttpHost;
 @Slf4j
 @OwnedBy(HarnessTeam.PL)
 public class Http {
+  private final String ALLOWED_EXCEPTION_RESPONSE =
+      "Exception while getting response code, but still validating the capability check";
   public static final OkHttpClient DEFAULT_OKHTTP_CLIENT =
       Http.getOkHttpClientWithProxyAuthSetup().connectionPool(new ConnectionPool()).build();
 
@@ -95,13 +99,13 @@ public class Http {
     return false;
   }
 
-  LoadingCache<String, Integer> responseCodeForValidation =
+  LoadingCache<HttpURLHeaderInfo, Integer> responseCodeForValidation =
       CacheBuilder.newBuilder()
           .maximumSize(1000)
           .expireAfterWrite(1, TimeUnit.MINUTES)
-          .build(new CacheLoader<String, Integer>() {
+          .build(new CacheLoader<HttpURLHeaderInfo, Integer>() {
             @Override
-            public Integer load(String url) throws IOException {
+            public Integer load(HttpURLHeaderInfo httpURLHeaderInfo) throws IOException {
               log.info("Testing connectivity");
 
               // Create a trust manager that does not validate certificate chains
@@ -111,7 +115,7 @@ public class Http {
               HostnameVerifier allHostsValid = (s, sslSession) -> true;
               // Install the all-trusting host verifier
               HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-              HttpURLConnection connection = getHttpsURLConnection(url);
+              HttpURLConnection connection = getHttpsURLConnection(httpURLHeaderInfo.getUrl());
               try {
                 // Changed to GET as some providers like artifactory SAAS is not
                 // accepting HEAD requests
@@ -121,6 +125,16 @@ public class Http {
                 int responseCode = connection.getResponseCode();
                 log.info("Returned code {}", responseCode);
                 return responseCode;
+              } catch (Exception e) {
+                if (EmptyPredicate.isNotEmpty(httpURLHeaderInfo.getAllowedExceptions())
+                    && httpURLHeaderInfo.getAllowedExceptions().stream().anyMatch(
+                        allowedException -> allowedException.isInstance(e))) {
+                  // In case of SSL exception we will validate the capability check
+                  // as we are getting the response from server.
+                  log.warn(ALLOWED_EXCEPTION_RESPONSE, e);
+                  return 200;
+                }
+                throw e;
               } finally {
                 if (connection != null) {
                   connection.disconnect();
@@ -198,6 +212,16 @@ public class Http {
                 int responseCode = connection.getResponseCode();
                 log.info("Returned code {}", responseCode);
                 return responseCode;
+              } catch (Exception e) {
+                if (EmptyPredicate.isNotEmpty(httpURLHeaderInfo.getAllowedExceptions())
+                    && httpURLHeaderInfo.getAllowedExceptions().stream().anyMatch(
+                        allowedException -> allowedException.isInstance(e))) {
+                  // In case of SSL exception we will validate the capability check
+                  // as we are getting the response from server.
+                  log.warn(ALLOWED_EXCEPTION_RESPONSE, e);
+                  return 200;
+                }
+                throw e;
               } finally {
                 if (connection != null) {
                   connection.disconnect();
@@ -237,6 +261,16 @@ public class Http {
                 int responseCode = connection.getResponseCode();
                 log.info("Returned code {}", responseCode);
                 return responseCode;
+              } catch (Exception e) {
+                if (EmptyPredicate.isNotEmpty(httpURLHeaderInfo.getAllowedExceptions())
+                    && httpURLHeaderInfo.getAllowedExceptions().stream().anyMatch(
+                        allowedException -> allowedException.isInstance(e))) {
+                  // In case of SSL exception we will validate the capability check
+                  // as we are getting the response from server.
+                  log.warn(ALLOWED_EXCEPTION_RESPONSE, e);
+                  return 200;
+                }
+                throw e;
               } finally {
                 if (connection != null) {
                   connection.disconnect();
@@ -282,12 +316,15 @@ public class Http {
     return responseCode != 400;
   }
 
-  public static boolean connectableHttpUrl(String url, boolean ignoreResponseCode) {
+  public static boolean connectableHttpUrl(
+      String url, boolean ignoreResponseCode, List<Class<? extends Exception>> allowedExceptions) {
     try (UrlLogContext ignore = new UrlLogContext(url, OVERRIDE_ERROR)) {
       try {
-        return checkResponseCode(responseCodeForValidation.get(url), ignoreResponseCode);
+        return checkResponseCode(responseCodeForValidation.get(
+                                     HttpURLHeaderInfo.builder().url(url).allowedExceptions(allowedExceptions).build()),
+            ignoreResponseCode);
       } catch (Exception e) {
-        log.info("Could not connect: {}", e.getMessage());
+        log.error("Could not connect", e);
       }
     }
     return false;
@@ -308,33 +345,35 @@ public class Http {
     return false;
   }
 
-  public static boolean connectableHttpUrlWithoutFollowingRedirect(
-      String url, List<KeyValuePair> headers, boolean ignoreResponseCode) {
+  public static boolean connectableHttpUrlWithoutFollowingRedirect(String url, List<KeyValuePair> headers,
+      boolean ignoreResponseCode, List<Class<? extends Exception>> allowedExceptions) {
     try (UrlLogContext ignore = new UrlLogContext(url, OVERRIDE_ERROR)) {
       try {
-        return checkResponseCode(responseCodeForValidationWithoutFollowingRedirect.get(
-                                     HttpURLHeaderInfo.builder().url(url).headers(headers).build()),
+        return checkResponseCode(
+            responseCodeForValidationWithoutFollowingRedirect.get(
+                HttpURLHeaderInfo.builder().url(url).headers(headers).allowedExceptions(allowedExceptions).build()),
             ignoreResponseCode);
       } catch (Exception e) {
-        log.info("Could not connect: {}", e.getMessage());
+        log.error("Could not connect", e);
       }
     }
     return false;
   }
 
   public static boolean connectableHttpUrlWithoutFollowingRedirect(String url) {
-    return connectableHttpUrlWithoutFollowingRedirect(url, null, false);
+    return connectableHttpUrlWithoutFollowingRedirect(url, null, false, new ArrayList<>());
   }
 
-  public static boolean connectableHttpUrlWithHeaders(
-      String url, List<KeyValuePair> headers, boolean ignoreResponseCode) {
+  public static boolean connectableHttpUrlWithHeaders(String url, List<KeyValuePair> headers,
+      boolean ignoreResponseCode, List<Class<? extends Exception>> allowedExceptions) {
     try (UrlLogContext ignore = new UrlLogContext(url, OVERRIDE_ERROR)) {
       try {
         return checkResponseCode(
-            responseCodeForValidationWithHeaders.get(HttpURLHeaderInfo.builder().url(url).headers(headers).build()),
+            responseCodeForValidationWithHeaders.get(
+                HttpURLHeaderInfo.builder().url(url).headers(headers).allowedExceptions(allowedExceptions).build()),
             ignoreResponseCode);
       } catch (Exception e) {
-        log.info("Could not connect: {}", e.getMessage());
+        log.error("Could not connect", e);
       }
     }
     return false;

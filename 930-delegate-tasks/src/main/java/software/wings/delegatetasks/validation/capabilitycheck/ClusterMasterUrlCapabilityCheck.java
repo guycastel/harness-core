@@ -20,6 +20,7 @@ import software.wings.delegatetasks.validation.capabilities.ClusterMasterUrlVali
 import software.wings.delegatetasks.validation.container.ContainerValidationHelper;
 
 import com.google.inject.Inject;
+import java.util.ArrayList;
 
 @CodePulse(
     module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_COMMON_STEPS})
@@ -31,7 +32,7 @@ public class ClusterMasterUrlCapabilityCheck implements CapabilityCheck {
   public CapabilityResponse performCapabilityCheck(ExecutionCapability delegateCapability) {
     ClusterMasterUrlValidationCapability capability = (ClusterMasterUrlValidationCapability) delegateCapability;
     String masterUrl = containerValidationHelper.getK8sMasterUrl(capability.getContainerServiceParams());
-    boolean valid = Http.connectableHttpUrl(masterUrl, false);
+    boolean valid = Http.connectableHttpUrl(masterUrl, false, new ArrayList<>());
     return CapabilityResponse.builder().delegateCapability(capability).validated(valid).build();
   }
 }

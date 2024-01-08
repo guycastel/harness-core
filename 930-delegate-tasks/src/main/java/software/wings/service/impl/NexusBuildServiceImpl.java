@@ -43,6 +43,7 @@ import software.wings.utils.RepositoryFormat;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -212,7 +213,7 @@ public class NexusBuildServiceImpl implements NexusBuildService {
 
   @Override
   public boolean validateArtifactServer(NexusConfig nexusConfig, List<EncryptedDataDetail> encryptedDataDetails) {
-    if (!connectableHttpUrl(nexusConfig.getNexusUrl(), false)) {
+    if (!connectableHttpUrl(nexusConfig.getNexusUrl(), false, new ArrayList<>())) {
       throw new InvalidArtifactServerException("Could not reach Nexus Server at : " + nexusConfig.getNexusUrl(), USER);
     }
     NexusRequest nexusRequest =

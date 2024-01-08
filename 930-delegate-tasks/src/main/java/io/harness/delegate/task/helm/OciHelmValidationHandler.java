@@ -39,6 +39,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -73,8 +74,8 @@ public class OciHelmValidationHandler implements ConnectorValidationHandler {
       decryptEncryptedDetails(helmValidationParams);
       if (OciHelmAuthType.ANONYMOUS.equals(ociHelmConnectorDTO.getAuth().getAuthType())) {
         String uriParsedOciUrl = helmTaskHelperBase.getParsedURI(ociUrl).toString();
-        if (!connectableHttpUrl(uriParsedOciUrl.replace(OCI_PREFIX, HTTPS_PREFIX), true)
-            && !connectableHttpUrl(uriParsedOciUrl.replace(OCI_PREFIX, HTTP_PREFIX), true)) {
+        if (!connectableHttpUrl(uriParsedOciUrl.replace(OCI_PREFIX, HTTPS_PREFIX), true, new ArrayList<>())
+            && !connectableHttpUrl(uriParsedOciUrl.replace(OCI_PREFIX, HTTP_PREFIX), true, new ArrayList<>())) {
           throw NestedExceptionUtils.hintWithExplanationException(
               "Check if the OCI Helm URL is reachable from your delegate(s)", "The given OCI Helm URL is not reachable",
               new InvalidRequestException("Could not reach OCI Helm Server at : " + ociUrl, USER));

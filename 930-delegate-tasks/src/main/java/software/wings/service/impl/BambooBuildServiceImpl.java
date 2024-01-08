@@ -32,6 +32,7 @@ import software.wings.utils.ArtifactType;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -119,7 +120,7 @@ public class BambooBuildServiceImpl implements BambooBuildService {
 
   @Override
   public boolean validateArtifactServer(BambooConfig bambooConfig, List<EncryptedDataDetail> encryptionDetails) {
-    if (!connectableHttpUrl(bambooConfig.getBambooUrl(), false)) {
+    if (!connectableHttpUrl(bambooConfig.getBambooUrl(), false, new ArrayList<>())) {
       throw new WingsException(ErrorCode.INVALID_ARTIFACT_SERVER, USER)
           .addParam("message", "Could not reach Bamboo Server at : " + bambooConfig.getBambooUrl());
     }

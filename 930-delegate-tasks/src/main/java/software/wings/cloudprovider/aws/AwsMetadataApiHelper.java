@@ -31,6 +31,7 @@ import com.amazonaws.services.ecs.model.Task;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +105,7 @@ public class AwsMetadataApiHelper {
 
   @VisibleForTesting
   boolean checkConnectivity(String url) {
-    return Http.connectableHttpUrl(url, false);
+    return Http.connectableHttpUrl(url, false, new ArrayList<>());
   }
 
   public String tryMetadataApiForDockerIdIfAccessble(Instance ec2Instance, Task taskRunningContainer,

@@ -18,6 +18,7 @@ import io.harness.delegate.beans.executioncapability.ExecutionCapability;
 import io.harness.delegate.beans.executioncapability.PcfConnectivityCapability;
 import io.harness.network.Http;
 
+import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 
 @CodePulse(
@@ -64,6 +65,6 @@ public class PcfConnectivityCapabilityCheck implements CapabilityCheck, ProtoCap
   }
 
   boolean isEndpointConnectable(String endpointUrl, String urlScheme) {
-    return Http.connectableHttpUrl(urlScheme + endpointUrl, false);
+    return Http.connectableHttpUrl(urlScheme + endpointUrl, false, new ArrayList<>());
   }
 }

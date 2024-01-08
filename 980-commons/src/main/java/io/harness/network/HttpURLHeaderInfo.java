@@ -18,4 +18,5 @@ import lombok.Value;
 public class HttpURLHeaderInfo {
   String url;
   List<KeyValuePair> headers;
+  List<Class<? extends Exception>> allowedExceptions;
 }

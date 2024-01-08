@@ -31,6 +31,7 @@ import software.wings.utils.ArtifactType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,7 +96,7 @@ public class EcrClassicBuildServiceImpl implements EcrClassicBuildService {
 
   @Override
   public boolean validateArtifactServer(EcrConfig config, List<EncryptedDataDetail> encryptedDataDetails) {
-    if (!connectableHttpUrl(config.getEcrUrl(), false)) {
+    if (!connectableHttpUrl(config.getEcrUrl(), false, new ArrayList<>())) {
       throw new WingsException(ErrorCode.INVALID_ARTIFACT_SERVER)
           .addParam("message", "Could not reach Amazon EC2 Container Registry at : " + config.getEcrUrl());
     }

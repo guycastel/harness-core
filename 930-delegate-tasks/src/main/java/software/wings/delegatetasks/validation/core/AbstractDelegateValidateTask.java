@@ -25,6 +25,7 @@ import io.harness.delegate.beans.executioncapability.ExecutionCapability;
 import io.harness.delegate.task.tasklogging.TaskLogContext;
 import io.harness.delegate.task.validation.DelegateConnectionResultDetail;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +96,7 @@ public abstract class AbstractDelegateValidateTask implements DelegateValidateTa
       String criteria = getCriteria().get(0);
       return singletonList(DelegateConnectionResultDetail.builder()
                                .criteria(criteria)
-                               .validated(connectableHttpUrl(criteria, false))
+                               .validated(connectableHttpUrl(criteria, false, new ArrayList<>()))
                                .build());
     } catch (Exception e) {
       return emptyList();

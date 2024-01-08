@@ -1,6 +1,6 @@
 # Any edit in this file should accompany an increment in version.
 name: rolesConfiguration
-version: 71
+version: 72
 roles:
     - identifier: _project_admin
       name: Project Admin
@@ -706,7 +706,6 @@ roles:
         - ccm_cloudAssetGovernanceEnforcement_edit
         - ccm_cloudAssetGovernanceEnforcement_view
         - ccm_cloudAssetGovernanceEnforcement_delete
-        - idp_idpsettings_manage
         - idp_plugin_view
         - idp_plugin_edit
         - idp_plugin_toggle
@@ -1249,7 +1248,6 @@ roles:
       name: IDP Admin
       description: Can create, edit, delete and view IDP Resources
       permissions:
-        - idp_idpsettings_manage
         - idp_plugin_view
         - idp_plugin_edit
         - idp_plugin_toggle

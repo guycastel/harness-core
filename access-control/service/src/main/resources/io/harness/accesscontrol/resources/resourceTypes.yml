@@ -1,6 +1,6 @@
 # Any edit in this file should accompany an increment in version.
 name: resourceTypeConfiguration
-version: 44
+version: 45
 resourceTypes:
   - identifier: ACCOUNT
     permissionKey: account
@@ -125,8 +125,6 @@ resourceTypes:
     permissionKey: streamingDestination
   - identifier: DOWNTIME
     permissionKey: downtime
-  - identifier: IDP_SETTINGS
-    permissionKey: idpsettings
   - identifier: IDP_PLUGIN
     permissionKey: plugin
   - identifier: IDP_SCORECARD

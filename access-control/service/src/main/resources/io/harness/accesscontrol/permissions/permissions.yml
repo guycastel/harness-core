@@ -1418,12 +1418,6 @@ permissions:
     status: ACTIVE
     allowedScopeLevels:
       - account
-  - identifier: idp_idpsettings_manage
-    name: Manage Policies in settings UI
-    status: ACTIVE
-    includedInAllRoles: false
-    allowedScopeLevels:
-      - account
   - identifier: idp_plugin_view
     name: View IDP custom plugins
     status: ACTIVE

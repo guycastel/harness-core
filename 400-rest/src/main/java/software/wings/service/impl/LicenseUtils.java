@@ -23,6 +23,7 @@ import software.wings.beans.account.AccountStatus;
 import software.wings.service.intfc.instance.licensing.InstanceLimitProvider;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Calendar;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,33 @@ public class LicenseUtils {
     }
 
     return encodeBase64(LicenseUtils.getEncryptedLicenseInfo(licenseInfo));
+  }
+
+  /**
+   * @param licenseInfo LicenseInfo of the account
+   * @param expiredBefore Time before which the account should have expired
+   * @return whether the account is expired or not
+   */
+  public boolean isActive(LicenseInfo licenseInfo, Duration expiredBefore) {
+    switch (licenseInfo.getAccountStatus()) {
+      // account can be marked as active even for NG license
+      case AccountStatus.ACTIVE:
+        return licenseInfo.getExpiryTime() <= 0
+            || licenseInfo.getExpiryTime() + expiredBefore.toMillis() > System.currentTimeMillis();
+      case AccountStatus.EXPIRED:
+        // if account was expired some time back, consider it as active
+        return licenseInfo.getExpiryTime() + expiredBefore.toMillis() > System.currentTimeMillis();
+      case AccountStatus.DELETED:
+      case AccountStatus.INACTIVE:
+      case AccountStatus.MARKED_FOR_DELETION:
+        return false;
+      default:
+        return true;
+    }
+  }
+
+  public boolean isActive(LicenseInfo licenseInfo) {
+    return isActive(licenseInfo, Duration.ZERO);
   }
 
   public void addLicenseInfo(Account account) {

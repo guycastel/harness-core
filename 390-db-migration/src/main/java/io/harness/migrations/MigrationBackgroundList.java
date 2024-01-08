@@ -446,6 +446,7 @@ public class MigrationBackgroundList {
         .add(Pair.of(256, EncryptDelegateTokenViaPagination.class))
         .add(Pair.of(257, UpdateOverrideTypeToCustomDelegateImage.class))
         .add(Pair.of(258, UpdateAccountStatusForAllExpiredAccountsMigration.class))
+        .add(Pair.of(259, DisableArtifactCollectionForInactiveAccount.class))
         .build();
   }
 }

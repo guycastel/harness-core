@@ -13,8 +13,10 @@ import io.harness.migrations.Migration;
 import io.harness.persistence.HIterator;
 
 import software.wings.beans.Account;
+import software.wings.beans.LicenseInfo;
 import software.wings.beans.account.AccountStatus;
 import software.wings.dl.WingsPersistence;
+import software.wings.service.impl.LicenseUtils;
 import software.wings.service.intfc.ArtifactStreamService;
 
 import com.google.inject.Inject;
@@ -43,7 +45,7 @@ public class DisableArtifactCollectionForInactiveAccount implements Migration {
   }
 
   private void changeArtifactCollectionStatus(Account account) {
-    if (account.getLicenseInfo() != null && !AccountStatus.ACTIVE.equals(account.getLicenseInfo().getAccountStatus())) {
+    if (account.getLicenseInfo() != null && !LicenseUtils.isActive(account.getLicenseInfo())) {
       log.info("Disabling artifact collection for account {}", account.getUuid());
       artifactStreamService.stopArtifactCollectionForAccount(account.getUuid());
     }

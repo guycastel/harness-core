@@ -28,6 +28,7 @@ import io.harness.models.ActiveServiceInstanceInfoV2;
 import io.harness.models.ActiveServiceInstanceInfoWithEnvType;
 import io.harness.models.ArtifactDeploymentDetailModel;
 import io.harness.models.CountByServiceIdAndEnvType;
+import io.harness.models.CountByServiceIdEnvTypeAndEnvId;
 import io.harness.models.EnvBuildInstanceCount;
 import io.harness.models.EnvironmentInstanceCountModel;
 import io.harness.models.InstanceGroupedByPipelineExecution;
@@ -314,6 +315,18 @@ public class InstanceServiceImpl implements InstanceService {
     return instanceRepository.getActiveServiceInstanceCountBreakdown(
         accountIdentifier, orgIdentifier, projectIdentifier, serviceId, timestampInMs);
   }
+
+  /*
+    Returns breakup of active instances by envId at a given timestamp for specified accountIdentifier,
+    projectIdentifier, orgIdentifier and serviceIds
+  */
+  @Override
+  public List<CountByServiceIdEnvTypeAndEnvId> getActiveServiceInstanceCountBreakdownByEnvId(
+      String accountIdentifier, String orgIdentifier, String projectIdentifier, String serviceId, long timestampInMs) {
+    return instanceRepository.getActiveServiceInstanceCountBreakdownByEnvId(
+        accountIdentifier, orgIdentifier, projectIdentifier, serviceId, timestampInMs);
+  }
+
   @Override
   public void updateInfrastructureMapping(List<String> instanceIds, String infrastructureMappingId) {
     for (String instanceId : instanceIds) {

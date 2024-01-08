@@ -27,6 +27,7 @@ import io.harness.models.ActiveServiceInstanceInfoWithEnvType;
 import io.harness.models.ArtifactDeploymentDetailModel;
 import io.harness.models.CountByOrgIdProjectIdAndServiceId;
 import io.harness.models.CountByServiceIdAndEnvType;
+import io.harness.models.CountByServiceIdEnvTypeAndEnvId;
 import io.harness.models.EnvBuildInstanceCount;
 import io.harness.models.EnvironmentInstanceCountModel;
 import io.harness.models.InstanceGroupedByPipelineExecution;
@@ -676,7 +677,50 @@ public class InstanceRepositoryCustomImpl implements InstanceRepositoryCustom {
     return result;
   }
 
+  /*
+    Returns breakup of active instances by envId at a given timestamp for specified accountIdentifier,
+    projectIdentifier, orgIdentifier and serviceId
+  */
+  @Override
+  public List<CountByServiceIdEnvTypeAndEnvId> getActiveServiceInstanceCountBreakdownByEnvId(
+      String accountIdentifier, String orgIdentifier, String projectIdentifier, String serviceId, long timestampInMs) {
+    final MutuallyExclusiveCriteriaSet criteriaSet =
+        getCriteriaSetForActiveInstances(accountIdentifier, orgIdentifier, projectIdentifier, timestampInMs);
+
+    final Criteria criteria1 = criteriaSet.getCriteria1().and(InstanceKeys.serviceIdentifier).is(serviceId);
+    final Criteria criteria2 = criteriaSet.getCriteria2().and(InstanceKeys.serviceIdentifier).is(serviceId);
+
+    final Function<Criteria, List<CountByServiceIdEnvTypeAndEnvId>> aggregateFunc = criteria -> {
+      MatchOperation matchStage = Aggregation.match(criteria);
+      GroupOperation groupEnvId =
+          group(InstanceKeys.serviceIdentifier, InstanceKeys.envType, InstanceKeys.envIdentifier, InstanceKeys.envName)
+              .count()
+              .as(InstanceSyncConstants.COUNT);
+      return secondaryMongoTemplate
+          .aggregate(newAggregation(matchStage, groupEnvId, CountByServiceIdEnvTypeAndEnvId.getProjection()),
+              Instance.class, CountByServiceIdEnvTypeAndEnvId.class)
+          .getMappedResults();
+    };
+
+    final List<CountByServiceIdEnvTypeAndEnvId> aggregate1 = aggregateFunc.apply(criteria1);
+    final List<CountByServiceIdEnvTypeAndEnvId> aggregate2 = aggregateFunc.apply(criteria2);
+
+    Map<serviceIdentifierEnvIdRecord, List<CountByServiceIdEnvTypeAndEnvId>> collect =
+        Stream.concat(aggregate1.stream(), aggregate2.stream())
+            .collect(Collectors.groupingBy(
+                c -> new serviceIdentifierEnvIdRecord(c.getServiceIdentifier(), c.getEnvType(), c.getEnvIdentifier())));
+
+    final List<CountByServiceIdEnvTypeAndEnvId> result = new ArrayList<>();
+    collect.forEach(
+        (k, v)
+            -> result.add(new CountByServiceIdEnvTypeAndEnvId(k.serviceIdentifier(), k.envType(), k.envIdentifier(),
+                v.stream().map(CountByServiceIdEnvTypeAndEnvId::getCount).reduce(0, Integer::sum))));
+
+    return result;
+  }
+
   public record serviceIdentifierEnvTypeRecord(String serviceIdentifier, EnvironmentType envType) {}
+  public record serviceIdentifierEnvIdRecord(String serviceIdentifier, EnvironmentType envType, String envIdentifier) {}
 
   /*
     Create criteria to query for all active service instances for given accountIdentifier, orgIdentifier,

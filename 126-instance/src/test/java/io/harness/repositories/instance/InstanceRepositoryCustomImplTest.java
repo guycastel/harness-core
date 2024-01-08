@@ -10,6 +10,7 @@ package io.harness.repositories.instance;
 import static io.harness.rule.OwnerRule.BUHA;
 import static io.harness.rule.OwnerRule.MEENA;
 import static io.harness.rule.OwnerRule.PIYUSH_BHUWALKA;
+import static io.harness.rule.OwnerRule.RISHABH;
 import static io.harness.rule.OwnerRule.VIKYATH_HAREKAL;
 
 import static java.util.Comparator.comparingInt;
@@ -27,6 +28,7 @@ import io.harness.entities.Instance.InstanceKeys;
 import io.harness.entities.Instance.InstanceKeysAdditional;
 import io.harness.models.ActiveServiceInstanceInfo;
 import io.harness.models.CountByServiceIdAndEnvType;
+import io.harness.models.CountByServiceIdEnvTypeAndEnvId;
 import io.harness.models.EnvBuildInstanceCount;
 import io.harness.models.InstancesByBuildId;
 import io.harness.mongo.helper.AnalyticsMongoTemplateHolder;
@@ -362,6 +364,38 @@ public class InstanceRepositoryCustomImplTest extends InstancesTestBase {
 
     verify(secondaryMongoTemplate, times(2))
         .aggregate(any(Aggregation.class), eq(Instance.class), eq(CountByServiceIdAndEnvType.class));
+  }
+
+  @Test
+  @Owner(developers = RISHABH)
+  @Category(UnitTests.class)
+  public void getActiveServiceInstanceCountBreakdownByEnvIdTest() {
+    when(secondaryMongoTemplate.aggregate(
+             any(Aggregation.class), eq(Instance.class), eq(CountByServiceIdEnvTypeAndEnvId.class)))
+        .thenReturn(new AggregationResults<>(
+            List.of(new CountByServiceIdEnvTypeAndEnvId(SERVICE_ID, EnvironmentType.PreProduction, "env1", COUNT)),
+            new Document()))
+        .thenReturn(new AggregationResults<>(
+            List.of(new CountByServiceIdEnvTypeAndEnvId(SERVICE_ID, EnvironmentType.PreProduction, "env2", COUNT + 3)),
+            new Document()));
+
+    List<CountByServiceIdEnvTypeAndEnvId> result =
+        instanceRepositoryCustom.getActiveServiceInstanceCountBreakdownByEnvId(
+            ACCOUNT_ID, ORGANIZATION_ID, PROJECT_ID, SERVICE_ID, TIMESTAMP);
+    // guarantee list order
+    result.sort(comparingInt(CountByServiceIdEnvTypeAndEnvId::getCount));
+
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).getCount()).isEqualTo(COUNT);
+    assertThat(result.get(0).getServiceIdentifier()).isEqualTo(SERVICE_ID);
+    assertThat(result.get(0).getEnvIdentifier()).isEqualTo("env1");
+
+    assertThat(result.get(1).getCount()).isEqualTo(COUNT + 3);
+    assertThat(result.get(1).getServiceIdentifier()).isEqualTo(SERVICE_ID);
+    assertThat(result.get(1).getEnvIdentifier()).isEqualTo("env2");
+
+    verify(secondaryMongoTemplate, times(2))
+        .aggregate(any(Aggregation.class), eq(Instance.class), eq(CountByServiceIdEnvTypeAndEnvId.class));
   }
 
   @Test

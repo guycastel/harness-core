@@ -4,5 +4,6 @@ metricGroup: event_times_group
 metrics:
   - metricName: event_process_time
     metricDefinition: Time taken for by redis event for processing
-    type: LastValue
-    unit: count
+    type: Duration
+    distribution: [ 0m, 15s, 30s, 1m, 2m, 4m, 8m, 16m, 32m ]
+    unit: "ms"

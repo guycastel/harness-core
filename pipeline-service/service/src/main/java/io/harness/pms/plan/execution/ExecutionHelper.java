@@ -54,6 +54,7 @@ import io.harness.gitaware.helper.GitAwareContextHelper;
 import io.harness.gitsync.beans.StoreType;
 import io.harness.gitsync.sdk.EntityGitDetails;
 import io.harness.logging.AutoLogContext;
+import io.harness.metrics.service.api.MetricService;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.ng.core.template.TemplateMergeResponseDTO;
 import io.harness.ngsettings.SettingCategory;
@@ -72,6 +73,7 @@ import io.harness.pms.contracts.plan.PipelineStoreType;
 import io.harness.pms.contracts.plan.PlanCreationBlobResponse;
 import io.harness.pms.contracts.plan.RerunInfo;
 import io.harness.pms.contracts.plan.RetryExecutionInfo;
+import io.harness.pms.events.base.PmsMetricContextGuard;
 import io.harness.pms.exception.PmsExceptionUtils;
 import io.harness.pms.expression.helper.InputSetMergeHelperV1;
 import io.harness.pms.gitsync.PmsGitSyncHelper;
@@ -176,6 +178,7 @@ public class ExecutionHelper {
   RollbackGraphGenerator rollbackGraphGenerator;
   YamlPreProcessorFactory yamlPreProcessorFactory;
   NodeTypeLookupService nodeTypeLookupService;
+  MetricService metricService;
 
   // Add all FFs to this list that we want to use during pipeline execution
   public final List<FeatureName> featureNames =
@@ -184,6 +187,7 @@ public class ExecutionHelper {
           PIE_SECRETS_OBSERVER, CDS_DIVIDE_SDK_RESPONSE_EVENTS_IN_DIFF_STREAMS, CDS_INPUT_YAML_IN_WEBHOOK_NOTIFICATION,
           CDS_NG_STRATEGY_IDENTIFIER_POSTFIX_TRUNCATION_REFACTOR);
   public static final String PMS_EXECUTION_SETTINGS_GROUP_IDENTIFIER = "pms_execution_settings";
+  public static final String PLAN_CREATION_TIME_METRIC_NAME = "plan_creation_time";
 
   public PipelineEntity fetchPipelineEntity(@NotNull String accountId, @NotNull String orgIdentifier,
       @NotNull String projectIdentifier, @NotNull String pipelineIdentifier) {
@@ -615,6 +619,9 @@ public class ExecutionHelper {
                                                       .put(SetupAbstractionKeys.projectIdentifier, projectIdentifier)
                                                       .build();
       long endTs = System.currentTimeMillis();
+      try (PmsMetricContextGuard pmsMetricContextGuard = new PmsMetricContextGuard(abstractions)) {
+        metricService.recordMetric(PLAN_CREATION_TIME_METRIC_NAME, endTs - startTs);
+      }
       log.info("[PMS_PLAN] Time taken to complete plan: {}ms ", endTs - startTs);
 
       List<Node> planNodesList = plan.getPlanNodes();

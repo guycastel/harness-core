@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -52,6 +53,7 @@ import io.harness.execution.PlanExecution.PlanExecutionKeys;
 import io.harness.execution.PlanExecutionMetadata;
 import io.harness.gitaware.helper.GitAwareContextHelper;
 import io.harness.gitsync.beans.StoreType;
+import io.harness.metrics.service.api.MetricService;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.ng.core.template.TemplateMergeResponseDTO;
 import io.harness.ngsettings.SettingValueType;
@@ -136,6 +138,7 @@ public class ExecutionHelperTest extends CategoryTest {
   @Mock PipelineRbacService pipelineRbacServiceImpl;
   @Mock PlanCreatorMergeService planCreatorMergeService;
   @Mock PipelineEnforcementService pipelineEnforcementService;
+  @Mock MetricService metricService;
   @Mock OrchestrationService orchestrationService;
   @Mock PlanExecutionMetadataService planExecutionMetadataService;
   @Mock PMSPipelineTemplateHelper pipelineTemplateHelper;
@@ -240,6 +243,7 @@ public class ExecutionHelperTest extends CategoryTest {
         ExecutionTriggerInfo.newBuilder().setTriggeredBy(triggeredBy).setTriggerType(MANUAL).setIsRerun(false).build();
     executionPrincipalInfo = ExecutionPrincipalInfo.newBuilder().build();
     doNothing().when(pipelineEnforcementService).validateExecutionEnforcementsBasedOnStage(anyString(), any());
+    doNothing().when(metricService).recordMetric(anyString(), anyDouble());
     aStatic = Mockito.mockStatic(UUIDGenerator.class);
     aStatic.when(UUIDGenerator::generateUuid).thenReturn(generatedExecutionId);
 

@@ -527,6 +527,7 @@ replace_key_value segmentConfiguration.certValidationRequired "$SEGMENT_VERIFY_C
 replace_key_value delegateSelectorsCacheMode "$DELEGATE_SELECTORS_CACHE_MODE"
 replace_key_value enableMetrics "$ENABLE_METRICS"
 replace_key_value customPlugins.triggerPipelineUrl "$CUSTOM_PLUGINS_TRIGGER_PIPELINE_URL"
+replace_key_value customPlugins.bucketName "$CUSTOM_PLUGINS_BUCKET_NAME"
 replace_key_value enforcementClientConfiguration.enforcementCheckEnabled "$ENFORCEMENT_CHECK_ENABLED"
 replace_key_value accessControlAdminClient.accessControlServiceConfig.baseUrl "$ACCESS_CONTROL_BASE_URL"
 replace_key_value accessControlAdminClient.accessControlServiceSecret "$ACCESS_CONTROL_SECRET"

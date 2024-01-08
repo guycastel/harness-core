@@ -8,7 +8,6 @@
 package io.harness.idp.plugin.services;
 
 import static io.harness.idp.common.Constants.PLUGIN_REQUEST_NOTIFICATION_SLACK_WEBHOOK;
-import static io.harness.idp.plugin.services.PluginInfoServiceImpl.CUSTOM_PLUGINS_BUCKET_NAME;
 import static io.harness.idp.plugin.services.PluginInfoServiceImpl.CUSTOM_PLUGIN_IDENTIFIER_FORMAT;
 import static io.harness.idp.plugin.services.PluginInfoServiceImpl.IMAGES_DIR;
 import static io.harness.idp.plugin.services.PluginInfoServiceImpl.METADATA_FILE_NAME;
@@ -46,6 +45,7 @@ import io.harness.idp.configmanager.utils.ConfigType;
 import io.harness.idp.envvariable.service.BackstageEnvVariableService;
 import io.harness.idp.plugin.beans.ExportsData;
 import io.harness.idp.plugin.beans.FileType;
+import io.harness.idp.plugin.config.CustomPluginsConfig;
 import io.harness.idp.plugin.entities.CustomPluginInfoEntity;
 import io.harness.idp.plugin.entities.DefaultPluginInfoEntity;
 import io.harness.idp.plugin.entities.PluginInfoEntity;
@@ -89,6 +89,7 @@ import org.springframework.data.domain.PageImpl;
 
 @OwnedBy(HarnessTeam.IDP)
 public class PluginInfoServiceImplTest {
+  private static final String CUSTOM_PLUGINS_BUCKET_NAME = "idp-custom-plugins";
   private static final String CUSTOM_PLUGIN_IDENTIFIER_PREFIX = "my_custom_plugin_";
   private static final String CUSTOM_PLUGIN_ID = "my_custom_plugin_odkfjvw";
   private static final String TEST_GCS_BUCKET_URL =
@@ -104,6 +105,7 @@ public class PluginInfoServiceImplTest {
   @Mock private HashMap<String, String> notificationConfigs = new HashMap<>();
   @Mock private GcpStorageUtil gcpStorageUtil;
   @Mock private CustomPluginService customPluginService;
+  @Mock private CustomPluginsConfig customPluginsConfig;
   private Map<PluginInfo.PluginTypeEnum, PluginDetailedInfoMapper> mapBinder;
   private final ObjectMapper objectMapper = mock(ObjectMapper.class);
 
@@ -127,9 +129,11 @@ public class PluginInfoServiceImplTest {
     PluginDetailedInfoMapper<?, ?> customPluginDetailedInfoMapper = new CustomPluginDetailedInfoMapper();
     mapBinder = Map.of(PluginInfo.PluginTypeEnum.DEFAULT, defaultPluginDetailedInfoMapper,
         PluginInfo.PluginTypeEnum.CUSTOM, customPluginDetailedInfoMapper);
-    pluginInfoServiceImpl = new PluginInfoServiceImpl(pluginInfoRepository, pluginRequestRepository,
-        configManagerService, configEnvVariablesService, backstageEnvVariableService, pluginsProxyInfoService,
-        idpCommonService, "local", notificationConfigs, mapBinder, gcpStorageUtil, customPluginService);
+    when(customPluginsConfig.getBucketName()).thenReturn(CUSTOM_PLUGINS_BUCKET_NAME);
+    pluginInfoServiceImpl =
+        new PluginInfoServiceImpl(pluginInfoRepository, pluginRequestRepository, configManagerService,
+            configEnvVariablesService, backstageEnvVariableService, pluginsProxyInfoService, idpCommonService, "local",
+            notificationConfigs, mapBinder, gcpStorageUtil, customPluginService, customPluginsConfig);
   }
 
   @Test

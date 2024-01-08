@@ -82,6 +82,7 @@ data:
   PROXY_ALLOW_LIST_CONFIG_SERVICES: |-
 {{ toYaml .Values.proxyAllowListConfigServices | indent 4 }}
   CUSTOM_PLUGINS_TRIGGER_PIPELINE_URL: {{.Values.customPluginsTriggerPipelineUrl}}
+  CUSTOM_PLUGINS_BUCKET_NAME: {{.Values.customPluginsBucketName}}
   ENFORCEMENT_CHECK_ENABLED: "true"
   ENTITY_CRUD_CONSUMER_THREADS: {{.Values.entityCrudConsumerThreads}}
   IDP_MODULE_LICENSE_USAGE_CAPTURE_EVENT_CONSUMER_THREADS: {{.Values.idpModuleLicenseUsageCaptureEventConsumerThreads}}

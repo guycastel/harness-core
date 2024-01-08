@@ -21,4 +21,5 @@ import lombok.experimental.FieldDefaults;
 @OwnedBy(HarnessTeam.IDP)
 public class CustomPluginsConfig {
   String triggerPipelineUrl;
+  String bucketName;
 }

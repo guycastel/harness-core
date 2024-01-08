@@ -29,6 +29,7 @@ import io.harness.idp.configmanager.utils.ConfigManagerUtils;
 import io.harness.idp.configmanager.utils.ConfigType;
 import io.harness.idp.envvariable.service.BackstageEnvVariableService;
 import io.harness.idp.plugin.beans.FileType;
+import io.harness.idp.plugin.config.CustomPluginsConfig;
 import io.harness.idp.plugin.entities.CustomPluginInfoEntity;
 import io.harness.idp.plugin.entities.DefaultPluginInfoEntity;
 import io.harness.idp.plugin.entities.PluginInfoEntity;
@@ -67,7 +68,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.ws.rs.NotFoundException;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -80,14 +80,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Criteria;
 
 @OwnedBy(HarnessTeam.IDP)
-@AllArgsConstructor(onConstructor = @__({ @Inject }))
 @Slf4j
 public class PluginInfoServiceImpl implements PluginInfoService {
   private static final String METADATA_FOLDER = "metadata/";
   private static final String YAML_EXT = ".yaml";
   static final int RANDOM_STRING_LENGTH = 6;
   static final String CUSTOM_PLUGIN_IDENTIFIER_FORMAT = "my_custom_plugin_%s";
-  static final String CUSTOM_PLUGINS_BUCKET_NAME = "idp-custom-plugins";
   private static final String PATH_SEPARATOR = "/";
   private static final String FILE_NAME_SEPARATOR = "_";
   private static final String ZIP_EXTENSION = "zip";
@@ -105,19 +103,44 @@ public class PluginInfoServiceImpl implements PluginInfoService {
   static final String METADATA_FILE_NAME = "metadata.yaml";
   private static final String PLUGINS_DIR = "plugins";
   static final String IMAGES_DIR = "static";
-  private PluginInfoRepository pluginInfoRepository;
-  private PluginRequestRepository pluginRequestRepository;
-  private ConfigManagerService configManagerService;
-  private ConfigEnvVariablesService configEnvVariablesService;
-  private BackstageEnvVariableService backstageEnvVariableService;
-  private PluginsProxyInfoService pluginsProxyInfoService;
-  private IdpCommonService idpCommonService;
-  @Inject @Named("env") private String env;
-  @Inject @Named("notificationConfigs") HashMap<String, String> notificationConfigs;
-  Map<PluginInfo.PluginTypeEnum, PluginDetailedInfoMapper> pluginDetailedInfoMapperMap;
-  private GcpStorageUtil gcpStorageUtil;
-  private CustomPluginService customPluginService;
+  private final PluginInfoRepository pluginInfoRepository;
+  private final PluginRequestRepository pluginRequestRepository;
+  private final ConfigManagerService configManagerService;
+  private final ConfigEnvVariablesService configEnvVariablesService;
+  private final BackstageEnvVariableService backstageEnvVariableService;
+  private final PluginsProxyInfoService pluginsProxyInfoService;
+  private final IdpCommonService idpCommonService;
+  private final String env;
+  private final HashMap<String, String> notificationConfigs;
+  private final Map<PluginInfo.PluginTypeEnum, PluginDetailedInfoMapper> pluginDetailedInfoMapperMap;
+  private final GcpStorageUtil gcpStorageUtil;
+  private final CustomPluginService customPluginService;
+  private final CustomPluginsConfig customPluginsConfig;
   private static final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+
+  @Inject
+  public PluginInfoServiceImpl(PluginInfoRepository pluginInfoRepository,
+      PluginRequestRepository pluginRequestRepository, ConfigManagerService configManagerService,
+      ConfigEnvVariablesService configEnvVariablesService, BackstageEnvVariableService backstageEnvVariableService,
+      PluginsProxyInfoService pluginsProxyInfoService, IdpCommonService idpCommonService, @Named("env") String env,
+      @Named("notificationConfigs") HashMap<String, String> notificationConfigs,
+      Map<PluginInfo.PluginTypeEnum, PluginDetailedInfoMapper> pluginDetailedInfoMapperMap,
+      GcpStorageUtil gcpStorageUtil, CustomPluginService customPluginService,
+      @Named("customPlugins") CustomPluginsConfig customPluginsConfig) {
+    this.pluginInfoRepository = pluginInfoRepository;
+    this.pluginRequestRepository = pluginRequestRepository;
+    this.configManagerService = configManagerService;
+    this.configEnvVariablesService = configEnvVariablesService;
+    this.backstageEnvVariableService = backstageEnvVariableService;
+    this.pluginsProxyInfoService = pluginsProxyInfoService;
+    this.idpCommonService = idpCommonService;
+    this.env = env;
+    this.notificationConfigs = notificationConfigs;
+    this.pluginDetailedInfoMapperMap = pluginDetailedInfoMapperMap;
+    this.gcpStorageUtil = gcpStorageUtil;
+    this.customPluginService = customPluginService;
+    this.customPluginsConfig = customPluginsConfig;
+  }
 
   @Override
   public List<PluginInfo> getAllPluginsInfo(String accountId) {
@@ -242,7 +265,7 @@ public class PluginInfoServiceImpl implements PluginInfoService {
     String fileName = getFileNamePrefix(fileType, pluginId, harnessAccount)
         + RandomStringUtils.randomAlphanumeric(RANDOM_STRING_LENGTH) + "." + fileExtension;
     String gcsBucketUrl =
-        gcpStorageUtil.uploadFileToGcs(CUSTOM_PLUGINS_BUCKET_NAME, filePath, fileName, fileInputStream);
+        gcpStorageUtil.uploadFileToGcs(customPluginsConfig.getBucketName(), filePath, fileName, fileInputStream);
 
     Optional<PluginInfoEntity> entityOpt = pluginInfoRepository.findByIdentifierAndAccountIdentifierAndType(
         pluginId, harnessAccount, PluginInfo.PluginTypeEnum.CUSTOM);
@@ -319,7 +342,7 @@ public class PluginInfoServiceImpl implements PluginInfoService {
       yamlBuilder.append(pluginYaml);
     }
     String filePath = getArtifactFilePath(accountIdentifier);
-    gcpStorageUtil.uploadFileToGcs(CUSTOM_PLUGINS_BUCKET_NAME, filePath, METADATA_FILE_NAME,
+    gcpStorageUtil.uploadFileToGcs(customPluginsConfig.getBucketName(), filePath, METADATA_FILE_NAME,
         new ByteArrayInputStream(yamlBuilder.toString().getBytes()));
   }
 

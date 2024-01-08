@@ -473,6 +473,7 @@ allowedKindsForAudit:
 
 customPlugins:
   triggerPipelineUrl: ""
+  bucketName: idp-custom-plugins
 
 debeziumConsumersConfigs:
   backstageCatalog:

@@ -19,9 +19,12 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.TargetModule;
 import io.harness.scheduler.PersistentScheduler;
 
+import software.wings.beans.Account;
 import software.wings.beans.trigger.ScheduledTriggerCondition;
 import software.wings.beans.trigger.Trigger;
 import software.wings.dl.WingsPersistence;
+import software.wings.service.impl.LicenseUtils;
+import software.wings.service.intfc.AccountService;
 import software.wings.service.intfc.AppService;
 import software.wings.service.intfc.TriggerService;
 
@@ -52,6 +55,7 @@ public class ScheduledTriggerJob implements Job {
   @Inject private TriggerService triggerService;
   @Inject private AppService appService;
   @Inject @Named("BackgroundJobScheduler") private PersistentScheduler jobScheduler;
+  @Inject private AccountService accountService;
 
   public static org.quartz.Trigger getQuartzTrigger(Trigger trigger) {
     return TriggerBuilder.newTrigger()
@@ -92,10 +96,19 @@ public class ScheduledTriggerJob implements Job {
       jobScheduler.deleteJob(triggerId, GROUP);
       return;
     }
+
+    final Account account = accountService.get(accountId);
+    if (!LicenseUtils.isActive(account.getLicenseInfo())) {
+      log.warn(
+          "Scheduled Trigger job running for expired account {}, appId {}, triggerId {}", accountId, appId, triggerId);
+      return;
+    }
+
     log.warn("Trigger running with quartz scheduler and not iterator framework with appId - {} and triggerId - {}",
         appId, triggerId);
     log.info("Triggering scheduled job for appId {} and triggerId {} with the scheduled fire time {}", appId, triggerId,
         jobExecutionContext.getNextFireTime());
+
     triggerService.triggerScheduledExecutionAsync(trigger, jobExecutionContext.getNextFireTime());
 
     // Old cron jobs doesn't have accountId. Will need to recreate with accountId as part of the job details

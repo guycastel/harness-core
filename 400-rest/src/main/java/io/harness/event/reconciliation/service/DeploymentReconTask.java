@@ -6,6 +6,7 @@
  */
 
 package io.harness.event.reconciliation.service;
+
 import static io.harness.maintenance.MaintenanceController.getMaintenanceFlag;
 import static io.harness.mongo.MongoConfig.NO_LIMIT;
 
@@ -25,11 +26,11 @@ import io.harness.persistence.HIterator;
 
 import software.wings.beans.Account;
 import software.wings.beans.WorkflowExecution;
-import software.wings.beans.account.AccountStatus;
 import software.wings.beans.datatretention.LongerDataRetentionState;
 import software.wings.core.managerConfiguration.ConfigurationController;
 import software.wings.search.entities.deployment.DeploymentExecutionEntity;
 import software.wings.search.framework.ExecutionEntity;
+import software.wings.service.impl.LicenseUtils;
 import software.wings.service.intfc.AccountService;
 
 import com.google.inject.Inject;
@@ -83,8 +84,7 @@ public class DeploymentReconTask implements Runnable {
       Query<Account> query = accountService.getBasicAccountWithLicenseInfoQuery().limit(NO_LIMIT);
       try (HIterator<Account> iterator = new HIterator<>(query.fetch())) {
         for (Account account : iterator) {
-          if (account.getLicenseInfo() == null
-              || !AccountStatus.ACTIVE.equals(account.getLicenseInfo().getAccountStatus())) {
+          if (account.getLicenseInfo() == null || !LicenseUtils.isActive(account.getLicenseInfo())) {
             continue;
           }
           for (ExecutionEntity executionEntity : executionEntities) {

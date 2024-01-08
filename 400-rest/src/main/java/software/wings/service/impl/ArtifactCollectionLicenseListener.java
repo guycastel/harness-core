@@ -8,7 +8,6 @@
 package software.wings.service.impl;
 
 import software.wings.beans.Account;
-import software.wings.beans.account.AccountStatus;
 import software.wings.service.intfc.AccountService;
 import software.wings.service.intfc.ArtifactStreamService;
 import software.wings.service.intfc.account.AccountLicenseObserver;
@@ -25,7 +24,7 @@ public class ArtifactCollectionLicenseListener implements AccountLicenseObserver
 
   @Override
   public boolean onLicenseChange(Account account) {
-    if (account.getLicenseInfo() != null && AccountStatus.ACTIVE.equals(account.getLicenseInfo().getAccountStatus())) {
+    if (account.getLicenseInfo() != null && LicenseUtils.isActive(account.getLicenseInfo())) {
       log.info("Enabling artifact collection for accountId {}", account.getUuid());
       return artifactStreamService.resetStoppedArtifactCollectionForAccount(account.getUuid());
     } else {

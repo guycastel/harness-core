@@ -21,10 +21,10 @@ import io.harness.scheduler.PersistentScheduler;
 
 import software.wings.beans.Account;
 import software.wings.beans.LicenseInfo;
-import software.wings.beans.account.AccountStatus;
 import software.wings.beans.datatretention.LongerDataRetentionState;
 import software.wings.beans.instance.dashboard.InstanceStatsUtils;
 import software.wings.exception.AccountNotFoundException;
+import software.wings.service.impl.LicenseUtils;
 import software.wings.service.intfc.AccountService;
 import software.wings.service.intfc.instance.licensing.InstanceUsageLimitExcessHandler;
 import software.wings.service.intfc.instance.stats.InstanceStatService;
@@ -169,17 +169,9 @@ public class InstanceStatsCollectorJob implements Job {
   private boolean shouldSkipStatsCollection(LicenseInfo licenseInfo, String accountId) {
     if (featureFlagService.isEnabled(FeatureName.DISABLE_INSTANCE_STATS_JOB_CG, accountId)) {
       return true;
-    } else if (AccountStatus.ACTIVE.equals(licenseInfo.getAccountStatus())) {
-      return false;
-    } else if (AccountStatus.DELETED.equals(licenseInfo.getAccountStatus())
-        || AccountStatus.INACTIVE.equals(licenseInfo.getAccountStatus())
-        || AccountStatus.MARKED_FOR_DELETION.equals(licenseInfo.getAccountStatus())) {
-      return true;
-    } else if (AccountStatus.EXPIRED.equals(licenseInfo.getAccountStatus())
-        && System.currentTimeMillis() > (licenseInfo.getExpiryTime() + TWO_MONTH_IN_MILLIS)) {
-      return true;
     }
-    return false;
+
+    return !LicenseUtils.isActive(licenseInfo, Duration.ofMillis(TWO_MONTH_IN_MILLIS));
   }
 
   @VisibleForTesting

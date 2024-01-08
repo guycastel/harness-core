@@ -7,11 +7,7 @@
 set -x
 
 if [[ -z "$PMS_SDK_SERVER_CONFIG_PORT" ]]; then
-   export PMS_SDK_SERVER_CONFIG_PORT=14302
-fi
-
-if [[ -z "$PMS_SDK_SERVER_CONFIG_SECURE_PORT" ]]; then
-   export PMS_SDK_SERVER_CONFIG_SECURE_PORT=14301
+   export PMS_SDK_SERVER_CONFIG_PORT=14301
 fi
 
 if [[ -z "$SERVER_ADMIN_HTTPS_PORT" ]]; then

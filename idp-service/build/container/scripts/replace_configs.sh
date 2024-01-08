@@ -794,3 +794,6 @@ fi
 if [[ "" != "$APP_CONFIGS_REDIS_EVENT_CONSUMER_THREADS" ]]; then
   export APP_CONFIGS_REDIS_EVENT_CONSUMER_THREADS; yq -i '.numberOfThreadsToUseForConsumers.APP_CONFIGS_REDIS_EVENT_CONSUMER_THREADS=env(APP_CONFIGS_REDIS_EVENT_CONSUMER_THREADS)' $CONFIG_FILE
 fi
+#Changes to use internal connection urls for PMS client gRPC
+replace_key_value pmsGrpcClientConfig.target "$INTERNAL_PMS_TARGET"
+replace_key_value pmsGrpcClientConfig.authority "$INTERNAL_PMS_AUTHORITY"

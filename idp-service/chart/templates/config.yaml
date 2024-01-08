@@ -95,3 +95,6 @@ data:
   BACKSTAGE_HTTP_CLIENT_CP_KEEP_ALIVE_DURATION: {{.Values.backstageHttpClientCpKeepAliveDuration}}
   BACKSTAGE_HTTP_CLIENT_CP_TIME_UNIT: {{.Values.backstageHttpClientCpTimeUnit}}
   RESOURCE_GROUP_BASE_URL: 'http://platform-service.{{ .Release.Namespace }}.svc.cluster.local:9005/api/'
+  #Changes to use internal connection urls for PMS client gRPC
+  INTERNAL_PMS_TARGET: pipeline-service:12011
+  INTERNAL_PMS_AUTHORITY: pipeline-service:12011

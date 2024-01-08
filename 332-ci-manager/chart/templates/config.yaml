@@ -62,6 +62,9 @@ data:
 
   # The following image variables are just for the reference and do not impact any functionality
   HARNESS_CODE_GIT_URL: '{{ .Values.global.loadbalancerURL }}/code/git'
+  #Changes to use internal connection urls for PMS client gRPC
+  INTERNAL_PMS_TARGET: pipeline-service:12011
+  INTERNAL_PMS_AUTHORITY: pipeline-service:12011
   {{ include "harnesscommon.harnessfunctions.java17flags" (dict "context" $) | nindent 2 }}
 {{- if .Values.additionalConfigs }}
   {{- toYaml .Values.additionalConfigs | nindent 2 }}

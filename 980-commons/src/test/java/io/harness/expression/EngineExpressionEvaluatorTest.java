@@ -503,6 +503,16 @@ public class EngineExpressionEvaluatorTest extends CategoryTest {
                    + "||\n"
                    + "<+c21.anotherStatus> == \"IGNORE_FAILED\")"))
         .isEqualTo(true);
+    assertThat(evaluator.evaluateExpression(
+                   "<+c2.status> == \"SUCCESS\" ||\r\n<+c2.status> == \"END2\" && (<+c21.anotherStatus> == \"END-1\"\n"
+                   + "||\n"
+                   + "<+c21.anotherStatus> == \"IGNORE_FAILED\")"))
+        .isEqualTo(false);
+    assertThat(evaluator.evaluateExpression(
+                   "<+c2.status> == \"SUCCESS\" ||\t\n <+c2.status> == \"END2\" && (<+c21.anotherStatus> == \"END-1\"\n"
+                   + "||\n"
+                   + "<+c21.anotherStatus> == \"IGNORE_FAILED\")"))
+        .isEqualTo(false);
     assertThat(
         evaluator.evaluateExpression(
             "<+c2.status> == \"RUNNING\" && (empty(<+json.select(\"values[?(@.name == 'Stratos <+company>')].id\",<+variables.v19>)>))"))
@@ -793,6 +803,16 @@ public class EngineExpressionEvaluatorTest extends CategoryTest {
     // or operator
     assertThat(evaluator.evaluateExpression("<+c2.status> == \"RUNNING\" or <+c2.anotherStatus> != \"IGNORE_FAILED\""))
         .isEqualTo(true);
+
+    assertThat(
+        evaluator.evaluateExpression("<+c2.status> == \"SUCCESS\" or\t <+c2.anotherStatus> != \"IGNORE_FAILED\""))
+        .isEqualTo(false);
+    assertThat(
+        evaluator.evaluateExpression("<+c2.status> == \"SUCCESS\" or\r <+c2.anotherStatus> != \"IGNORE_FAILED\""))
+        .isEqualTo(false);
+    assertThat(
+        evaluator.evaluateExpression("<+c2.status> == \"SUCCESS\" or\n <+c2.anotherStatus> != \"IGNORE_FAILED\""))
+        .isEqualTo(false);
     // =~ operator
     assertThat(evaluator.evaluateExpression("<+c2.status> =~ \"RUNNING\" and <+c2.anotherStatus> != \"IGNORE_FAILED\""))
         .isEqualTo(false);

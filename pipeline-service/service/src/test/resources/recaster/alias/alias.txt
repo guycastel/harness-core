@@ -474,3 +474,5 @@ io.harness.steps.shellscript.v1.ExportScopeV1
 io.harness.steps.http.v1.HttpStepParameters
 io.harness.steps.http.v1.HttpOutcome
 io.harness.plancreator.steps.common.v1.StageElementParametersV1
+io.harness.steps.approval.step.jira.v1.JiraApprovalStepParameters
+io.harness.steps.wait.v1.WaitStepParameters

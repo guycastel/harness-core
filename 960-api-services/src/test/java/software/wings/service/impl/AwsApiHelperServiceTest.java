@@ -9,6 +9,7 @@ package software.wings.service.impl;
 
 import static io.harness.rule.OwnerRule.ABHINAV2;
 import static io.harness.rule.OwnerRule.DEEPAK_PUTHRAYA;
+import static io.harness.rule.OwnerRule.RAKSHIT_AGARWAL;
 import static io.harness.rule.OwnerRule.vivekveman;
 
 import static software.wings.service.impl.aws.model.AwsConstants.DEFAULT_BACKOFF_MAX_ERROR_RETRIES;
@@ -34,12 +35,19 @@ import io.harness.rule.Owner;
 import io.harness.serializer.KryoSerializer;
 
 import software.wings.helpers.ext.jenkins.BuildDetails;
+import software.wings.service.impl.aws.client.CloseableAmazonWebServiceClient;
 
 import com.amazonaws.retry.PredefinedBackoffStrategies;
 import com.amazonaws.retry.RetryPolicy;
+import com.amazonaws.services.ecr.AmazonECRClient;
+import com.amazonaws.services.ecr.AmazonECRClientBuilder;
+import com.amazonaws.services.ecr.model.DescribeRepositoriesRequest;
+import com.amazonaws.services.ecr.model.DescribeRepositoriesResult;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -56,6 +64,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AwsApiHelperServiceTest extends CategoryTest {
   @Mock AmazonS3Client amazonS3Client;
+  @Mock AmazonECRClientBuilder amazonECRClientBuilder;
+  @Mock private AmazonECRClient amazonECRClient;
+  @Mock CloseableAmazonWebServiceClient<AmazonS3Client> closeableAmazonWebServiceClient;
   @Mock AwsCallTracker tracker;
   @Mock KryoSerializer kryoSerializer;
   @Mock ObjectMetadata metadata;
@@ -219,5 +230,101 @@ public class AwsApiHelperServiceTest extends CategoryTest {
         awsApiHelperService.getArtifactBuildDetails(awsInternalConfig, bucketName, filePath, false, 100, region, true);
     assertThat(buildDetails.getMetadata()).isEqualTo(map);
     verify(tracker, times(1)).trackS3Call("Get Object Metadata");
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testListRepositories() {
+    String region = "us-east-1";
+    AwsInternalConfig awsInternalConfig = AwsInternalConfig.builder()
+                                              .useIRSA(false)
+                                              .accessKey(new char[] {'a', 'c', 'c', 'e', 's', 's'})
+                                              .secretKey(new char[] {'a', 'c', 'c', 'e', 's', 's'})
+                                              .build();
+
+    DescribeRepositoriesRequest describeRepositoriesRequest = new DescribeRepositoriesRequest();
+    DescribeRepositoriesResult expectedResult = new DescribeRepositoriesResult();
+
+    when(awsApiHelperService.getAmazonEcrClient(awsInternalConfig, region)).thenReturn(amazonECRClient);
+    when(amazonECRClient.describeRepositories(eq(describeRepositoriesRequest))).thenReturn(expectedResult);
+
+    DescribeRepositoriesResult result =
+        awsApiHelperService.listRepositories(awsInternalConfig, describeRepositoriesRequest, region);
+
+    verify(amazonECRClient, times(1)).describeRepositories(eq(describeRepositoriesRequest));
+
+    assertThat(expectedResult).isEqualTo(result);
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testListRepositories_Null() {
+    String region = "us-east-1";
+    AwsInternalConfig awsInternalConfig = AwsInternalConfig.builder()
+                                              .useIRSA(false)
+                                              .accessKey(new char[] {'a', 'c', 'c', 'e', 's', 's'})
+                                              .secretKey(new char[] {'a', 'c', 'c', 'e', 's', 's'})
+                                              .build();
+
+    DescribeRepositoriesRequest describeRepositoriesRequest = new DescribeRepositoriesRequest();
+
+    when(awsApiHelperService.getAmazonEcrClient(awsInternalConfig, region)).thenReturn(amazonECRClient);
+    when(amazonECRClient.describeRepositories(eq(describeRepositoriesRequest))).thenReturn(null);
+
+    DescribeRepositoriesResult result =
+        awsApiHelperService.listRepositories(awsInternalConfig, describeRepositoriesRequest, region);
+
+    verify(amazonECRClient, times(1)).describeRepositories(eq(describeRepositoriesRequest));
+    assertThat(result).isNull();
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testGetVersionedObjectFromS3() {
+    AwsInternalConfig awsInternalConfig = AwsInternalConfig.builder()
+                                              .useIRSA(false)
+                                              .accessKey(new char[] {'a', 'c', 'c', 'e', 's', 's'})
+                                              .secretKey(new char[] {'a', 'c', 'c', 'e', 's', 's'})
+                                              .build();
+    String region = "us-east-1";
+    String bucketName = "your-bucket-name";
+    String key = "your-object-key";
+    String version = "your-object-version";
+
+    GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, key, version);
+
+    when(awsApiHelperService.getAmazonS3Client(awsInternalConfig, region)).thenReturn(amazonS3Client);
+    when(amazonS3Client.getObject(getObjectRequest)).thenReturn(new S3Object());
+
+    S3Object result = awsApiHelperService.getVersionedObjectFromS3(awsInternalConfig, region, bucketName, key, version);
+
+    assertThat(result).isNotNull();
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testGetVersionedObjectFromS3_Null() {
+    AwsInternalConfig awsInternalConfig = AwsInternalConfig.builder()
+                                              .useIRSA(false)
+                                              .accessKey(new char[] {'a', 'c', 'c', 'e', 's', 's'})
+                                              .secretKey(new char[] {'a', 'c', 'c', 'e', 's', 's'})
+                                              .build();
+    String region = "us-east-1";
+    String bucketName = "your-bucket-name";
+    String key = "your-object-key";
+    String version = "your-object-version";
+
+    GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, key, version);
+
+    when(awsApiHelperService.getAmazonS3Client(awsInternalConfig, region)).thenReturn(amazonS3Client);
+    when(amazonS3Client.getObject(getObjectRequest)).thenReturn(null);
+
+    S3Object result = awsApiHelperService.getVersionedObjectFromS3(awsInternalConfig, region, bucketName, key, version);
+
+    assertThat(result).isNull();
   }
 }

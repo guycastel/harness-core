@@ -923,7 +923,8 @@ public enum FeatureName {
   PL_DISABLE_SM_CREDENTIALS_CHECK(
       "Disables the checks to detect credentials of secret manager are stored in Built In Harness SM", HarnessTeam.PL),
   CDS_BLOCK_SENSITIVE_EXPRESSIONS(
-      "FF to enable to block usage of specific classes/methods/strings in expressions", PIPELINE);
+      "FF to enable to block usage of specific classes/methods/strings in expressions", PIPELINE),
+  CDS_AWS_OIDC_AUTHENTICATION("OIDC Authentication for AWS connector", HarnessTeam.CDP);
   // keep-sorted end
 
   @Deprecated

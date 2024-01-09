@@ -240,7 +240,7 @@ public class ServiceAllInOnePlanCreatorUtils {
                     .setParameters(ByteString.copyFrom(
                         kryoSerializer.asBytes(OnSuccessAdviserParameters.builder().nextNodeId(nextNodeId).build())))
                     .build())
-            .skipExpressionChain(true)
+            .skipExpressionChain(false)
             .build();
     planCreationResponseMap.put(node.getUuid(), PlanCreationResponse.builder().planNode(node).build());
 

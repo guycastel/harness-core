@@ -73,4 +73,5 @@ public class DataPoints {
   public static final String PLUGIN_DISABLED = "Unable to get plugin details, probably plugin is not enabled";
   public static final String INVALID_CONDITIONAL_INPUT = "Invalid conditional input";
   public static final String INVALID_FILE_NAME_ERROR = "Invalid file name provided";
+  public static final String INVALID_EXPRESSION = "Invalid or missing expression %s";
 }

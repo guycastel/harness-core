@@ -12,6 +12,7 @@ import io.harness.annotations.dev.OwnedBy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @OwnedBy(HarnessTeam.IDP)
 public class Constants {
@@ -123,4 +124,5 @@ public class Constants {
   public static final String HARNESS_ACCOUNT = "Harness-Account";
 
   public static final String ACCOUNT_SCOPED = "account.";
+  public final static Pattern EXPRESSION_PATTERN = Pattern.compile("<\\+(.*?)>");
 }

@@ -42,14 +42,15 @@ public abstract class DataSourceLocationNoLoop extends DataSourceLocation {
         apiRequestDetails.getHeaders().put(k, v);
       }
     });
+    Map<String, Object> data = new HashMap<>();
+    if (!validate(dataPointAndInputValues.get(0), data, replaceableHeaders, possibleReplaceableRequestBodyPairs)
+        || !expressionResolved(dataPointAndInputValues.get(0), backstageCatalogEntity, data)) {
+      return data;
+    }
+
     apiRequestDetails.setUrl(
         constructUrl(httpConfig.getTarget(), apiRequestDetails.getUrl(), possibleReplaceableUrlPairs,
             dataPointAndInputValues.get(0).getDataPoint(), dataPointAndInputValues.get(0).getInputValues()));
-    Map<String, Object> data = new HashMap<>();
-
-    if (!validate(dataPointAndInputValues.get(0), data, replaceableHeaders, possibleReplaceableRequestBodyPairs)) {
-      return data;
-    }
 
     String requestBody = constructRequestBody(
         apiRequestDetails, possibleReplaceableRequestBodyPairs, dataPointAndInputValues, backstageCatalogEntity);

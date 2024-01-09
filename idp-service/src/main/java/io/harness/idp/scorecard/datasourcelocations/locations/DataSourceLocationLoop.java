@@ -42,7 +42,8 @@ public abstract class DataSourceLocationLoop extends DataSourceLocation {
 
     boolean validateResult = false;
     for (DataFetchDTO dataFetchDTO : dataPointsAndInputValues) {
-      if (!validate(dataFetchDTO, data, replaceableHeaders, possibleReplaceableRequestBodyPairs)) {
+      if (!validate(dataFetchDTO, data, replaceableHeaders, possibleReplaceableRequestBodyPairs)
+          || !expressionResolved(dataFetchDTO, backstageCatalogEntity, data)) {
         validateResult = true;
       }
     }

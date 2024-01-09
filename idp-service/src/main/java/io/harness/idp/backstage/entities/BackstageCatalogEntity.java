@@ -101,6 +101,7 @@ public abstract class BackstageCatalogEntity
     @JsonInclude(JsonInclude.Include.NON_EMPTY) private Map<String, String> annotations;
     private Object links;
     private Map<String, String> labels;
+    private Map<String, Object> harnessData;
 
     public void setMetadata(String identifier, String absoluteIdentifier, String name, String title, String description,
         List<String> tags, Map<String, String> annotations) {

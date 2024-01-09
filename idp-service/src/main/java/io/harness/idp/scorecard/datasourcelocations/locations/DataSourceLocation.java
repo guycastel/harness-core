@@ -9,13 +9,18 @@ package io.harness.idp.scorecard.datasourcelocations.locations;
 
 import static io.harness.idp.common.CommonUtils.removeLeadingSlash;
 import static io.harness.idp.common.CommonUtils.removeTrailingSlash;
+import static io.harness.idp.common.Constants.CATALOG_IDENTIFIER;
+import static io.harness.idp.common.Constants.DOT_SEPARATOR;
 import static io.harness.idp.common.Constants.DSL_RESPONSE;
 import static io.harness.idp.common.Constants.ERROR_MESSAGE_KEY;
+import static io.harness.idp.common.Constants.EXPRESSION_PATTERN;
 import static io.harness.idp.common.Constants.MESSAGE_KEY;
+import static io.harness.idp.scorecard.datapoints.constants.DataPoints.INVALID_EXPRESSION;
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.eraro.ResponseMessage;
+import io.harness.expression.common.ExpressionMode;
 import io.harness.idp.backstage.entities.BackstageCatalogEntity;
 import io.harness.idp.common.GsonUtils;
 import io.harness.idp.scorecard.common.beans.DataSourceConfig;
@@ -25,18 +30,27 @@ import io.harness.idp.scorecard.datasourcelocations.client.DslClient;
 import io.harness.idp.scorecard.datasourcelocations.client.DslClientFactory;
 import io.harness.idp.scorecard.datasourcelocations.entity.DataSourceLocationEntity;
 import io.harness.idp.scorecard.datasourcelocations.entity.HttpDataSourceLocationEntity;
+import io.harness.idp.scorecard.expression.IdpExpressionEvaluator;
 import io.harness.idp.scorecard.scores.beans.DataFetchDTO;
 import io.harness.spec.server.idp.v1.model.InputValue;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import javax.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 
 @OwnedBy(HarnessTeam.IDP)
+@Slf4j
 public abstract class DataSourceLocation {
   @Inject DslClientFactory dslClientFactory;
+  private static final ObjectMapper mapper =
+      new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
   public abstract Map<String, Object> fetchData(String accountIdentifier, BackstageCatalogEntity backstageCatalogEntity,
       DataSourceLocationEntity dataSourceLocationEntity, List<DataFetchDTO> dataPointAndInputValues,
@@ -106,5 +120,38 @@ public abstract class DataSourceLocation {
           GsonUtils.convertJsonStringToObject(response.getEntity().toString(), Map.class).get(MESSAGE_KEY));
     }
     return ruleData;
+  }
+
+  protected boolean expressionResolved(
+      DataFetchDTO dataFetchDTO, BackstageCatalogEntity entity, Map<String, Object> data) {
+    for (InputValue inputValue : dataFetchDTO.getInputValues()) {
+      String value = inputValue.getValue();
+      Matcher matcher = EXPRESSION_PATTERN.matcher(value);
+      while (matcher.find()) {
+        String expression = matcher.group(1);
+        String fullExpression = CATALOG_IDENTIFIER + DOT_SEPARATOR + expression;
+        Object resolvedValue = null;
+        Map<String, Object> catalog = mapper.convertValue(entity, new TypeReference<>() {});
+        IdpExpressionEvaluator evaluator = new IdpExpressionEvaluator(Map.of(CATALOG_IDENTIFIER, catalog));
+        try {
+          resolvedValue = evaluator.evaluateExpression(fullExpression, ExpressionMode.RETURN_NULL_IF_UNRESOLVED);
+          if (resolvedValue != null) {
+            value = value.replace(matcher.group(0), (String) resolvedValue);
+            continue;
+          }
+        } catch (Exception e) {
+          log.error("Expression evaluation failed for expression {}, input {}", expression, inputValue.getKey(), e);
+        }
+        if (resolvedValue == null) {
+          log.info("Could not find the required data by evaluating expression for - {}, input {}", expression,
+              inputValue.getKey());
+        }
+        data.put(
+            dataFetchDTO.getRuleIdentifier(), Map.of(ERROR_MESSAGE_KEY, String.format(INVALID_EXPRESSION, expression)));
+        return false;
+      }
+      inputValue.setValue(value);
+    }
+    return true;
   }
 }

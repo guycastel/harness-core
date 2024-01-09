@@ -244,20 +244,24 @@ public class ScoreComputerServiceImplTest extends CategoryTest {
   }
 
   private List<BackstageCatalogComponentEntity> getMockServices() {
-    BackstageCatalogComponentEntity service1 =
-        BackstageCatalogComponentEntity.builder()
-            .kind(BackstageCatalogEntityTypes.COMPONENT.kind)
-            .metadata(BackstageCatalogEntity.Metadata.builder().uid(ENTITY_UID1).tags(List.of(TAG)).build())
-            .spec(BackstageCatalogComponentEntity.Spec.builder()
-                      .type(FILTER_TYPE_SERVICE)
-                      .owner(OWNER)
-                      .lifecycle(LIFECYCLE)
-                      .build())
-            .build();
+    BackstageCatalogComponentEntity service1 = BackstageCatalogComponentEntity.builder()
+                                                   .kind(BackstageCatalogEntityTypes.COMPONENT.kind)
+                                                   .metadata(BackstageCatalogEntity.Metadata.builder()
+                                                                 .uid(ENTITY_UID1)
+                                                                 .tags(List.of(TAG))
+                                                                 .harnessData(Collections.emptyMap())
+                                                                 .build())
+                                                   .spec(BackstageCatalogComponentEntity.Spec.builder()
+                                                             .type(FILTER_TYPE_SERVICE)
+                                                             .owner(OWNER)
+                                                             .lifecycle(LIFECYCLE)
+                                                             .build())
+                                                   .build();
     BackstageCatalogComponentEntity service2 =
         BackstageCatalogComponentEntity.builder()
             .kind(BackstageCatalogEntityTypes.COMPONENT.kind)
-            .metadata(BackstageCatalogEntity.Metadata.builder().uid(ENTITY_UID2).build())
+            .metadata(
+                BackstageCatalogEntity.Metadata.builder().uid(ENTITY_UID2).harnessData(Collections.emptyMap()).build())
             .spec(BackstageCatalogComponentEntity.Spec.builder().type(FILTER_TYPE_SERVICE).owner(OWNER).build())
             .build();
     return List.of(service1, service2);

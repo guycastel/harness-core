@@ -226,8 +226,7 @@ public class YamlGitConfigServiceImpl implements YamlGitConfigService {
   }
 
   private boolean canEnableOldGitSync(String accountIdentifier, String orgIdentifier, String projectIdentifier) {
-    return ngFeatureFlagHelperService.isEnabled(accountIdentifier, FeatureName.FF_GITSYNC)
-        || ngFeatureFlagHelperService.isEnabled(accountIdentifier, FeatureName.USE_OLD_GIT_SYNC)
+    return ngFeatureFlagHelperService.isEnabled(accountIdentifier, FeatureName.USE_OLD_GIT_SYNC)
         || isGitSyncEnabled(accountIdentifier, orgIdentifier, projectIdentifier);
   }
 

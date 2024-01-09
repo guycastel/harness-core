@@ -389,7 +389,6 @@ public enum FeatureName {
   FFM_9497_PROXY_KEY_MANAGEMENT("Enable FF proxy key management via the Account Resources", HarnessTeam.CF),
   FF_ALLOW_OPTIONAL_VARIABLE("Allow Optional Variable from UI in NG.", HarnessTeam.PIPELINE),
   FF_FLAG_SYNC_THROUGH_GITEX_ENABLED,
-  FF_GITSYNC,
   FF_PIPELINE,
   FIXED_INSTANCE_ZERO_ALLOW("To allow user to set the fixed instance count to 0 for ECS Deployments", HarnessTeam.CDP),
   FREEZE_DURING_MIGRATION,

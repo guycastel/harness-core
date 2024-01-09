@@ -5,17 +5,22 @@
  * https://polyformproject.org/wp-content/uploads/2020/06/PolyForm-Shield-1.0.0.txt.
  */
 
-package io.harness.ngtriggers.beans.source.v1.scheduled;
+package io.harness.ngtriggers.beans.source.v1.webhook;
+
+import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
 
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
+import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CronTriggerSpec implements ScheduledTriggerYamlSimplSpec {
-  String type;
-  String expression;
+@OwnedBy(PIPELINE)
+@Value
+public class TriggerEventDataCondition {
+  String key;
+  ConditionOperator operator;
+  String value;
 }

@@ -17,9 +17,9 @@ import io.harness.annotations.dev.ProductModule;
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @OwnedBy(PIPELINE)
 public interface YamlSimplConstants {
-  String PR = "pr";
-  String PUSH = "push";
-  String MR = "mr";
+  String PR_EVENT_TYPE = "pr";
+  String PUSH_EVENT_TYPE = "push";
+  String MR_EVENT_TYPE = "mr";
 
   // Webhook Triggers
   String AZURE_REPO = "azure-repo";
@@ -69,6 +69,9 @@ public interface YamlSimplConstants {
   String PRE_RELEASE_EVENT_TYPE = "pre-release";
   String PUBLISH_EVENT_TYPE = "publish";
   String UNPUBLISH_EVENT_TYPE = "unpublish";
+  String MERGE_EVENT_TYPE = "merge";
+  String UPDATE_EVENT_TYPE = "update";
+  String DECLINE_EVENT_TYPE = "decline";
 
   String ISSUE_COMMENT_EVENT_TYPE = "issue-comment";
   String MR_COMMENT_EVENT_TYPE = "mr-comment";

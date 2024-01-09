@@ -1605,7 +1605,7 @@ components:
     Artifact:
       title: Artifact
       x-stoplight:
-        id: 3k0kk81trd5lk
+        id: 4dgg4yzvj1mp2
       type: object
       x-examples: {}
       properties:
@@ -1616,7 +1616,11 @@ components:
         type:
           type: string
           description: type of the artifact
-          example: repo/image
+          enum:
+            - image
+            - repo
+          default: image
+          example: image
         name:
           type: string
           description: name of the artifact
@@ -1630,7 +1634,14 @@ components:
           type: string
           description: url of the artifact
           example: 'https://console.cloud.google.com/gcr/images/imageName'
+        metadata:
+          x-stoplight:
+            id: 4m42oo9d8o95i
+          oneOf:
+            - $ref: '#/components/schemas/ContainerArtifactMetadata'
+            - $ref: '#/components/schemas/RepositoryArtifactMetadata'
       required:
+        - type
         - name
         - registry_url
     SbomProcess:
@@ -4020,7 +4031,33 @@ components:
         review_comment:
           type: string
           x-stoplight:
-            id: d2s98yb5sttqx
+            id: hfv36kbsptevp
+    RepositoryArtifactMetadata:
+      title: RepositoryArtifactMetadata
+      x-stoplight:
+        id: vengas3i1yt75
+      type: object
+      properties:
+        branch:
+          type: string
+          x-stoplight:
+            id: 58u6bsqtyqsdv
+          description: Branch name of the repository being orchestrated.
+        git_tag:
+          type: string
+          x-stoplight:
+            id: dynvtoi385j90
+          description: Git tag of the repository being orchestrated.
+        commit_sha:
+          type: string
+          x-stoplight:
+            id: jpoahyinegg53
+          description: Commit ID of the repository being orchestrated.
+    ContainerArtifactMetadata:
+      title: ContainerArtifactMetadata
+      x-stoplight:
+        id: 1rqvfm6ygafnz
+      type: object
     ArtifactListingResponseV2:
       type: object
       x-stoplight:

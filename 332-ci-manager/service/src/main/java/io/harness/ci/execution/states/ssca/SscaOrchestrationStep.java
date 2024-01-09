@@ -31,6 +31,7 @@ import io.harness.ssca.client.beans.SBOMArtifactResponse;
 import io.harness.ssca.execution.orchestration.outcome.PublishedSbomArtifact;
 
 import com.google.inject.Inject;
+import java.util.Objects;
 
 @OwnedBy(HarnessTeam.SSCA)
 public class SscaOrchestrationStep extends AbstractStepExecutable {
@@ -46,16 +47,19 @@ public class SscaOrchestrationStep extends AbstractStepExecutable {
           sscaServiceUtils.getOrchestrationSummaryResponse(stepExecutionId, AmbianceUtils.getAccountId(ambiance),
               AmbianceUtils.getOrgIdentifier(ambiance), AmbianceUtils.getProjectIdentifier(ambiance));
 
-      SscaArtifactMetadata sscaArtifactMetadata = SscaArtifactMetadata.builder()
-                                                      .id(stepExecutionResponse.getArtifact().getId())
-                                                      .imageName(stepExecutionResponse.getArtifact().getName())
-                                                      .registryUrl(stepExecutionResponse.getArtifact().getRegistryUrl())
-                                                      .registryType(stepExecutionResponse.getArtifact().getType())
-                                                      .isSbomAttested(stepExecutionResponse.isIsAttested())
-                                                      .sbomName(stepExecutionResponse.getSbom().getName())
-                                                      .stepExecutionId(stepExecutionId)
-                                                      .imageTag(stepExecutionResponse.getArtifact().getTag())
-                                                      .build();
+      SscaArtifactMetadata sscaArtifactMetadata =
+          SscaArtifactMetadata.builder()
+              .id(stepExecutionResponse.getArtifact().getId())
+              .imageName(stepExecutionResponse.getArtifact().getName())
+              .registryUrl(stepExecutionResponse.getArtifact().getRegistryUrl())
+              .registryType(Objects.nonNull(stepExecutionResponse.getArtifact().getType())
+                      ? stepExecutionResponse.getArtifact().getType().toString()
+                      : null)
+              .isSbomAttested(stepExecutionResponse.isIsAttested())
+              .sbomName(stepExecutionResponse.getSbom().getName())
+              .stepExecutionId(stepExecutionId)
+              .imageTag(stepExecutionResponse.getArtifact().getTag())
+              .build();
 
       if (stepExecutionResponse.getScorecardSummary() != null) {
         sscaArtifactMetadata.setScorecard(Scorecard.builder()

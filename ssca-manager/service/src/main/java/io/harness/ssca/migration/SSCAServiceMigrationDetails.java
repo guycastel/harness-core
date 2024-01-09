@@ -42,6 +42,7 @@ public class SSCAServiceMigrationDetails implements MigrationDetails {
         .add(Pair.of(9, ArtifactEmptyTagMigration.class))
         .add(Pair.of(10, RemoveDuplicateOrchestrationIdFromArtifact.class))
         .add(Pair.of(11, RemoveDuplicateIdFromEnforcementSummary.class))
+        .add(Pair.of(12, ArtifactTypeMigration.class))
         .build();
   }
 }

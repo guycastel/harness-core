@@ -138,7 +138,7 @@ public class OrchestrationStepServiceImpl implements OrchestrationStepService {
 
     Artifact artifactResponse = new Artifact()
                                     .name(artifact.getName())
-                                    .type(artifact.getName())
+                                    .type(Artifact.TypeEnum.fromValue(artifact.getType()))
                                     .registryUrl(artifact.getUrl())
                                     .id(artifact.getId())
                                     .tag(artifact.getTag());

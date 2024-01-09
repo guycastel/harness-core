@@ -175,7 +175,7 @@ public class BuilderFactory {
                           .stepIdentifier("orchestrationStepId"))
         .artifact(new Artifact()
                       .registryUrl("https://index.docker.com")
-                      .type("image/repo")
+                      .type(Artifact.TypeEnum.IMAGE)
                       .name("test/image")
                       .tag("tag")
                       .id("id"))
@@ -192,7 +192,7 @@ public class BuilderFactory {
         .artifactCorrelationId("artifactCorrelationId")
         .url("testUrl")
         .name("test/image")
-        .type("imgae/repo")
+        .type("image")
         .tag("tag")
         .pipelineExecutionId("pipelineExecutionId")
         .pipelineId("pipelineId")
@@ -289,7 +289,7 @@ public class BuilderFactory {
                       .artifactId("artifactId")
                       .tag("tag")
                       .name("test/image")
-                      .type("image/repo")
+                      .type("image")
                       .url("https://index.docker.com/v2/")
                       .build())
         .orchestrationId("orchestrationId")
@@ -312,7 +312,7 @@ public class BuilderFactory {
                       .id("artifactId")
                       .name("test/image")
                       .tag("tag")
-                      .type("image/repo")
+                      .type(Artifact.TypeEnum.IMAGE)
                       .registryUrl("https://index.docker.com/v2/"));
   }
 

@@ -233,7 +233,7 @@ public class EnforcementStepServiceImplTest extends SSCAManagerTestBase {
     artifact.setId("setId");
     artifact.setName("setName");
     artifact.setTag("setTag");
-    artifact.setType("setType");
+    artifact.setType(Artifact.TypeEnum.IMAGE);
     artifact.setRegistryUrl("setRegistryUrl");
     return artifact;
   }

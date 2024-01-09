@@ -28,7 +28,7 @@ public class EnforcementSummaryTransformer {
         .createdAt(dto.getCreated().longValue())
         .artifact(Artifact.builder()
                       .url(dto.getArtifact().getRegistryUrl())
-                      .type(dto.getArtifact().getType())
+                      .type(dto.getArtifact().getType().toString())
                       .name(dto.getArtifact().getName())
                       .tag(dto.getArtifact().getTag())
                       .artifactId(dto.getArtifact().getId())
@@ -49,11 +49,12 @@ public class EnforcementSummaryTransformer {
         .denyListViolationCount(new BigDecimal(entity.getDenyListViolationCount()))
         .orchestrationId(entity.getOrchestrationId())
         .status(entity.getStatus())
-        .artifact(new io.harness.spec.server.ssca.v1.model.Artifact()
-                      .id(entity.getArtifact().getArtifactId())
-                      .name(entity.getArtifact().getName())
-                      .tag(entity.getArtifact().getTag())
-                      .type(entity.getArtifact().getType())
-                      .registryUrl(entity.getArtifact().getUrl()));
+        .artifact(
+            new io.harness.spec.server.ssca.v1.model.Artifact()
+                .id(entity.getArtifact().getArtifactId())
+                .name(entity.getArtifact().getName())
+                .tag(entity.getArtifact().getTag())
+                .type(io.harness.spec.server.ssca.v1.model.Artifact.TypeEnum.fromValue(entity.getArtifact().getType()))
+                .registryUrl(entity.getArtifact().getUrl()));
   }
 }

@@ -28,6 +28,7 @@ import io.harness.ssca.client.beans.enforcement.SscaEnforcementSummary;
 import io.harness.ssca.execution.orchestration.outcome.PublishedSbomArtifact;
 
 import com.google.inject.Inject;
+import java.util.Objects;
 
 @OwnedBy(HarnessTeam.SSCA)
 public class SscaEnforcementStep extends AbstractStepExecutable {
@@ -61,7 +62,9 @@ public class SscaEnforcementStep extends AbstractStepExecutable {
                         .id(enforcementSummary.getArtifact().getId())
                         .imageName(enforcementSummary.getArtifact().getName())
                         .registryUrl(enforcementSummary.getArtifact().getRegistryUrl())
-                        .registryType(enforcementSummary.getArtifact().getType())
+                        .registryType(Objects.nonNull(enforcementSummary.getArtifact().getType())
+                                ? enforcementSummary.getArtifact().getType().toString()
+                                : null)
                         .stepExecutionId(stepExecutionId)
                         .allowListViolationCount(enforcementSummary.getAllowListViolationCount())
                         .denyListViolationCount(enforcementSummary.getDenyListViolationCount())

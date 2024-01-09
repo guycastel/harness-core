@@ -216,7 +216,7 @@ public class SscaOrchestrationStepTest extends CIExecutionTestBase {
              SscaTestsUtility.ACCOUNT_ID, SscaTestsUtility.ORG_ID, SscaTestsUtility.PROJECT_ID))
         .thenReturn(new OrchestrationSummaryResponse()
                         .artifact(new io.harness.spec.server.ssca.v1.model.Artifact()
-                                      .type("image")
+                                      .type(io.harness.spec.server.ssca.v1.model.Artifact.TypeEnum.IMAGE)
                                       .name("library/nginx")
                                       .tag("latest")
                                       .id("someId")

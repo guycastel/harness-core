@@ -117,7 +117,7 @@ public class ArtifactServiceImplTest extends SSCAManagerTestBase {
     assertThat(artifact.getArtifactCorrelationId()).isEqualTo("index.docker.com/test/image:tag");
     assertThat(artifact.getUrl()).isEqualTo("https://index.docker.com");
     assertThat(artifact.getName()).isEqualTo("test/image");
-    assertThat(artifact.getType()).isEqualTo("image/repo");
+    assertThat(artifact.getType()).isEqualTo("image");
     assertThat(artifact.getTag()).isEqualTo("tag");
     assertThat(artifact.getAccountId()).isEqualTo(builderFactory.getContext().getAccountId());
     assertThat(artifact.getOrgId()).isEqualTo(builderFactory.getContext().getOrgIdentifier());

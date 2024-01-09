@@ -126,7 +126,7 @@ public class EnforcementStepServiceImpl implements EnforcementStepService {
         .artifact(new Artifact()
                       .id(enforcementSummary.getArtifact().getArtifactId())
                       .name(enforcementSummary.getArtifact().getName())
-                      .type(enforcementSummary.getArtifact().getType())
+                      .type(Artifact.TypeEnum.fromValue(enforcementSummary.getArtifact().getType()))
                       .registryUrl(enforcementSummary.getArtifact().getUrl())
                       .tag(enforcementSummary.getArtifact().getTag())
 

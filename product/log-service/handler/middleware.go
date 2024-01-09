@@ -191,12 +191,12 @@ func AuthMiddleware(config config.Config, ngClient, aclClient *client.HTTPClient
 func validateACL(r *http.Request, aclClient *client.HTTPClient, accountID, inputAuthToken string) error {
 
 	if r.FormValue(pipelineIdentifier) == "" || r.FormValue(projectIdentifier) == "" || r.FormValue(orgIdentifier) == "" {
-		return errors.New("scope pipelineID, projectID and orgID are required for validating access")
+		return errors.New("scope pipelineId, projectId and orgId are required for validating access")
 	}
 
 	allowed, err := aclClient.ValidateAccessforPipeline(r.Context(), inputAuthToken, accountID, r.FormValue(pipelineIdentifier), r.FormValue(projectIdentifier), r.FormValue(orgIdentifier), resource_pipeline, pipeline_view_permission)
 	if err != nil {
-		return errors.New("error validating access for resource, unauthorized or expired token")
+		return fmt.Errorf("error validating access for resource, unauthorized or expired token %w", err)
 	}
 	if !allowed {
 		return errors.New("user not authorized")

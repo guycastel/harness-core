@@ -120,12 +120,15 @@ public class WebhookNotificationServiceImpl implements WebhookNotificationServic
       log.error("Exception occurred while updating module info during webhook notification", ex);
       return moduleInfoBuilder.build();
     }
-    if (stageSummaryResponseDTOMap == null) {
+    if (EmptyPredicate.isEmpty(stageSummaryResponseDTOMap)) {
       return moduleInfoBuilder.build();
     }
     CDStageSummaryResponseDTO stageSummaryResponseDTO = stageSummaryResponseDTOMap.get(currentLevel.getRuntimeId());
     if (stageSummaryResponseDTO == null) {
       stageSummaryResponseDTO = stageSummaryResponseDTOMap.get(stageIdentifier);
+      if (stageSummaryResponseDTO == null) {
+        return moduleInfoBuilder.build();
+      }
     }
     return moduleInfoBuilder
         .services(EmptyPredicate.isEmpty(stageSummaryResponseDTO.getServices())

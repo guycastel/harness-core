@@ -63,6 +63,7 @@ import io.harness.gitsync.common.scmerrorhandling.handlers.gitlab.GitlabListBran
 import io.harness.gitsync.common.scmerrorhandling.handlers.gitlab.GitlabListFilesScmApiErrorHandler;
 import io.harness.gitsync.common.scmerrorhandling.handlers.gitlab.GitlabListRepoScmApiErrorHandler;
 import io.harness.gitsync.common.scmerrorhandling.handlers.gitlab.GitlabUpdateFileScmApiErrorHandler;
+import io.harness.gitsync.common.scmerrorhandling.handlers.harnesscode.HarnessCodeGenericApiErrorHandler;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -84,6 +85,7 @@ class ScmApiErrorHandlerFactory {
               BitbucketServerListRepoScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.LIST_REPOSITORIES, RepoProviders.AZURE), AdoListRepoScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.LIST_REPOSITORIES, RepoProviders.GITLAB), GitlabListRepoScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.LIST_REPOSITORIES, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           // Get File Handlers
           .put(Pair.of(ScmApis.GET_FILE, RepoProviders.BITBUCKET), BitbucketGetFileScmApiErrorHandler.class)
@@ -92,6 +94,7 @@ class ScmApiErrorHandlerFactory {
               Pair.of(ScmApis.GET_FILE, RepoProviders.BITBUCKET_SERVER), BitbucketServerGetFileScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.GET_FILE, RepoProviders.AZURE), AdoGetFileScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.GET_FILE, RepoProviders.GITLAB), GitlabGetFileScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.GET_FILE, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           .put(Pair.of(ScmApis.CREATE_PULL_REQUEST, RepoProviders.BITBUCKET),
               BitbucketCreatePullRequestScmApiErrorHandler.class)
@@ -102,6 +105,7 @@ class ScmApiErrorHandlerFactory {
           .put(Pair.of(ScmApis.CREATE_PULL_REQUEST, RepoProviders.AZURE), AdoCreatePullRequestScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.CREATE_PULL_REQUEST, RepoProviders.GITLAB),
               GitlabCreatePullRequestScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.CREATE_PULL_REQUEST, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           .put(Pair.of(ScmApis.CREATE_FILE, RepoProviders.BITBUCKET), BitbucketCreateFileScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.CREATE_FILE, RepoProviders.GITHUB), GithubCreateFileScmApiErrorHandler.class)
@@ -109,6 +113,7 @@ class ScmApiErrorHandlerFactory {
               BitbucketServerCreateFileScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.CREATE_FILE, RepoProviders.AZURE), AdoCreateFileScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.CREATE_FILE, RepoProviders.GITLAB), GitlabCreateFileScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.CREATE_FILE, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           .put(Pair.of(ScmApis.UPDATE_FILE, RepoProviders.BITBUCKET), BitbucketUpdateFileScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.UPDATE_FILE, RepoProviders.GITHUB), GithubUpdateFileScmApiErrorHandler.class)
@@ -116,6 +121,7 @@ class ScmApiErrorHandlerFactory {
               BitbucketServerUpdateFileScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.UPDATE_FILE, RepoProviders.AZURE), AdoUpdateFileScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.UPDATE_FILE, RepoProviders.GITLAB), GitlabUpdateFileScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.UPDATE_FILE, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           .put(Pair.of(ScmApis.CREATE_BRANCH, RepoProviders.BITBUCKET), BitbucketCreateBranchScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.CREATE_BRANCH, RepoProviders.GITHUB), GithubCreateBranchScmApiErrorHandler.class)
@@ -123,6 +129,7 @@ class ScmApiErrorHandlerFactory {
               BitbucketServerCreateBranchScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.CREATE_BRANCH, RepoProviders.AZURE), AdoCreateBranchScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.CREATE_BRANCH, RepoProviders.GITLAB), GitlabCreateBranchScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.CREATE_BRANCH, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           .put(Pair.of(ScmApis.LIST_BRANCHES, RepoProviders.BITBUCKET), BitbucketListBranchesScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.LIST_BRANCHES, RepoProviders.GITHUB), GithubListBranchesScmApiErrorHandler.class)
@@ -130,6 +137,7 @@ class ScmApiErrorHandlerFactory {
               BitbucketServerListBranchesScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.LIST_BRANCHES, RepoProviders.AZURE), AdoListBranchesScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.LIST_BRANCHES, RepoProviders.GITLAB), GitlabListBranchesScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.LIST_BRANCHES, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           .put(Pair.of(ScmApis.GET_DEFAULT_BRANCH, RepoProviders.BITBUCKET),
               BitbucketGetDefaultBranchScmApiErrorHandler.class)
@@ -140,6 +148,7 @@ class ScmApiErrorHandlerFactory {
           .put(Pair.of(ScmApis.GET_DEFAULT_BRANCH, RepoProviders.AZURE), AdoGetDefaultBranchScmApiErrorHandler.class)
           .put(
               Pair.of(ScmApis.GET_DEFAULT_BRANCH, RepoProviders.GITLAB), GitlabGetDefaultBranchScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.GET_DEFAULT_BRANCH, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           .put(Pair.of(ScmApis.GET_BRANCH_HEAD_COMMIT, RepoProviders.BITBUCKET),
               BitbucketGetBranchHeadCommitScmApiErrorHandler.class)
@@ -151,12 +160,14 @@ class ScmApiErrorHandlerFactory {
               AdoGetBranchHeadCommitScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.GET_BRANCH_HEAD_COMMIT, RepoProviders.GITLAB),
               GitlabGetBranchHeadCommitScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.GET_BRANCH_HEAD_COMMIT, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
 
           .put(Pair.of(ScmApis.LIST_FILES, RepoProviders.BITBUCKET), BitbucketListFilesScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.LIST_FILES, RepoProviders.GITHUB), GithubListFilesScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.LIST_FILES, RepoProviders.BITBUCKET_SERVER),
               BitbucketServerListFilesScmApiErrorHandler.class)
           .put(Pair.of(ScmApis.LIST_FILES, RepoProviders.GITLAB), GitlabListFilesScmApiErrorHandler.class)
+          .put(Pair.of(ScmApis.LIST_FILES, RepoProviders.HARNESS), HarnessCodeGenericApiErrorHandler.class)
           .build();
 
   public ScmApiErrorHandler getHandler(ScmApis scmApi, RepoProviders repoProvider) {

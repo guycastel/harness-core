@@ -552,9 +552,31 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
 
   private void closeTrackerIfNoPendingEntities(
       List<ArtifactEntity> pendingArtifactEntities, RemediationTrackerEntity remediationTracker) {
-    if (pendingArtifactEntities.isEmpty()) {
+    if (shouldCloseTracker(pendingArtifactEntities, remediationTracker)) {
       closeTracker(remediationTracker);
     }
+  }
+
+  private boolean shouldCloseTracker(
+      List<ArtifactEntity> pendingArtifactEntities, RemediationTrackerEntity remediationTracker) {
+    if (pendingArtifactEntities.isEmpty()) {
+      return true;
+    }
+    if (remediationTracker.getArtifactInfos() == null) {
+      return false;
+    }
+
+    for (ArtifactEntity artifactEntity : pendingArtifactEntities) {
+      boolean trackerContainsArtifact =
+          remediationTracker.getArtifactInfos().containsKey(artifactEntity.getArtifactId());
+      boolean artifactExcluded = trackerContainsArtifact
+          && remediationTracker.getArtifactInfos().get(artifactEntity.getArtifactId()).isExcluded();
+
+      if (!artifactExcluded || !trackerContainsArtifact) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private void closeTracker(RemediationTrackerEntity remediationTracker) {

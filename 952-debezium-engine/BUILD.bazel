@@ -17,6 +17,7 @@ java_library(
     ] + [
         "//:lombok",
         "//953-events-api:module",
+        "//955-account-mgmt:module",
         "//956-feature-flag-beans:module",
         "//959-debezium-beans:module",
         "//960-continuous-features:module",

@@ -8,8 +8,10 @@
 package io.harness;
 
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
+import static io.harness.authorization.AuthorizationServiceHeader.DEBEZIUM_SERVICE;
 import static io.harness.logging.LoggingInitializer.initializeLogging;
 
+import io.harness.account.AccountClientModule;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
@@ -24,6 +26,7 @@ import io.harness.debezium.DebeziumConfig;
 import io.harness.debezium.DebeziumControllerStarter;
 import io.harness.eventsframework.EventsFrameworkConfiguration;
 import io.harness.ff.FeatureFlagConfig;
+import io.harness.govern.ProviderModule;
 import io.harness.health.HealthMonitor;
 import io.harness.health.HealthService;
 import io.harness.lock.PersistentLocker;
@@ -33,12 +36,16 @@ import io.harness.metrics.MetricRegistryModule;
 import io.harness.metrics.jobs.RecordMetricsJob;
 import io.harness.metrics.service.api.MetricService;
 import io.harness.reflection.HarnessReflections;
+import io.harness.serializer.KryoRegistrar;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -50,6 +57,7 @@ import io.serializer.HObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.Path;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +88,7 @@ public class DebeziumServiceApplication extends Application<DebeziumServiceConfi
     bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(
         bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(false)));
     configureObjectMapper(bootstrap.getObjectMapper());
-    bootstrap.addBundle(new SwaggerBundle<DebeziumServiceConfiguration>() {
+    bootstrap.addBundle(new SwaggerBundle<>() {
       @Override
       protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
           DebeziumServiceConfiguration debeziumServiceConfiguration) {
@@ -121,6 +129,7 @@ public class DebeziumServiceApplication extends Application<DebeziumServiceConfi
     MaintenanceController.forceMaintenance(true);
 
     List<Module> modules = new ArrayList<>();
+
     modules.add(new AbstractCfModule() {
       @Override
       public CfClientConfig cfClientConfig() {
@@ -137,6 +146,7 @@ public class DebeziumServiceApplication extends Application<DebeziumServiceConfi
         return appConfig.getFeatureFlagConfig();
       }
     });
+
     DebeziumServiceModuleConfig moduleConfig =
         DebeziumServiceModuleConfig.builder()
             .lockImplementation(appConfig.getDistributedLockImplementation())
@@ -145,8 +155,19 @@ public class DebeziumServiceApplication extends Application<DebeziumServiceConfi
             .build();
     modules.add(DebeziumServiceModule.getInstance(moduleConfig));
 
+    modules.add(new ProviderModule() {
+      @Provides
+      @Singleton
+      Set<Class<? extends KryoRegistrar>> kryoRegistrars() {
+        return ImmutableSet.<Class<? extends KryoRegistrar>>builder().build();
+      }
+    });
+
     // Bind the MetricRegistry
     modules.add(new MetricRegistryModule(metricRegistry));
+
+    modules.add(new AccountClientModule(appConfig.getManagerClientConfig(),
+        appConfig.getNextGenConfig().getManagerServiceSecret(), DEBEZIUM_SERVICE.toString()));
 
     Injector injector = Guice.createInjector(modules);
     registerHealthCheck(environment, injector);

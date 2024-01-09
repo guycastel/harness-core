@@ -8,11 +8,10 @@
 package io.harness.debezium;
 
 import io.harness.beans.FeatureName;
-import io.harness.cf.client.api.CfClient;
-import io.harness.cf.client.dto.Target;
 import io.harness.eventsframework.EventsFrameworkConfiguration;
 import io.harness.eventsframework.api.Producer;
 import io.harness.eventsframework.producer.Message;
+import io.harness.utils.DebeziumFeatureFlagHelper;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.debezium.embedded.EmbeddedEngineChangeEvent;
@@ -38,18 +37,18 @@ public abstract class EventsFrameworkChangeConsumer implements MongoCollectionCh
   final DebeziumProducerFactory producerFactory;
   int cnt;
   int redisStreamSize;
-  CfClient cfClient;
+  DebeziumFeatureFlagHelper featureFlagHelper;
   EventsFrameworkConfiguration configuration;
   ConsumerMode mode;
 
-  public EventsFrameworkChangeConsumer(ChangeConsumerConfig changeConsumerConfig, CfClient cfClient, String collection,
-      DebeziumProducerFactory debeziumProducerFactory) {
+  public EventsFrameworkChangeConsumer(ChangeConsumerConfig changeConsumerConfig,
+      DebeziumFeatureFlagHelper featureFlagHelper, String collection, DebeziumProducerFactory debeziumProducerFactory) {
     this.mode = changeConsumerConfig.getConsumerMode();
     this.configuration = changeConsumerConfig.getEventsFrameworkConfiguration();
     this.collectionName = collection;
     this.producerFactory = debeziumProducerFactory;
     this.redisStreamSize = changeConsumerConfig.getRedisStreamSize();
-    this.cfClient = cfClient;
+    this.featureFlagHelper = featureFlagHelper;
   }
 
   @Override
@@ -92,10 +91,10 @@ public abstract class EventsFrameworkChangeConsumer implements MongoCollectionCh
     }
   }
 
-  private boolean isDebeziumEnabled(String collectionName) {
+  protected boolean isDebeziumEnabled(String collectionName) {
     String collection = Arrays.stream(collectionName.split("\\.")).collect(Collectors.toList()).get(1);
-    return cfClient.boolVariation(
-        FeatureName.DEBEZIUM_ENABLED.toString(), Target.builder().identifier(collection + "." + mode).build(), false);
+    String targetIdentifier = collection + "." + mode;
+    return featureFlagHelper.isEnabled(targetIdentifier, FeatureName.DEBEZIUM_ENABLED);
   }
 
   @VisibleForTesting

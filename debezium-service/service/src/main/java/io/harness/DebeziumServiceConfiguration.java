@@ -16,6 +16,8 @@ import io.harness.eventsframework.EventsFrameworkConfiguration;
 import io.harness.ff.FeatureFlagConfig;
 import io.harness.lock.DistributedLockImplementation;
 import io.harness.redis.RedisConfig;
+import io.harness.remote.NextGenConfig;
+import io.harness.remote.client.ServiceHttpClientConfig;
 import io.harness.secret.ConfigSecret;
 
 import ch.qos.logback.access.spi.IAccessEvent;
@@ -51,6 +53,8 @@ public class DebeziumServiceConfiguration extends Configuration {
   @JsonProperty("cfClientConfig") @ConfigSecret private CfClientConfig cfClientConfig;
   @JsonProperty("featureFlagConfig") private FeatureFlagConfig featureFlagConfig;
   @JsonProperty("listOfErrorCodesForOffsetReset") private List<Integer> listOfErrorCodesForOffsetReset;
+  @JsonProperty("managerClientConfig") private ServiceHttpClientConfig managerClientConfig;
+  @JsonProperty("nextGen") @ConfigSecret private NextGenConfig nextGenConfig;
 
   public DebeziumServiceConfiguration() {
     DefaultServerFactory defaultServerFactory = new DefaultServerFactory();

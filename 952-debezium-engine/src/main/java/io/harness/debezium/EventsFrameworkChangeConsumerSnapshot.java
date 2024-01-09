@@ -7,12 +7,10 @@
 
 package io.harness.debezium;
 
-import io.harness.beans.FeatureName;
-import io.harness.cf.client.api.CfClient;
-import io.harness.cf.client.dto.Target;
 import io.harness.eventsframework.api.Producer;
 import io.harness.eventsframework.producer.Message;
 import io.harness.exception.InvalidRequestException;
+import io.harness.utils.DebeziumFeatureFlagHelper;
 
 import io.debezium.embedded.EmbeddedEngineChangeEvent;
 import io.debezium.engine.ChangeEvent;
@@ -27,9 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class EventsFrameworkChangeConsumerSnapshot extends EventsFrameworkChangeConsumer {
-  public EventsFrameworkChangeConsumerSnapshot(ChangeConsumerConfig changeConsumerConfig, CfClient cfClient,
-      String collection, DebeziumProducerFactory producerFactory) {
-    super(changeConsumerConfig, cfClient, collection, producerFactory);
+  public EventsFrameworkChangeConsumerSnapshot(ChangeConsumerConfig changeConsumerConfig,
+      DebeziumFeatureFlagHelper featureFlagHelper, String collection, DebeziumProducerFactory producerFactory) {
+    super(changeConsumerConfig, featureFlagHelper, collection, producerFactory);
   }
   @Override
   public void handleBatch(List<ChangeEvent<String, String>> records,
@@ -42,27 +40,14 @@ public class EventsFrameworkChangeConsumerSnapshot extends EventsFrameworkChange
         recordsMap.put(record.key(), record);
       }
     }
+
+    boolean debeziumEnabled = isDebeziumEnabled(collectionName);
+
     // Add the batch records to the stream(s)
     for (ChangeEvent<String, String> record : recordsMap.values()) {
       cnt++;
-      Optional<OpType> opType =
-          getOperationType(((EmbeddedEngineChangeEvent<String, String, List<Header>>) record).sourceRecord());
-      if (!opType.isEmpty()) {
-        if (!opType.get().equals(OpType.SNAPSHOT)) {
-          throw new InvalidRequestException("Snapshot completed");
-        }
-        DebeziumChangeEvent debeziumChangeEvent = DebeziumChangeEvent.newBuilder()
-                                                      .setKey(getKeyOrDefault(record))
-                                                      .setValue(getValueOrDefault(record))
-                                                      .setOptype(opType.get().toString())
-                                                      .setTimestamp(System.currentTimeMillis())
-                                                      .build();
-        boolean debeziumEnabled =
-            cfClient.boolVariation(FeatureName.DEBEZIUM_ENABLED.toString(), Target.builder().build(), false);
-        Producer producer = producerFactory.get(record.destination(), redisStreamSize, mode, configuration);
-        if (debeziumEnabled) {
-          producer.send(Message.newBuilder().setData(debeziumChangeEvent.toByteString()).build());
-        }
+      if (debeziumEnabled) {
+        process(record);
       }
       try {
         recordCommitter.markProcessed(record);
@@ -71,5 +56,23 @@ public class EventsFrameworkChangeConsumerSnapshot extends EventsFrameworkChange
       }
     }
     recordCommitter.markBatchFinished();
+  }
+
+  private void process(ChangeEvent<String, String> record) {
+    Optional<OpType> opType =
+        getOperationType(((EmbeddedEngineChangeEvent<String, String, List<Header>>) record).sourceRecord());
+    if (opType.isPresent()) {
+      if (!OpType.SNAPSHOT.equals(opType.get())) {
+        throw new InvalidRequestException("Snapshot completed");
+      }
+      DebeziumChangeEvent debeziumChangeEvent = DebeziumChangeEvent.newBuilder()
+                                                    .setKey(getKeyOrDefault(record))
+                                                    .setValue(getValueOrDefault(record))
+                                                    .setOptype(opType.get().toString())
+                                                    .setTimestamp(System.currentTimeMillis())
+                                                    .build();
+      Producer producer = producerFactory.get(record.destination(), redisStreamSize, mode, configuration);
+      producer.send(Message.newBuilder().setData(debeziumChangeEvent.toByteString()).build());
+    }
   }
 }

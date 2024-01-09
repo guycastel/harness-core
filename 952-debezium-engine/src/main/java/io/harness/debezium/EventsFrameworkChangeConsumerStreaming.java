@@ -7,11 +7,11 @@
 
 package io.harness.debezium;
 
-import io.harness.cf.client.api.CfClient;
+import io.harness.utils.DebeziumFeatureFlagHelper;
 
 public class EventsFrameworkChangeConsumerStreaming extends EventsFrameworkChangeConsumer {
-  public EventsFrameworkChangeConsumerStreaming(ChangeConsumerConfig changeConsumerConfig, CfClient cfClient,
-      String collection, DebeziumProducerFactory debeziumProducerFactory) {
-    super(changeConsumerConfig, cfClient, collection, debeziumProducerFactory);
+  public EventsFrameworkChangeConsumerStreaming(ChangeConsumerConfig changeConsumerConfig,
+      DebeziumFeatureFlagHelper featureFlagHelper, String collection, DebeziumProducerFactory debeziumProducerFactory) {
+    super(changeConsumerConfig, featureFlagHelper, collection, debeziumProducerFactory);
   }
 }

@@ -12,8 +12,7 @@ import static io.harness.rule.OwnerRule.SHALINI;
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -22,12 +21,12 @@ import static org.mockito.Mockito.verify;
 import io.harness.CategoryTest;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
+import io.harness.beans.FeatureName;
 import io.harness.category.element.UnitTests;
-import io.harness.cf.client.api.CfClient;
-import io.harness.cf.client.dto.Target;
 import io.harness.eventsframework.api.Producer;
 import io.harness.eventsframework.producer.Message;
 import io.harness.rule.Owner;
+import io.harness.utils.DebeziumFeatureFlagHelper;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.debezium.embedded.EmbeddedEngineChangeEvent;
@@ -55,7 +54,7 @@ public class EventsFrameworkChangeConsumerTest extends CategoryTest {
   @Mock Producer producer;
   private static final String collection = "coll";
   @Mock private static DebeziumProducerFactory producerFactory;
-  @Mock private CfClient cfClient;
+  @Mock private DebeziumFeatureFlagHelper featureFlagHelper;
   ConsumerMode mode = ConsumerMode.SNAPSHOT;
   private static final EventsFrameworkChangeConsumerStreaming EVENTS_FRAMEWORK_CHANGE_CONSUMER_STREAMING =
       new EventsFrameworkChangeConsumerStreaming(ChangeConsumerConfig.builder()
@@ -108,7 +107,7 @@ public class EventsFrameworkChangeConsumerTest extends CategoryTest {
   @Test
   @Owner(developers = SHALINI)
   @Category(UnitTests.class)
-  public void testHandleBatch() throws InterruptedException, InvalidProtocolBufferException {
+  public void testHandleBatch() throws InterruptedException {
     EventsFrameworkChangeConsumerStreaming eventsFrameworkChangeConsumerStreaming =
         new EventsFrameworkChangeConsumerStreaming(ChangeConsumerConfig.builder()
                                                        .redisStreamSize(10)
@@ -116,7 +115,7 @@ public class EventsFrameworkChangeConsumerTest extends CategoryTest {
                                                        .eventsFrameworkConfiguration(null)
                                                        .consumerMode(mode)
                                                        .build(),
-            cfClient, "coll.mode", producerFactory);
+            featureFlagHelper, "coll.mode", producerFactory);
     List<ChangeEvent<String, String>> records = new ArrayList<>();
 
     ConnectHeaders headers_1 = new ConnectHeaders();
@@ -138,7 +137,7 @@ public class EventsFrameworkChangeConsumerTest extends CategoryTest {
     doNothing().when(recordCommitter).markBatchFinished();
     doNothing().when(recordCommitter).markProcessed(testRecord_1);
     doNothing().when(recordCommitter).markProcessed(testRecord_2);
-    doReturn(true).when(cfClient).boolVariation(anyString(), any(), anyBoolean());
+    doReturn(true).when(featureFlagHelper).isEnabled(any(), eq(FeatureName.DEBEZIUM_ENABLED));
     eventsFrameworkChangeConsumerStreaming.handleBatch(records, recordCommitter);
     ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
     verify(producer, times(2)).send(captor.capture());
@@ -168,6 +167,6 @@ public class EventsFrameworkChangeConsumerTest extends CategoryTest {
     verify(recordCommitter, times(1)).markBatchFinished();
 
     // verify FF service called once per batch
-    verify(cfClient, times(1)).boolVariation(anyString(), any(Target.class), anyBoolean());
+    verify(featureFlagHelper, times(1)).isEnabled(any(), eq(FeatureName.DEBEZIUM_ENABLED));
   }
 }

@@ -6,6 +6,7 @@
  */
 
 package io.harness.expression;
+
 import static io.harness.annotations.dev.HarnessTeam.CDC;
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.exception.InvalidRequestException.USER;
@@ -88,6 +89,9 @@ public class ExpressionEvaluator {
 
   public Object evaluate(String expression, JexlContext context) {
     if (expression == null) {
+      return null;
+    }
+    if (ExpressionEvaluatorUtils.sanitizeExpression(expression) == null) {
       return null;
     }
 

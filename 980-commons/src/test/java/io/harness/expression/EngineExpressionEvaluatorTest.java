@@ -10,6 +10,7 @@ package io.harness.expression;
 import static io.harness.rule.OwnerRule.ARCHIT;
 import static io.harness.rule.OwnerRule.BRIJESH;
 import static io.harness.rule.OwnerRule.GARVIT;
+import static io.harness.rule.OwnerRule.MEENA;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -19,6 +20,7 @@ import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.category.element.UnitTests;
 import io.harness.data.structure.EmptyPredicate;
+import io.harness.exception.EngineExpressionEvaluationException;
 import io.harness.exception.HintException;
 import io.harness.exception.UnresolvedExpressionsException;
 import io.harness.expression.common.ExpressionMode;
@@ -1066,8 +1068,8 @@ public class EngineExpressionEvaluatorTest extends CategoryTest {
     }
 
     @Override
-    protected Object evaluateInternal(String expression, EngineJexlContext ctx) {
-      Object value = super.evaluateInternal(expression, ctx);
+    protected Object evaluateInternal(String expression, EngineJexlContext ctx, ExpressionMode expressionMode) {
+      Object value = super.evaluateInternal(expression, ctx, expressionMode);
       if (value instanceof DummyField) {
         DummyField<?> field = (DummyField<?>) value;
         return field.isExpression() ? field.getExpressionValue() : field.getValue();
@@ -1086,5 +1088,34 @@ public class EngineExpressionEvaluatorTest extends CategoryTest {
     public Object getValue(String secretIdentifier) {
       return "${ngSecretManager.obtain(\"" + secretIdentifier + "\", " + expressionFunctorToken + ")}";
     }
+  }
+
+  @Test
+  @Owner(developers = MEENA)
+  @Category(UnitTests.class)
+  public void testBlockedExpression() {
+    EngineExpressionEvaluator evaluator = prepareEngineExpressionEvaluator(
+        new ImmutableMap.Builder<String, Object>()
+            .put("testVar", "<+a><+b>")
+            .put("a", "abc")
+            .put("b", "def")
+            .put("x", "<+y>")
+            .put("y", "<+z>")
+            .put("z", "<+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>")
+            .put(EngineExpressionEvaluator.ENABLED_FEATURE_FLAGS_KEY, List.of("CDS_BLOCK_SENSITIVE_EXPRESSIONS"))
+            .build());
+
+    assertThat(evaluator.evaluateExpression(
+                   "<+<+testVar> + <+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>>"))
+        .isNull();
+    assertThat(evaluator.evaluateExpression("<+z>")).isNull();
+    assertThat(evaluator.evaluateExpression("<+x>", ExpressionMode.RETURN_NULL_IF_UNRESOLVED)).isNull();
+    assertThatThrownBy(() -> evaluator.evaluateExpression("<+x>", ExpressionMode.THROW_EXCEPTION_IF_UNRESOLVED))
+        .isInstanceOf(EngineExpressionEvaluationException.class)
+        .hasMessage("Expression containing blocked classes/methods/strings");
+    assertThat(evaluator.resolve("<+z>", ExpressionMode.RETURN_NULL_IF_UNRESOLVED)).isEqualTo("null");
+    assertThat(evaluator.resolve("<+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>",
+                   ExpressionMode.RETURN_NULL_IF_UNRESOLVED))
+        .isEqualTo("null");
   }
 }

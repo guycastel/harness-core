@@ -923,7 +923,9 @@ public enum FeatureName {
   CDS_SAVE_PIPELINE_OPA_RESPONSE_CODE_CHANGE(
       "FF to enable 4xx response code on pipeline save when OPA policy fails", CDC),
   PL_DISABLE_SM_CREDENTIALS_CHECK(
-      "Disables the checks to detect credentials of secret manager are stored in Built In Harness SM", HarnessTeam.PL);
+      "Disables the checks to detect credentials of secret manager are stored in Built In Harness SM", HarnessTeam.PL),
+  CDS_BLOCK_SENSITIVE_EXPRESSIONS(
+      "FF to enable to block usage of specific classes/methods/strings in expressions", PIPELINE);
   // keep-sorted end
 
   @Deprecated

@@ -537,8 +537,8 @@ public class AmbianceExpressionEvaluatorTest extends OrchestrationTestBase {
     }
 
     @Override
-    protected Object evaluateInternal(String expression, EngineJexlContext ctx) {
-      Object value = super.evaluateInternal(expression, ctx);
+    protected Object evaluateInternal(String expression, EngineJexlContext ctx, ExpressionMode expressionMode) {
+      Object value = super.evaluateInternal(expression, ctx, expressionMode);
       if (value instanceof DummyOrchestrationField) {
         return ((DummyOrchestrationField) value).fetchFinalValue();
       }

@@ -51,7 +51,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
-import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.logging.impl.NoOpLog;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -84,6 +83,7 @@ public class EngineExpressionEvaluator {
 
   public EngineExpressionEvaluator(VariableResolverTracker variableResolverTracker) {
     this.engine = new JexlBuilder().logger(new NoOpLog()).create();
+
     this.variableResolverTracker =
         variableResolverTracker == null ? new VariableResolverTracker() : variableResolverTracker;
     this.contextMap = new LateBindingMap();
@@ -273,6 +273,9 @@ public class EngineExpressionEvaluator {
       return null;
     }
     EngineJexlContext engineJexlContext = prepareContext(ctx);
+    if (ExpressionEvaluatorUtils.sanitizeExpression(expression, expressionMode, engineJexlContext) == null) {
+      return null;
+    }
     try {
       return evaluateExpressionInternal(expression, engineJexlContext, MAX_DEPTH, expressionMode);
     } catch (Exception e) {
@@ -297,7 +300,7 @@ public class EngineExpressionEvaluator {
       if (ctx.isFeatureFlagEnabled(PIE_EXPRESSION_CONCATENATION)) {
         StringReplacerResponse replacerResponse;
         replacerResponse = runStringReplacerWithResponse(expression, resolver);
-        Object evaluatedExpression = evaluateInternalV2(replacerResponse, ctx);
+        Object evaluatedExpression = evaluateInternalV2(replacerResponse, ctx, expressionMode);
 
         // If expression is evaluated as null, check if prefix combinations can give any valid result or not, we should
         // do recursive check only if render expression was modified to avoid cyclic loop
@@ -323,7 +326,7 @@ public class EngineExpressionEvaluator {
         return evaluatedExpression;
       } else {
         String finalExpression = runStringReplacer(expression, resolver);
-        return evaluateInternal(finalExpression, ctx);
+        return evaluateInternal(finalExpression, ctx, expressionMode);
       }
     } catch (JexlException ex) {
       log.error(format("Failed to evaluate final expression: %s", expression), ex);
@@ -391,7 +394,7 @@ public class EngineExpressionEvaluator {
     String finalExpression = runStringReplacer(expression, resolver);
     ctx.addToContext(partialCtx);
     if (!hasExpressions(finalExpression)) {
-      return PartialEvaluateResult.createCompleteResult(evaluateInternal(expression, ctx));
+      return PartialEvaluateResult.createCompleteResult(evaluateInternal(expression, ctx, expressionMode));
     }
 
     List<String> variables = findVariables(finalExpression);
@@ -434,7 +437,7 @@ public class EngineExpressionEvaluator {
     String finalExpression = runStringReplacer(expression, resolver);
     ctx.addToContext(partialCtx);
     if (!hasExpressions(finalExpression)) {
-      return PartialEvaluateResult.createCompleteResult(evaluateInternal(expression, ctx));
+      return PartialEvaluateResult.createCompleteResult(evaluateInternal(expression, ctx, expressionMode));
     }
 
     List<String> variables = findVariables(finalExpression);
@@ -498,9 +501,13 @@ public class EngineExpressionEvaluator {
    */
   public Object evaluateExpressionBlock(
       @NotNull String expressionBlock, @NotNull EngineJexlContext ctx, int depth, ExpressionMode expressionMode) {
-    checkDepth(depth, expressionBlock);
     if (EmptyPredicate.isEmpty(expressionBlock)) {
       return expressionBlock;
+    }
+    checkDepth(depth, expressionBlock);
+
+    if (ExpressionEvaluatorUtils.sanitizeExpression(expressionBlock, expressionMode, ctx) == null) {
+      return null;
     }
 
     // Check for cases like <+<+abc>.contains(<+def>)>.
@@ -562,7 +569,7 @@ public class EngineExpressionEvaluator {
         if (hasExpressions(finalExpression)) {
           object = evaluateExpressionInternal(finalExpression, ctx, depth - 1, expressionMode);
         } else {
-          object = evaluateInternal(finalExpression, ctx);
+          object = evaluateInternal(finalExpression, ctx, expressionMode);
         }
         if (object != null) {
           return object;
@@ -644,16 +651,10 @@ public class EngineExpressionEvaluator {
    * Evaluate an expression with the given context. This variant is non-recursive and doesn't support harness
    * expressions - variables delimited by <+...>.
    */
-  protected Object evaluateInternal(@NotNull String expression, @NotNull EngineJexlContext ctx) {
-    return evaluateByCreatingExpression(expression, ctx);
-  }
-
-  protected Object evaluateByCreatingExpression(@NotNull String expression, @NotNull EngineJexlContext ctx) {
-    if (ctx.isFeatureFlagEnabled(PIE_EXECUTION_JSON_SUPPORT)) {
-      return engine.createScript(expression).execute(ctx);
-    }
-    JexlExpression jexlExpression = engine.createExpression(expression);
-    return jexlExpression.evaluate(ctx);
+  protected Object evaluateInternal(
+      @NotNull String expression, @NotNull EngineJexlContext ctx, ExpressionMode expressionMode) {
+    return evaluateExpressionInJexl(
+        expression, ctx, expressionMode, ctx.isFeatureFlagEnabled(PIE_EXECUTION_JSON_SUPPORT));
   }
 
   /**
@@ -661,28 +662,13 @@ public class EngineExpressionEvaluator {
    * expressions - variables delimited by <+...>.
    * It checks smartly if rendered expressions needs to be evaluated or not
    */
-  protected Object evaluateInternalV2(@NotNull StringReplacerResponse response, @NotNull EngineJexlContext ctx) {
-    return evaluateByCreatingExpressionV2(response, ctx);
-  }
-
-  protected Object evaluateByCreatingExpressionV2(
-      @NotNull StringReplacerResponse response, @NotNull EngineJexlContext ctx) {
+  protected Object evaluateInternalV2(
+      @NotNull StringReplacerResponse response, @NotNull EngineJexlContext ctx, ExpressionMode expressionMode) {
     // All expressions in the input are rendered thus no jexl evaluation required.
     String expression = response.getFinalExpressionValue();
-
-    if (ctx.isFeatureFlagEnabled(PIE_EXECUTION_JSON_SUPPORT)) {
-      try {
-        return engine.createScript(expression).execute(ctx);
-      } catch (Exception e) {
-        if (response.isOnlyRenderedExpressions()) {
-          return null;
-        }
-        throw e;
-      }
-    }
     try {
-      JexlExpression jexlExpression = engine.createExpression(expression);
-      return jexlExpression.evaluate(ctx);
+      return evaluateExpressionInJexl(
+          expression, ctx, expressionMode, ctx.isFeatureFlagEnabled(PIE_EXECUTION_JSON_SUPPORT));
     } catch (Exception e) {
       if (response.isOnlyRenderedExpressions()) {
         return null;
@@ -691,8 +677,13 @@ public class EngineExpressionEvaluator {
     }
   }
 
-  protected Object evaluateByCreatingScript(@NotNull String expression, @NotNull EngineJexlContext ctx) {
-    return engine.createScript(expression).execute(ctx);
+  protected Object evaluateExpressionInJexl(@NotNull String expression, @NotNull EngineJexlContext ctx,
+      ExpressionMode expressionMode, boolean shouldCreateScript) {
+    if (ExpressionEvaluatorUtils.sanitizeExpression(expression, expressionMode, ctx) == null) {
+      return null;
+    }
+    return shouldCreateScript ? engine.createScript(expression).execute(ctx)
+                              : engine.createExpression(expression).evaluate(ctx);
   }
 
   private EngineJexlContext prepareContext(Map<String, Object> ctx) {

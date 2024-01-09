@@ -8,6 +8,7 @@
 package io.harness.text;
 
 import static io.harness.rule.OwnerRule.GARVIT;
+import static io.harness.rule.OwnerRule.MEENA;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,6 +57,31 @@ public class StringReplacerTest extends CategoryTest {
     assertThat(expressions)
         .containsExactly(
             " de \\ f ", "gh <+ij <+kl.select(\"<book><title>Harry Potter</title></book>\")> > ", "abc > def");
+  }
+
+  @Test
+  @Owner(developers = MEENA)
+  @Category(UnitTests.class)
+  public void testBlockedStringNotWithinExpression() {
+    String source = "getClass()";
+    DummyExpressionResolver resolver = new DummyExpressionResolver();
+    StringReplacer stringReplacer = new StringReplacer(resolver, "<+", ">");
+
+    String resp = stringReplacer.replaceWithRenderCheck(source).getFinalExpressionValue();
+    assertThat(resp).isEqualTo(source);
+  }
+
+  @Test()
+  @Owner(developers = MEENA)
+  @Category(UnitTests.class)
+  public void testBlockedStringNotWithinExprAndAnExpr() {
+    String source = "getClass() def <+gh <+ij <+kl> > > <+mn>>> op";
+    String expected = "getClass() def 1 2>> op";
+    DummyExpressionResolver resolver = new DummyExpressionResolver();
+    StringReplacer stringReplacer = new StringReplacer(resolver, "<+", ">");
+
+    String resp = stringReplacer.replaceWithRenderCheck(source).getFinalExpressionValue();
+    assertThat(resp).isEqualTo(expected);
   }
 
   private String replace(ExpressionResolver resolver, String source) {

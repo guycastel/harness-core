@@ -12,6 +12,7 @@ import static io.harness.rule.OwnerRule.ADWAIT;
 import static io.harness.rule.OwnerRule.FERNANDOD;
 import static io.harness.rule.OwnerRule.GEORGE;
 import static io.harness.rule.OwnerRule.HINGER;
+import static io.harness.rule.OwnerRule.MEENA;
 import static io.harness.rule.OwnerRule.SARTHAK_KASAT;
 import static io.harness.rule.OwnerRule.SRINIVAS;
 
@@ -37,6 +38,7 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
 import org.apache.commons.jexl3.JexlContext;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -556,5 +558,16 @@ public class ExpressionEvaluatorTest extends CategoryTest {
     Map<String, Object> context = ImmutableMap.<String, Object>builder().put("body", json).build();
 
     assertThat(expressionEvaluator.substitute("${json.select(\".[0].title\", body)}", context)).isEqualTo("testValue");
+  }
+
+  @Ignore("Enable after CDS_BLOCK_SENSITIVE_EXPRESSIONS is enabled")
+  @Test
+  @Owner(developers = MEENA)
+  @Category(UnitTests.class)
+  public void shouldEvaluateWithBlockedMethod() {
+    ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator();
+    String expression = "''.getClass().forName('java.lang.Runtime').getRuntime().exec('echo \"hey\"')";
+    Object retValue = expressionEvaluator.evaluate(expression, LateBindingContext.builder().build());
+    assertThat(retValue).isNull();
   }
 }

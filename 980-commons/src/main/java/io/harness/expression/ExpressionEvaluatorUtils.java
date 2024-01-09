@@ -17,8 +17,10 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 import io.harness.data.algorithm.IdentifierName;
 import io.harness.exception.CriticalExpressionEvaluationException;
+import io.harness.exception.EngineExpressionEvaluationException;
 import io.harness.exception.UnresolvedExpressionsException;
 import io.harness.expression.common.ExpressionConstants;
+import io.harness.expression.common.ExpressionMode;
 
 import com.google.common.collect.ImmutableSet;
 import java.lang.reflect.Array;
@@ -60,6 +62,10 @@ public class ExpressionEvaluatorUtils {
 
   private static final JexlEngine engine = new JexlBuilder().logger(new NoOpLog()).create();
   private static final String REGEX = "[0-9]+";
+
+  private static final Set<String> blacklistedStrings = Set.of("getClass()");
+  private static final String CDS_BLOCK_SENSITIVE_EXPRESSIONS = "CDS_BLOCK_SENSITIVE_EXPRESSIONS";
+  private static final String BLOCKED_STRING_ERROR_MESSAGE = "Expression containing blocked classes/methods/strings";
 
   public static String substitute(
       ExpressionEvaluator expressionEvaluator, String expression, JexlContext ctx, VariableResolverTracker tracker) {
@@ -417,5 +423,31 @@ public class ExpressionEvaluatorUtils {
 
     throw new CriticalExpressionEvaluationException(
         "Infinite loop or too deep indirection in property interpretation", expression);
+  }
+  // for CG
+  public String sanitizeExpression(@NotNull String expression) {
+    if (hasBlacklistedContent(expression)) {
+      log.info(format("Expression %s containing blocked classes/methods/strings", expression));
+      //      return null;
+    }
+    return expression;
+  }
+
+  public String sanitizeExpression(
+      @NotNull String expression, ExpressionMode expressionMode, @NotNull EngineJexlContext ctx) {
+    if (hasBlacklistedContent(expression)) {
+      log.info(format("Expression %s containing blocked classes/methods/strings", expression));
+      if (ctx.isFeatureFlagEnabled(CDS_BLOCK_SENSITIVE_EXPRESSIONS)) {
+        if (ExpressionMode.THROW_EXCEPTION_IF_UNRESOLVED.equals(expressionMode)) {
+          throw new EngineExpressionEvaluationException(BLOCKED_STRING_ERROR_MESSAGE, expression);
+        }
+        return null;
+      }
+    }
+    return expression;
+  }
+
+  private static boolean hasBlacklistedContent(String expression) {
+    return blacklistedStrings.stream().anyMatch(expression::contains);
   }
 }

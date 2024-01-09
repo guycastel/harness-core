@@ -71,4 +71,5 @@ public abstract class ModuleLicenseDTO {
   Long lastModifiedAt;
   Boolean trialExtended;
   Integer developerLicenseCount;
+  boolean isAddOn;
 }

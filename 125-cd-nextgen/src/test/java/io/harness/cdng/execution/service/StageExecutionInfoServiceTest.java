@@ -8,6 +8,7 @@
 package io.harness.cdng.execution.service;
 
 import static io.harness.annotations.dev.HarnessTeam.CDP;
+import static io.harness.rule.OwnerRule.ABHINAV_MITTAL;
 import static io.harness.rule.OwnerRule.IVAN;
 import static io.harness.rule.OwnerRule.NAMANG;
 import static io.harness.rule.OwnerRule.TMACARI;
@@ -24,6 +25,9 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.Scope;
 import io.harness.category.element.UnitTests;
 import io.harness.cdng.execution.ExecutionInfoKey;
+import io.harness.cdng.execution.ExecutionSummaryDetails;
+import io.harness.cdng.execution.InfraExecutionSummaryDetails;
+import io.harness.cdng.execution.ServiceExecutionSummaryDetails;
 import io.harness.cdng.execution.StageExecutionBasicSummaryProjection;
 import io.harness.cdng.execution.StageExecutionInfo;
 import io.harness.exception.InvalidArgumentsException;
@@ -221,9 +225,63 @@ public class StageExecutionInfoServiceTest extends CategoryTest {
   }
 
   @Test
+  @Owner(developers = ABHINAV_MITTAL)
+  @Category(UnitTests.class)
+  public void testListStageExecutionFormattedSummaryByStageExecutionIdentifiersForPositiveCase() {
+    // stage execution ids required
+    Mockito
+        .when(
+            stageExecutionInfoRepository
+                .findAllByAccountIdentifierAndOrgIdentifierAndProjectIdentifierAndStageExecutionIdIn(
+                    ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, new HashSet<>(STAGE_EXECUTION_IDENTIFIERS)))
+        .thenReturn(List.of(stageExecutionBasicSummaryProjection1, stageExecutionBasicSummaryProjection2));
+
+    when(stageExecutionBasicSummaryProjection1.getStageExecutionId()).thenReturn("id1");
+    when(stageExecutionBasicSummaryProjection1.getServiceIdentifier()).thenReturn(SERVICE_IDENTIFIER);
+    when(stageExecutionBasicSummaryProjection1.getEnvIdentifier()).thenReturn(ENV_IDENTIFIER);
+    when(stageExecutionBasicSummaryProjection1.getInfraIdentifier()).thenReturn(INFRA_IDENTIFIER);
+
+    when(stageExecutionBasicSummaryProjection2.getStageExecutionId()).thenReturn("id2");
+    when(stageExecutionBasicSummaryProjection2.getServiceIdentifier()).thenReturn(null);
+    when(stageExecutionBasicSummaryProjection2.getEnvIdentifier()).thenReturn(null);
+    when(stageExecutionBasicSummaryProjection2.getInfraIdentifier()).thenReturn(null);
+    when(stageExecutionBasicSummaryProjection2.getExecutionSummaryDetails())
+        .thenReturn(ExecutionSummaryDetails.builder()
+                        .serviceInfo(ServiceExecutionSummaryDetails.builder().identifier(SERVICE_IDENTIFIER).build())
+                        .infraExecutionSummary(InfraExecutionSummaryDetails.builder()
+                                                   .identifier(ENV_IDENTIFIER)
+                                                   .infrastructureIdentifier(INFRA_IDENTIFIER)
+                                                   .build())
+                        .build());
+
+    Map<String, CDStageSummaryResponseDTO> stageMap =
+        stageExecutionInfoService.listStageExecutionFormattedSummaryByStageExecutionIdentifiers(
+            Scope.of(ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER), STAGE_EXECUTION_IDENTIFIERS);
+
+    assertThat(stageMap)
+        .hasSize(2)
+        .containsEntry("id1",
+            CDStageSummaryResponseDTO.builder()
+                .service(SERVICE_IDENTIFIER)
+                .environment(ENV_IDENTIFIER)
+                .infra(INFRA_IDENTIFIER)
+                .build())
+        .containsEntry("id2",
+            CDStageSummaryResponseDTO.builder()
+                .service(SERVICE_IDENTIFIER)
+                .environment(ENV_IDENTIFIER)
+                .infra(INFRA_IDENTIFIER)
+                .build());
+
+    verify(stageExecutionInfoRepository, times(1))
+        .findAllByAccountIdentifierAndOrgIdentifierAndProjectIdentifierAndStageExecutionIdIn(
+            ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, new HashSet<>(STAGE_EXECUTION_IDENTIFIERS));
+  }
+
+  @Test
   @Owner(developers = NAMANG)
   @Category(UnitTests.class)
-  public void testListStagePlanCremationFormattedSummaryByStageIdentifiers() {
+  public void testListStagePlanCreationFormattedSummaryByStageIdentifiers() {
     when(stageExecutionBasicSummaryProjection1.getStageExecutionId()).thenReturn("id1");
     when(stageExecutionBasicSummaryProjection1.getServiceIdentifier()).thenReturn(SERVICE_IDENTIFIER);
     when(stageExecutionBasicSummaryProjection1.getEnvIdentifier()).thenReturn(ENV_IDENTIFIER);

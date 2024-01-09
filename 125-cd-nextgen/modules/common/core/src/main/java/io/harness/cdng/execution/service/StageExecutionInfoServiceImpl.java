@@ -12,6 +12,7 @@ import static io.harness.cdng.creator.plan.stage.SingleServiceEnvDeploymentStage
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
@@ -21,6 +22,7 @@ import io.harness.beans.Scope;
 import io.harness.cdng.execution.ExecutionInfoKey;
 import io.harness.cdng.execution.ExecutionInfoUtility;
 import io.harness.cdng.execution.ExecutionSummaryDetails;
+import io.harness.cdng.execution.InfraExecutionSummaryDetails;
 import io.harness.cdng.execution.ServiceExecutionSummaryDetails;
 import io.harness.cdng.execution.ServiceExecutionSummaryDetails.ServiceExecutionSummaryDetailsBuilder;
 import io.harness.cdng.execution.StageExecutionBasicSummaryProjection;
@@ -268,9 +270,9 @@ public class StageExecutionInfoServiceImpl implements StageExecutionInfoService 
 
   protected CDStageSummaryResponseDTO getFormattedStageSummary(
       @NotNull StageExecutionBasicSummaryProjection stageExecutionBasicSummaryProjection) {
-    String environment = stageExecutionBasicSummaryProjection.getEnvIdentifier();
-    String service = stageExecutionBasicSummaryProjection.getServiceIdentifier();
-    String infra = stageExecutionBasicSummaryProjection.getInfraIdentifier();
+    String environment = getEnvironmentIdentifierWithFallBack(stageExecutionBasicSummaryProjection);
+    String service = getServiceIdentifierWithFallBack(stageExecutionBasicSummaryProjection);
+    String infra = getInfraIdentifierWithFallBack(stageExecutionBasicSummaryProjection);
 
     return CDStageSummaryResponseDTO.builder()
         .service(StringUtils.defaultIfBlank(service, NOT_AVAILABLE))
@@ -290,6 +292,39 @@ public class StageExecutionInfoServiceImpl implements StageExecutionInfoService 
         .getServiceInfo()
         .getArtifacts()
         .getArtifactDisplayName();
+  }
+
+  private String getServiceIdentifierWithFallBack(
+      @NotNull StageExecutionBasicSummaryProjection stageExecutionBasicSummaryProjection) {
+    if (isBlank(stageExecutionBasicSummaryProjection.getServiceIdentifier())
+        && stageExecutionBasicSummaryProjection.getExecutionSummaryDetails() != null) {
+      ServiceExecutionSummaryDetails serviceInfo =
+          stageExecutionBasicSummaryProjection.getExecutionSummaryDetails().getServiceInfo();
+      return serviceInfo != null ? serviceInfo.getIdentifier() : null;
+    }
+    return stageExecutionBasicSummaryProjection.getServiceIdentifier();
+  }
+
+  private String getEnvironmentIdentifierWithFallBack(
+      @NotNull StageExecutionBasicSummaryProjection stageExecutionBasicSummaryProjection) {
+    if (isBlank(stageExecutionBasicSummaryProjection.getEnvIdentifier())
+        && stageExecutionBasicSummaryProjection.getExecutionSummaryDetails() != null) {
+      InfraExecutionSummaryDetails infraExecutionSummary =
+          stageExecutionBasicSummaryProjection.getExecutionSummaryDetails().getInfraExecutionSummary();
+      return infraExecutionSummary != null ? infraExecutionSummary.getIdentifier() : null;
+    }
+    return stageExecutionBasicSummaryProjection.getEnvIdentifier();
+  }
+
+  private String getInfraIdentifierWithFallBack(
+      @NotNull StageExecutionBasicSummaryProjection stageExecutionBasicSummaryProjection) {
+    if (isBlank(stageExecutionBasicSummaryProjection.getEnvIdentifier())
+        && stageExecutionBasicSummaryProjection.getExecutionSummaryDetails() != null) {
+      InfraExecutionSummaryDetails infraExecutionSummary =
+          stageExecutionBasicSummaryProjection.getExecutionSummaryDetails().getInfraExecutionSummary();
+      return infraExecutionSummary != null ? infraExecutionSummary.getInfrastructureIdentifier() : null;
+    }
+    return stageExecutionBasicSummaryProjection.getInfraIdentifier();
   }
 
   private void updateStageExecutionInfoFromStageExecutionInfoUpdateDTO(

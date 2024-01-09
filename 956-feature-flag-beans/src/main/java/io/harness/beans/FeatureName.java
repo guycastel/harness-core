@@ -401,6 +401,8 @@ public enum FeatureName {
       SPG),
   SPG_CG_FIXING_PIPELINE_RESUME("This fixes pipeline resume when a loop state is skipped", HarnessTeam.SPG),
   GIT_HOST_CONNECTIVITY,
+  GITOPS_AGENT_HELM_V2(
+      "Adds functionality to generate GitOps Agent manifests using public Helm chart.", HarnessTeam.GITOPS),
   GLOBAL_COMMAND_LIBRARY,
   GLOBAL_DISABLE_HEALTH_CHECK(Scope.GLOBAL),
   GRAPHQL_DEV,

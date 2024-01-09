@@ -502,8 +502,6 @@ public enum FeatureName {
   PIE_NG_BATCH_GET_TEMPLATES(
       "FF to enable batching of templates to improve loading time of pipeline and template studio",
       HarnessTeam.PIPELINE),
-  PIE_PIPELINE_SETTINGS_ENFORCEMENT_LIMIT(
-      "To enable pipeline-settings and limits in Project Default Settings in UI", HarnessTeam.PIPELINE),
   PIE_RETRY_STEP_GROUP(
       "To enable Retry Step Group Failure Strategy, under which if a step fails in a step group, the whole group is retried",
       PIPELINE),

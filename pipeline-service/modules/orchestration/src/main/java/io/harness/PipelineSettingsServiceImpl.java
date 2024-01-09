@@ -6,7 +6,6 @@
  */
 package io.harness;
 
-import static io.harness.beans.FeatureName.PIE_PIPELINE_SETTINGS_ENFORCEMENT_LIMIT;
 import static io.harness.licensing.Edition.ENTERPRISE;
 import static io.harness.licensing.Edition.FREE;
 import static io.harness.licensing.Edition.TEAM;
@@ -77,48 +76,16 @@ public class PipelineSettingsServiceImpl implements PipelineSettingsService {
 
   @Override
   public PlanExecutionSettingResponse shouldQueuePlanExecution(String accountId, String pipelineIdentifier) {
-    if (featureFlagService.isEnabled(accountId, PIE_PIPELINE_SETTINGS_ENFORCEMENT_LIMIT.name())) {
-      try {
-        long concurrency = Long.parseLong(
-            NGRestUtils
-                .getResponse(ngSettingsClient.getSetting(
-                    NGPipelineSettingsConstant.CONCURRENT_ACTIVE_PIPELINE_EXECUTIONS.getName(), accountId, null, null))
-                .getValue());
-        return shouldQueueInternal(concurrency,
-            planExecutionService.countRunningExecutionsForGivenPipelineInAccount(accountId, pipelineIdentifier));
-      } catch (Exception exception) {
-        log.error("FAILED to get \"CONCURRENT_ACTIVE_PIPELINE_EXECUTIONS\" settings : " + exception.getMessage());
-      }
-    }
     try {
-      Edition edition = getEdition(accountId);
-      switch (edition) {
-        case FREE:
-          if (orchestrationRestrictionConfiguration.isUseRestrictionForFree()) {
-            return shouldQueueInternal(orchestrationRestrictionConfiguration.getPlanExecutionRestriction().getFree(),
-                planExecutionService.countRunningExecutionsForGivenPipelineInAccount(accountId, pipelineIdentifier));
-          }
-          break;
-        case ENTERPRISE:
-          if (orchestrationRestrictionConfiguration.isUseRestrictionForEnterprise()) {
-            return shouldQueueInternal(
-                orchestrationRestrictionConfiguration.getPlanExecutionRestriction().getEnterprise(),
-                planExecutionService.countRunningExecutionsForGivenPipelineInAccountExcludingWaitingStatuses(
-                    accountId, pipelineIdentifier));
-          }
-          break;
-        case TEAM:
-          if (orchestrationRestrictionConfiguration.isUseRestrictionForTeam()) {
-            return shouldQueueInternal(orchestrationRestrictionConfiguration.getPlanExecutionRestriction().getTeam(),
-                planExecutionService.countRunningExecutionsForGivenPipelineInAccountExcludingWaitingStatuses(
-                    accountId, pipelineIdentifier));
-          }
-          break;
-        default:
-          PlanExecutionSettingResponse.builder().shouldQueue(false).useNewFlow(false).build();
-      }
-    } catch (Exception ex) {
-      return PlanExecutionSettingResponse.builder().shouldQueue(false).useNewFlow(false).build();
+      long concurrency = Long.parseLong(
+          NGRestUtils
+              .getResponse(ngSettingsClient.getSetting(
+                  NGPipelineSettingsConstant.CONCURRENT_ACTIVE_PIPELINE_EXECUTIONS.getName(), accountId, null, null))
+              .getValue());
+      return shouldQueueInternal(concurrency,
+          planExecutionService.countRunningExecutionsForGivenPipelineInAccount(accountId, pipelineIdentifier));
+    } catch (Exception exception) {
+      log.error("FAILED to get \"CONCURRENT_ACTIVE_PIPELINE_EXECUTIONS\" settings : " + exception.getMessage());
     }
     return PlanExecutionSettingResponse.builder().shouldQueue(false).useNewFlow(false).build();
   }

@@ -19,10 +19,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 
 import io.harness.annotations.dev.OwnedBy;
-import io.harness.beans.FeatureName;
 import io.harness.category.element.UnitTests;
 import io.harness.engine.executions.plan.PlanExecutionService;
 import io.harness.exception.InvalidRequestException;
@@ -37,9 +35,7 @@ import io.harness.ngsettings.dto.SettingValueResponseDTO;
 import io.harness.pms.utils.NGPipelineSettingsConstant;
 import io.harness.remote.client.NGRestUtils;
 import io.harness.rule.Owner;
-import io.harness.utils.PmsFeatureFlagService;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -63,7 +59,6 @@ public class PipelineSettingsServiceImplTest extends OrchestrationTestBase {
   @Mock PlanExecutionService planExecutionService;
 
   @InjectMocks PipelineSettingsServiceImpl pipelineSettingsService;
-  @Mock PmsFeatureFlagService featureFlagService;
   @Mock NGSettingsClient ngSettingsClient;
   @Mock private Call<ResponseDTO<SettingValueResponseDTO>> request;
 
@@ -90,171 +85,6 @@ public class PipelineSettingsServiceImplTest extends OrchestrationTestBase {
     mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
     edition = pipelineSettingsService.getEdition("ACCOUNT_ID");
     assertThat(edition).isEqualTo(ENTERPRISE);
-  }
-
-  @Test
-  @Owner(developers = AYUSHI_TIWARI)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionNotFree() {
-    // edition == FREE && orchestrationRestrictionConfiguration.isUseRestrictionForFree() == False
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    PlanExecutionRestrictionConfig planExecutionRestrictionConfig = new PlanExecutionRestrictionConfig(1, 2, 3);
-    doReturn(3L).when(planExecutionService).countRunningExecutionsForGivenPipelineInAccount(any(), any());
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(Edition.FREE).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(false).when(orchestrationRestrictionConfiguration).isUseRestrictionForFree();
-    doReturn(planExecutionRestrictionConfig).when(orchestrationRestrictionConfiguration).getPlanExecutionRestriction();
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isFalse();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isFalse();
-  }
-
-  @Test
-  @Owner(developers = AYUSHI_TIWARI)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionFree() {
-    // editon == FREE && orchestrationRestrictionConfiguration.isUseRestrictionForFree() == True
-    // runningExecutionsForGivenPipeline >= maxCount == False
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    PlanExecutionRestrictionConfig planExecutionRestrictionConfig = new PlanExecutionRestrictionConfig(1, 2, 3);
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(Edition.FREE).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(true).when(orchestrationRestrictionConfiguration).isUseRestrictionForFree();
-    doReturn(planExecutionRestrictionConfig).when(orchestrationRestrictionConfiguration).getPlanExecutionRestriction();
-    doReturn(0L)
-        .when(planExecutionService)
-        .countRunningExecutionsForGivenPipelineInAccount("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isFalse();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isTrue();
-  }
-
-  @Test
-  @Owner(developers = AYUSHI_TIWARI)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionNotTeam() throws UnsupportedEncodingException {
-    // edition == TEAM && orchestrationRestrictionConfiguration.isUseRestrictionForTeam() == False
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(Edition.TEAM).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(false).when(orchestrationRestrictionConfiguration).isUseRestrictionForTeam();
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isFalse();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isFalse();
-  }
-
-  @Test
-  @Owner(developers = AYUSHI_TIWARI)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionTeamGreaterThanMaxCount() throws UnsupportedEncodingException {
-    // edition == TEAM && orchestrationRestrictionConfiguration.isUseRestrictionForTeam() == True
-    // runningExecutionsForGivenPipeline >= maxCount == True
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    PlanExecutionRestrictionConfig planExecutionRestrictionConfig = new PlanExecutionRestrictionConfig(1, 2, 3);
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(Edition.TEAM).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(true).when(orchestrationRestrictionConfiguration).isUseRestrictionForTeam();
-    doReturn(planExecutionRestrictionConfig).when(orchestrationRestrictionConfiguration).getPlanExecutionRestriction();
-    doReturn(100L)
-        .when(planExecutionService)
-        .countRunningExecutionsForGivenPipelineInAccountExcludingWaitingStatuses("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isTrue();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isTrue();
-  }
-
-  @Test
-  @Owner(developers = AYUSHI_TIWARI)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionTeam() {
-    // edition == TEAM && orchestrationRestrictionConfiguration.isUseRestrictionForTeam() == True
-    // runningExecutionsForGivenPipeline >= maxCount == False
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    PlanExecutionRestrictionConfig planExecutionRestrictionConfig = new PlanExecutionRestrictionConfig(1, 2, 3);
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(Edition.TEAM).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(true).when(orchestrationRestrictionConfiguration).isUseRestrictionForTeam();
-    doReturn(planExecutionRestrictionConfig).when(orchestrationRestrictionConfiguration).getPlanExecutionRestriction();
-    doReturn(0L)
-        .when(planExecutionService)
-        .countRunningExecutionsForGivenPipelineInAccount("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isFalse();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isTrue();
-  }
-
-  @Test
-  @Owner(developers = AYUSHI_TIWARI)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionNotEnterprise() throws UnsupportedEncodingException {
-    // editon == ENTERPRISE && orchestrationRestrictionConfiguration.isUseRestrictionForEnterprise() == False
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(Edition.ENTERPRISE).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(false).when(orchestrationRestrictionConfiguration).isUseRestrictionForEnterprise();
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isFalse();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isFalse();
-  }
-
-  @Test
-  @Owner(developers = AYUSHI_TIWARI)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionEnterpriseGreaterThanMaxCount() throws UnsupportedEncodingException {
-    // edition == ENTERPRISE && orchestrationRestrictionConfiguration.isUseRestrictionForENTERPRISE() == True
-    // runningExecutionsForGivenPipeline >= maxCount == True
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    PlanExecutionRestrictionConfig planExecutionRestrictionConfig = new PlanExecutionRestrictionConfig(1, 2, 3);
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(Edition.ENTERPRISE).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(true).when(orchestrationRestrictionConfiguration).isUseRestrictionForEnterprise();
-    doReturn(planExecutionRestrictionConfig).when(orchestrationRestrictionConfiguration).getPlanExecutionRestriction();
-    doReturn(100L)
-        .when(planExecutionService)
-        .countRunningExecutionsForGivenPipelineInAccountExcludingWaitingStatuses("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isTrue();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isTrue();
-  }
-
-  @Test
-  @Owner(developers = AYUSHI_TIWARI)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionEnterprise() {
-    // edition == ENTERPRISE && orchestrationRestrictionConfiguration.isUseRestrictionForEnterprise() == True &&
-    // runningExecutionsForGivenPipeline >= maxCount == False
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    PlanExecutionRestrictionConfig planExecutionRestrictionConfig = new PlanExecutionRestrictionConfig(1, 2, 3);
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(ENTERPRISE).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(true).when(orchestrationRestrictionConfiguration).isUseRestrictionForEnterprise();
-    doReturn(planExecutionRestrictionConfig).when(orchestrationRestrictionConfiguration).getPlanExecutionRestriction();
-    doReturn(0L)
-        .when(planExecutionService)
-        .countRunningExecutionsForGivenPipelineInAccount("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", PIPELINE_IDENTIFIER);
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isFalse();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isTrue();
   }
 
   @Test
@@ -536,32 +366,9 @@ public class PipelineSettingsServiceImplTest extends OrchestrationTestBase {
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionForDisabledFF() {
+  public void testShouldQueuePlanExecution() {
     // edition == FREE && orchestrationRestrictionConfiguration.isUseRestrictionForFree() == False
     MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    when(featureFlagService.isEnabled("ACCOUNT_ID", FeatureName.PIE_PIPELINE_SETTINGS_ENFORCEMENT_LIMIT.name()))
-        .thenReturn(false);
-    PlanExecutionRestrictionConfig planExecutionRestrictionConfig = new PlanExecutionRestrictionConfig(1, 2, 3);
-    doReturn(3L).when(planExecutionService).countRunningExecutionsForGivenPipelineInAccount(any(), any());
-    List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();
-    moduleLicenseDTOS.add(CDModuleLicenseDTO.builder().edition(Edition.FREE).build());
-    mockRestStatic.when(() -> NGRestUtils.getResponse(any())).thenReturn(moduleLicenseDTOS);
-    doReturn(false).when(orchestrationRestrictionConfiguration).isUseRestrictionForFree();
-    doReturn(planExecutionRestrictionConfig).when(orchestrationRestrictionConfiguration).getPlanExecutionRestriction();
-    PlanExecutionSettingResponse planExecutionSettingResponse =
-        pipelineSettingsService.shouldQueuePlanExecution("ACCOUNT_ID", "PIPELINE_IDENTIFIER");
-    assertThat(planExecutionSettingResponse.isShouldQueue()).isFalse();
-    assertThat(planExecutionSettingResponse.isUseNewFlow()).isFalse();
-  }
-
-  @Test
-  @Owner(developers = SHIVAM)
-  @Category(UnitTests.class)
-  public void testShouldQueuePlanExecutionForEnabledFF() {
-    // edition == FREE && orchestrationRestrictionConfiguration.isUseRestrictionForFree() == False
-    MockedStatic<NGRestUtils> mockRestStatic = Mockito.mockStatic(NGRestUtils.class);
-    when(featureFlagService.isEnabled("ACCOUNT_ID", FeatureName.PIE_PIPELINE_SETTINGS_ENFORCEMENT_LIMIT.name()))
-        .thenReturn(true);
     PlanExecutionRestrictionConfig planExecutionRestrictionConfig = new PlanExecutionRestrictionConfig(1, 2, 3);
     doReturn(3L).when(planExecutionService).countRunningExecutionsForGivenPipelineInAccount(any(), any());
     List<ModuleLicenseDTO> moduleLicenseDTOS = new ArrayList<>();

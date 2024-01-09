@@ -108,10 +108,6 @@ public enum FeatureName {
   CDS_ENABLE_NEW_PARAMETER_FIELD_PROCESSOR(
       "FF for turning on new parameterField processor which handles all expression resolution for ParameterField",
       HarnessTeam.CDC),
-
-  CDS_HELM_FETCH_CHART_METADATA_NG(
-      "Enables option to fetch helm chart details from the Chart.yaml and expose this as expressions. Epic: https://harness.atlassian.net/browse/CDS-58036",
-      HarnessTeam.CDP),
   CDS_HELM_STEADY_STATE_CHECK_1_16_V2_CG(
       "This FF will use helm get manifest instead of helm template output to find managed workloads for Native Helm steady state check for CG",
       HarnessTeam.CDP),

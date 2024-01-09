@@ -17,9 +17,7 @@ import static org.mockito.Mockito.mock;
 import io.harness.CategoryTest;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
-import io.harness.beans.FeatureName;
 import io.harness.category.element.UnitTests;
-import io.harness.cdng.featureFlag.CDFeatureFlagHelper;
 import io.harness.cdng.manifest.delegate.K8sManifestDelegateMapper;
 import io.harness.cdng.manifest.yaml.HelmChartManifestOutcome;
 import io.harness.cdng.manifest.yaml.K8sManifestOutcome;
@@ -59,7 +57,6 @@ public class HelmChartManifestTaskHandlerTest extends CategoryTest {
 
   @Mock private K8sManifestDelegateMapper manifestDelegateMapper;
   @Mock private DelegateGrpcClientWrapper delegateGrpcClientWrapper;
-  @Mock private CDFeatureFlagHelper featureFlagHelperService;
 
   @Mock private LogCallback logCallback;
 
@@ -71,29 +68,15 @@ public class HelmChartManifestTaskHandlerTest extends CategoryTest {
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
   public void testIsSupported() {
-    testIsSupported(ParameterField.createValueField(true), true, true);
-  }
-
-  @Test
-  @Owner(developers = ABOSII)
-  @Category(UnitTests.class)
-  public void testIsSupportedFFNotEnabled() {
-    testIsSupported(ParameterField.createValueField(true), false, false);
-  }
-
-  @Test
-  @Owner(developers = ABOSII)
-  @Category(UnitTests.class)
-  public void testIsSupportedNotEnabled() {
-    testIsSupported(ParameterField.createValueField(false), true, false);
+    testIsSupported(ParameterField.createValueField(true), true);
   }
 
   @Test
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
   public void testIsSupportedNullValue() {
-    testIsSupported(null, true, false);
-    testIsSupported(ParameterField.createValueField(null), true, false);
+    testIsSupported(null, false);
+    testIsSupported(ParameterField.createValueField(null), false);
   }
 
   @Test
@@ -109,8 +92,6 @@ public class HelmChartManifestTaskHandlerTest extends CategoryTest {
                                                  .manifestOutcome(manifestOutcome)
                                                  .logCallback(logCallback)
                                                  .build();
-
-    doReturn(true).when(featureFlagHelperService).isEnabled(ACCOUNT_ID, FeatureName.CDS_HELM_FETCH_CHART_METADATA_NG);
 
     doReturn(true).when(delegateGrpcClientWrapper).isTaskTypeSupported(expectedAccountId, expectedTaskType);
 
@@ -135,7 +116,6 @@ public class HelmChartManifestTaskHandlerTest extends CategoryTest {
                                                  .logCallback(logCallback)
                                                  .build();
 
-    doReturn(true).when(featureFlagHelperService).isEnabled(ACCOUNT_ID, FeatureName.CDS_HELM_FETCH_CHART_METADATA_NG);
     doReturn(true).when(delegateGrpcClientWrapper).isTaskTypeSupported(expectedAccountId, expectedTaskType);
     assertThat(helmChartManifestTaskHandler.isSupported(context)).isFalse();
   }
@@ -300,7 +280,7 @@ public class HelmChartManifestTaskHandlerTest extends CategoryTest {
     assertThat(result).isEmpty();
   }
 
-  private void testIsSupported(ParameterField<Boolean> fetchHelmChart, boolean ffEnabled, boolean expectedResult) {
+  private void testIsSupported(ParameterField<Boolean> fetchHelmChart, boolean expectedResult) {
     final HelmChartManifestOutcome manifestOutcome =
         HelmChartManifestOutcome.builder().fetchHelmChartMetadata(fetchHelmChart).build();
 
@@ -309,11 +289,6 @@ public class HelmChartManifestTaskHandlerTest extends CategoryTest {
                                                  .manifestOutcome(manifestOutcome)
                                                  .logCallback(logCallback)
                                                  .build();
-
-    doReturn(ffEnabled)
-        .when(featureFlagHelperService)
-        .isEnabled(ACCOUNT_ID, FeatureName.CDS_HELM_FETCH_CHART_METADATA_NG);
-
     assertThat(helmChartManifestTaskHandler.isSupported(context)).isEqualTo(expectedResult);
   }
 }

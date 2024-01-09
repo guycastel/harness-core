@@ -14,7 +14,6 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.beans.FeatureName;
 import io.harness.cdng.featureFlag.CDFeatureFlagHelper;
 import io.harness.cdng.manifest.ManifestType;
 import io.harness.cdng.manifest.delegate.K8sManifestDelegateMapper;
@@ -62,10 +61,6 @@ public class HelmChartManifestTaskHandler implements ManifestTaskHandler {
     }
 
     final String accountId = AmbianceUtils.getAccountId(context.getAmbiance());
-
-    if (!featureFlagHelperService.isEnabled(accountId, FeatureName.CDS_HELM_FETCH_CHART_METADATA_NG)) {
-      return false;
-    }
 
     HelmChartManifestOutcome helmChartManifest = (HelmChartManifestOutcome) context.getManifestOutcome();
     if (!getBooleanParameterFieldValue(helmChartManifest.getFetchHelmChartMetadata())) {

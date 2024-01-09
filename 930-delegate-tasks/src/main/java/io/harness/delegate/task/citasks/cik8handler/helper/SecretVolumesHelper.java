@@ -50,7 +50,7 @@ public class SecretVolumesHelper {
       List<String> fileList = listFilesInDir(sourceDirPath);
 
       fileList.forEach(
-          (f) -> secretVolumeMappings.put(f, Collections.singletonList(HARNESS_SHARED_CERTS_PATH + getName(f))));
+          f -> secretVolumeMappings.put(f, Collections.singletonList(HARNESS_SHARED_CERTS_PATH + getName(f))));
     }
 
     // Check if SHARED_CA_CERTS_PATH and DESTINATION_CA_PATH is set, then create the secretVolumeMappings from these

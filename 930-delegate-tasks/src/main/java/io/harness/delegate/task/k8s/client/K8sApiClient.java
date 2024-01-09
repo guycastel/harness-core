@@ -32,7 +32,6 @@ import com.google.inject.Singleton;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.ApisApi;
-import io.kubernetes.client.openapi.models.V1APIGroup;
 import io.kubernetes.client.openapi.models.V1APIGroupList;
 import io.kubernetes.client.openapi.models.V1GroupVersionForDiscovery;
 import java.util.ArrayList;

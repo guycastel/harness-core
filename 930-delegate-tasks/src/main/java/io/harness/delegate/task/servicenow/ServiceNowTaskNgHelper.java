@@ -710,15 +710,14 @@ public class ServiceNowTaskNgHelper {
     ServiceNowConnectorDTO serviceNowConnectorDTO = serviceNowTaskNGParameters.getServiceNowConnectorDTO();
     ServiceNowRestClient serviceNowRestClient = getServiceNowRestClient(serviceNowConnectorDTO.getServiceNowUrl());
 
-    StringBuilder sysparm_query_builder = new StringBuilder("active=true");
+    String sysparm_query = "active=true";
     if (!StringUtils.isBlank(serviceNowTaskNGParameters.getTemplateName())) {
-      sysparm_query_builder.append(String.format("^sys_name=%s", serviceNowTaskNGParameters.getTemplateName()));
+      sysparm_query += String.format("^sys_name=%s", serviceNowTaskNGParameters.getTemplateName());
     }
     if (!StringUtils.isBlank(serviceNowTaskNGParameters.getSearchTerm())) {
-      sysparm_query_builder.append(String.format("^sys_nameCONTAINS%s", serviceNowTaskNGParameters.getSearchTerm()));
+      sysparm_query += String.format("^sys_nameCONTAINS%s", serviceNowTaskNGParameters.getSearchTerm());
     }
-    sysparm_query_builder.append("^ORDERBYsys_created_on");
-    String sysparm_query = sysparm_query_builder.toString();
+    sysparm_query += "^ORDERBYsys_created_on";
     String sparm_fields = "template,sys_name,sys_id";
     final Call<JsonNode> request = serviceNowRestClient.getStandardTemplate(
         ServiceNowAuthNgHelper.getAuthToken(serviceNowConnectorDTO), sysparm_query, sparm_fields,

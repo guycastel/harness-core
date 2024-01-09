@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+@UtilityClass
 @Slf4j
 @OwnedBy(PL)
-@UtilityClass
 public class NotificationSettingsHelper {
   public List<String> getRecipientsWithValidDomain(List<String> recipients, List<String> targetAllowlist) {
     if (isEmpty(targetAllowlist)) {

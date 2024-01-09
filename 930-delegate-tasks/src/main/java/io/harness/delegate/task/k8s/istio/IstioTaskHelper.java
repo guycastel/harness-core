@@ -100,6 +100,8 @@ public class IstioTaskHelper {
       case HarnessLabelValues.colorGreen:
         labels.put(HarnessLabels.color, HarnessLabelValues.colorGreen);
         break;
+      default:
+        break;
     }
     return labels;
   }

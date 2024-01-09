@@ -285,6 +285,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   public void testUpdateArtifactsAndEnvironmentsInRemediationTracker() throws IllegalAccessException {
     RemediationTrackerEntity remediationTrackerEntity =
         createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
 
     updatedArtifactsAndCdInstanceSummaries();
 
@@ -337,6 +338,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   public void testDeploymentCounts_WithExcludedArtifacts() throws IllegalAccessException {
     RemediationTrackerEntity remediationTrackerEntity =
         createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
 
     remediationTrackerEntity.getArtifactInfos().get("artifactId").setExcluded(true);
 
@@ -403,6 +405,10 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
     assertThat(response.getRemediationCounts().get(1).getCount()).isEqualTo(1);
   }
 
+  private void setRemediationTrackerToOnGoing(RemediationTrackerEntity remediationTrackerEntity) {
+    remediationTrackerEntity.setStatus(ON_GOING);
+    repository.save(remediationTrackerEntity);
+  }
   private void updatedArtifactsAndCdInstanceSummaries() throws IllegalAccessException {
     when(artifactService.listDeployedArtifactsFromIdsWithCriteria(any(), any(), any(), any(), any()))
         .thenReturn(Collections.singletonList(
@@ -578,6 +584,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   public void testListRemediationsArtifacts() throws IllegalAccessException {
     RemediationTrackerEntity remediationTrackerEntity =
         createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
 
     updatedArtifactsAndCdInstanceSummaries();
     Pageable pageable = PageResponseUtils.getPageable(0, 3);
@@ -614,6 +621,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   public void testListRemediationsArtifacts_WithPendingRemediationStatus() throws IllegalAccessException {
     RemediationTrackerEntity remediationTrackerEntity =
         createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
     updatedArtifactsAndCdInstanceSummaries();
 
     Pageable pageable = PageResponseUtils.getPageable(0, 3);
@@ -654,6 +662,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
       throws IllegalAccessException {
     RemediationTrackerEntity remediationTrackerEntity =
         createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
     updatedArtifactsAndCdInstanceSummaries();
     Pageable pageable = PageResponseUtils.getPageable(0, 3);
     List<RemediationArtifactListingResponse> response =
@@ -685,6 +694,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   public void testListRemediationArtifactDeployments() throws IllegalAccessException {
     RemediationTrackerEntity remediationTrackerEntity =
         createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
 
     updatedArtifactsAndCdInstanceSummaries();
     Pageable pageable = PageResponseUtils.getPageable(0, 10);
@@ -741,6 +751,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   public void testListRemediationArtifactDeployments_WithEnvIdentifier() throws IllegalAccessException {
     RemediationTrackerEntity remediationTrackerEntity =
         createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
 
     updatedArtifactsAndCdInstanceSummaries();
     Pageable pageable = PageResponseUtils.getPageable(0, 10);
@@ -782,6 +793,7 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   public void testListRemediationArtifactDeployments_WithPreProdEnv() throws IllegalAccessException {
     RemediationTrackerEntity remediationTrackerEntity =
         createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
 
     updatedArtifactsAndCdInstanceSummaries();
     Pageable pageable = PageResponseUtils.getPageable(0, 10);

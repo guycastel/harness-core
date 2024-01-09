@@ -7,6 +7,8 @@
 
 package io.harness.ssca.api;
 
+import io.harness.ssca.entities.remediation_tracker.CVEVulnerability.CVEVulnerabilityInfoKeys;
+import io.harness.ssca.entities.remediation_tracker.ContactInfo.ContactInfoKeys;
 import io.harness.ssca.entities.remediation_tracker.RemediationTrackerEntity.RemediationTrackerEntityKeys;
 import io.harness.ssca.entities.remediation_tracker.VulnerabilityInfo.VulnerabilityInfoKeys;
 
@@ -17,7 +19,11 @@ public class RemediationTrackerApiMapperUtils {
   public static String getSortFieldMapping(String field) {
     switch (field) {
       case "component":
-        return VulnerabilityInfoKeys.component;
+        return RemediationTrackerEntityKeys.vulnerabilityInfo + "." + VulnerabilityInfoKeys.component;
+      case "contactName":
+        return RemediationTrackerEntityKeys.contactInfo + "." + ContactInfoKeys.name;
+      case "cve":
+        return RemediationTrackerEntityKeys.vulnerabilityInfo + "." + CVEVulnerabilityInfoKeys.cve;
       case "status":
         return RemediationTrackerEntityKeys.status;
       case "targetDate":

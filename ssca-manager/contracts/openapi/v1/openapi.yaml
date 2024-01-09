@@ -938,6 +938,8 @@ paths:
               - component
               - status
               - targetDate
+              - contactName
+              - cve
             default: component
       security:
         - x-api-key: []

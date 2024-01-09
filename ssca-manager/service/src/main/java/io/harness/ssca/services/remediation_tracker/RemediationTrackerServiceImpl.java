@@ -248,6 +248,9 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
 
   @Override
   public void updateArtifactsAndEnvironments(RemediationTrackerEntity remediationTracker) {
+    if (remediationTracker.getStatus() == RemediationStatus.COMPLETED) {
+      return;
+    }
     List<ComponentFilter> componentFilter = getComponentFilters(remediationTracker);
     List<String> orchestrationIdsMatchingTrackerFilter = getOrchestrationIds(remediationTracker, componentFilter);
 
@@ -460,6 +463,9 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
                                    .collect(Collectors.toList());
     // We have implemented in-memory sort here to support pagination.
     // Since we don't expect a lot of artifacts in a remediation tracker, this should be fine.
+    if (artifactListingResponses.isEmpty()) {
+      return new PageImpl<>(artifactListingResponses, pageable, artifactListingResponses.size());
+    }
     return new PageImpl<>(
         PageResponseUtils.getPaginatedList(artifactListingResponses, pageable.getPageNumber(), pageable.getPageSize()),
         pageable, artifactListingResponses.size());
@@ -489,6 +495,9 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
                     .collect(Collectors.toList());
     // We have implemented in-memory sort here to support pagination.
     // Since we don't expect a lot of artifacts in a remediation tracker, this should be fine.
+    if (responses.isEmpty()) {
+      return new PageImpl<>(responses, pageable, responses.size());
+    }
     return new PageImpl<>(
         PageResponseUtils.getPaginatedList(responses, pageable.getPageNumber(), pageable.getPageSize()), pageable,
         responses.size());

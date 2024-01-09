@@ -8,9 +8,12 @@ package io.harness.ssca.entities.remediation_tracker;
 
 import lombok.Builder;
 import lombok.Value;
+import lombok.experimental.FieldNameConstants;
 
 @Value
 @Builder
+@FieldNameConstants(innerTypeName = "ContactInfoKeys")
+
 public class ContactInfo {
   String name;
   String email;

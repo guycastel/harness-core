@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.harness.CategoryTest;
 import io.harness.category.element.UnitTests;
+import io.harness.exception.EngineExpressionEvaluationException;
 import io.harness.exception.FunctorException;
 import io.harness.exception.InvalidRequestException;
 import io.harness.exception.WingsException;
@@ -567,7 +568,8 @@ public class ExpressionEvaluatorTest extends CategoryTest {
   public void shouldEvaluateWithBlockedMethod() {
     ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator();
     String expression = "''.getClass().forName('java.lang.Runtime').getRuntime().exec('echo \"hey\"')";
-    Object retValue = expressionEvaluator.evaluate(expression, LateBindingContext.builder().build());
-    assertThat(retValue).isNull();
+    assertThatThrownBy(() -> expressionEvaluator.evaluate(expression, LateBindingContext.builder().build()))
+        .isInstanceOf(EngineExpressionEvaluationException.class)
+        .hasMessage(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE);
   }
 }

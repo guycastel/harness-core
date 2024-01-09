@@ -88,9 +88,8 @@ public class TriggerExpressionEvaluator extends EngineExpressionEvaluator {
   }
 
   @Override
-  protected Object evaluateInternal(
-      @NotNull String expression, @NotNull EngineJexlContext ctx, ExpressionMode expressionMode) {
-    return evaluateExpressionInJexl(expression, ctx, expressionMode, true);
+  protected Object evaluateInternal(@NotNull String expression, @NotNull EngineJexlContext ctx) {
+    return evaluateExpressionInJexl(expression, ctx, true);
   }
 
   @Override

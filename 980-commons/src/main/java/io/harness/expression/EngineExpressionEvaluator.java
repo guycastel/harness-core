@@ -273,9 +273,6 @@ public class EngineExpressionEvaluator {
       return null;
     }
     EngineJexlContext engineJexlContext = prepareContext(ctx);
-    if (ExpressionEvaluatorUtils.sanitizeExpression(expression, expressionMode, engineJexlContext) == null) {
-      return null;
-    }
     try {
       return evaluateExpressionInternal(expression, engineJexlContext, MAX_DEPTH, expressionMode);
     } catch (Exception e) {
@@ -300,7 +297,7 @@ public class EngineExpressionEvaluator {
       if (ctx.isFeatureFlagEnabled(PIE_EXPRESSION_CONCATENATION)) {
         StringReplacerResponse replacerResponse;
         replacerResponse = runStringReplacerWithResponse(expression, resolver);
-        Object evaluatedExpression = evaluateInternalV2(replacerResponse, ctx, expressionMode);
+        Object evaluatedExpression = evaluateInternalV2(replacerResponse, ctx);
 
         // If expression is evaluated as null, check if prefix combinations can give any valid result or not, we should
         // do recursive check only if render expression was modified to avoid cyclic loop
@@ -326,7 +323,7 @@ public class EngineExpressionEvaluator {
         return evaluatedExpression;
       } else {
         String finalExpression = runStringReplacer(expression, resolver);
-        return evaluateInternal(finalExpression, ctx, expressionMode);
+        return evaluateInternal(finalExpression, ctx);
       }
     } catch (JexlException ex) {
       log.error(format("Failed to evaluate final expression: %s", expression), ex);
@@ -394,7 +391,7 @@ public class EngineExpressionEvaluator {
     String finalExpression = runStringReplacer(expression, resolver);
     ctx.addToContext(partialCtx);
     if (!hasExpressions(finalExpression)) {
-      return PartialEvaluateResult.createCompleteResult(evaluateInternal(expression, ctx, expressionMode));
+      return PartialEvaluateResult.createCompleteResult(evaluateInternal(expression, ctx));
     }
 
     List<String> variables = findVariables(finalExpression);
@@ -437,7 +434,7 @@ public class EngineExpressionEvaluator {
     String finalExpression = runStringReplacer(expression, resolver);
     ctx.addToContext(partialCtx);
     if (!hasExpressions(finalExpression)) {
-      return PartialEvaluateResult.createCompleteResult(evaluateInternal(expression, ctx, expressionMode));
+      return PartialEvaluateResult.createCompleteResult(evaluateInternal(expression, ctx));
     }
 
     List<String> variables = findVariables(finalExpression);
@@ -506,10 +503,6 @@ public class EngineExpressionEvaluator {
     }
     checkDepth(depth, expressionBlock);
 
-    if (ExpressionEvaluatorUtils.sanitizeExpression(expressionBlock, expressionMode, ctx) == null) {
-      return null;
-    }
-
     // Check for cases like <+<+abc>.contains(<+def>)>.
     if (hasExpressions(expressionBlock)) {
       return evaluateExpressionInternal(expressionBlock, ctx, depth - 1, expressionMode);
@@ -569,7 +562,7 @@ public class EngineExpressionEvaluator {
         if (hasExpressions(finalExpression)) {
           object = evaluateExpressionInternal(finalExpression, ctx, depth - 1, expressionMode);
         } else {
-          object = evaluateInternal(finalExpression, ctx, expressionMode);
+          object = evaluateInternal(finalExpression, ctx);
         }
         if (object != null) {
           return object;
@@ -588,6 +581,11 @@ public class EngineExpressionEvaluator {
       } catch (FunctorException ex) {
         // For backwards compatibility.
         throw new EngineExpressionEvaluationException(ex, createExpression(expressionBlock));
+      } catch (EngineExpressionEvaluationException ex) {
+        if (ex.getMessage().equals(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE)) {
+          throw new EngineExpressionEvaluationException(
+              ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE, expressionBlock);
+        }
       }
     }
     return null;
@@ -651,10 +649,8 @@ public class EngineExpressionEvaluator {
    * Evaluate an expression with the given context. This variant is non-recursive and doesn't support harness
    * expressions - variables delimited by <+...>.
    */
-  protected Object evaluateInternal(
-      @NotNull String expression, @NotNull EngineJexlContext ctx, ExpressionMode expressionMode) {
-    return evaluateExpressionInJexl(
-        expression, ctx, expressionMode, ctx.isFeatureFlagEnabled(PIE_EXECUTION_JSON_SUPPORT));
+  protected Object evaluateInternal(@NotNull String expression, @NotNull EngineJexlContext ctx) {
+    return evaluateExpressionInJexl(expression, ctx, ctx.isFeatureFlagEnabled(PIE_EXECUTION_JSON_SUPPORT));
   }
 
   /**
@@ -662,13 +658,11 @@ public class EngineExpressionEvaluator {
    * expressions - variables delimited by <+...>.
    * It checks smartly if rendered expressions needs to be evaluated or not
    */
-  protected Object evaluateInternalV2(
-      @NotNull StringReplacerResponse response, @NotNull EngineJexlContext ctx, ExpressionMode expressionMode) {
+  protected Object evaluateInternalV2(@NotNull StringReplacerResponse response, @NotNull EngineJexlContext ctx) {
     // All expressions in the input are rendered thus no jexl evaluation required.
     String expression = response.getFinalExpressionValue();
     try {
-      return evaluateExpressionInJexl(
-          expression, ctx, expressionMode, ctx.isFeatureFlagEnabled(PIE_EXECUTION_JSON_SUPPORT));
+      return evaluateExpressionInJexl(expression, ctx, ctx.isFeatureFlagEnabled(PIE_EXECUTION_JSON_SUPPORT));
     } catch (Exception e) {
       if (response.isOnlyRenderedExpressions()) {
         return null;
@@ -677,11 +671,9 @@ public class EngineExpressionEvaluator {
     }
   }
 
-  protected Object evaluateExpressionInJexl(@NotNull String expression, @NotNull EngineJexlContext ctx,
-      ExpressionMode expressionMode, boolean shouldCreateScript) {
-    if (ExpressionEvaluatorUtils.sanitizeExpression(expression, expressionMode, ctx) == null) {
-      return null;
-    }
+  protected Object evaluateExpressionInJexl(
+      @NotNull String expression, @NotNull EngineJexlContext ctx, boolean shouldCreateScript) {
+    ExpressionEvaluatorUtils.sanitizeExpression(expression, ctx);
     return shouldCreateScript ? engine.createScript(expression).execute(ctx)
                               : engine.createExpression(expression).evaluate(ctx);
   }

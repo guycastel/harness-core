@@ -1088,8 +1088,8 @@ public class EngineExpressionEvaluatorTest extends CategoryTest {
     }
 
     @Override
-    protected Object evaluateInternal(String expression, EngineJexlContext ctx, ExpressionMode expressionMode) {
-      Object value = super.evaluateInternal(expression, ctx, expressionMode);
+    protected Object evaluateInternal(String expression, EngineJexlContext ctx) {
+      Object value = super.evaluateInternal(expression, ctx);
       if (value instanceof DummyField) {
         DummyField<?> field = (DummyField<?>) value;
         return field.isExpression() ? field.getExpressionValue() : field.getValue();
@@ -1116,26 +1116,43 @@ public class EngineExpressionEvaluatorTest extends CategoryTest {
   public void testBlockedExpression() {
     EngineExpressionEvaluator evaluator = prepareEngineExpressionEvaluator(
         new ImmutableMap.Builder<String, Object>()
-            .put("testVar", "<+a><+b>")
-            .put("a", "abc")
-            .put("b", "def")
+            .put("testVar", "abc def")
             .put("x", "<+y>")
             .put("y", "<+z>")
             .put("z", "<+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>")
             .put(EngineExpressionEvaluator.ENABLED_FEATURE_FLAGS_KEY, List.of("CDS_BLOCK_SENSITIVE_EXPRESSIONS"))
             .build());
 
-    assertThat(evaluator.evaluateExpression(
-                   "<+<+testVar> + <+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>>"))
-        .isNull();
-    assertThat(evaluator.evaluateExpression("<+z>")).isNull();
-    assertThat(evaluator.evaluateExpression("<+x>", ExpressionMode.RETURN_NULL_IF_UNRESOLVED)).isNull();
-    assertThatThrownBy(() -> evaluator.evaluateExpression("<+x>", ExpressionMode.THROW_EXCEPTION_IF_UNRESOLVED))
+    assertThatThrownBy(
+        ()
+            -> evaluator.evaluateExpression(
+                "<+<+testVar> + <+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>>"))
         .isInstanceOf(EngineExpressionEvaluationException.class)
-        .hasMessage("Expression containing blocked classes/methods/strings");
-    assertThat(evaluator.resolve("<+z>", ExpressionMode.RETURN_NULL_IF_UNRESOLVED)).isEqualTo("null");
-    assertThat(evaluator.resolve("<+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>",
-                   ExpressionMode.RETURN_NULL_IF_UNRESOLVED))
-        .isEqualTo("null");
+        .hasMessage(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE);
+    assertThatThrownBy(() -> evaluator.evaluateExpression("<+z>"))
+        .isInstanceOf(EngineExpressionEvaluationException.class)
+        .hasMessage(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE);
+    assertThatThrownBy(() -> evaluator.evaluateExpression("<+x>", ExpressionMode.RETURN_NULL_IF_UNRESOLVED))
+        .isInstanceOf(EngineExpressionEvaluationException.class)
+        .hasMessage(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE);
+    assertThatThrownBy(() -> evaluator.evaluateExpression("<+z>", ExpressionMode.THROW_EXCEPTION_IF_UNRESOLVED))
+        .isInstanceOf(EngineExpressionEvaluationException.class)
+        .hasMessage(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE);
+    assertThatThrownBy(() -> evaluator.resolve("<+z>", ExpressionMode.RETURN_NULL_IF_UNRESOLVED))
+        .isInstanceOf(EngineExpressionEvaluationException.class)
+        .hasMessage(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE);
+    assertThatThrownBy(
+        ()
+            -> evaluator.resolve("<+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>",
+                ExpressionMode.RETURN_NULL_IF_UNRESOLVED))
+        .isInstanceOf(EngineExpressionEvaluationException.class)
+        .hasMessage(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE);
+    assertThatThrownBy(
+        ()
+            -> evaluator.resolve(
+                "<+<+testVar> + <+ ''.getClass().forName('java.lang.Runtime').getRuntime().exec(\"echo hey\")>>",
+                ExpressionMode.RETURN_NULL_IF_UNRESOLVED))
+        .isInstanceOf(EngineExpressionEvaluationException.class)
+        .hasMessage(ExpressionEvaluatorUtils.BLOCKED_STRING_ERROR_MESSAGE);
   }
 }

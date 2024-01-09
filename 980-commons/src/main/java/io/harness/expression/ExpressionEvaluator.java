@@ -91,9 +91,7 @@ public class ExpressionEvaluator {
     if (expression == null) {
       return null;
     }
-    if (ExpressionEvaluatorUtils.sanitizeExpression(expression) == null) {
-      return null;
-    }
+    ExpressionEvaluatorUtils.sanitizeExpression(expression);
 
     JexlExpression jexlExpression;
     try {

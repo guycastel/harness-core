@@ -474,8 +474,8 @@ public class PMSExpressionEvaluatorTest extends PipelineServiceTestBase {
     }
 
     @Override
-    protected Object evaluateInternal(String expression, EngineJexlContext ctx, ExpressionMode expressionMode) {
-      Object value = super.evaluateInternal(expression, ctx, expressionMode);
+    protected Object evaluateInternal(String expression, EngineJexlContext ctx) {
+      Object value = super.evaluateInternal(expression, ctx);
       if (value instanceof DummyOrchestrationField) {
         return ((DummyOrchestrationField) value).fetchFinalValue();
       }

@@ -70,6 +70,24 @@ public class VmPluginCompatibleStepSerializer {
     return getContainerizedStep(ambiance, pluginCompatibleStep, stageInfraDetails, envVars, timeout);
   }
 
+  public VmStepInfo serializeByExcludingConnector(Ambiance ambiance, PluginCompatibleStep pluginCompatibleStep,
+      StageInfraDetails stageInfraDetails, String identifier, ParameterField<Timeout> parameterFieldTimeout,
+      String stepName) {
+    long timeout = TimeoutUtils.getTimeoutInSeconds(parameterFieldTimeout, pluginCompatibleStep.getDefaultTimeout());
+    if (CIStepInfoUtils.canRunVmStepOnHost(pluginCompatibleStep.getNonYamlInfo().getStepInfoType(), stageInfraDetails,
+            AmbianceUtils.getAccountId(ambiance), ciExecutionConfigService, featureFlagService, pluginCompatibleStep)) {
+      Map<String, String> envVars = pluginSettingUtils.getPluginCompatibleEnvVariables(
+          pluginCompatibleStep, identifier, timeout, ambiance, Type.VM, true, false);
+      return getHostedStepByExcludingConnector(ambiance, pluginCompatibleStep, envVars, timeout);
+    }
+    Map<String, String> envVars = pluginSettingUtils.getPluginCompatibleEnvVariables(
+        pluginCompatibleStep, identifier, timeout, ambiance, Type.VM, true, true);
+    Map<String, String> statusEnvVars = serializerUtils.getStepStatusEnvVars(ambiance);
+    envVars.putAll(statusEnvVars);
+    return getContainerizedStepByExcludingConnector(
+        ambiance, pluginCompatibleStep, stageInfraDetails, envVars, timeout);
+  }
+
   private VmRunStep getHostedStep(
       Ambiance ambiance, PluginCompatibleStep pluginCompatibleStep, Map<String, String> envVars, long timeout) {
     String name = ciExecutionConfigService.getContainerlessPluginNameForVM(
@@ -80,6 +98,19 @@ public class VmPluginCompatibleStepSerializer {
         .envVariables(envVars)
         .timeoutSecs(timeout)
         .connector(getStepConnectorDetails(ngAccess, pluginCompatibleStep, ambiance))
+        .build();
+  }
+
+  private VmRunStep getHostedStepByExcludingConnector(
+      Ambiance ambiance, PluginCompatibleStep pluginCompatibleStep, Map<String, String> envVars, long timeout) {
+    String name = ciExecutionConfigService.getContainerlessPluginNameForVM(
+        pluginCompatibleStep.getNonYamlInfo().getStepInfoType(), pluginCompatibleStep);
+    NGAccess ngAccess = AmbianceUtils.getNgAccess(ambiance);
+    return VmRunStep.builder()
+        .entrypoint(Arrays.asList("plugin", "-kind", "harness", "-name", name))
+        .envVariables(envVars)
+        .timeoutSecs(timeout)
+        .connector(null)
         .build();
   }
 
@@ -124,6 +155,25 @@ public class VmPluginCompatibleStepSerializer {
     connectorDetails.setEnvToSecretsMap(newEnvToSecretsMap);
 
     return connectorDetails;
+  }
+
+  private VmPluginStep getContainerizedStepByExcludingConnector(Ambiance ambiance,
+      PluginCompatibleStep pluginCompatibleStep, StageInfraDetails stageInfraDetails, Map<String, String> envVars,
+      long timeout) {
+    String image = CIStepInfoUtils.getPluginCustomStepImage(
+        pluginCompatibleStep, ciExecutionConfigService, Type.VM, AmbianceUtils.getAccountId(ambiance));
+    NGAccess ngAccess = AmbianceUtils.getNgAccess(ambiance);
+
+    ConnectorDetails harnessInternalImageConnector =
+        harnessImageUtils.getHarnessImageConnectorDetailsForVM(ngAccess, stageInfraDetails);
+    VmPluginStepBuilder vmPluginStepBuilder =
+        VmPluginStep.builder()
+            .image(IntegrationStageUtils.getFullyQualifiedImageName(image, harnessInternalImageConnector))
+            .envVariables(envVars)
+            .timeoutSecs(timeout)
+            .imageConnector(harnessInternalImageConnector)
+            .connector(null);
+    return vmPluginStepBuilder.build();
   }
 
   public static boolean isGitCloneStep(PluginCompatibleStep pluginCompatibleStep) {

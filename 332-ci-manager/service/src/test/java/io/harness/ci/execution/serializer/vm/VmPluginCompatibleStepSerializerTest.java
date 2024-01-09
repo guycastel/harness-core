@@ -8,11 +8,15 @@
 package io.harness.ci.execution.serializer.vm;
 
 import static io.harness.annotations.dev.HarnessTeam.CI;
+import static io.harness.rule.OwnerRule.DEVESH;
 import static io.harness.rule.OwnerRule.RUTVIJ_MEHTA;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import io.harness.annotations.dev.OwnedBy;
@@ -26,12 +30,24 @@ import io.harness.ci.config.CIDockerLayerCachingConfig;
 import io.harness.ci.execution.buildstate.PluginSettingUtils;
 import io.harness.ci.execution.execution.CIDockerLayerCachingConfigService;
 import io.harness.ci.execution.execution.CIExecutionConfigService;
+import io.harness.ci.execution.integrationstage.IntegrationStageUtils;
+import io.harness.ci.execution.serializer.SerializerUtils;
+import io.harness.ci.execution.utils.CIStepInfoUtils;
+import io.harness.ci.execution.utils.HarnessImageUtils;
 import io.harness.ci.ff.CIFeatureFlagService;
+import io.harness.delegate.beans.ci.pod.ConnectorDetails;
+import io.harness.delegate.beans.ci.vm.steps.VmPluginStep;
+import io.harness.delegate.beans.ci.vm.steps.VmRunStep;
+import io.harness.idp.steps.beans.stepinfo.IdpCookieCutterStepInfo;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
+import io.harness.utils.TimeoutUtils;
+import io.harness.yaml.core.timeout.Timeout;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import org.apache.groovy.util.Maps;
 import org.junit.Before;
@@ -39,6 +55,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @OwnedBy(CI)
@@ -49,6 +66,18 @@ public class VmPluginCompatibleStepSerializerTest {
   @Mock private CIExecutionConfigService ciExecutionConfigService;
   @InjectMocks private VmPluginCompatibleStepSerializer vmPluginStepSerializer;
 
+  @Mock HarnessImageUtils harnessImageUtils;
+  @Mock SerializerUtils serializerUtils;
+
+  private static final String TEST_UUID_COOKIECUTTER = "test-cookie-cutter-uuid";
+  private static final String TEST_IDENTIFIER_COOKIECUTTER = "test-cookie-cutter-identifier";
+  private static final String TEST_NAME_COOKIECUTTER = "test-name-cookiecutter";
+  private static final String TEST_PUBLIC_URL = "test-public-url";
+
+  private static final String TEST_IMAGE_NAME = "test-image-name";
+
+  private static final long TEST_TIMEOUT_VALUE = 10;
+
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
@@ -58,6 +87,15 @@ public class VmPluginCompatibleStepSerializerTest {
     return Ambiance.newBuilder()
         .putAllSetupAbstractions(Maps.of(
             "accountId", "accountId", "projectIdentifier", "projectIdentfier", "orgIdentifier", "orgIdentifier"))
+        .build();
+  }
+
+  private IdpCookieCutterStepInfo getCookieCutterStepInfo() {
+    return IdpCookieCutterStepInfo.builder()
+        .uuid(TEST_UUID_COOKIECUTTER)
+        .identifier(TEST_IDENTIFIER_COOKIECUTTER)
+        .name(TEST_NAME_COOKIECUTTER)
+        .publicTemplateUrl(ParameterField.createValueField(TEST_PUBLIC_URL))
         .build();
   }
 
@@ -225,5 +263,57 @@ public class VmPluginCompatibleStepSerializerTest {
     Set<String> secretList =
         vmPluginStepSerializer.preProcessStep(ambiance, ecrStepInfo, stageInfraDetails, "identifier", false);
     assertThat(secretList.size()).isEqualTo(0);
+  }
+
+  @Test
+  @Owner(developers = DEVESH)
+  @Category(UnitTests.class)
+  public void testSerializeByExcludingConnector() {
+    Map<String, String> envVariables = new HashMap<>();
+
+    String testEnvName = "testEnvName";
+    String testEnvValue = "testEnvValue";
+
+    envVariables.put(testEnvName, testEnvValue);
+    StageInfraDetails stageInfraDetails = () -> StageInfraDetails.Type.K8;
+
+    when(pluginSettingUtils.getPluginCompatibleEnvVariables(
+             any(), any(), anyLong(), any(), any(), anyBoolean(), anyBoolean()))
+        .thenReturn(envVariables);
+    when(serializerUtils.getStepStatusEnvVars(any())).thenReturn(envVariables);
+
+    Mockito.mockStatic(TimeoutUtils.class);
+    when(TimeoutUtils.getTimeoutInSeconds((ParameterField<Timeout>) Mockito.any(), Mockito.anyLong()))
+        .thenReturn(TEST_TIMEOUT_VALUE);
+
+    Mockito.mockStatic(CIStepInfoUtils.class);
+    when(CIStepInfoUtils.getPluginCustomStepImage(any(), any(), any(), any())).thenReturn(TEST_IMAGE_NAME);
+
+    when(harnessImageUtils.getHarnessImageConnectorDetailsForVM(any(), any()))
+        .thenReturn(ConnectorDetails.builder().build());
+
+    Mockito.mockStatic(IntegrationStageUtils.class);
+    when(IntegrationStageUtils.getFullyQualifiedImageName(any(), any())).thenReturn(TEST_IMAGE_NAME);
+
+    VmPluginStep vmPluginStep = (VmPluginStep) vmPluginStepSerializer.serializeByExcludingConnector(getAmbiance(),
+        getCookieCutterStepInfo(), stageInfraDetails, TEST_IDENTIFIER_COOKIECUTTER,
+        ParameterField.createValueField(Timeout.builder().build()), TEST_NAME_COOKIECUTTER);
+    assertNull(vmPluginStep.getConnector());
+    assertEquals(vmPluginStep.getEnvVariables().get(testEnvName), testEnvValue);
+
+    // test for container less plugins steps
+    when(CIStepInfoUtils.canRunVmStepOnHost(any(), any(), any(), any(), any(), any())).thenReturn(true);
+    String testName = "testName";
+
+    when(pluginSettingUtils.getPluginCompatibleEnvVariables(
+             any(), any(), anyLong(), any(), any(), anyBoolean(), anyBoolean()))
+        .thenReturn(envVariables);
+
+    when(ciExecutionConfigService.getContainerlessPluginNameForVM(any(), any())).thenReturn(testName);
+    VmRunStep vmRunStep = (VmRunStep) vmPluginStepSerializer.serializeByExcludingConnector(getAmbiance(),
+        getCookieCutterStepInfo(), stageInfraDetails, TEST_IDENTIFIER_COOKIECUTTER,
+        ParameterField.createValueField(Timeout.builder().build()), TEST_NAME_COOKIECUTTER);
+    assertNull(vmRunStep.getConnector());
+    assertEquals(vmRunStep.getEnvVariables().get(testEnvName), testEnvValue);
   }
 }

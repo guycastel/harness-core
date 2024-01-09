@@ -8,13 +8,17 @@
 package io.harness.chartmuseum;
 
 import static io.harness.annotations.dev.HarnessTeam.CDP;
+import static io.harness.chartmuseum.ChartMuseumConstants.ADDRESS_BIND_ERROR;
 import static io.harness.chartmuseum.ChartMuseumConstants.AWS_ACCESS_KEY_ID;
 import static io.harness.chartmuseum.ChartMuseumConstants.AWS_SECRET_ACCESS_KEY;
+import static io.harness.chartmuseum.ChartMuseumConstants.CHART_MUSEUM_SERVER_START_RETRIES;
 import static io.harness.chartmuseum.ChartMuseumConstants.VERSION;
 import static io.harness.rule.OwnerRule.ABOSII;
 import static io.harness.rule.OwnerRule.MLUKIC;
+import static io.harness.rule.OwnerRule.PRATYUSH;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -168,6 +172,24 @@ public class ChartMuseumClientHelperTest extends CategoryTest {
 
       assertThat(serviceReady).isEqualTo(false);
     }
+  }
+
+  @Test
+  @Owner(developers = PRATYUSH)
+  @Category(UnitTests.class)
+  public void testAddressBindCodeErrorMessage() {
+    String processedErrorMessage =
+        clientHelper.getErrorMessage("listen tcp 0.0.0.0:8080: bind: address already in use");
+    assertThat(processedErrorMessage)
+        .isEqualTo(
+            format("Could not start chart museum server. Failed after %s retries %n", CHART_MUSEUM_SERVER_START_RETRIES)
+            + format(ADDRESS_BIND_ERROR, 8080));
+
+    processedErrorMessage = clientHelper.getErrorMessage("listen tcp :8080: bind: address already in use");
+    assertThat(processedErrorMessage)
+        .isEqualTo(
+            format("Could not start chart museum server. Failed after %s retries %n", CHART_MUSEUM_SERVER_START_RETRIES)
+            + format(ADDRESS_BIND_ERROR, 8080));
   }
 
   private void testGetEnvForAwsConfigWithIRSA() {

@@ -74,7 +74,7 @@ public class ChartMuseumClientHelper {
   private static final SecureRandom random = new SecureRandom();
   private static final String CHARTMUSEUM_SERVER_STARTUP_FAILURE_MESSAGE =
       "Could not start chart museum server. Failed after %s retries %n";
-  private static final String ADDRESS_ALREADY_IN_USE_REGEX = "tcp :(\\d+): bind: address already in use";
+  private static final String ADDRESS_ALREADY_IN_USE_REGEX = ".*:(\\d+): bind: address already in use";
   private static final Pattern ADDRESS_ALREADY_IN_USE_PATTERN =
       Pattern.compile(ADDRESS_ALREADY_IN_USE_REGEX, Pattern.MULTILINE);
 
@@ -280,7 +280,7 @@ public class ChartMuseumClientHelper {
     return result;
   }
 
-  private static String getErrorMessage(String processOutput) {
+  static String getErrorMessage(String processOutput) {
     log.warn(String.format("Could not start Chart museum server. Process output: [%s]", processOutput));
     String errorPrefix = "Failed with error: ";
 

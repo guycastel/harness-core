@@ -874,6 +874,7 @@ public class CDNGPlanCreatorProvider implements PipelineServiceInfoProvider {
             .setName("K8s Traffic Routing")
             .setType(StepSpecTypeConstants.K8S_TRAFFIC_ROUTING)
             .setStepMetaData(StepMetaData.newBuilder().addCategory("Kubernetes").addFolderPaths("Kubernetes").build())
+            .setFeatureFlag(FeatureName.CDS_K8S_TRAFFIC_ROUTING_NG.name())
             .build();
 
     StepInfo terraformApply = StepInfo.newBuilder()

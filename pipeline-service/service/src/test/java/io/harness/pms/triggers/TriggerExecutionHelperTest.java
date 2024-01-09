@@ -31,6 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyDouble;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,6 +56,7 @@ import io.harness.gitsync.helpers.GitContextHelper;
 import io.harness.gitsync.interceptor.GitEntityInfo;
 import io.harness.gitsync.interceptor.GitSyncBranchContext;
 import io.harness.gitsync.scm.beans.ScmGitMetaData;
+import io.harness.metrics.service.api.MetricService;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.ngtriggers.beans.config.NGTriggerConfigV2;
 import io.harness.ngtriggers.beans.dto.TriggerDetails;
@@ -172,6 +175,7 @@ public class TriggerExecutionHelperTest extends CategoryTest {
   @Mock PmsFeatureFlagHelper pmsFeatureFlagHelper;
   @Mock PlanExecutionService planExecutionService;
   @Mock PMSExecutionService pmsExecutionService;
+  @Mock MetricService metricService;
   @Before
   public void setUp() {
     triggerWebhookEvent =
@@ -181,6 +185,7 @@ public class TriggerExecutionHelperTest extends CategoryTest {
                 HeaderConfig.builder().key("content-type").values(Arrays.asList("application/json")).build(),
                 HeaderConfig.builder().key("X-GitHub-Event").values(Arrays.asList("someValue")).build()))
             .payload("{branch: main}")
+            .createdAt(1L)
             .build();
     MockitoAnnotations.initMocks(this);
 
@@ -191,6 +196,7 @@ public class TriggerExecutionHelperTest extends CategoryTest {
                           .targetIdentifier("target")
                           .identifier("trigger")
                           .name("triggerName")
+                          .createdAt(1L)
                           .build();
 
     String simplifiedYaml = readFile("simplified-pipeline.yaml");
@@ -696,6 +702,7 @@ public class TriggerExecutionHelperTest extends CategoryTest {
              pipelineEntityV1.getProjectIdentifier(), execArgs.getMetadata(), execArgs.getPlanExecutionMetadata(),
              false, null, null, null, true))
         .thenReturn(expectedPlanExecution);
+    doNothing().when(metricService).recordMetric(any(), anyDouble());
     PlanExecution actualPlanExecution = triggerExecutionHelper.resolveRuntimeInputAndSubmitExecutionRequest(
         triggerDetails, triggerPayload, triggerWebhookEvent, null, null, null);
     assertThat(actualPlanExecution).isEqualToComparingFieldByField(expectedPlanExecution);
@@ -772,7 +779,7 @@ public class TriggerExecutionHelperTest extends CategoryTest {
         .thenReturn(PlanExecution.builder().ambiance(ambiance).build());
 
     triggerExecutionHelper.createPlanExecution(triggerDetails, null, null, null, null, null,
-        TriggerWebhookEvent.builder().build(), triggerDetails.getNgTriggerConfigV2().getInputYaml());
+        TriggerWebhookEvent.builder().createdAt(1L).build(), triggerDetails.getNgTriggerConfigV2().getInputYaml());
     ArgumentCaptor<String> capturedRuntimeInputYaml = ArgumentCaptor.forClass(String.class);
     verify(executionHelper, times(1))
         .buildExecutionArgs(eq(pipelineEntity), eq(null), capturedRuntimeInputYaml.capture(),
@@ -809,8 +816,8 @@ public class TriggerExecutionHelperTest extends CategoryTest {
              execArgs.getPlanExecutionMetadata(), false, null, null, null, true))
         .thenReturn(PlanExecution.builder().ambiance(ambiance).build());
 
-    triggerExecutionHelper.createPlanExecution(
-        triggerDetails, null, null, null, null, null, null, triggerDetails.getNgTriggerConfigV2().getInputYaml());
+    triggerExecutionHelper.createPlanExecution(triggerDetails, null, null, null, null, null,
+        TriggerWebhookEvent.builder().createdAt(1L).build(), triggerDetails.getNgTriggerConfigV2().getInputYaml());
 
     Principal expectedPrincipal = new ServicePrincipal(AuthorizationServiceHeader.PIPELINE_SERVICE.getServiceId());
     assertThat(SecurityContextBuilder.getPrincipal()).isEqualToComparingFieldByField(expectedPrincipal);
@@ -852,7 +859,7 @@ public class TriggerExecutionHelperTest extends CategoryTest {
         .thenReturn(PlanExecution.builder().ambiance(ambiance).build());
 
     triggerExecutionHelper.createPlanExecution(triggerDetails, null, null, null, null, null,
-        TriggerWebhookEvent.builder().build(), triggerDetails.getNgTriggerConfigV2().getInputYaml());
+        TriggerWebhookEvent.builder().createdAt(1L).build(), triggerDetails.getNgTriggerConfigV2().getInputYaml());
     verify(pmsPipelineService, times(1)).getPipeline("acc", "default", "test", "myPipeline", false, false);
     assertThat(GitAwareContextHelper.getGitRequestParamsInfo())
         .isEqualToComparingFieldByField(GitEntityInfo.builder().build());
@@ -899,7 +906,7 @@ public class TriggerExecutionHelperTest extends CategoryTest {
         .thenReturn(PlanExecution.builder().ambiance(ambiance).build());
 
     triggerExecutionHelper.createPlanExecution(triggerDetails, null, null, null, null, null,
-        TriggerWebhookEvent.builder().build(), triggerDetails.getNgTriggerConfigV2().getInputYaml());
+        TriggerWebhookEvent.builder().createdAt(1L).build(), triggerDetails.getNgTriggerConfigV2().getInputYaml());
     verify(pmsPipelineService, times(1)).getPipeline("acc", "default", "test", "myPipeline", false, false);
     assertThat(GitAwareContextHelper.getGitRequestParamsInfo())
         .isEqualToComparingFieldByField(GitEntityInfo.builder().build());

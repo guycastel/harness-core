@@ -1,0 +1,8 @@
+name: Webhook Event Process Time Metrics
+identifier: WebhookEventProcessTime
+metricGroup: webhook_event_times_group
+metrics:
+  - metricName: webhook_event_process_time
+    metricDefinition: Time taken to process Webhook event.
+    type: LastValue
+    unit: count

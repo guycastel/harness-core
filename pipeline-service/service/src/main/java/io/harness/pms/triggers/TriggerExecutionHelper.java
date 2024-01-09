@@ -50,6 +50,7 @@ import io.harness.gitaware.helper.GitAwareContextHelper;
 import io.harness.gitsync.beans.StoreType;
 import io.harness.gitsync.interceptor.GitEntityInfo;
 import io.harness.gitsync.interceptor.GitSyncBranchContext;
+import io.harness.metrics.service.api.MetricService;
 import io.harness.ngtriggers.beans.config.NGTriggerConfigV2;
 import io.harness.ngtriggers.beans.dto.TriggerDetails;
 import io.harness.ngtriggers.beans.entity.NGTriggerEntity;
@@ -77,6 +78,8 @@ import io.harness.pms.contracts.triggers.ParsedPayload;
 import io.harness.pms.contracts.triggers.SourceType;
 import io.harness.pms.contracts.triggers.TriggerPayload;
 import io.harness.pms.contracts.triggers.Type;
+import io.harness.pms.events.PmsEventMonitoringConstants;
+import io.harness.pms.events.base.PmsMetricContextGuard;
 import io.harness.pms.inputset.MergeInputSetRequestDTOPMS;
 import io.harness.pms.inputset.MergeInputSetResponseDTOPMS;
 import io.harness.pms.merger.helpers.InputSetTemplateHelper;
@@ -101,6 +104,7 @@ import io.harness.serializer.ProtoUtils;
 import io.harness.utils.PmsFeatureFlagHelper;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.List;
@@ -122,7 +126,8 @@ public class TriggerExecutionHelper {
   private final WebhookEventPayloadParser webhookEventPayloadParser;
   private final PipelineServiceClient pipelineServiceClient;
   private final PmsFeatureFlagHelper pmsFeatureFlagHelper;
-
+  private final MetricService metricService;
+  private static final String WEBHOOK_EVENT_PROCESS_TIME = "webhook_event_process_time";
   public PlanExecution resolveRuntimeInputAndSubmitExecutionRequestForArtifactManifestPollingFlow(
       TriggerDetails triggerDetails, TriggerPayload triggerPayload, String runTimeInputYaml) {
     String executionTag = generateExecutionTagForEvent(triggerDetails, triggerPayload);
@@ -184,7 +189,10 @@ public class TriggerExecutionHelper {
     // First we reset git-sync global context to avoid any issues with global context leaking between executions.
     // TODO: Move all calls of `initDefaultScmGitMetaDataAndRequestParams` to the beginning of trigger execution threads
     GitAwareContextHelper.initDefaultScmGitMetaDataAndRequestParams();
-    try {
+    try (PmsMetricContextGuard metricContext = new PmsMetricContextGuard(
+             ImmutableMap.<String, String>builder()
+                 .put(PmsEventMonitoringConstants.ACCOUNT_ID, triggerDetails.getNgTriggerEntity().getAccountId())
+                 .build());) {
       setPrincipal(triggerWebhookEvent);
       PipelineEntity pipelineEntity = getPipelineEntityToExecute(triggerDetails, triggerWebhookEvent);
       RetryExecutionParameters retryExecutionParameters = RetryExecutionParameters.builder().isRetry(false).build();
@@ -204,6 +212,10 @@ public class TriggerExecutionHelper {
       execArgs.getPlanExecutionMetadata().setTriggerJsonPayload(payload);
       execArgs.getPlanExecutionMetadata().setTriggerHeader(header);
       NGTriggerEntity ngTriggerEntity = triggerDetails.getNgTriggerEntity();
+      if (triggerWebhookEvent != null) {
+        metricService.recordMetric(
+            WEBHOOK_EVENT_PROCESS_TIME, (double) (System.currentTimeMillis() - triggerWebhookEvent.getCreatedAt()));
+      }
       PlanExecution planExecution = executionHelper.startExecution(ngTriggerEntity.getAccountId(),
           ngTriggerEntity.getOrgIdentifier(), ngTriggerEntity.getProjectIdentifier(), execArgs.getMetadata(),
           execArgs.getPlanExecutionMetadata(), false, null, null, null, true);

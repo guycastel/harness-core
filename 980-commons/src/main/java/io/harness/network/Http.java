@@ -67,6 +67,7 @@ public class Http {
       "Exception while getting response code, but still validating the capability check";
   public static final OkHttpClient DEFAULT_OKHTTP_CLIENT =
       Http.getOkHttpClientWithProxyAuthSetup().connectionPool(new ConnectionPool()).build();
+  public static final int HTTP_TIMEOUT_IN_MILLIS = 30000;
 
   private static UrlValidator urlValidator =
       new UrlValidator(new String[] {"http", "https"}, UrlValidator.ALLOW_LOCAL_URLS);
@@ -120,8 +121,8 @@ public class Http {
                 // Changed to GET as some providers like artifactory SAAS is not
                 // accepting HEAD requests
                 connection.setRequestMethod("GET");
-                connection.setConnectTimeout(15000);
-                connection.setReadTimeout(15000);
+                connection.setConnectTimeout(HTTP_TIMEOUT_IN_MILLIS);
+                connection.setReadTimeout(HTTP_TIMEOUT_IN_MILLIS);
                 int responseCode = connection.getResponseCode();
                 log.info("Returned code {}", responseCode);
                 return responseCode;
@@ -199,8 +200,8 @@ public class Http {
                 // Changed to GET as some providers like artifactory SAAS is not
                 // accepting HEAD requests
                 connection.setRequestMethod("GET");
-                connection.setConnectTimeout(15000);
-                connection.setReadTimeout(15000);
+                connection.setConnectTimeout(HTTP_TIMEOUT_IN_MILLIS);
+                connection.setReadTimeout(HTTP_TIMEOUT_IN_MILLIS);
                 connection.setInstanceFollowRedirects(false);
 
                 // set headers
@@ -251,8 +252,8 @@ public class Http {
                 // Changed to GET as some providers like artifactory SAAS is not
                 // accepting HEAD requests
                 connection.setRequestMethod("GET");
-                connection.setConnectTimeout(15000);
-                connection.setReadTimeout(15000);
+                connection.setConnectTimeout(HTTP_TIMEOUT_IN_MILLIS);
+                connection.setReadTimeout(HTTP_TIMEOUT_IN_MILLIS);
 
                 // set headers
                 for (KeyValuePair header : httpURLHeaderInfo.getHeaders()) {

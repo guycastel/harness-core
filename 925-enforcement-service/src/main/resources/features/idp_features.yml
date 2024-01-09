@@ -9,5 +9,5 @@ features:
     restrictions:
       ENTERPRISE:
         restrictionType: LICENSE_STATIC_LIMIT
-        fieldName: idpActiveDevelopers
+        fieldName: totalDevelopers
         clientName: idpService

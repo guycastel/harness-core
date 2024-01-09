@@ -21,6 +21,7 @@ import static io.harness.licensing.interfaces.ModuleLicenseImpl.TRIAL_DURATION;
 import static io.harness.remote.client.CGRestUtils.getResponse;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 
 import io.harness.ModuleType;
 import io.harness.account.services.AccountService;
@@ -88,7 +89,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -515,7 +515,7 @@ public class DefaultLicenseServiceImpl implements LicenseService {
     List<ModuleLicenseDTO> moduleLicensesFromDb = getAllModuleLicences(accountId);
     AccountDTO accountDTO = accountService.getAccount(accountId);
 
-    if (Objects.isNull(moduleLicensesFromDb) || moduleLicensesFromDb.isEmpty() || Objects.isNull(accountDTO)) {
+    if (isNull(moduleLicensesFromDb) || moduleLicensesFromDb.isEmpty() || isNull(accountDTO)) {
       log.error("There might be no account or module license present in db to generate smp license");
       throw new InvalidRequestException("There might be no account or module license present in db");
     }
@@ -680,7 +680,10 @@ public class DefaultLicenseServiceImpl implements LicenseService {
       String accountIdentifier, ModuleType moduleType) {
     try {
       if (checkExistInCache(accountIdentifier, moduleType)) {
-        return getFromCache(accountIdentifier, moduleType);
+        List<ModuleLicenseDTO> moduleLicenseDTOList = getFromCache(accountIdentifier, moduleType);
+        if (!isNull(moduleLicenseDTOList)) {
+          return moduleLicenseDTOList;
+        }
       }
     } catch (Exception e) {
       log.error("Unable to get license data from cache", e);

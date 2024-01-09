@@ -1666,36 +1666,42 @@ public class GitClientV2Impl implements GitClientV2 {
           "The password is null in git config for the git connector " + gitBaseRequest.getConnectorId());
       gitCommand.setCredentialsProvider(new UsernamePasswordCredentialsProviderWithSkipSslVerify(
           authRequest.getUsername(), authRequest.getPassword()));
-      gitCommand.setTransportConfigCallback(transport -> {
-        if (transport instanceof TransportHttp) {
-          TransportHttp http = (TransportHttp) transport;
-          // Without proper timeout socket can get hang (ref: java.net.SocketInputStream.socketRead0) indefinitely
-          // during packet loss. In some scenarios even if connection is established back this may still remain stuck.
-          // Since socketRead0 ignores the thread interruptions, the original task thread will remain in running state
-          // forever. As all of our operations are synchronized stuck thread will block other git tasks to execute
-          // This timeout is used for setting connection and read timeout based on current implementation. A better
-          // option for further improvements is to have a custom connection factory where will use a more granular
-          // configuration of these timeouts parameters
-          http.setTimeout(SOCKET_CONNECTION_READ_TIMEOUT_SECONDS);
-          if (isNotEmpty(gitBaseRequest.getProxyHost()) && gitBaseRequest.getProxyPort() != null) {
-            HttpConnectionFactory httpConnectionFactory = ProxyHttpConnectionFactory.builder()
-                                                              .proxyHost(gitBaseRequest.getProxyHost())
-                                                              .proxyPort(gitBaseRequest.getProxyPort())
-                                                              .build();
-            http.setHttpConnectionFactory(httpConnectionFactory);
-          } else {
-            http.setHttpConnectionFactory(connectionFactory);
-          }
-        }
-      });
+      setTransportConfigCallbackForGitCommand(gitCommand, gitBaseRequest);
     } else if (gitBaseRequest.getAuthRequest().getAuthType() == AuthInfo.AuthType.SSH_KEY) {
       JgitSshAuthRequest authRequest = (JgitSshAuthRequest) gitBaseRequest.getAuthRequest();
       gitCommand.setTransportConfigCallback(transport -> {
         SshTransport sshTransport = (SshTransport) transport;
         sshTransport.setSshSessionFactory(authRequest.getFactory());
       });
+    } else if (gitBaseRequest.getAuthRequest().getAuthType() == AuthInfo.AuthType.HTTP_ANONYMOUS) {
+      setTransportConfigCallbackForGitCommand(gitCommand, gitBaseRequest);
     }
     return gitCommand;
+  }
+
+  private void setTransportConfigCallbackForGitCommand(TransportCommand gitCommand, GitBaseRequest gitBaseRequest) {
+    gitCommand.setTransportConfigCallback(transport -> {
+      if (transport instanceof TransportHttp) {
+        TransportHttp http = (TransportHttp) transport;
+        // Without proper timeout socket can get hang (ref: java.net.SocketInputStream.socketRead0) indefinitely
+        // during packet loss. In some scenarios even if connection is established back this may still remain stuck.
+        // Since socketRead0 ignores the thread interruptions, the original task thread will remain in running state
+        // forever. As all of our operations are synchronized stuck thread will block other git tasks to execute
+        // This timeout is used for setting connection and read timeout based on current implementation. A better
+        // option for further improvements is to have a custom connection factory where will use a more granular
+        // configuration of these timeouts parameters
+        http.setTimeout(SOCKET_CONNECTION_READ_TIMEOUT_SECONDS);
+        if (isNotEmpty(gitBaseRequest.getProxyHost()) && gitBaseRequest.getProxyPort() != null) {
+          HttpConnectionFactory httpConnectionFactory = ProxyHttpConnectionFactory.builder()
+                                                            .proxyHost(gitBaseRequest.getProxyHost())
+                                                            .proxyPort(gitBaseRequest.getProxyPort())
+                                                            .build();
+          http.setHttpConnectionFactory(httpConnectionFactory);
+        } else {
+          http.setHttpConnectionFactory(connectionFactory);
+        }
+      }
+    });
   }
 
   private Git openGit(File repoDir, Boolean disableUserConfig) throws IOException {

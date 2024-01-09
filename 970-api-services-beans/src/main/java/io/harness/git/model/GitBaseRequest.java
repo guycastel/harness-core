@@ -32,6 +32,7 @@ public class GitBaseRequest {
   private boolean unsureOrNonExistentBranch;
   private String proxyHost;
   private Integer proxyPort;
+  private boolean isAnonymousAuth;
 
   public boolean useBranch() {
     return isNotEmpty(branch);

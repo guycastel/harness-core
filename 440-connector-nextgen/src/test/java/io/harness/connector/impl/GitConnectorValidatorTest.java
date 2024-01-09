@@ -12,6 +12,7 @@ import static io.harness.connector.ConnectivityStatus.SUCCESS;
 import static io.harness.encryption.Scope.ACCOUNT;
 import static io.harness.rule.OwnerRule.ABHINAV;
 import static io.harness.rule.OwnerRule.DEV_MITTAL;
+import static io.harness.rule.OwnerRule.VLICA;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.joor.Reflect.on;
@@ -214,5 +215,69 @@ public class GitConnectorValidatorTest extends CategoryTest {
     ConnectorValidationResult validationResult = gitConnectorValidator.validate(
         gitConfig, "accountIdentifier", "orgIdentifier", "projectIdentifier", "identifier");
     assertThat(validationResult.getStatus()).isEqualTo(ConnectivityStatus.SUCCESS);
+  }
+
+  @Test
+  @Owner(developers = VLICA)
+  @Category(UnitTests.class)
+  public void testConnectorViaManagerWhenGitConfigDTOIsAnonymous() {
+    GitConfigDTO gitConfig = GitConfigDTO.builder()
+                                 .isAnonymous(true)
+                                 .gitAuth(GitHTTPAuthenticationDTO.builder().passwordRef(null).username(null).build())
+                                 .gitAuthType(GitAuthType.HTTP)
+                                 .gitConnectionType(GitConnectionType.REPO)
+                                 .branchName("branchName")
+                                 .url("url")
+                                 .executeOnDelegate(false)
+                                 .build();
+
+    GitValidationHandler gitValidationHandler = mock(GitValidationHandler.class);
+    on(gitValidationHandler).set("gitCommandTaskHandler", gitCommandTaskHandler);
+    on(gitValidationHandler).set("gitDecryptionHelper", gitDecryptionHelper);
+    when(gitValidationHandler.validate(any(), any())).thenCallRealMethod();
+    when(connectorTypeToConnectorValidationHandlerMap.get(eq("Git"))).thenReturn(gitValidationHandler);
+
+    ConnectorValidationResult connectorValidationResult =
+        ConnectorValidationResult.builder().status(ConnectivityStatus.SUCCESS).build();
+
+    when(gitCommandTaskHandler.validateGitCredentials(any(), any(), any(), any()))
+        .thenReturn(connectorValidationResult);
+    ScmConnectorValidationParamsProvider scmConnectorValidationParamsProvider =
+        new ScmConnectorValidationParamsProvider();
+
+    on(scmConnectorValidationParamsProvider)
+        .set("gitConfigAuthenticationInfoHelper", gitConfigAuthenticationInfoHelper);
+    when(connectorValidationParamsProviderMap.get(eq("Git"))).thenReturn(scmConnectorValidationParamsProvider);
+
+    ConnectorValidationResult validationResult = gitConnectorValidator.validate(
+        gitConfig, "accountIdentifier", "orgIdentifier", "projectIdentifier", "identifier");
+    assertThat(validationResult.getStatus()).isEqualTo(ConnectivityStatus.SUCCESS);
+  }
+
+  @Test
+  @Owner(developers = VLICA)
+  @Category(UnitTests.class)
+  public void testConnectorViaDelegateWhenGitConfigDTOIsAnonymous() {
+    GitConfigDTO gitConfig = GitConfigDTO.builder()
+                                 .isAnonymous(true)
+                                 .gitAuth(GitHTTPAuthenticationDTO.builder().passwordRef(null).username(null).build())
+                                 .gitAuthType(GitAuthType.HTTP)
+                                 .gitConnectionType(GitConnectionType.REPO)
+                                 .branchName("branchName")
+                                 .url("url")
+                                 .executeOnDelegate(true)
+                                 .build();
+    Pair<String, GitCommandExecutionResponse> gitResponse = Pair.of(TASK_ID,
+        GitCommandExecutionResponse.builder()
+            .connectorValidationResult(ConnectorValidationResult.builder().status(SUCCESS).build())
+            .build());
+    when(encryptionHelper.getEncryptionDetail(any(), any(), any(), any())).thenReturn(null);
+
+    doReturn(gitResponse).when(delegateGrpcClientWrapper).executeSyncTaskV2ReturnTaskId(any());
+    ConnectorValidationResult connectorValidationResult =
+        gitConnectorValidator.validate(gitConfig, ACCOUNT_ID, null, null, null);
+    verify(delegateGrpcClientWrapper, times(1)).executeSyncTaskV2ReturnTaskId(any());
+    assertThat(connectorValidationResult.getStatus()).isEqualTo(SUCCESS);
+    assertThat(connectorValidationResult.getTaskId()).isEqualTo(TASK_ID);
   }
 }

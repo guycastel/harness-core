@@ -780,6 +780,7 @@ public class TerraformBaseHelperImpl implements TerraformBaseHelper {
             ngGitService.getAuthRequest((GitConfigDTO) confileFileGitStore.getGitConfigDTO(), sshSessionConfig))
         .accountId(accountId)
         .connectorId(confileFileGitStore.getConnectorName())
+        .isAnonymousAuth(configFileGitConfigDTO.getIsAnonymous() != null && configFileGitConfigDTO.getIsAnonymous())
         .build();
   }
 

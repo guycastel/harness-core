@@ -10,6 +10,7 @@ package io.harness.connector.service.git;
 import static io.harness.rule.OwnerRule.ABHINAV;
 import static io.harness.rule.OwnerRule.ABOSII;
 import static io.harness.rule.OwnerRule.SATHISH;
+import static io.harness.rule.OwnerRule.VLICA;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,8 @@ import io.harness.delegate.beans.connector.scm.genericgitconnector.GitHTTPAuthen
 import io.harness.delegate.beans.storeconfig.GitStoreDelegateConfig;
 import io.harness.encryption.SecretRefData;
 import io.harness.git.GitClientV2;
+import io.harness.git.model.AnonymousAuthRequest;
+import io.harness.git.model.AuthInfo;
 import io.harness.git.model.DownloadFilesRequest;
 import io.harness.git.model.GitBaseRequest;
 import io.harness.git.model.GitRepositoryType;
@@ -67,6 +70,28 @@ public class NGGitServiceImplTest extends CategoryTest implements MockableTestMi
     assertThat(gitBaseRequest.getRepoType()).isNotNull();
     assertThat(gitBaseRequest.getAccountId()).isNotNull();
     assertThat(gitBaseRequest.getAuthRequest()).isNotNull();
+  }
+
+  @Test
+  @Owner(developers = VLICA)
+  @Category(UnitTests.class)
+  public void testGetGitBaseRequestWithAnonymous() {
+    final String accountId = "accountId";
+    GitConfigDTO gitConfigDTO =
+        GitConfigDTO.builder()
+            .isAnonymous(true)
+            .gitAuth(GitHTTPAuthenticationDTO.builder().username(null).passwordRef(null).build())
+            .gitAuthType(GitAuthType.HTTP)
+            .build();
+    final GitBaseRequest gitBaseRequest = GitBaseRequest.builder().build();
+    ngGitService.setGitBaseRequest(gitConfigDTO, accountId, gitBaseRequest, GitRepositoryType.YAML, null, true);
+    assertThat(gitBaseRequest).isNotNull();
+    assertThat(gitBaseRequest.getRepoType()).isNotNull();
+    assertThat(gitBaseRequest.getAccountId()).isNotNull();
+    assertThat(gitBaseRequest.getAuthRequest()).isNotNull();
+    assertThat(gitBaseRequest.isAnonymousAuth()).isTrue();
+    assertThat(((AnonymousAuthRequest) gitBaseRequest.getAuthRequest())).isNotNull();
+    assertThat((gitBaseRequest.getAuthRequest().getAuthType())).isEqualTo(AuthInfo.AuthType.HTTP_ANONYMOUS);
   }
 
   @Test

@@ -45,6 +45,7 @@ public class GitConfigOutcomeDTO extends ConnectorConfigOutcomeDTO implements De
   private Boolean executeOnDelegate;
   private String gitConnectionUrl;
   private Boolean proxy;
+  private Boolean isAnonymous;
   @JsonIgnore private String proxyUrl;
 
   @JsonTypeInfo(

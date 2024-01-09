@@ -59,6 +59,7 @@ public class GitConfigDTO
   private String branchName;
   private Set<String> delegateSelectors;
   private Boolean executeOnDelegate;
+  Boolean isAnonymous;
   Boolean proxy;
   @JsonIgnore private String proxyUrl;
   private String gitConnectionUrl;
@@ -73,7 +74,7 @@ public class GitConfigDTO
   @Builder
   public GitConfigDTO(GitAuthType gitAuthType, GitAuthenticationDTO gitAuth, GitConnectionType gitConnectionType,
       String url, String validationRepo, String branchName, Set<String> delegateSelectors, Boolean executeOnDelegate,
-      String proxyUrl, boolean proxy) {
+      String proxyUrl, boolean proxy, Boolean isAnonymous) {
     this.gitAuthType = gitAuthType;
     this.gitAuth = gitAuth;
     this.gitConnectionType = gitConnectionType;
@@ -84,6 +85,7 @@ public class GitConfigDTO
     this.executeOnDelegate = executeOnDelegate;
     this.proxy = proxy;
     this.proxyUrl = proxyUrl;
+    this.isAnonymous = isAnonymous;
   }
 
   @Override

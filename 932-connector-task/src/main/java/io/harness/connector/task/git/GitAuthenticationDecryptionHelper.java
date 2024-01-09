@@ -37,6 +37,7 @@ public class GitAuthenticationDecryptionHelper {
     } else if (scmConnector instanceof GitConfigDTO) {
       GitConfigDTO gitConfigDTO = (GitConfigDTO) scmConnector;
       return gitConfigDTO.getGitAuth() instanceof GitHTTPAuthenticationDTO
+          && ((GitHTTPAuthenticationDTO) gitConfigDTO.getGitAuth()).getPasswordRef() != null
           && (GITHUB_APP.equals(
               ((GitHTTPAuthenticationDTO) gitConfigDTO.getGitAuth()).getPasswordRef().getIdentifier()))
           && (Arrays.equals(GITHUB_APP.toCharArray(),

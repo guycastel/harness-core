@@ -37,6 +37,7 @@ public class GithubToGitMapper {
     final GitConnectionType connectionType = githubConnectorDTO.getConnectionType();
     final String url = githubConnectorDTO.getUrl();
     final String validationRepo = githubConnectorDTO.getValidationRepo();
+    boolean isGitConfigAnonymous = false;
     if (authType == GitAuthType.HTTP) {
       final GithubHttpCredentialsDTO credentials =
           (GithubHttpCredentialsDTO) githubConnectorDTO.getAuthentication().getCredentials();
@@ -60,6 +61,11 @@ public class GithubToGitMapper {
         usernameRef = null;
         // dummy secret ref as there is not null check for password ref
         passwordRef = SecretRefHelper.createSecretRef(GITHUB_APP, Scope.ACCOUNT, GITHUB_APP.toCharArray());
+      } else if (credentials.getType() == GithubHttpAuthenticationType.ANONYMOUS) {
+        username = null;
+        usernameRef = null;
+        passwordRef = null;
+        isGitConfigAnonymous = true;
       } else {
         final GithubOauthDTO githubOauthDTO = (GithubOauthDTO) credentials.getHttpCredentialsSpec();
         username = GithubOauthDTO.userName;
@@ -70,6 +76,7 @@ public class GithubToGitMapper {
           username, usernameRef, passwordRef, githubConnectorDTO.getDelegateSelectors());
       gitConfigForHttp.setExecuteOnDelegate(githubConnectorDTO.getExecuteOnDelegate());
       gitConfigForHttp.setProxyUrl(githubConnectorDTO.getProxyUrl());
+      gitConfigForHttp.setIsAnonymous(isGitConfigAnonymous);
       return gitConfigForHttp;
 
     } else if (authType == GitAuthType.SSH) {

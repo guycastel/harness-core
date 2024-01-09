@@ -376,8 +376,12 @@ public abstract class ConnectorProcessor {
     switch (gitConfig.getGitAuthType()) {
       case HTTP:
         GitHTTPAuthenticationDTO gitAuthenticationDTO = (GitHTTPAuthenticationDTO) gitConfig.getGitAuth();
-        validateRequiredFieldsPresent(
-            gitAuthenticationDTO.getPasswordRef(), gitConfig.getUrl(), gitConfig.getGitConnectionType());
+        if (gitConfig.getIsAnonymous() != null && gitConfig.getIsAnonymous()) {
+          validateRequiredFieldsPresent(gitConfig.getUrl(), gitConfig.getGitConnectionType());
+        } else {
+          validateRequiredFieldsPresent(
+              gitAuthenticationDTO.getPasswordRef(), gitConfig.getUrl(), gitConfig.getGitConnectionType());
+        }
         break;
       case SSH:
         GitSSHAuthenticationDTO gitSSHAuthenticationDTO = (GitSSHAuthenticationDTO) gitConfig.getGitAuth();

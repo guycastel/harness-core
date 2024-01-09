@@ -23,6 +23,7 @@ import io.harness.delegate.beans.storeconfig.GitStoreDelegateConfig;
 import io.harness.exception.InvalidRequestException;
 import io.harness.git.GitClientV2;
 import io.harness.git.UsernamePasswordAuthRequest;
+import io.harness.git.model.AnonymousAuthRequest;
 import io.harness.git.model.AuthRequest;
 import io.harness.git.model.CommitAndPushRequest;
 import io.harness.git.model.CommitAndPushResult;
@@ -89,6 +90,7 @@ public class NGGitServiceImpl implements NGGitService {
     gitBaseRequest.setAuthRequest(getAuthRequest(gitConfig, sshSessionConfig));
     gitBaseRequest.setRepoType(repositoryType);
     gitBaseRequest.setAccountId(accountId);
+    gitBaseRequest.setAnonymousAuth(gitConfig.getIsAnonymous() != null && gitConfig.getIsAnonymous());
 
     if (overrideFromGitConfig) {
       gitBaseRequest.setBranch(gitConfig.getBranchName());
@@ -107,12 +109,16 @@ public class NGGitServiceImpl implements NGGitService {
         return JgitSshAuthRequest.builder().factory(getSshSessionFactory(sshSessionConfig)).build();
       case HTTP:
         GitHTTPAuthenticationDTO httpAuthenticationDTO = (GitHTTPAuthenticationDTO) gitConfig.getGitAuth();
-        String userName = getSecretAsStringFromPlainTextOrSecretRef(
-            httpAuthenticationDTO.getUsername(), httpAuthenticationDTO.getUsernameRef());
-        return UsernamePasswordAuthRequest.builder()
-            .username(userName)
-            .password(httpAuthenticationDTO.getPasswordRef().getDecryptedValue())
-            .build();
+        if (gitConfig.getIsAnonymous() != null && gitConfig.getIsAnonymous()) {
+          return AnonymousAuthRequest.builder().build();
+        } else {
+          String userName = getSecretAsStringFromPlainTextOrSecretRef(
+              httpAuthenticationDTO.getUsername(), httpAuthenticationDTO.getUsernameRef());
+          return UsernamePasswordAuthRequest.builder()
+              .username(userName)
+              .password(httpAuthenticationDTO.getPasswordRef().getDecryptedValue())
+              .build();
+        }
       default:
         throw new InvalidRequestException("Unknown auth type.");
     }
@@ -175,6 +181,7 @@ public class NGGitServiceImpl implements NGGitService {
             .repoType(YAML)
             .repoUrl(gitConfigDTO.getUrl())
             .optionalFiles(gitStoreDelegateConfig.isOptional())
+            .isAnonymousAuth(gitConfigDTO.getIsAnonymous() != null && gitConfigDTO.getIsAnonymous())
             .build();
     return gitClientV2.fetchFilesByPath(identifier, fetchFilesByPathRequest);
   }
@@ -198,6 +205,7 @@ public class NGGitServiceImpl implements NGGitService {
             .destinationDirectory(destinationDirectory)
             .mayHaveMultipleFolders(mayHaveMultipleFolders)
             .cloneWithCheckout(true)
+            .isAnonymousAuth(gitConfigDTO.getIsAnonymous() != null && gitConfigDTO.getIsAnonymous())
             .build();
     gitClientV2.downloadFiles(downloadFilesRequest);
   }

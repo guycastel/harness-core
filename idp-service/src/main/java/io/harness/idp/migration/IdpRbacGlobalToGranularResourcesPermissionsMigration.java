@@ -108,10 +108,10 @@ public class IdpRbacGlobalToGranularResourcesPermissionsMigration implements NGM
           List<RoleResponseDTO> roleResponseDTOS = rolesResponse.getContent();
           roleResponseDTOS.forEach(roleResponseDTO -> {
             RoleDTO roleDTO = roleResponseDTO.getRole();
-            boolean harnessManaged = roleResponseDTO.isHarnessManaged();
             String roleIdentifier = roleDTO.getIdentifier();
             Set<String> permissions = roleDTO.getPermissions();
-            if (Boolean.FALSE.equals(harnessManaged) && permissions.contains(IDP_IDPSETTINGS_MANAGE_PERMISSION)) {
+            if (!roleIdentifier.startsWith("_") && isNotEmpty(permissions)
+                && permissions.contains(IDP_IDPSETTINGS_MANAGE_PERMISSION)) {
               log.info("Found global resource permission in role = {} account = {}", roleIdentifier, accountIdentifier);
               permissions.remove(IDP_IDPSETTINGS_MANAGE_PERMISSION);
               permissions.addAll(Arrays.asList(IDP_PLUGIN_VIEW, IDP_PLUGIN_EDIT, IDP_PLUGIN_TOGGLE, IDP_PLUGIN_DELETE,
@@ -161,7 +161,8 @@ public class IdpRbacGlobalToGranularResourcesPermissionsMigration implements NGM
             boolean harnessManaged = resourceGroupResponse.isHarnessManaged();
             ResourceFilter resourceFilter = resourceGroupDTO.getResourceFilter();
             String resourceGroupIdentifier = resourceGroupDTO.getIdentifier();
-            List<ResourceSelector> resourceSelectors = resourceFilter.getResources();
+            List<ResourceSelector> resourceSelectors =
+                Objects.nonNull(resourceFilter) ? resourceFilter.getResources() : new ArrayList<>();
             if (isNotEmpty(resourceSelectors)) {
               for (ResourceSelector resourceSelector : resourceSelectors) {
                 if (Boolean.FALSE.equals(harnessManaged)
@@ -189,7 +190,7 @@ public class IdpRbacGlobalToGranularResourcesPermissionsMigration implements NGM
                         resourceGroupIdentifier, accountIdentifier);
                   } catch (Exception ex) {
                     log.error(
-                        "Error updated resource group = {} in account = {} with idp granular resources and removing global resource",
+                        "Error updating resource group = {} in account = {} with idp granular resources and removing global resource",
                         resourceGroupIdentifier, accountIdentifier);
                   }
                 }

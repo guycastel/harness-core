@@ -10,6 +10,7 @@ package software.wings.helpers.ext.jenkins;
 import static io.harness.annotations.dev.HarnessTeam.CDC;
 import static io.harness.rule.OwnerRule.DEEPAK_PUTHRAYA;
 import static io.harness.rule.OwnerRule.RAFAEL;
+import static io.harness.rule.OwnerRule.RAKSHIT_AGARWAL;
 import static io.harness.rule.OwnerRule.SHIVAM;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -22,8 +23,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,7 +57,10 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import com.offbytwo.jenkins.model.Artifact;
 import com.offbytwo.jenkins.model.Build;
+import com.offbytwo.jenkins.model.BuildResult;
+import com.offbytwo.jenkins.model.BuildWithDetails;
 import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.Job;
 import com.offbytwo.jenkins.model.JobWithDetails;
@@ -62,6 +68,7 @@ import com.offbytwo.jenkins.model.QueueReference;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -83,6 +90,9 @@ public class JenkinsRegistryUtilsTest extends WingsBaseTest {
   private static final String JENKINS_URL = "http://localhost:%s/";
   private static final String JENKINS_URL2 = "http://localhost:%s";
   private static final String USERNAME = "wingsbuild";
+  private static final String JOB_NAME = "jobName";
+  private static final String BUILD_NUMBER = "123";
+  private static final List<String> ARTIFACT_PATH = new ArrayList<>();
   private static String PASSWORD = "password";
   @Inject ScmSecret scmSecret;
   @Rule
@@ -518,7 +528,6 @@ public class JenkinsRegistryUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
-
   public void shouldRetryOnFailures() throws IOException, URISyntaxException {
     JenkinsInternalConfig jenkinsInternalConfigTest =
         JenkinsInternalConfig.builder().jenkinsUrl(rootUrl).username(USERNAME).password(PASSWORD.toCharArray()).build();
@@ -567,7 +576,6 @@ public class JenkinsRegistryUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
-
   public void triggerThrowErrorJobNotFound() throws IOException {
     CustomJenkinsServer jenkinsServer = mock(CustomJenkinsServer.class);
     when(jenkinsServer.createJob(any(FolderJob.class), eq("randomJob"), any(JenkinsConfig.class))).thenReturn(null);
@@ -580,7 +588,6 @@ public class JenkinsRegistryUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
-
   public void testGetJobsReturnsEmptyArrayWhenException() throws IOException {
     JenkinsCustomServer jenkinsServer = mock(JenkinsCustomServer.class);
     when(jenkinsServer.getJobs()).thenThrow(new RuntimeException());
@@ -703,7 +710,6 @@ public class JenkinsRegistryUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
-
   public void verifyGetConsoleLogs() throws IOException, URISyntaxException {
     JenkinsInternalConfig jenkinsInternalConfigTest =
         JenkinsInternalConfig.builder().jenkinsUrl(rootUrl).username(USERNAME).password(PASSWORD.toCharArray()).build();
@@ -718,7 +724,6 @@ public class JenkinsRegistryUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
-
   public void verifyGetConsoleLogsIOException() throws IOException, URISyntaxException {
     JenkinsInternalConfig jenkinsInternalConfigTest =
         JenkinsInternalConfig.builder().jenkinsUrl(rootUrl).username(USERNAME).password(PASSWORD.toCharArray()).build();
@@ -733,7 +738,6 @@ public class JenkinsRegistryUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
-
   public void verifyGetConsoleLogsURIException() throws IOException, URISyntaxException {
     JenkinsInternalConfig jenkinsInternalConfigTest =
         JenkinsInternalConfig.builder().jenkinsUrl(rootUrl).username(USERNAME).password(PASSWORD.toCharArray()).build();
@@ -743,5 +747,39 @@ public class JenkinsRegistryUtilsTest extends WingsBaseTest {
     when(jenkinsServer.getJenkinsConsoleLogs(any(), any(), any())).thenReturn("test log");
     String consoleLogs = jenkinsRegistryUtils.getJenkinsConsoleLogs(jenkinsInternalConfigTest, "test", "1234");
     assertThat(consoleLogs).isNullOrEmpty();
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testVerifyBuildForJob() throws IOException {
+    BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
+    when(buildWithDetails.getResult()).thenReturn(BuildResult.SUCCESS);
+    when(buildWithDetails.getArtifacts()).thenReturn(Collections.singletonList(mock(Artifact.class)));
+
+    JenkinsRegistryUtils jenkinsRegistryUtils = spy(new JenkinsRegistryUtils());
+    doReturn(buildWithDetails).when(jenkinsRegistryUtils).getBuildDetail(jenkinsInternalConfig, JOB_NAME, BUILD_NUMBER);
+
+    BuildDetails result =
+        jenkinsRegistryUtils.verifyBuildForJob(jenkinsInternalConfig, JOB_NAME, ARTIFACT_PATH, BUILD_NUMBER);
+
+    assertThat(result).isNotNull();
+  }
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testVerifyBuildForJob_NullBuildDetails() throws IOException {
+    JenkinsRegistryUtils jenkinsRegistryUtils = mock(JenkinsRegistryUtils.class);
+
+    JenkinsInternalConfig jenkinsInternalConfigTest =
+        JenkinsInternalConfig.builder().jenkinsUrl(rootUrl).username(USERNAME).password(PASSWORD.toCharArray()).build();
+    when(jenkinsRegistryUtils.getBuildDetail(eq(jenkinsInternalConfigTest), eq(JOB_NAME), eq(BUILD_NUMBER)))
+        .thenReturn(null);
+
+    BuildDetails buildDetails =
+        jenkinsRegistryUtils.verifyBuildForJob(jenkinsInternalConfigTest, JOB_NAME, ARTIFACT_PATH, BUILD_NUMBER);
+    assertThat(buildDetails).isNull();
+    verify(jenkinsRegistryUtils, times(1))
+        .verifyBuildForJob(eq(jenkinsInternalConfigTest), eq(JOB_NAME), eq(ARTIFACT_PATH), eq(BUILD_NUMBER));
   }
 }

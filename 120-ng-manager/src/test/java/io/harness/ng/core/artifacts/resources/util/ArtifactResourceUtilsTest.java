@@ -190,6 +190,8 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
   private static final String SERVICE_REF = "serviceRef";
   private static final String FQN = "fqn";
   private static final String REPO_NAME = "repoName";
+  private static final String REPOSITORY = "repository";
+  private static final String REPOSITORY_2 = "repository2";
   private static final String VERSION = "version";
   private static final String VERSION_REGEX = "versionRegex";
   private static final String REGION = "region";
@@ -1813,6 +1815,214 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
   @Test
   @Owner(developers = RAKSHIT_AGARWAL)
   @Category(UnitTests.class)
+  public void testGetBuildDetailsV2GAR_ValueFromConfig() {
+    // spy for ArtifactResourceUtils
+    ArtifactResourceUtils spyartifactResourceUtils = spy(artifactResourceUtils);
+
+    // Creating GoogleArtifactRegistryConfig for mock
+    GoogleArtifactRegistryConfig googleArtifactRegistryConfig =
+        GoogleArtifactRegistryConfig.builder()
+            .connectorRef(ParameterField.<String>builder().value(CONNECTOR_REF).build())
+            .project(ParameterField.<String>builder().value(PROJECT).build())
+            .pkg(ParameterField.<String>builder().value(PKG).build())
+            .repositoryName(ParameterField.<String>builder().value(REPO_NAME).build())
+            .region(ParameterField.<String>builder().value(REGION).build())
+            .build();
+
+    // Creating GARResponseDTO for mock
+    GARResponseDTO buildDetails = GARResponseDTO.builder().build();
+
+    Map<String, String> contextMap = new HashMap<>();
+    contextMap.put("serviceGitBranch", "main-patch");
+
+    YamlExpressionEvaluatorWithContext yamlExpressionEvaluatorWithContext =
+        YamlExpressionEvaluatorWithContext.builder()
+            .yamlExpressionEvaluator(cdYamlExpressionEvaluator)
+            .contextMap(contextMap)
+            .build();
+
+    doReturn(yamlExpressionEvaluatorWithContext)
+        .when(spyartifactResourceUtils)
+        .getYamlExpressionEvaluatorWithContext(any(), any(), any(), any(), any(), any(), any(), any());
+
+    // Creating IdentifierRef for mock
+    IdentifierRef identifierRef = IdentifierRefHelper.getIdentifierRef(CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID);
+
+    doReturn(googleArtifactRegistryConfig)
+        .when(spyartifactResourceUtils)
+        .locateArtifactInService(any(), any(), any(), any(), any(), eq("main-patch"));
+
+    doReturn(true).when(spyartifactResourceUtils).isRemoteService(any(), any(), any(), any());
+
+    doReturn(buildDetails)
+        .when(garResourceService)
+        .getBuildDetails(identifierRef, REGION, REPO_NAME, PROJECT, PKG, VERSION, VERSION_REGEX, ORG_ID, PROJECT_ID);
+
+    assertThat(spyartifactResourceUtils.getBuildDetailsV2GAR(null, null, null, null, null, ACCOUNT_ID, ORG_ID,
+                   PROJECT_ID, PIPELINE_ID, VERSION, VERSION_REGEX, FQN, "", SERVICE_REF, null))
+        .isEqualTo(buildDetails);
+
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "",
+            CONNECTOR_REF, FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REGION, FQN,
+            null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", PKG, FQN,
+            null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REPO_NAME,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", PROJECT, FQN,
+            null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testGetBuildDetailsV2GAR_ValueFromParams() {
+    // spy for ArtifactResourceUtils
+    ArtifactResourceUtils spyartifactResourceUtils = spy(artifactResourceUtils);
+
+    // Creating GoogleArtifactRegistryConfig for mock
+    GoogleArtifactRegistryConfig googleArtifactRegistryConfig = GoogleArtifactRegistryConfig.builder().build();
+
+    // Creating GARResponseDTO for mock
+    GARResponseDTO buildDetails = GARResponseDTO.builder().build();
+
+    Map<String, String> contextMap = new HashMap<>();
+    contextMap.put("serviceGitBranch", "main-patch");
+
+    YamlExpressionEvaluatorWithContext yamlExpressionEvaluatorWithContext =
+        YamlExpressionEvaluatorWithContext.builder()
+            .yamlExpressionEvaluator(cdYamlExpressionEvaluator)
+            .contextMap(contextMap)
+            .build();
+
+    doReturn(yamlExpressionEvaluatorWithContext)
+        .when(spyartifactResourceUtils)
+        .getYamlExpressionEvaluatorWithContext(any(), any(), any(), any(), any(), any(), any(), any());
+
+    // Creating IdentifierRef for mock
+    IdentifierRef identifierRef = IdentifierRefHelper.getIdentifierRef(CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID);
+
+    doReturn(googleArtifactRegistryConfig)
+        .when(spyartifactResourceUtils)
+        .locateArtifactInService(any(), any(), any(), any(), any(), eq("main-patch"));
+
+    doReturn(true).when(spyartifactResourceUtils).isRemoteService(any(), any(), any(), any());
+
+    doReturn(buildDetails)
+        .when(garResourceService)
+        .getBuildDetails(identifierRef, REGION, REPO_NAME, PROJECT, PKG, VERSION, VERSION_REGEX, ORG_ID, PROJECT_ID);
+
+    assertThat(spyartifactResourceUtils.getBuildDetailsV2GAR(CONNECTOR_REF, REGION, REPO_NAME, PROJECT, PKG, ACCOUNT_ID,
+                   ORG_ID, PROJECT_ID, PIPELINE_ID, VERSION, VERSION_REGEX, FQN, "", SERVICE_REF, null))
+        .isEqualTo(buildDetails);
+
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "",
+            CONNECTOR_REF, FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REGION, FQN,
+            null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", PKG, FQN,
+            null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REPO_NAME,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", PROJECT, FQN,
+            null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testGetBuildDetailsV2GAR_ValueFromResolvedExpression() {
+    // spy for ArtifactResourceUtils
+    ArtifactResourceUtils spyartifactResourceUtils = spy(artifactResourceUtils);
+
+    // Creating GoogleArtifactRegistryConfig for mock
+    GoogleArtifactRegistryConfig googleArtifactRegistryConfig = GoogleArtifactRegistryConfig.builder().build();
+
+    // Creating GARResponseDTO for mock
+    GARResponseDTO buildDetails = GARResponseDTO.builder().build();
+
+    Map<String, String> contextMap = new HashMap<>();
+    contextMap.put("serviceGitBranch", "main-patch");
+
+    YamlExpressionEvaluatorWithContext yamlExpressionEvaluatorWithContext =
+        YamlExpressionEvaluatorWithContext.builder()
+            .yamlExpressionEvaluator(cdYamlExpressionEvaluator)
+            .contextMap(contextMap)
+            .build();
+
+    doReturn(yamlExpressionEvaluatorWithContext)
+        .when(spyartifactResourceUtils)
+        .getYamlExpressionEvaluatorWithContext(any(), any(), any(), any(), any(), any(), any(), any());
+
+    // Creating IdentifierRef for mock
+    IdentifierRef identifierRef = IdentifierRefHelper.getIdentifierRef(CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID);
+
+    doReturn(googleArtifactRegistryConfig)
+        .when(spyartifactResourceUtils)
+        .locateArtifactInService(any(), any(), any(), any(), any(), eq("main-patch"));
+
+    doReturn(ResolvedFieldValueWithYamlExpressionEvaluator.builder().value(CONNECTOR_REF).build())
+        .when(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "",
+            CONNECTOR_REF_2, FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    doReturn(ResolvedFieldValueWithYamlExpressionEvaluator.builder().value(PROJECT).build())
+        .when(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", PROJECT_2,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    doReturn(ResolvedFieldValueWithYamlExpressionEvaluator.builder().value(REGION).build())
+        .when(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REGION_2,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    doReturn(ResolvedFieldValueWithYamlExpressionEvaluator.builder().value(REPO_NAME).build())
+        .when(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REPO_NAME_2,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    doReturn(ResolvedFieldValueWithYamlExpressionEvaluator.builder().value(PKG).build())
+        .when(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", PKG_2, FQN,
+            null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+
+    doReturn(true).when(spyartifactResourceUtils).isRemoteService(any(), any(), any(), any());
+
+    doReturn(buildDetails)
+        .when(garResourceService)
+        .getBuildDetails(identifierRef, REGION, REPO_NAME, PROJECT, PKG, VERSION, VERSION_REGEX, ORG_ID, PROJECT_ID);
+
+    assertThat(spyartifactResourceUtils.getBuildDetailsV2GAR(CONNECTOR_REF_2, REGION_2, REPO_NAME_2, PROJECT_2, PKG_2,
+                   ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, VERSION, VERSION_REGEX, FQN, "", SERVICE_REF, null))
+        .isEqualTo(buildDetails);
+
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "",
+            CONNECTOR_REF_2, FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REGION_2,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", PKG_2, FQN,
+            null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REPO_NAME_2,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", PROJECT_2,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
   public void testGetPackagesV2GAR() {
     ArtifactResourceUtils spyartifactResourceUtils = spy(artifactResourceUtils);
 
@@ -2493,6 +2703,154 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
   }
 
   @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testGetArtifactoryImagePath_ValueFromConfig() {
+    // spy for ArtifactResourceUtils
+    ArtifactResourceUtils spyartifactResourceUtils = spy(artifactResourceUtils);
+
+    // Creating ArtifactoryRegistryArtifactConfig for mock
+    ArtifactoryRegistryArtifactConfig artifactoryRegistryArtifactConfig =
+        ArtifactoryRegistryArtifactConfig.builder()
+            .connectorRef(ParameterField.<String>builder().value(CONNECTOR_REF).build())
+            .repository(ParameterField.<String>builder().value(REPOSITORY).build())
+            .build();
+
+    ArtifactoryImagePathsDTO buildDetails = ArtifactoryImagePathsDTO.builder().build();
+
+    Map<String, String> contextMap = new HashMap<>();
+    contextMap.put("serviceGitBranch", "main-patch");
+    YamlExpressionEvaluatorWithContext yamlExpressionEvaluatorWithContext =
+        YamlExpressionEvaluatorWithContext.builder()
+            .yamlExpressionEvaluator(cdYamlExpressionEvaluator)
+            .contextMap(contextMap)
+            .build();
+
+    doReturn(yamlExpressionEvaluatorWithContext)
+        .when(spyartifactResourceUtils)
+        .getYamlExpressionEvaluatorWithContext(any(), any(), any(), any(), any(), any(), any(), any());
+
+    // Creating IdentifierRef for mock
+    IdentifierRef identifierRef = IdentifierRefHelper.getIdentifierRef(CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID);
+
+    doReturn(artifactoryRegistryArtifactConfig)
+        .when(spyartifactResourceUtils)
+        .locateArtifactInService(any(), any(), any(), any(), any(), eq("main-patch"));
+
+    doReturn(true).when(spyartifactResourceUtils).isRemoteService(any(), any(), any(), any());
+
+    doReturn(buildDetails)
+        .when(artifactoryResourceService)
+        .getImagePaths("", identifierRef, ORG_ID, PROJECT_ID, REPOSITORY);
+
+    assertThat(spyartifactResourceUtils.getArtifactoryImagePath(
+                   "", CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID, null, FQN, "", PIPELINE_ID, SERVICE_REF, null))
+        .isEqualTo(buildDetails);
+
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REPOSITORY,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+  }
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testGetArtifactoryImagePath_ValueFromParams() {
+    // spy for ArtifactResourceUtils
+    ArtifactResourceUtils spyartifactResourceUtils = spy(artifactResourceUtils);
+
+    // Creating ArtifactoryRegistryArtifactConfig for mock
+    ArtifactoryRegistryArtifactConfig artifactoryRegistryArtifactConfig =
+        ArtifactoryRegistryArtifactConfig.builder().build();
+
+    // Creating IdentifierRef for mock
+    IdentifierRef identifierRef = IdentifierRefHelper.getIdentifierRef(CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID);
+
+    ArtifactoryImagePathsDTO artifactoryImagePathsDTO = ArtifactoryImagePathsDTO.builder().build();
+
+    Map<String, String> contextMap = new HashMap<>();
+    contextMap.put("serviceGitBranch", "main-patch");
+
+    YamlExpressionEvaluatorWithContext yamlExpressionEvaluatorWithContext =
+        YamlExpressionEvaluatorWithContext.builder()
+            .yamlExpressionEvaluator(cdYamlExpressionEvaluator)
+            .contextMap(contextMap)
+            .build();
+
+    doReturn(yamlExpressionEvaluatorWithContext)
+        .when(spyartifactResourceUtils)
+        .getYamlExpressionEvaluatorWithContext(any(), any(), any(), any(), any(), any(), any(), any());
+
+    doReturn(artifactoryRegistryArtifactConfig)
+        .when(spyartifactResourceUtils)
+        .locateArtifactInService(any(), any(), any(), any(), any(), any());
+
+    doReturn(true).when(spyartifactResourceUtils).isRemoteService(any(), any(), any(), any());
+
+    doReturn(artifactoryImagePathsDTO)
+        .when(artifactoryResourceService)
+        .getImagePaths("", identifierRef, ORG_ID, PROJECT_ID, REPOSITORY);
+
+    assertThat(spyartifactResourceUtils.getArtifactoryImagePath("", CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID,
+                   REPOSITORY, FQN, "", PIPELINE_ID, SERVICE_REF, null))
+        .isEqualTo(artifactoryImagePathsDTO);
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REPOSITORY,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+  }
+
+  @Test
+  @Owner(developers = RAKSHIT_AGARWAL)
+  @Category(UnitTests.class)
+  public void testGetArtifactoryImagePath_ValueFromResolvedExpression() {
+    // spy for ArtifactResourceUtils
+    ArtifactResourceUtils spyartifactResourceUtils = spy(artifactResourceUtils);
+
+    // Creating ArtifactoryRegistryArtifactConfig for mock
+    ArtifactoryRegistryArtifactConfig artifactoryRegistryArtifactConfig =
+        ArtifactoryRegistryArtifactConfig.builder().build();
+
+    // Creating IdentifierRef for mock
+    IdentifierRef identifierRef = IdentifierRefHelper.getIdentifierRef(CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID);
+
+    ArtifactoryImagePathsDTO artifactoryImagePathsDTO = ArtifactoryImagePathsDTO.builder().build();
+
+    Map<String, String> contextMap = new HashMap<>();
+    contextMap.put("serviceGitBranch", "main-patch");
+
+    YamlExpressionEvaluatorWithContext yamlExpressionEvaluatorWithContext =
+        YamlExpressionEvaluatorWithContext.builder()
+            .yamlExpressionEvaluator(cdYamlExpressionEvaluator)
+            .contextMap(contextMap)
+            .build();
+
+    doReturn(yamlExpressionEvaluatorWithContext)
+        .when(spyartifactResourceUtils)
+        .getYamlExpressionEvaluatorWithContext(any(), any(), any(), any(), any(), any(), any(), any());
+
+    doReturn(artifactoryRegistryArtifactConfig)
+        .when(spyartifactResourceUtils)
+        .locateArtifactInService(any(), any(), any(), any(), any(), any());
+
+    doReturn(ResolvedFieldValueWithYamlExpressionEvaluator.builder().value(REPOSITORY).build())
+        .when(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REPOSITORY_2,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+
+    doReturn(true).when(spyartifactResourceUtils).isRemoteService(any(), any(), any(), any());
+
+    doReturn(artifactoryImagePathsDTO)
+        .when(artifactoryResourceService)
+        .getImagePaths("", identifierRef, ORG_ID, PROJECT_ID, REPOSITORY);
+
+    assertThat(spyartifactResourceUtils.getArtifactoryImagePath("", CONNECTOR_REF, ACCOUNT_ID, ORG_ID, PROJECT_ID,
+                   REPOSITORY_2, FQN, "", PIPELINE_ID, SERVICE_REF, null))
+        .isEqualTo(artifactoryImagePathsDTO);
+    verify(spyartifactResourceUtils)
+        .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID, "", REPOSITORY_2,
+            FQN, null, SERVICE_REF, yamlExpressionEvaluatorWithContext.getYamlExpressionEvaluator());
+  }
+
+  @Test
   @Owner(developers = HINGER)
   @Category(UnitTests.class)
   public void testLocateArtifactForSourcesFromTemplate() throws IOException {
@@ -2987,7 +3345,6 @@ public class ArtifactResourceUtilsTest extends NgManagerTestBase {
         .getResolvedFieldValueWithYamlExpressionEvaluator(ACCOUNT_ID, ORG_ID, PROJECT_ID, PIPELINE_ID,
             pipelineYamlWithoutTemplates, CONNECTOR_REF_2, FQN, GIT_ENTITY_FIND_INFO_DTO, SERVICE_REF, null);
   }
-
   @Test
   @Owner(developers = ABHISHEK)
   @Category(UnitTests.class)

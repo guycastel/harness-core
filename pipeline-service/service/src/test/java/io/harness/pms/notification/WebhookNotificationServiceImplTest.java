@@ -92,8 +92,9 @@ public class WebhookNotificationServiceImplTest extends CategoryTest {
                             .addLevels(Level.newBuilder().setRuntimeId(runtimeID).setStepType(
                                 StepType.newBuilder().setStepCategory(StepCategory.STAGE)))
                             .build();
-    Response<ResponseDTO<Map<String, CDStageSummaryResponseDTO>>> restResponse = Response.success(
-        ResponseDTO.newResponse(Map.of(runtimeID, CDStageSummaryResponseDTO.builder().service("s1").build())));
+    Response<ResponseDTO<Map<String, CDStageSummaryResponseDTO>>> restResponse =
+        Response.success(ResponseDTO.newResponse(
+            Map.of(runtimeID, CDStageSummaryResponseDTO.builder().service("s1").artifactDisplayName("sahil").build())));
     Call<ResponseDTO<Map<String, CDStageSummaryResponseDTO>>> responseDTOCall = mock(Call.class);
     when(responseDTOCall.execute()).thenReturn(restResponse);
     Mockito

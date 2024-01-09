@@ -130,6 +130,13 @@ public class WebhookNotificationServiceImpl implements WebhookNotificationServic
         return moduleInfoBuilder.build();
       }
     }
+    if (pipelineEventType != PipelineEventType.STAGE_START) {
+      if ((EmptyPredicate.isNotEmpty(stageSummaryResponseDTO.getService())
+          && stageSummaryResponseDTO.getService().equals("NA")) || EmptyPredicate.isEmpty(stageSummaryResponseDTO.getArtifactDisplayName())) {
+        return ModuleInfo.getModuleInfo(ambiance, executionSummaryEntity);
+      }
+    }
+
     return moduleInfoBuilder
         .services(EmptyPredicate.isEmpty(stageSummaryResponseDTO.getServices())
                 ? Lists.newArrayList(stageSummaryResponseDTO.getService())

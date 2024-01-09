@@ -8,7 +8,6 @@
 package io.harness.delegate.task.shell;
 import static io.harness.delegate.task.shell.winrm.WinRmCommandConstants.SESSION_TIMEOUT;
 import static io.harness.delegate.task.shell.winrm.WinRmUtils.getWorkingDir;
-import static io.harness.delegate.task.shell.winrm.WinRmUtils.shouldDisableWinRmEnvVarsEscaping;
 
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
@@ -202,8 +201,7 @@ public class WinRmShellScriptTaskNG extends AbstractDelegateRunnableTask {
             .hostname(taskParameters.getHost())
             .timeout(taskParameters.getSessionTimeout() != null ? Math.toIntExact(taskParameters.getSessionTimeout())
                                                                 : SESSION_TIMEOUT)
-            .commandParameters(getCommandParameters(taskParameters))
-            .disableWinRmEnvVarEscaping(shouldDisableWinRmEnvVarsEscaping(taskParameters));
+            .commandParameters(getCommandParameters(taskParameters));
 
     WinRmSessionConfig config =
         winRmConfigAuthEnhancer.configureAuthentication((WinRmCredentialsSpecDTO) taskParameters.getSshKeySpecDTO(),
@@ -240,8 +238,7 @@ public class WinRmShellScriptTaskNG extends AbstractDelegateRunnableTask {
             .hostname(taskParameters.getHost())
             .timeout(taskParameters.getSessionTimeout() != null ? Math.toIntExact(taskParameters.getSessionTimeout())
                                                                 : SESSION_TIMEOUT)
-            .commandParameters(getCommandParameters(taskParameters))
-            .disableWinRmEnvVarEscaping(shouldDisableWinRmEnvVarsEscaping(taskParameters));
+            .commandParameters(getCommandParameters(taskParameters));
 
     WinRmSessionConfig config =
         winRmConfigAuthEnhancer.configureAuthentication((WinRmCredentialsSpecDTO) taskParameters.getSshKeySpecDTO(),

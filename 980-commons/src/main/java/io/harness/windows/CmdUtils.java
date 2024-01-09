@@ -43,23 +43,6 @@ public class CmdUtils {
     return value;
   }
 
-  public static String escapeEnvValueIllegalSymbols(String value) {
-    if (!isValidEnvValue(value)) {
-      log.debug(format("Escaping %s env variable as there is a single %% occurrence", value));
-      return "";
-    }
-
-    /*
-    < and > symbols can be used standalone, but in combination of those is translating to %lt> string itself.
-     */
-    if (value.contains("<>")) {
-      log.debug(format("Escaping %s env variable as there is a a combination of <> symbols identified", value));
-      return "";
-    }
-
-    return value;
-  }
-
   public static String escapeLineBreakChars(String value) {
     return value.replace("\r", "`r").replace("\n", "`n").replace("\t", "`t");
   }

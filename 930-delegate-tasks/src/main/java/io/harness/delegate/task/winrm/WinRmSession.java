@@ -13,7 +13,6 @@ import static io.harness.delegate.task.winrm.WinRmExecutorHelper.PARTITION_SIZE_
 import static io.harness.delegate.utils.TaskExceptionUtils.calcPercentage;
 import static io.harness.logging.CommandExecutionStatus.RUNNING;
 import static io.harness.logging.LogLevel.INFO;
-import static io.harness.windows.CmdUtils.escapeEnvValueIllegalSymbols;
 import static io.harness.windows.CmdUtils.escapeEnvValueSpecialChars;
 import static io.harness.winrm.WinRmHelperUtils.buildErrorDetailsFromWinRmClientException;
 
@@ -84,9 +83,7 @@ public class WinRmSession implements AutoCloseable {
     Map<String, String> processedEnvironmentMap = new HashMap<>();
     if (config.getEnvironment() != null) {
       for (Entry<String, String> entry : config.getEnvironment().entrySet()) {
-        processedEnvironmentMap.put(entry.getKey(),
-            config.isDisableWinRmEnvVarEscaping() ? escapeEnvValueIllegalSymbols(entry.getValue())
-                                                  : escapeEnvValueSpecialChars(entry.getValue()));
+        processedEnvironmentMap.put(entry.getKey(), escapeEnvValueSpecialChars(entry.getValue()));
       }
     }
     this.logCallback = logCallback;

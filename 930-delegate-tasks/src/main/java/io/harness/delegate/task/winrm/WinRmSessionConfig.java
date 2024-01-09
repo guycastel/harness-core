@@ -63,7 +63,6 @@ public class WinRmSessionConfig implements EncryptableSetting {
   private List<WinRmCommandParameter> commandParameters;
 
   @SchemaIgnore private String encryptedPassword;
-  private boolean disableWinRmEnvVarEscaping;
 
   @Override
   public SettingVariableTypes getSettingType() {

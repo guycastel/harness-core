@@ -25,7 +25,6 @@ import io.harness.delegate.beans.logstreaming.UnitProgressDataMapper;
 import io.harness.delegate.task.TaskParameters;
 import io.harness.delegate.task.common.AbstractDelegateRunnableTask;
 import io.harness.delegate.task.shell.ssh.CommandHandler;
-import io.harness.delegate.task.shell.winrm.WinRmUtils;
 import io.harness.delegate.task.ssh.NgCommandUnit;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.secret.SecretSanitizerThreadLocal;
@@ -92,9 +91,7 @@ public class CommandTaskNG extends AbstractDelegateRunnableTask {
   }
 
   private DelegateResponseData runWinRm(WinrmTaskParameters parameters) {
-    if (!WinRmUtils.shouldDisableWinRmEnvVarsEscaping(parameters)) {
-      getLogStreamingTaskClient().getMarkers().add(WIN_RM_MARKER);
-    }
+    getLogStreamingTaskClient().getMarkers().add(WIN_RM_MARKER);
 
     CommandUnitsProgress commandUnitsProgress = CommandUnitsProgress.builder().build();
 

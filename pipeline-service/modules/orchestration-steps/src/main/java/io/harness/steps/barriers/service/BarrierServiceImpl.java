@@ -232,13 +232,12 @@ public class BarrierServiceImpl implements BarrierService, ForceProctor {
 
   @Override
   public List<BarrierExecutionInstance> updatePosition(String planExecutionId, BarrierPositionType positionType,
-      String positionSetupId, String positionExecutionId, String stageExecutionId, String stepGroupExecutionId,
-      boolean isNewBarrierUpdateFlow) {
+      String positionSetupId, String positionExecutionId, String stageExecutionId, String stepGroupExecutionId) {
     List<BarrierExecutionInstance> barrierExecutionInstances =
         findByPosition(planExecutionId, positionType, positionSetupId);
 
-    Update update = obtainRuntimeIdUpdate(positionType, positionSetupId, positionExecutionId, stageExecutionId,
-        stepGroupExecutionId, isNewBarrierUpdateFlow);
+    Update update = obtainRuntimeIdUpdate(
+        positionType, positionSetupId, positionExecutionId, stageExecutionId, stepGroupExecutionId);
 
     // mongo does not support multiple documents atomic update, let's update one by one
     barrierExecutionInstances.forEach(instance
@@ -274,44 +273,38 @@ public class BarrierServiceImpl implements BarrierService, ForceProctor {
   }
 
   private Update obtainRuntimeIdUpdate(BarrierPositionType positionType, String positionSetupId,
-      String positionExecutionId, String stageExecutionId, String stepGroupExecutionId,
-      boolean isNewBarrierUpdateFlow) {
+      String positionExecutionId, String stageExecutionId, String stepGroupExecutionId) {
     String position = "position";
     final String positions = BarrierExecutionInstanceKeys.positions + ".$[" + position + "].";
     Update update;
     switch (positionType) {
       case STAGE:
-        Criteria stageCriteria =
-            Criteria.where(position.concat(".").concat(BarrierPositionKeys.stageSetupId)).is(positionSetupId);
-        if (isNewBarrierUpdateFlow) {
-          stageCriteria = stageCriteria.and(position.concat(".").concat(BarrierPositionKeys.strategyNodeType)).isNull();
-        }
+        Criteria stageCriteria = Criteria.where(position.concat(".").concat(BarrierPositionKeys.stageSetupId))
+                                     .is(positionSetupId)
+                                     .and(position.concat(".").concat(BarrierPositionKeys.strategyNodeType))
+                                     .isNull();
         update = new Update()
                      .set(positions.concat(BarrierPositionKeys.stageRuntimeId), positionExecutionId)
                      .filterArray(stageCriteria);
         break;
       case STEP_GROUP:
-        Criteria stepGroupCriteria =
-            Criteria.where(position.concat(".").concat(BarrierPositionKeys.stepGroupSetupId)).is(positionSetupId);
-        if (isNewBarrierUpdateFlow) {
-          stepGroupCriteria = stepGroupCriteria.and(position.concat(".").concat(BarrierPositionKeys.strategyNodeType))
-                                  .in(BarrierPositionType.STAGE, null)
-                                  .and(position.concat(".").concat(BarrierPositionKeys.stageRuntimeId))
-                                  .is(stageExecutionId);
-        }
+        Criteria stepGroupCriteria = Criteria.where(position.concat(".").concat(BarrierPositionKeys.stepGroupSetupId))
+                                         .is(positionSetupId)
+                                         .and(position.concat(".").concat(BarrierPositionKeys.strategyNodeType))
+                                         .in(BarrierPositionType.STAGE, null)
+                                         .and(position.concat(".").concat(BarrierPositionKeys.stageRuntimeId))
+                                         .is(stageExecutionId);
         update = new Update()
                      .set(positions.concat(BarrierPositionKeys.stepGroupRuntimeId), positionExecutionId)
                      .filterArray(stepGroupCriteria);
         break;
       case STEP:
-        Criteria stepCriteria =
-            Criteria.where(position.concat(".").concat(BarrierPositionKeys.stepSetupId)).is(positionSetupId);
-        if (isNewBarrierUpdateFlow) {
-          stepCriteria = stepCriteria.and(position.concat(".").concat(BarrierPositionKeys.stageRuntimeId))
-                             .is(stageExecutionId)
-                             .and(position.concat(".").concat(BarrierPositionKeys.stepGroupRuntimeId))
-                             .is(stepGroupExecutionId);
-        }
+        Criteria stepCriteria = Criteria.where(position.concat(".").concat(BarrierPositionKeys.stepSetupId))
+                                    .is(positionSetupId)
+                                    .and(position.concat(".").concat(BarrierPositionKeys.stageRuntimeId))
+                                    .is(stageExecutionId)
+                                    .and(position.concat(".").concat(BarrierPositionKeys.stepGroupRuntimeId))
+                                    .is(stepGroupExecutionId);
         update = new Update()
                      .set(positions.concat(BarrierPositionKeys.stepRuntimeId), positionExecutionId)
                      .filterArray(stepCriteria);
@@ -484,22 +477,6 @@ public class BarrierServiceImpl implements BarrierService, ForceProctor {
       BarrierVisitor barrierVisitor = new BarrierVisitor(injector);
       barrierVisitor.walkElementTree(yamlNode);
       return new ArrayList<>(barrierVisitor.getBarrierIdentifierMap().values());
-    } catch (IOException e) {
-      log.error("Error while extracting yaml");
-      throw new InvalidRequestException("Error while extracting yaml");
-    } catch (InvalidRequestException e) {
-      log.error("Error while processing yaml");
-      throw e;
-    }
-  }
-
-  @Override
-  public Map<String, List<BarrierPositionInfo.BarrierPosition>> getBarrierPositionInfoList(String yaml) {
-    try {
-      YamlNode yamlNode = YamlUtils.extractPipelineField(yaml).getNode();
-      BarrierVisitor barrierVisitor = new BarrierVisitor(injector);
-      barrierVisitor.walkElementTree(yamlNode);
-      return barrierVisitor.getBarrierPositionInfoMap();
     } catch (IOException e) {
       log.error("Error while extracting yaml");
       throw new InvalidRequestException("Error while extracting yaml");

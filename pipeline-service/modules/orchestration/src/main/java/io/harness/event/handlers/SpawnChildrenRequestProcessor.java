@@ -16,7 +16,6 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.beans.FeatureName;
 import io.harness.concurrency.ConcurrentChildInstance;
 import io.harness.concurrency.MaxConcurrentChildCallback;
 import io.harness.engine.OrchestrationEngine;
@@ -44,7 +43,6 @@ import io.harness.pms.contracts.plan.PostExecutionRollbackInfo;
 import io.harness.pms.contracts.steps.StepCategory;
 import io.harness.pms.execution.utils.AmbianceUtils;
 import io.harness.pms.execution.utils.PlanExecutionProjectionConstants;
-import io.harness.utils.PmsFeatureFlagService;
 import io.harness.waiter.WaitNotifyEngine;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -73,7 +71,6 @@ public class SpawnChildrenRequestProcessor implements SdkResponseProcessor {
   @Inject private PlanExecutionMetadataService planExecutionMetadataService;
   @Inject private WaitNotifyEngine waitNotifyEngine;
   @Inject private InitiateNodeHelper initiateNodeHelper;
-  @Inject private PmsFeatureFlagService pmsFeatureFlagService;
   @Inject private NodeExecutionInfoService nodeExecutionInfoService;
   @Inject private OrchestrationEngine orchestrationEngine;
   @Inject private PipelineSettingsService pipelineSettingsService;
@@ -94,12 +91,9 @@ public class SpawnChildrenRequestProcessor implements SdkResponseProcessor {
         childrenIds.add(generateUuid());
       }
       int maxConcurrency = getMaxConcurrencyLimit(ambiance, childrenIds, request.getChildren().getMaxConcurrency());
-      if (AmbianceUtils.checkIfFeatureFlagEnabled(
-              ambiance, FeatureName.CDS_NG_BARRIER_STEPS_WITHIN_LOOPING_STRATEGIES.name())) {
-        expandBarriersWithinStrategyNode(nodeExecutionId, nodeSetupId,
-            request.getChildren().getChildrenList().stream().map(Child::getChildNodeId).collect(Collectors.toList()),
-            childrenIds, ambiance, maxConcurrency);
-      }
+      expandBarriersWithinStrategyNode(nodeExecutionId, nodeSetupId,
+          request.getChildren().getChildrenList().stream().map(Child::getChildNodeId).collect(Collectors.toList()),
+          childrenIds, ambiance, maxConcurrency);
 
       List<Child> filteredChildren = getFilteredChildren(ambiance, request.getChildren().getChildrenList());
       if (childrenIds.isEmpty() || filteredChildren.isEmpty()) {

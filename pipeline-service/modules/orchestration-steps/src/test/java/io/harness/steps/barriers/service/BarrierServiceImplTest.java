@@ -49,7 +49,6 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -348,42 +347,6 @@ public class BarrierServiceImplTest extends OrchestrationStepsTestBase {
   @Test
   @Owner(developers = ALEXEI)
   @Category(UnitTests.class)
-  public void shouldTestGetBarrierPositionInfoMap() throws IOException {
-    ClassLoader classLoader = getClass().getClassLoader();
-    String yamlFile = "barriers.yaml";
-    String yaml = Resources.toString(Objects.requireNonNull(classLoader.getResource(yamlFile)), StandardCharsets.UTF_8);
-
-    Map<String, List<BarrierPosition>> barrierPositionInfoMap = barrierService.getBarrierPositionInfoList(yaml);
-
-    assertThat(barrierPositionInfoMap.size()).isEqualTo(3);
-  }
-
-  @Test
-  @Owner(developers = ALEXEI)
-  @Category(UnitTests.class)
-  public void shouldThrowIOExceptionWhenGetBarrierPositionInfoMap() {
-    String incorrectYaml = "pipeline: stages: stage";
-    assertThatThrownBy(() -> barrierService.getBarrierPositionInfoList(incorrectYaml))
-        .isInstanceOf(InvalidRequestException.class)
-        .hasMessage("Error while extracting yaml");
-  }
-
-  @Test
-  @Owner(developers = ALEXEI)
-  @Category(UnitTests.class)
-  public void shouldThrowInvalidRequestExceptionWhenGetBarrierPositionInfo() throws IOException {
-    ClassLoader classLoader = getClass().getClassLoader();
-    String yamlFile = "barriers-incorrect.yaml";
-    String yaml = Resources.toString(Objects.requireNonNull(classLoader.getResource(yamlFile)), StandardCharsets.UTF_8);
-
-    assertThatThrownBy(() -> barrierService.getBarrierPositionInfoList(yaml))
-        .isInstanceOf(InvalidRequestException.class)
-        .hasMessage("Barrier Identifier myBarrierId7 was not present in flowControl");
-  }
-
-  @Test
-  @Owner(developers = ALEXEI)
-  @Category(UnitTests.class)
 
   public void shouldFindByPlanNodeIdAndPlanExecutionId() {
     String identifier = "identifier";
@@ -430,8 +393,7 @@ public class BarrierServiceImplTest extends OrchestrationStepsTestBase {
             .build();
     barrierService.save(barrierExecutionInstance);
 
-    barrierService.updatePosition(
-        planExecutionId, BarrierPositionType.STEP, planNodeId, executionId, null, null, false);
+    barrierService.updatePosition(planExecutionId, BarrierPositionType.STEP, planNodeId, executionId, null, null);
 
     List<BarrierExecutionInstance> result =
         barrierService.findByPosition(planExecutionId, BarrierPositionType.STEP, planNodeId);
@@ -481,7 +443,7 @@ public class BarrierServiceImplTest extends OrchestrationStepsTestBase {
     barrierService.save(barrierExecutionInstance);
 
     barrierService.updatePosition(
-        planExecutionId, BarrierPositionType.STEP, planNodeId, executionId, "stageRuntime1", "sgRuntime1", true);
+        planExecutionId, BarrierPositionType.STEP, planNodeId, executionId, "stageRuntime1", "sgRuntime1");
 
     List<BarrierExecutionInstance> result =
         barrierService.findByPosition(planExecutionId, BarrierPositionType.STEP, planNodeId);
@@ -522,8 +484,7 @@ public class BarrierServiceImplTest extends OrchestrationStepsTestBase {
             .build();
     barrierService.save(barrierExecutionInstance);
 
-    barrierService.updatePosition(
-        planExecutionId, BarrierPositionType.STEP_GROUP, planNodeId, executionId, null, null, false);
+    barrierService.updatePosition(planExecutionId, BarrierPositionType.STEP_GROUP, planNodeId, executionId, null, null);
 
     List<BarrierExecutionInstance> result =
         barrierService.findByPosition(planExecutionId, BarrierPositionType.STEP_GROUP, planNodeId);
@@ -580,7 +541,7 @@ public class BarrierServiceImplTest extends OrchestrationStepsTestBase {
     barrierService.save(barrierExecutionInstance);
 
     barrierService.updatePosition(
-        planExecutionId, BarrierPositionType.STEP_GROUP, "sgSetup1", "sgRuntime1", "stageRuntime1", "sgRuntime1", true);
+        planExecutionId, BarrierPositionType.STEP_GROUP, "sgSetup1", "sgRuntime1", "stageRuntime1", "sgRuntime1");
 
     List<BarrierExecutionInstance> result =
         barrierService.findByPosition(planExecutionId, BarrierPositionType.STEP, planNodeId);
@@ -625,8 +586,7 @@ public class BarrierServiceImplTest extends OrchestrationStepsTestBase {
             .build();
     barrierService.save(barrierExecutionInstance);
 
-    barrierService.updatePosition(
-        planExecutionId, BarrierPositionType.STAGE, planNodeId, executionId, null, null, false);
+    barrierService.updatePosition(planExecutionId, BarrierPositionType.STAGE, planNodeId, executionId, null, null);
 
     List<BarrierExecutionInstance> result =
         barrierService.findByPosition(planExecutionId, BarrierPositionType.STAGE, planNodeId);
@@ -666,8 +626,8 @@ public class BarrierServiceImplTest extends OrchestrationStepsTestBase {
             .build());
     barrierService.save(barrierExecutionInstance);
 
-    barrierService.updatePosition(planExecutionId, BarrierPositionType.STAGE, "stageSetup1", "stageRuntime1",
-        "stageRuntime1", "sgRuntime1", true);
+    barrierService.updatePosition(
+        planExecutionId, BarrierPositionType.STAGE, "stageSetup1", "stageRuntime1", "stageRuntime1", "sgRuntime1");
 
     List<BarrierExecutionInstance> result =
         barrierService.findByPosition(planExecutionId, BarrierPositionType.STEP, planNodeId);

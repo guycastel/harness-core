@@ -10,7 +10,6 @@ package io.harness.steps.barriers.event;
 import static io.harness.rule.OwnerRule.VINICIUS;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -20,7 +19,6 @@ import static org.mockito.Mockito.when;
 import io.harness.OrchestrationStepsTestBase;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
-import io.harness.beans.FeatureName;
 import io.harness.category.element.UnitTests;
 import io.harness.engine.observers.NodeUpdateInfo;
 import io.harness.execution.NodeExecution;
@@ -50,7 +48,7 @@ public class BarrierPositionHelperEventHandlerTest extends OrchestrationStepsTes
   @Test
   @Owner(developers = VINICIUS)
   @Category(UnitTests.class)
-  public void testOnNodeStatusUpdateBarrierFFEnabled() {
+  public void testOnNodeStatusUpdateBarrier() {
     String accountId = "accountId";
     String executionId = "executionId";
     String planExecutionId = "planExecutionId";
@@ -63,7 +61,7 @@ public class BarrierPositionHelperEventHandlerTest extends OrchestrationStepsTes
             .build();
     when(persistentLocker.waitToAcquireLock(any(), any(), any())).thenReturn(AcquiredNoopLock.builder().build());
     when(barrierService.updatePosition(
-             planExecutionId, BarrierPositionType.STEP, "setupId", executionId, "stageId", "stepGroupId", true))
+             planExecutionId, BarrierPositionType.STEP, "setupId", executionId, "stageId", "stepGroupId"))
         .thenReturn(List.of());
     try (MockedStatic<AmbianceUtils> mockAmbianceUtils = mockStatic(AmbianceUtils.class, RETURNS_MOCKS)) {
       when(AmbianceUtils.getAccountId(any())).thenReturn(accountId);
@@ -73,43 +71,9 @@ public class BarrierPositionHelperEventHandlerTest extends OrchestrationStepsTes
           .thenReturn(Optional.of(Level.newBuilder().setRuntimeId("stageId").build()));
       when(AmbianceUtils.getStepGroupLevelFromAmbiance(any()))
           .thenReturn(Optional.of(Level.newBuilder().setRuntimeId("stepGroupId").build()));
-      when(AmbianceUtils.checkIfFeatureFlagEnabled(
-               any(), eq(FeatureName.CDS_NG_BARRIER_STEPS_WITHIN_LOOPING_STRATEGIES.name())))
-          .thenReturn(true);
       barrierPositionHelperEventHandler.onNodeStatusUpdate(nodeUpdateInfo);
       verify(barrierService, times(1))
-          .updatePosition(
-              planExecutionId, BarrierPositionType.STEP, "setupId", executionId, "stageId", "stepGroupId", true);
-    }
-  }
-
-  @Test
-  @Owner(developers = VINICIUS)
-  @Category(UnitTests.class)
-  public void testOnNodeStatusUpdateBarrierFFDisabled() {
-    String accountId = "accountId";
-    String executionId = "executionId";
-    String planExecutionId = "planExecutionId";
-    NodeUpdateInfo nodeUpdateInfo =
-        NodeUpdateInfo.builder()
-            .nodeExecution(NodeExecution.builder()
-                               .uuid(executionId)
-                               .ambiance(Ambiance.newBuilder().setPlanExecutionId(planExecutionId).build())
-                               .build())
-            .build();
-    when(barrierService.updatePosition(
-             planExecutionId, BarrierPositionType.STEP, "setupId", executionId, null, null, false))
-        .thenReturn(List.of());
-    try (MockedStatic<AmbianceUtils> mockAmbianceUtils = mockStatic(AmbianceUtils.class, RETURNS_MOCKS)) {
-      when(AmbianceUtils.getAccountId(any())).thenReturn(accountId);
-      when(AmbianceUtils.obtainCurrentLevel(any()))
-          .thenReturn(Level.newBuilder().setGroup(BarrierPositionType.STEP.name()).setSetupId("setupId").build());
-      when(AmbianceUtils.checkIfFeatureFlagEnabled(
-               any(), eq(FeatureName.CDS_NG_BARRIER_STEPS_WITHIN_LOOPING_STRATEGIES.name())))
-          .thenReturn(false);
-      barrierPositionHelperEventHandler.onNodeStatusUpdate(nodeUpdateInfo);
-      verify(barrierService, times(1))
-          .updatePosition(planExecutionId, BarrierPositionType.STEP, "setupId", executionId, null, null, false);
+          .updatePosition(planExecutionId, BarrierPositionType.STEP, "setupId", executionId, "stageId", "stepGroupId");
     }
   }
 }

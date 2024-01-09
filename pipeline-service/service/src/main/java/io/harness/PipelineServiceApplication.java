@@ -192,7 +192,6 @@ import io.harness.service.impl.DelegateSyncServiceImpl;
 import io.harness.springdata.HMongoTemplate;
 import io.harness.steps.PodCleanupUpdateEventHandler;
 import io.harness.steps.approval.step.custom.IrregularApprovalInstanceHandler;
-import io.harness.steps.barriers.BarrierInitializer;
 import io.harness.steps.barriers.event.BarrierDropper;
 import io.harness.steps.barriers.event.BarrierPositionHelperEventHandler;
 import io.harness.steps.barriers.event.BarrierWithinStrategyExpander;
@@ -603,8 +602,6 @@ public class PipelineServiceApplication extends Application<PipelineServiceConfi
 
     PlanExecutionStrategy planExecutionStrategy = injector.getInstance(Key.get(PlanExecutionStrategy.class));
     // StartObservers
-    planExecutionStrategy.getOrchestrationStartSubject().register(
-        injector.getInstance(Key.get(BarrierInitializer.class)));
     planExecutionStrategy.getOrchestrationStartSubject().register(
         injector.getInstance(Key.get(ResourceRestraintInitializer.class)));
     planExecutionStrategy.getOrchestrationStartSubject().register(

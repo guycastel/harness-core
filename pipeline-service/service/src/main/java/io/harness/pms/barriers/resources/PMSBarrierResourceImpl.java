@@ -31,6 +31,7 @@ import lombok.AllArgsConstructor;
 public class PMSBarrierResourceImpl implements PMSBarrierResource {
   private final PMSBarrierService pmsBarrierService;
 
+  @Deprecated
   public ResponseDTO<List<BarrierSetupInfoDTO>> getBarriersSetupInfoList(@NotNull String yaml) {
     List<BarrierSetupInfo> barrierSetupInfoList = pmsBarrierService.getBarrierSetupInfoList(yaml);
     List<BarrierSetupInfoDTO> barrierSetupInfoDTOList =

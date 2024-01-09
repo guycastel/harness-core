@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -41,6 +42,8 @@ public interface PMSBarrierResource {
   @PUT
   @Path("/setupInfo")
   @ApiOperation(value = "Gets barriers setup info list", nickname = "getBarriersSetupInfoList")
+  @Operation(deprecated = true)
+  @Deprecated
   ResponseDTO<List<BarrierSetupInfoDTO>> getBarriersSetupInfoList(@NotNull @ApiParam(hidden = true) String yaml);
 
   @GET

@@ -12,7 +12,6 @@ import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
 import static io.harness.beans.FeatureName.CDS_BLOCK_SENSITIVE_EXPRESSIONS;
 import static io.harness.beans.FeatureName.CDS_DIVIDE_SDK_RESPONSE_EVENTS_IN_DIFF_STREAMS;
 import static io.harness.beans.FeatureName.CDS_INPUT_YAML_IN_WEBHOOK_NOTIFICATION;
-import static io.harness.beans.FeatureName.CDS_NG_BARRIER_STEPS_WITHIN_LOOPING_STRATEGIES;
 import static io.harness.beans.FeatureName.CDS_NG_STRATEGY_IDENTIFIER_POSTFIX_TRUNCATION_REFACTOR;
 import static io.harness.beans.FeatureName.CDS_REMOVE_RESUME_EVENT_FOR_ASYNC_AND_ASYNCCHAIN_MODE;
 import static io.harness.beans.FeatureName.PIE_EXPRESSION_CONCATENATION;
@@ -185,7 +184,7 @@ public class ExecutionHelper {
   // Add all FFs to this list that we want to use during pipeline execution
   public final List<FeatureName> featureNames =
       List.of(PIE_EXPRESSION_CONCATENATION, PIE_EXPRESSION_DISABLE_COMPLEX_JSON_SUPPORT, PIE_SIMPLIFY_LOG_BASE_KEY,
-          CDS_NG_BARRIER_STEPS_WITHIN_LOOPING_STRATEGIES, CDS_REMOVE_RESUME_EVENT_FOR_ASYNC_AND_ASYNCCHAIN_MODE,
+          CDS_REMOVE_RESUME_EVENT_FOR_ASYNC_AND_ASYNCCHAIN_MODE,
           PIE_SECRETS_OBSERVER, CDS_DIVIDE_SDK_RESPONSE_EVENTS_IN_DIFF_STREAMS, CDS_INPUT_YAML_IN_WEBHOOK_NOTIFICATION,
           CDS_NG_STRATEGY_IDENTIFIER_POSTFIX_TRUNCATION_REFACTOR, CDS_BLOCK_SENSITIVE_EXPRESSIONS);
   public static final String PMS_EXECUTION_SETTINGS_GROUP_IDENTIFIER = "pms_execution_settings";

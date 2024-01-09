@@ -62,26 +62,12 @@ public class BarrierPositionHelperEventHandler implements AsyncInformObserver, N
         positionType = BarrierPositionType.STEP;
       }
       if (positionType != null) {
-        if (AmbianceUtils.checkIfFeatureFlagEnabled(nodeUpdateInfo.getNodeExecution().getAmbiance(),
-                FeatureName.CDS_NG_BARRIER_STEPS_WITHIN_LOOPING_STRATEGIES.name())) {
-          updatePosition(planExecutionId, positionType, nodeExecution);
-        } else {
-          updatePositionWithoutFiltersForLoopingStrategy(planExecutionId, positionType, nodeExecution);
-        }
+        updatePosition(planExecutionId, positionType, nodeExecution);
       }
     } catch (Exception e) {
       log.error("Failed to update barrier position for planExecutionId: [{}]", planExecutionId);
       throw e;
     }
-  }
-
-  private List<BarrierExecutionInstance> updatePositionWithoutFiltersForLoopingStrategy(
-      String planExecutionId, BarrierPositionType type, NodeExecution nodeExecution) {
-    // TODO: Remove this method when removing Feature Flag CDS_NG_BARRIER_STEPS_WITHIN_LOOPING_STRATEGIES.
-    Ambiance ambiance = nodeExecution.getAmbiance();
-    Level level = Objects.requireNonNull(AmbianceUtils.obtainCurrentLevel(ambiance));
-    return barrierService.updatePosition(
-        planExecutionId, type, level.getSetupId(), nodeExecution.getUuid(), null, null, false);
   }
 
   private List<BarrierExecutionInstance> updatePosition(
@@ -97,7 +83,7 @@ public class BarrierPositionHelperEventHandler implements AsyncInformObserver, N
     try (AcquiredLock<?> ignore = persistentLocker.waitToAcquireLock(
              BARRIER_UPDATE_LOCK + planExecutionId, Duration.ofSeconds(20), Duration.ofSeconds(60))) {
       return barrierService.updatePosition(
-          planExecutionId, type, level.getSetupId(), nodeExecution.getUuid(), stageRuntimeId, stepGroupRuntimeId, true);
+          planExecutionId, type, level.getSetupId(), nodeExecution.getUuid(), stageRuntimeId, stepGroupRuntimeId);
     }
   }
 

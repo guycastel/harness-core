@@ -19,6 +19,7 @@ public enum Edition {
   COMMUNITY, // Community is exclusively on prem
   FREE,
   TEAM,
+  STARTUP,
   ENTERPRISE;
 
   public static List<Edition> getSuperiorEdition(Edition edition) {

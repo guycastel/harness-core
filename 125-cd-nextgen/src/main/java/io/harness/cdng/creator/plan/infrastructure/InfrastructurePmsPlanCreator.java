@@ -309,7 +309,7 @@ public class InfrastructurePmsPlanCreator {
         .build();
   }
 
-  private YamlField constructResourceConstraintYamlField(YamlNode specNode, String whenCondition,
+  public YamlField constructResourceConstraintYamlField(YamlNode specNode, String whenCondition,
       PlanCreationContext context, boolean isProjectScopedResourceConstraintQueue, String yamlFieldName,
       String yamlFieldNodeName) {
     String resourceUnit = "<+INFRA_KEY>";

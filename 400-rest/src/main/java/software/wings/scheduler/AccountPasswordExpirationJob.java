@@ -110,7 +110,7 @@ public class AccountPasswordExpirationJob implements Job {
                 account.getUuid());
           }
         } catch (Exception ex) {
-          log.error("CheckAccountPasswordExpiration failed for User: {}", user.getEmail(), ex);
+          log.debug("CheckAccountPasswordExpiration failed for User: {}", user.getEmail(), ex);
         }
       }
     } catch (Exception ex) {

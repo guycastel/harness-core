@@ -648,7 +648,7 @@ public class NGTemplateResourceTest extends CategoryTest {
   public void testGetMergedTemplateInputsYaml() {
     doReturn(TemplateRetainVariablesResponse.builder().mergedTemplateInputs("tag: <+input>").build())
         .when(templateMergeService)
-        .mergeTemplateInputs("tag: <+input>", "");
+        .mergeTemplateInputs("tag: <+input>", "", "account_id");
 
     ResponseDTO<TemplateRetainVariablesResponse> responseDTO = templateResource.getMergedTemplateInputsYaml(ACCOUNT_ID,
         TemplateRetainVariablesRequestDTO.builder().oldTemplateInputs("").newTemplateInputs("tag: <+input>").build());

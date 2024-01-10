@@ -15,6 +15,7 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.beans.FeatureName;
 import io.harness.exception.ngexception.NGTemplateException;
 import io.harness.ng.core.template.RefreshResponseDTO;
 import io.harness.ng.core.template.refresh.NgManagerRefreshRequestDTO;
@@ -174,9 +175,11 @@ public class TemplateInputsRefreshHelper {
       log.error("Could not read template yaml", e);
       throw new NGTemplateException("Could not read template yaml: " + e.getMessage());
     }
-
+    boolean allowDifferentInfraForEnvPropagation = featureFlagHelperService.isFeatureFlagEnabled(
+        accountId, FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
     // refreshed json node
-    JsonNode refreshedJsonNode = YamlRefreshHelper.refreshNodeFromSourceNode(templateInputs, templateSpec);
+    JsonNode refreshedJsonNode =
+        YamlRefreshHelper.refreshNodeFromSourceNode(templateInputs, templateSpec, allowDifferentInfraForEnvPropagation);
 
     ObjectNode updatedValue = (ObjectNode) templateNodeValue;
 

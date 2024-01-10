@@ -405,7 +405,7 @@ public class NGTemplateResourceImpl implements NGTemplateResource {
     log.info("Gets Merged Template Input yaml");
     return ResponseDTO.newResponse(
         templateMergeService.mergeTemplateInputs(templateRetainVariablesRequestDTO.getNewTemplateInputs(),
-            templateRetainVariablesRequestDTO.getOldTemplateInputs()));
+            templateRetainVariablesRequestDTO.getOldTemplateInputs(), accountId));
   }
 
   @Override

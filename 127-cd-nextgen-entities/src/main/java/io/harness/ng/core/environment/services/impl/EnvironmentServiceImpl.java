@@ -30,6 +30,7 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.beans.FeatureName;
 import io.harness.beans.IdentifierRef;
 import io.harness.cdng.gitops.service.ClusterService;
 import io.harness.cdng.visitor.YamlTypes;
@@ -100,6 +101,7 @@ import io.harness.scope.ScopeHelper;
 import io.harness.setupusage.EnvironmentEntitySetupUsageHelper;
 import io.harness.utils.ExceptionCreationUtils;
 import io.harness.utils.IdentifierRefHelper;
+import io.harness.utils.NGFeatureFlagHelperService;
 import io.harness.utils.YamlPipelineUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -166,6 +168,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
   private final EnvironmentFilterHelper environmentFilterHelper;
   private final GitXSettingsHelper gitXSettingsHelper;
   private final CDGitXService cdGitXService;
+  private final NGFeatureFlagHelperService ngFeatureFlagHelperService;
 
   @Inject
   public EnvironmentServiceImpl(EnvironmentRepository environmentRepository,
@@ -176,7 +179,8 @@ public class EnvironmentServiceImpl implements EnvironmentService {
       ServiceEntityService serviceEntityService, AccountClient accountClient, NGSettingsClient settingsClient,
       EnvironmentEntitySetupUsageHelper environmentEntitySetupUsageHelper,
       ServiceOverrideV2ValidationHelper overrideV2ValidationHelper, EnvironmentFilterHelper environmentFilterHelper,
-      GitXSettingsHelper gitXSettingsHelper, CDGitXService cdGitXService) {
+      GitXSettingsHelper gitXSettingsHelper, CDGitXService cdGitXService,
+      NGFeatureFlagHelperService ngFeatureFlagHelperService) {
     this.environmentRepository = environmentRepository;
     this.entitySetupUsageService = entitySetupUsageService;
     this.eventProducer = eventProducer;
@@ -194,6 +198,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
     this.environmentFilterHelper = environmentFilterHelper;
     this.gitXSettingsHelper = gitXSettingsHelper;
     this.cdGitXService = cdGitXService;
+    this.ngFeatureFlagHelperService = ngFeatureFlagHelperService;
   }
 
   @Override
@@ -1096,9 +1101,12 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 
       String newEnvironmentInputsYaml =
           isEmpty(yamlInputs) ? StringUtils.EMPTY : YamlPipelineUtils.writeYamlString(yamlInputs);
+
+      boolean allowDifferentInfraForEnvPropagation = ngFeatureFlagHelperService.isEnabled(
+          accountId, FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
       return EnvironmentInputsMergedResponseDto.builder()
-          .mergedEnvironmentInputsYaml(
-              InputSetMergeUtility.mergeInputs(oldEnvironmentInputsYaml, newEnvironmentInputsYaml))
+          .mergedEnvironmentInputsYaml(InputSetMergeUtility.mergeInputs(
+              oldEnvironmentInputsYaml, newEnvironmentInputsYaml, allowDifferentInfraForEnvPropagation))
           .environmentYaml(environmentYaml)
           .build();
     } catch (Exception ex) {

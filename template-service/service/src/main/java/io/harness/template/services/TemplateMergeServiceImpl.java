@@ -117,7 +117,8 @@ public class TemplateMergeServiceImpl implements TemplateMergeService {
   }
 
   @Override
-  public TemplateRetainVariablesResponse mergeTemplateInputs(String newTemplateInputs, String originalTemplateInputs) {
+  public TemplateRetainVariablesResponse mergeTemplateInputs(
+      String newTemplateInputs, String originalTemplateInputs, String accountId) {
     JsonNode templateInputSetJsonNode;
     JsonNode originalTemplateInputSetJsonNode;
     if (EmptyPredicate.isEmpty(originalTemplateInputs)) {
@@ -132,8 +133,10 @@ public class TemplateMergeServiceImpl implements TemplateMergeService {
     } catch (IOException e) {
       throw new InvalidRequestException("Couldn't convert yaml to JsonNode");
     }
-    JsonNode updatedJsonNode =
-        YamlRefreshHelper.refreshNodeFromSourceNode(originalTemplateInputSetJsonNode, templateInputSetJsonNode);
+    boolean allowDifferentInfraForEnvPropagation = ngTemplateFeatureFlagHelperService.isFeatureFlagEnabled(
+        accountId, FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
+    JsonNode updatedJsonNode = YamlRefreshHelper.refreshNodeFromSourceNode(
+        originalTemplateInputSetJsonNode, templateInputSetJsonNode, allowDifferentInfraForEnvPropagation);
     return TemplateRetainVariablesResponse.builder()
         .mergedTemplateInputs(YamlUtils.writeYamlString(updatedJsonNode))
         .build();

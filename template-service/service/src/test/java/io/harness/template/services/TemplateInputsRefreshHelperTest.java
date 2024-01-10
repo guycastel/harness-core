@@ -34,6 +34,7 @@ import io.harness.template.entity.TemplateEntity;
 import io.harness.template.helpers.TemplateInputsRefreshHelper;
 import io.harness.template.helpers.TemplateMergeServiceHelper;
 import io.harness.template.helpers.TemplatePreProcessorHelper;
+import io.harness.template.utils.NGTemplateFeatureFlagHelperService;
 
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -54,6 +55,7 @@ public class TemplateInputsRefreshHelperTest extends TemplateServiceTestBase {
   @InjectMocks TemplateMergeServiceHelper templateMergeServiceHelper;
   @Mock NgManagerReconcileClient ngManagerReconcileClient;
   @Mock TemplatePreProcessorHelper templatePreProcessorHelper;
+  @Mock NGTemplateFeatureFlagHelperService featureFlagHelperService;
 
   private static final String ACCOUNT_ID = "accountId";
 
@@ -73,6 +75,7 @@ public class TemplateInputsRefreshHelperTest extends TemplateServiceTestBase {
     on(templateMergeServiceHelper).set("templateServiceHelper", templateServiceHelper);
     on(templateInputsRefreshHelper).set("templateMergeServiceHelper", templateMergeServiceHelper);
     on(templateInputsRefreshHelper).set("ngManagerReconcileClient", ngManagerReconcileClient);
+    on(templateInputsRefreshHelper).set("featureFlagHelperService", featureFlagHelperService);
 
     Call<ResponseDTO<InputsValidationResponse>> ngManagerReconcileCall = mock(Call.class);
 

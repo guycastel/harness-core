@@ -34,17 +34,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InputSetMergeUtility {
   public static final String DUMMY_NODE = "dummy";
-  public String mergeInputs(String oldInputsYaml, String newInputsYaml) {
+  public String mergeInputs(String oldInputsYaml, String newInputsYaml, boolean allowDifferentInfraForEnvPropagation) {
     if (isEmpty(newInputsYaml)) {
       return newInputsYaml;
     }
     if (isEmpty(oldInputsYaml)) {
       return newInputsYaml;
     }
-    return YamlPipelineUtils.writeYamlString(YamlRefreshHelper.refreshYamlFromSourceYaml(oldInputsYaml, newInputsYaml));
+    return YamlPipelineUtils.writeYamlString(YamlRefreshHelper.refreshYamlFromSourceYaml(
+        oldInputsYaml, newInputsYaml, allowDifferentInfraForEnvPropagation));
   }
 
-  public String mergeArrayNodeInputs(String oldInputsYaml, String newInputsYaml) throws IOException {
+  public String mergeArrayNodeInputs(
+      String oldInputsYaml, String newInputsYaml, boolean allowDifferentInfraForEnvPropagation) throws IOException {
     if (isEmpty(newInputsYaml)) {
       return newInputsYaml;
     }
@@ -56,8 +58,9 @@ public class InputSetMergeUtility {
     addDummyRootToJsonNode(readTree(oldInputsYaml), mapper);
     JsonNode newInputJsonNode = addDummyRootToJsonNode(readTree(newInputsYaml), mapper);
 
-    JsonNode refreshedJsonNode = YamlRefreshHelper.refreshYamlFromSourceYaml(
-        YamlPipelineUtils.writeYamlString(oldInputJsonNode), YamlPipelineUtils.writeYamlString(newInputJsonNode));
+    JsonNode refreshedJsonNode =
+        YamlRefreshHelper.refreshYamlFromSourceYaml(YamlPipelineUtils.writeYamlString(oldInputJsonNode),
+            YamlPipelineUtils.writeYamlString(newInputJsonNode), allowDifferentInfraForEnvPropagation);
 
     return refreshedJsonNode == null ? null : YamlPipelineUtils.writeYamlString(refreshedJsonNode.get(DUMMY_NODE));
   }

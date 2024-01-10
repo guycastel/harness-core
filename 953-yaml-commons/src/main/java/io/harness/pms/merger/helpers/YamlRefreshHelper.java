@@ -9,6 +9,7 @@ package io.harness.pms.merger.helpers;
 
 import static io.harness.annotations.dev.HarnessTeam.CDC;
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
+import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
@@ -26,6 +27,7 @@ import io.harness.utils.YamlPipelineUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.IOException;
@@ -54,6 +56,9 @@ public class YamlRefreshHelper {
   public final Map<String, String> nonIgnorableKeysAndSiblings =
       Map.of("service.gitBranch", "serviceRef", "environment.gitBranch", "environmentRef");
 
+  public final Set<String> ignorableKeysToUseFromStageAtSameLevel =
+      new HashSet<>(List.of("infrastructureDefinition", "infrastructureDefinitions"));
+
   private static final String USE_FROM_STAGE_NODE = "useFromStage";
   private static final String STAGE_NODE = "stage";
   private static final String CHILD_SERVICE_REF_NODE = "service.serviceRef";
@@ -65,7 +70,8 @@ public class YamlRefreshHelper {
    * @param sourceNode
    * @return refreshed jsonNode with updated values
    */
-  public JsonNode refreshNodeFromSourceNode(JsonNode nodeToRefresh, JsonNode sourceNode) {
+  public JsonNode refreshNodeFromSourceNode(
+      JsonNode nodeToRefresh, JsonNode sourceNode, boolean allowDifferentInfraForEnvPropagation) {
     // if there is nothing to refresh from, return null
     if (sourceNode == null) {
       return null;
@@ -100,7 +106,8 @@ public class YamlRefreshHelper {
     dummyNodeToRefreshNode.set(DUMMY_NODE, nodeToRefresh);
     String dummyNodeToRefreshYaml = convertToYaml(dummyNodeToRefreshNode);
 
-    JsonNode refreshedJsonNode = refreshYamlFromSourceYaml(dummyNodeToRefreshYaml, sourceNodeInputSetFormatYaml);
+    JsonNode refreshedJsonNode = refreshYamlFromSourceYaml(
+        dummyNodeToRefreshYaml, sourceNodeInputSetFormatYaml, allowDifferentInfraForEnvPropagation);
     return refreshedJsonNode.get(DUMMY_NODE);
   }
 
@@ -112,14 +119,16 @@ public class YamlRefreshHelper {
    * @param sourceNodeInputSetFormatYaml
    * @return refreshed jsonNode with updated values
    */
-  public JsonNode refreshYamlFromSourceYaml(String nodeToRefreshYaml, String sourceNodeInputSetFormatYaml) {
+  public JsonNode refreshYamlFromSourceYaml(
+      String nodeToRefreshYaml, String sourceNodeInputSetFormatYaml, boolean allowDifferentInfraForEnvPropagation) {
     YamlConfig sourceNodeYamlConfig = new YamlConfig(sourceNodeInputSetFormatYaml);
     YamlConfig nodeToRefreshYamlConfig = new YamlConfig(nodeToRefreshYaml);
-    return refreshYamlConfigFromSourceYamlConfig(sourceNodeYamlConfig, nodeToRefreshYamlConfig);
+    return refreshYamlConfigFromSourceYamlConfig(
+        sourceNodeYamlConfig, nodeToRefreshYamlConfig, allowDifferentInfraForEnvPropagation);
   }
 
-  public JsonNode refreshYamlConfigFromSourceYamlConfig(
-      YamlConfig sourceNodeYamlConfig, YamlConfig nodeToRefreshYamlConfig) {
+  public JsonNode refreshYamlConfigFromSourceYamlConfig(YamlConfig sourceNodeYamlConfig,
+      YamlConfig nodeToRefreshYamlConfig, boolean allowDifferentInfraForEnvPropagation) {
     Map<FQN, Object> sourceNodeFqnToValueMap = sourceNodeYamlConfig.getFqnToValueMap();
     Map<FQN, Object> nodeToRefreshFqnToValueMap = nodeToRefreshYamlConfig.getFqnToValueMap();
 
@@ -157,9 +166,9 @@ public class YamlRefreshHelper {
 
     Set<FQN> useFromStageFQNKeysFromInputSet =
         getUseFromStageKeysFromInputSet(sourceNodeFqnToValueMap, nodeToRefreshFqnToValueMap);
-    JsonNode modifiedOriginalMap =
-        addOneOfKeysParentKeysRemovingOtherParallelChildren(sourceNodeYamlConfig.getYamlMap(), refreshedFqnToValueMap,
-            useFromStageFQNKeysFromInputSet, nodeToRefreshYamlConfig.getYamlMap());
+    JsonNode modifiedOriginalMap = addOneOfKeysParentKeysRemovingOtherParallelChildren(
+        sourceNodeYamlConfig.getYamlMap(), refreshedFqnToValueMap, useFromStageFQNKeysFromInputSet,
+        nodeToRefreshYamlConfig.getYamlMap(), allowDifferentInfraForEnvPropagation);
 
     return new YamlConfig(refreshedFqnToValueMap, modifiedOriginalMap).getYamlMap();
   }
@@ -253,12 +262,17 @@ public class YamlRefreshHelper {
    * @param refreshedYamlNodeFqnToValueMap
    * @param oneOfKeysTypeNodeChild
    * @param runtimeInputYamlMap
+   * @param allowDifferentInfraForEnvPropagation
    * @return
    * This method modifies original sourceNodeYaml by deleting original oneOfChild fields and adding new one
-   * It also modifies refreshedYamlNodeFqnToValueMap in same way
+   * It also modifies refreshedYamlNodeFqnToValueMap in same way.
+   * The boolean allowDifferentInfraForEnvPropagation is being added temporarily to support infrastructure override
+   * during environment propagation. This boolean will be removed from the method once we GA the FF -
+   * CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION
    */
   private JsonNode addOneOfKeysParentKeysRemovingOtherParallelChildren(JsonNode sourceNodeYamlMap,
-      Map<FQN, Object> refreshedYamlNodeFqnToValueMap, Set<FQN> oneOfKeysTypeNodeChild, JsonNode runtimeInputYamlMap) {
+      Map<FQN, Object> refreshedYamlNodeFqnToValueMap, Set<FQN> oneOfKeysTypeNodeChild, JsonNode runtimeInputYamlMap,
+      boolean allowDifferentInfraForEnvPropagation) {
     for (FQN childKeyFQN : oneOfKeysTypeNodeChild) {
       FQN parent = childKeyFQN.getBaseFQNTillOneOfGivenFields(oneOfKeysParent);
       JsonNode jsonNodeForParentFQN = YamlSubMapExtractor.getNodeForFQN(sourceNodeYamlMap, parent);
@@ -266,19 +280,58 @@ public class YamlRefreshHelper {
         continue;
       }
 
-      refreshedYamlNodeFqnToValueMap.entrySet().removeIf(
-          next -> next.getKey().contains(parent) && !next.getKey().equals(parent));
+      if (allowDifferentInfraForEnvPropagation) {
+        /*
+          Do not remove those fields from map which are allowed as siblings to useFromStage and are provided in
+          pipeline yaml because if they are provided in pipeline yaml, then it means the value provided in pipeline yaml
+          should be used for that field instead of propagating the value from a stage i.e. infrastructureDefinitions
+          in case of environment propagation
+         */
+        refreshedYamlNodeFqnToValueMap.entrySet().removeIf(next
+            -> next.getKey().contains(parent) && !next.getKey().equals(parent)
+                && ignorableKeysToUseFromStageAtSameLevel.stream().noneMatch(ignorableKeys
+                    -> (next.getKey().getExpressionFqn().contains(ignorableKeys)
+                        && isNotEmpty(runtimeInputYamlMap.findValues(ignorableKeys)))));
+      } else {
+        refreshedYamlNodeFqnToValueMap.entrySet().removeIf(
+            next -> next.getKey().contains(parent) && !next.getKey().equals(parent));
+      }
 
       ObjectNode objectNodeForParentFQN = (ObjectNode) jsonNodeForParentFQN;
       for (Iterator<String> fieldNamesItr = objectNodeForParentFQN.fieldNames(); fieldNamesItr.hasNext();) {
         String childFieldName = fieldNamesItr.next();
         if (objectNodeForParentFQN.has(childFieldName) && !childFieldName.equals(childKeyFQN.getFieldName())) {
+          /*
+          Do not remove those fields from json node which are allowed as siblings to useFromStage and are provided in
+          pipeline yaml because if they are provided in pipeline yaml, then it means the value provided in pipeline yaml
+          should be used for that field instead of propagating the value from a stage i.e. infrastructureDefinitions
+          in case of environment propagation
+           */
+          if (allowDifferentInfraForEnvPropagation && ignorableKeysToUseFromStageAtSameLevel.contains(childFieldName)
+              && (isNotEmpty(runtimeInputYamlMap.findValues(childFieldName)))) {
+            continue;
+          }
           fieldNamesItr.remove();
         }
       }
 
       if (!objectNodeForParentFQN.has(childKeyFQN.getFieldName())) {
-        objectNodeForParentFQN.putIfAbsent(childKeyFQN.getFieldName(), new TextNode("<+input>"));
+        if (allowDifferentInfraForEnvPropagation) {
+          /*
+          We could have directly done :
+          objectNodeForParentFQN.putIfAbsent(childKeyFQN.getFieldName(), new TextNode("<+input>"));
+          But we are using these temp variables so that useFromStage field comes before infrastructureDefinitions field
+          in the yaml
+           */
+          ObjectNode tempObjectNode = new ObjectNode(JsonNodeFactory.instance);
+          tempObjectNode.putIfAbsent(childKeyFQN.getFieldName(), new TextNode("<+input>"));
+          tempObjectNode.setAll(objectNodeForParentFQN);
+          objectNodeForParentFQN.removeAll();
+          objectNodeForParentFQN.setAll(tempObjectNode);
+        } else {
+          objectNodeForParentFQN.putIfAbsent(childKeyFQN.getFieldName(), new TextNode("<+input>"));
+        }
+
         refreshedYamlNodeFqnToValueMap.put(
             childKeyFQN, YamlSubMapExtractor.getNodeForFQN(runtimeInputYamlMap, childKeyFQN));
       }

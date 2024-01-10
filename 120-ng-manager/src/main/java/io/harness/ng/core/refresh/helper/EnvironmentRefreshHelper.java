@@ -431,9 +431,10 @@ public class EnvironmentRefreshHelper {
     ObjectNode linkedServiceOverridesInputs = mapper.createObjectNode();
     linkedServiceOverridesInputs.set(YamlTypes.SERVICE_OVERRIDE_INPUTS, serviceOverrideInputs);
     String linkedServiceOverridesYaml = YamlUtils.writeYamlString(linkedServiceOverridesInputs);
-
-    JsonNode refreshedJsonNode =
-        YamlRefreshHelper.refreshYamlFromSourceYaml(linkedServiceOverridesYaml, serviceOverrideInputsYaml);
+    boolean allowDifferentInfraForEnvPropagation = featureFlagHelperService.isEnabled(
+        context.getAccountId(), FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
+    JsonNode refreshedJsonNode = YamlRefreshHelper.refreshYamlFromSourceYaml(
+        linkedServiceOverridesYaml, serviceOverrideInputsYaml, allowDifferentInfraForEnvPropagation);
     envObjectNode.set(YamlTypes.SERVICE_OVERRIDE_INPUTS, refreshedJsonNode.get(YamlTypes.SERVICE_OVERRIDE_INPUTS));
   }
 
@@ -537,9 +538,11 @@ public class EnvironmentRefreshHelper {
       JsonNode dummyLinkedInfraDefs = addDummyRootToJsonNode(linkedInfraDefs, mapper);
       JsonNode infraInputsNode = readTree(infraInputs);
       JsonNode dummyInfraInputsNode = addDummyRootToJsonNode(infraInputsNode, mapper);
-
-      JsonNode refreshedJsonNode = YamlRefreshHelper.refreshYamlFromSourceYaml(
-          YamlUtils.writeYamlString(dummyLinkedInfraDefs), YamlUtils.writeYamlString(dummyInfraInputsNode));
+      boolean allowDifferentInfraForEnvPropagation = featureFlagHelperService.isEnabled(
+          context.getAccountId(), FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
+      JsonNode refreshedJsonNode =
+          YamlRefreshHelper.refreshYamlFromSourceYaml(YamlUtils.writeYamlString(dummyLinkedInfraDefs),
+              YamlUtils.writeYamlString(dummyInfraInputsNode), allowDifferentInfraForEnvPropagation);
       if (refreshedJsonNode != null) {
         envObjectNode.setAll((ObjectNode) refreshedJsonNode.get(DUMMY_NODE));
       }
@@ -570,7 +573,10 @@ public class EnvironmentRefreshHelper {
     ObjectNode linkedEnvInputs = mapper.createObjectNode();
     linkedEnvInputs.set(YamlTypes.ENVIRONMENT_INPUTS, linkedEnvInputsValue);
     String linkedEnvInputsYaml = YamlUtils.writeYamlString(linkedEnvInputs);
-    JsonNode refreshedJsonNode = YamlRefreshHelper.refreshYamlFromSourceYaml(linkedEnvInputsYaml, envInputsYaml);
+    boolean allowDifferentInfraForEnvPropagation = featureFlagHelperService.isEnabled(
+        context.getAccountId(), FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
+    JsonNode refreshedJsonNode = YamlRefreshHelper.refreshYamlFromSourceYaml(
+        linkedEnvInputsYaml, envInputsYaml, allowDifferentInfraForEnvPropagation);
     envObjectNode.set(YamlTypes.ENVIRONMENT_INPUTS, refreshedJsonNode.get(YamlTypes.ENVIRONMENT_INPUTS));
   }
 

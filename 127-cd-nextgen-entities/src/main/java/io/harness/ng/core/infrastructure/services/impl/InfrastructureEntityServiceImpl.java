@@ -26,6 +26,7 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.beans.FeatureName;
 import io.harness.beans.IdentifierRef;
 import io.harness.cdng.customdeployment.helper.CustomDeploymentEntitySetupHelper;
 import io.harness.cdng.infra.mapper.InfrastructureEntityConfigMapper;
@@ -80,6 +81,7 @@ import io.harness.repositories.infrastructure.spring.InfrastructureRepository;
 import io.harness.setupusage.InfrastructureEntitySetupUsageHelper;
 import io.harness.utils.ExceptionCreationUtils;
 import io.harness.utils.IdentifierRefHelper;
+import io.harness.utils.NGFeatureFlagHelperService;
 import io.harness.utils.YamlPipelineUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -150,6 +152,7 @@ public class InfrastructureEntityServiceImpl implements InfrastructureEntityServ
   private final GitAwareEntityHelper gitAwareEntityHelper;
   @Inject private CDGitXService cdGitXService;
   @Inject private GitXSettingsHelper gitXSettingsHelper;
+  @Inject private NGFeatureFlagHelperService ngFeatureFlagHelperService;
 
   private static final String DUP_KEY_EXP_FORMAT_STRING_FOR_PROJECT =
       "Infrastructure [%s] under Environment [%s] Project[%s], Organization [%s] in Account [%s] already exists";
@@ -1184,10 +1187,11 @@ public class InfrastructureEntityServiceImpl implements InfrastructureEntityServ
 
       String newInfraInputsYaml =
           isNotEmpty(yamlInputs) ? YamlPipelineUtils.writeYamlString(yamlInputs) : StringUtils.EMPTY;
-
+      boolean allowDifferentInfraForEnvPropagation = ngFeatureFlagHelperService.isEnabled(
+          accountId, FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
       return InfrastructureInputsMergedResponseDto.builder()
-          .mergedInfrastructureInputsYaml(
-              InputSetMergeUtility.mergeArrayNodeInputs(oldInfrastructureInputsYaml, newInfraInputsYaml))
+          .mergedInfrastructureInputsYaml(InputSetMergeUtility.mergeArrayNodeInputs(
+              oldInfrastructureInputsYaml, newInfraInputsYaml, allowDifferentInfraForEnvPropagation))
           .infrastructureYaml(infraYaml)
           .build();
     } catch (Exception ex) {

@@ -6,6 +6,7 @@
  */
 
 package io.harness.ng.core.refresh.helper;
+
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.template.resources.beans.NGTemplateConstants.GIT_BRANCH;
 
@@ -14,6 +15,7 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.beans.FeatureName;
 import io.harness.cdng.visitor.YamlTypes;
 import io.harness.common.NGExpressionUtils;
 import io.harness.data.structure.EmptyPredicate;
@@ -28,6 +30,7 @@ import io.harness.pms.yaml.YamlField;
 import io.harness.pms.yaml.YamlNode;
 import io.harness.pms.yaml.YamlNodeUtils;
 import io.harness.pms.yaml.YamlUtils;
+import io.harness.utils.NGFeatureFlagHelperService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +51,7 @@ public class RefreshInputsHelper {
   @Inject ServiceEntityService serviceEntityService;
   @Inject EntityFetchHelper entityFetchHelper;
   @Inject EnvironmentRefreshHelper environmentRefreshHelper;
+  @Inject NGFeatureFlagHelperService featureFlagHelperService;
 
   public String refreshInputs(
       String accountId, String orgId, String projectId, String yaml, String resolvedTemplatesYaml) {
@@ -174,8 +178,10 @@ public class RefreshInputsHelper {
     ObjectNode serviceInputsNode = mapper.createObjectNode();
     serviceInputsNode.set(YamlTypes.SERVICE_INPUTS, serviceInputs);
     String linkedServiceInputsYaml = YamlUtils.writeYamlString(serviceInputsNode);
-    JsonNode refreshedJsonNode =
-        YamlRefreshHelper.refreshYamlFromSourceYaml(linkedServiceInputsYaml, serviceRuntimeInputYaml);
+    boolean allowDifferentInfraForEnvPropagation = featureFlagHelperService.isEnabled(
+        context.getAccountId(), FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
+    JsonNode refreshedJsonNode = YamlRefreshHelper.refreshYamlFromSourceYaml(
+        linkedServiceInputsYaml, serviceRuntimeInputYaml, allowDifferentInfraForEnvPropagation);
     serviceNodeValue.set(YamlTypes.SERVICE_INPUTS, refreshedJsonNode.get(YamlTypes.SERVICE_INPUTS));
     return serviceNodeValue;
   }

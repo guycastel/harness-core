@@ -54,16 +54,16 @@ public class YamlRefreshHelperTest extends CategoryTest {
   @Category(UnitTests.class)
   public void testRefreshNodeFromSourceNode() throws IOException {
     // all true scenarios
-    assertThat(refreshNodeFromSourceNode(null, null)).isNull();
-    assertThat(refreshNodeFromSourceNode(null, convertYamlToJsonNode("field: abc"))).isNull();
+    assertThat(refreshNodeFromSourceNode(null, null, false)).isNull();
+    assertThat(refreshNodeFromSourceNode(null, convertYamlToJsonNode("field: abc"), false)).isNull();
     assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: <+input>"))))
+                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: <+input>"), false)))
         .isEqualTo("field: abc");
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: abc"),
-                   convertYamlToJsonNode("field: <+input>.allowedValues(abc,b,c)"))))
+                   convertYamlToJsonNode("field: <+input>.allowedValues(abc,b,c)"), false)))
         .isEqualTo("field: abc");
     assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: <+input>.regex(a.*)"))))
+                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: <+input>.regex(a.*)"), false)))
         .isEqualTo("field: abc");
     String yamlToValidate = "field:\n"
         + "- a\n"
@@ -72,7 +72,7 @@ public class YamlRefreshHelperTest extends CategoryTest {
         + "  - a\n"
         + "  - b";
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode(yamlToValidate),
-                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"))))
+                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"), false)))
         .isEqualTo(expectedYaml);
     yamlToValidate = "field:\n"
         + "- a\n"
@@ -81,7 +81,7 @@ public class YamlRefreshHelperTest extends CategoryTest {
         + "  - a\n"
         + "  - ab";
     assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode(yamlToValidate), convertYamlToJsonNode("field: <+input>.regex(a.*)"))))
+                   convertYamlToJsonNode(yamlToValidate), convertYamlToJsonNode("field: <+input>.regex(a.*)"), false)))
         .isEqualTo(expectedYaml);
     yamlToValidate = "field:\n"
         + "  identifier: id\n"
@@ -90,72 +90,72 @@ public class YamlRefreshHelperTest extends CategoryTest {
         + "  identifier: id\n"
         + "  name: name";
     assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode(yamlToValidate), convertYamlToJsonNode("field: <+input>"))))
+                   convertYamlToJsonNode(yamlToValidate), convertYamlToJsonNode("field: <+input>"), false)))
         .isEqualTo(expectedYaml);
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: a.allowedValues(a,b,c)"),
-                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"))))
+                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"), false)))
         .isEqualTo("field: \"a.allowedValues(a,b,c)\"");
-    assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: a.regex(a.*)"), convertYamlToJsonNode("field: <+input>.regex(a.*)"))))
+    assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: a.regex(a.*)"),
+                   convertYamlToJsonNode("field: <+input>.regex(a.*)"), false)))
         .isEqualTo("field: a.regex(a.*)");
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: yes"),
-                   convertYamlToJsonNode("field: <+input>.allowedValues(yes, no)"))))
+                   convertYamlToJsonNode("field: <+input>.allowedValues(yes, no)"), false)))
         .isEqualTo("field: \"<+input>.allowedValues(yes, no)\"");
-    assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: 01"), convertYamlToJsonNode("field: <+input>.allowedValues(01, 2)"))))
+    assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: 01"),
+                   convertYamlToJsonNode("field: <+input>.allowedValues(01, 2)"), false)))
         .isEqualTo("field: \"<+input>.allowedValues(01, 2)\"");
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>.allowedValues(yes, no)"),
-                   convertYamlToJsonNode("field: <+input>"))))
+                   convertYamlToJsonNode("field: <+input>"), false)))
         .isEqualTo("field: \"<+input>.allowedValues(yes, no)\"");
-    assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: <+input>.regex(a.*)"), convertYamlToJsonNode("field: <+input>"))))
+    assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>.regex(a.*)"),
+                   convertYamlToJsonNode("field: <+input>"), false)))
         .isEqualTo("field: <+input>.regex(a.*)");
 
     // all false scenarios
-    assertThat(convertToYaml(refreshNodeFromSourceNode(null, convertYamlToJsonNode("field: <+input>"))))
+    assertThat(convertToYaml(refreshNodeFromSourceNode(null, convertYamlToJsonNode("field: <+input>"), false)))
         .isEqualTo("field: <+input>");
-    assertThat(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>"), null)).isNull();
-    assertThat(convertToYaml(
-                   refreshNodeFromSourceNode(convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: abc"))))
+    assertThat(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>"), null, false)).isNull();
+    assertThat(convertToYaml(refreshNodeFromSourceNode(
+                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: abc"), false)))
         .isEqualTo("");
     assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field2: abc"))))
-        .isEqualTo("");
-    assertThat(convertToYaml(
-                   refreshNodeFromSourceNode(convertYamlToJsonNode("field: def"), convertYamlToJsonNode("field: abc"))))
+                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field2: abc"), false)))
         .isEqualTo("");
     assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field1: abc"), convertYamlToJsonNode("field: <+input>"))))
+                   convertYamlToJsonNode("field: def"), convertYamlToJsonNode("field: abc"), false)))
+        .isEqualTo("");
+    assertThat(convertToYaml(refreshNodeFromSourceNode(
+                   convertYamlToJsonNode("field1: abc"), convertYamlToJsonNode("field: <+input>"), false)))
         .isEqualTo("field: <+input>");
-    assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"))))
+    assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: abc"),
+                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"), false)))
         .isEqualTo("field: \"<+input>.allowedValues(a,b,c)\"");
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>"),
-                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"))))
+                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"), false)))
         .isEqualTo("field: \"<+input>.allowedValues(a,b,c)\"");
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c,d)"),
-                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"))))
+                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"), false)))
         .isEqualTo("field: \"<+input>.allowedValues(a,b,c)\"");
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>.regex(a.*)"),
-                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"))))
+                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"), false)))
         .isEqualTo("field: \"<+input>.allowedValues(a,b,c)\"");
     assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: <+input>.regex(b.*)"))))
+                   convertYamlToJsonNode("field: abc"), convertYamlToJsonNode("field: <+input>.regex(b.*)"), false)))
         .isEqualTo("field: <+input>.regex(b.*)");
-    assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("field: <+input>"), convertYamlToJsonNode("field: <+input>.regex(b.*)"))))
+    assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>"),
+                   convertYamlToJsonNode("field: <+input>.regex(b.*)"), false)))
         .isEqualTo("field: <+input>.regex(b.*)");
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>.regex(a.*)"),
-                   convertYamlToJsonNode("field: <+input>.regex(b.*)"))))
+                   convertYamlToJsonNode("field: <+input>.regex(b.*)"), false)))
         .isEqualTo("field: <+input>.regex(b.*)");
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c,d)"),
-                   convertYamlToJsonNode("field: <+input>.regex(b.*)"))))
+                   convertYamlToJsonNode("field: <+input>.regex(b.*)"), false)))
         .isEqualTo("field: <+input>.regex(b.*)");
     yamlToValidate = "field:\n"
         + "  - a\n"
         + "  - ab";
     assertThat(convertToYaml(refreshNodeFromSourceNode(convertYamlToJsonNode(yamlToValidate),
-                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"))))
+                   convertYamlToJsonNode("field: <+input>.allowedValues(a,b,c)"), false)))
         .isEqualTo("field: \"<+input>.allowedValues(a,b,c)\"");
   }
 
@@ -168,14 +168,15 @@ public class YamlRefreshHelperTest extends CategoryTest {
             convertYamlToJsonNode(
                 "type: \"Deployment\"\nspec:\n  service:\n    serviceRef: \"<+input>\"\n    serviceInputs: \"<+input>\"\n"),
             convertYamlToJsonNode(
-                "type: \"Deployment\"\nspec:\n  service:\n    serviceRef: \"<+input>\"\n    serviceInputs: \"<+input>\"\n"))))
+                "type: \"Deployment\"\nspec:\n  service:\n    serviceRef: \"<+input>\"\n    serviceInputs: \"<+input>\"\n"),
+            false)))
         .isEqualTo("type: Deployment\nspec:\n  service:\n    serviceRef: <+input>\n    serviceInputs: <+input>");
 
-    assertThat(
-        convertToYaml(refreshNodeFromSourceNode(
-            convertYamlToJsonNode("type: Deployment\nspec:\n  service:\n    serviceRef: prod_service\n"),
-            convertYamlToJsonNode(
-                "type: Deployment\nspec:\n  service:\n    serviceRef: <+input>\n    serviceInputs: <+input>\n"))))
+    assertThat(convertToYaml(refreshNodeFromSourceNode(
+                   convertYamlToJsonNode("type: Deployment\nspec:\n  service:\n    serviceRef: prod_service\n"),
+                   convertYamlToJsonNode(
+                       "type: Deployment\nspec:\n  service:\n    serviceRef: <+input>\n    serviceInputs: <+input>\n"),
+                   false)))
         .isEqualTo("type: Deployment\nspec:\n  service:\n    serviceRef: prod_service\n    serviceInputs: <+input>");
 
     assertThat(
@@ -183,15 +184,16 @@ public class YamlRefreshHelperTest extends CategoryTest {
             convertYamlToJsonNode(
                 "type: Deployment\nspec:\n  service:\n    serviceInputs:\n      serviceDefinition:\n        type: Kubernetes\n        spec:\n          variables:\n            - name: ghcgh\n              type: String\n              value: ewfrvgdbgr\n    serviceRef: two\n"),
             convertYamlToJsonNode(
-                "type: Deployment\nspec:\n  service:\n    serviceRef: <+input>\n    serviceInputs: <+input>\n"))))
+                "type: Deployment\nspec:\n  service:\n    serviceRef: <+input>\n    serviceInputs: <+input>\n"),
+            false)))
         .isEqualTo(
             "type: Deployment\nspec:\n  service:\n    serviceRef: two\n    serviceInputs:\n      serviceDefinition:\n        type: Kubernetes\n        spec:\n          variables:\n            - name: ghcgh\n              type: String\n              value: ewfrvgdbgr");
 
-    assertThat(
-        convertToYaml(refreshNodeFromSourceNode(
-            convertYamlToJsonNode("type: Deployment\nspec:\n  service:\n    useFromStage:\n      stage: s1\n"),
-            convertYamlToJsonNode(
-                "type: Deployment\nspec:\n  service:\n    serviceRef: <+input>\n    serviceInputs: <+input>\n"))))
+    assertThat(convertToYaml(refreshNodeFromSourceNode(
+                   convertYamlToJsonNode("type: Deployment\nspec:\n  service:\n    useFromStage:\n      stage: s1\n"),
+                   convertYamlToJsonNode(
+                       "type: Deployment\nspec:\n  service:\n    serviceRef: <+input>\n    serviceInputs: <+input>\n"),
+                   false)))
         .isEqualTo("type: Deployment\nspec:\n  service:\n    useFromStage:\n      stage: s1");
 
     assertThat(
@@ -199,7 +201,8 @@ public class YamlRefreshHelperTest extends CategoryTest {
             convertYamlToJsonNode(
                 "type: Deployment\nspec:\n  service:\n    serviceInputs:\n      serviceDefinition:\n        type: Kubernetes\n        spec:\n          variables:\n            - name: ghcgh\n              type: String\n              value: ewfrvgdbgr\n"),
             convertYamlToJsonNode(
-                "type: Deployment\nspec:\n  service:\n    serviceRef: fixedService\n    serviceInputs: <+input>\n"))))
+                "type: Deployment\nspec:\n  service:\n    serviceRef: fixedService\n    serviceInputs: <+input>\n"),
+            false)))
         .isEqualTo(
             "type: Deployment\nspec:\n  service:\n    serviceInputs:\n      serviceDefinition:\n        type: Kubernetes\n        spec:\n          variables:\n            - name: ghcgh\n              type: String\n              value: ewfrvgdbgr");
   }
@@ -213,7 +216,8 @@ public class YamlRefreshHelperTest extends CategoryTest {
             convertYamlToJsonNode(
                 "type: \"Deployment\"\nspec:\n  environment:\n    environmentRef: \"<+input>\"\n    environmentInputs: \"<+input>\"\n"),
             convertYamlToJsonNode(
-                "type: \"Deployment\"\nspec:\n  environment:\n    environmentRef: \"<+input>\"\n    environmentInputs: \"<+input>\"\n"))))
+                "type: \"Deployment\"\nspec:\n  environment:\n    environmentRef: \"<+input>\"\n    environmentInputs: \"<+input>\"\n"),
+            false)))
         .isEqualTo(
             "type: Deployment\nspec:\n  environment:\n    environmentRef: <+input>\n    environmentInputs: <+input>");
 
@@ -221,7 +225,8 @@ public class YamlRefreshHelperTest extends CategoryTest {
         convertToYaml(refreshNodeFromSourceNode(
             convertYamlToJsonNode("type: Deployment\nspec:\n  environment:\n    environmentRef: prod_environment\n"),
             convertYamlToJsonNode(
-                "type: Deployment\nspec:\n  environment:\n    environmentRef: <+input>\n    environmentInputs: <+input>\n"))))
+                "type: Deployment\nspec:\n  environment:\n    environmentRef: <+input>\n    environmentInputs: <+input>\n"),
+            false)))
         .isEqualTo(
             "type: Deployment\nspec:\n  environment:\n    environmentRef: prod_environment\n    environmentInputs: <+input>");
     assertThat(
@@ -229,7 +234,8 @@ public class YamlRefreshHelperTest extends CategoryTest {
             convertYamlToJsonNode(
                 "type: Deployment\nspec:\n  environment:\n    environmentInputs:\n      identifier: env_2\n      type: Production\n      variables:\n        - name: ghcgh\n          type: String\n          value: ewfrvgdbgr\n    environmentRef: two\n"),
             convertYamlToJsonNode(
-                "type: Deployment\nspec:\n  environment:\n    environmentRef: <+input>\n    environmentInputs: <+input>\n"))))
+                "type: Deployment\nspec:\n  environment:\n    environmentRef: <+input>\n    environmentInputs: <+input>\n"),
+            false)))
         .isEqualTo(
             "type: Deployment\nspec:\n  environment:\n    environmentRef: two\n    environmentInputs:\n      identifier: env_2\n      type: Production\n      variables:\n        - name: ghcgh\n          type: String\n          value: ewfrvgdbgr");
 
@@ -237,7 +243,8 @@ public class YamlRefreshHelperTest extends CategoryTest {
         convertToYaml(refreshNodeFromSourceNode(
             convertYamlToJsonNode("type: Deployment\nspec:\n  environment:\n    useFromStage:\n      stage: s1\n"),
             convertYamlToJsonNode(
-                "type: Deployment\nspec:\n  environment:\n    environmentRef: <+input>\n    environmentInputs: <+input>\n"))))
+                "type: Deployment\nspec:\n  environment:\n    environmentRef: <+input>\n    environmentInputs: <+input>\n"),
+            false)))
         .isEqualTo("type: Deployment\nspec:\n  environment:\n    useFromStage:\n      stage: s1");
 
     assertThat(
@@ -245,7 +252,8 @@ public class YamlRefreshHelperTest extends CategoryTest {
             convertYamlToJsonNode(
                 "type: Deployment\nspec:\n  environment:\n    environmentInputs:\n      identifier: env_2\n      type: Production\n      variables:\n        - name: ghcgh\n          type: String\n          value: ewfrvgdbgr\n"),
             convertYamlToJsonNode(
-                "type: Deployment\nspec:\n  environment:\n    environmentRef: fixedService\n    environmentInputs: <+input>\n"))))
+                "type: Deployment\nspec:\n  environment:\n    environmentRef: fixedService\n    environmentInputs: <+input>\n"),
+            false)))
         .isEqualTo(
             "type: Deployment\nspec:\n  environment:\n    environmentInputs:\n      identifier: env_2\n      type: Production\n      variables:\n        - name: ghcgh\n          type: String\n          value: ewfrvgdbgr");
   }
@@ -254,14 +262,15 @@ public class YamlRefreshHelperTest extends CategoryTest {
   @Owner(developers = TATHAGAT)
   @Category(UnitTests.class)
   public void testRefreshNodeFromSourceNodeWithUseFromStageForMultiService() throws IOException {
-    assertThat(convertToYaml(refreshNodeFromSourceNode(
-                   convertYamlToJsonNode("type: \"Deployment\"\nspec:\n  services:\n    values: \"<+input>\"\n"),
-                   convertYamlToJsonNode("type: \"Deployment\"\nspec:\n  services:\n    values: \"<+input>\"\n"))))
+    assertThat(
+        convertToYaml(refreshNodeFromSourceNode(
+            convertYamlToJsonNode("type: \"Deployment\"\nspec:\n  services:\n    values: \"<+input>\"\n"),
+            convertYamlToJsonNode("type: \"Deployment\"\nspec:\n  services:\n    values: \"<+input>\"\n"), false)))
         .isEqualTo("type: Deployment\nspec:\n  services:\n    values: <+input>");
 
     assertThat(convertToYaml(refreshNodeFromSourceNode(
                    convertYamlToJsonNode("type: Deployment\nspec:\n  services:\n    useFromStage:\n      stage: s1\n"),
-                   convertYamlToJsonNode("type: Deployment\nspec:\n  services:\n    values: <+input>\n"))))
+                   convertYamlToJsonNode("type: Deployment\nspec:\n  services:\n    values: <+input>\n"), false)))
         .isEqualTo("type: Deployment\nspec:\n  services:\n    useFromStage:\n      stage: s1");
   }
 
@@ -765,7 +774,7 @@ public class YamlRefreshHelperTest extends CategoryTest {
         + "                    outputVariables: []\n"
         + "        tags: {}\n";
 
-    JsonNode refreshedNode = refreshYamlFromSourceYaml(linkedYaml, sourceYaml);
+    JsonNode refreshedNode = refreshYamlFromSourceYaml(linkedYaml, sourceYaml, false);
 
     String expectedYaml = "pipeline:\n"
         + "  identifier: temppipe\n"
@@ -1032,7 +1041,7 @@ public class YamlRefreshHelperTest extends CategoryTest {
     testFile = classLoader.getResource("template-inputs-for-service-env-git-branch-test.json");
     String templateInputJson = Resources.toString(testFile, Charsets.UTF_8);
     JsonNode nodeToRefresh = JsonUtils.asObject(templateInputJson, JsonNode.class);
-    JsonNode refreshedJsonNode = refreshNodeFromSourceNode(nodeToRefresh, sourceNode);
+    JsonNode refreshedJsonNode = refreshNodeFromSourceNode(nodeToRefresh, sourceNode, false);
     assertThat(refreshedJsonNode).isNotNull();
 
     assertThat(refreshedJsonNode.get("spec")).isNotNull();

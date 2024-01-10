@@ -57,14 +57,13 @@ public class EnvironmentRefreshHelperTest extends CategoryTest {
   @Mock private EnvironmentService environmentService;
   @Mock private InfrastructureEntityService infrastructureEntityService;
   @Mock private ServiceOverrideService serviceOverrideService;
-
-  @Mock NGFeatureFlagHelperService featureFlagHelperService;
   @Mock NGSettingsClient settingsClient;
   @Mock AccountClient accountClient;
   @Mock ServiceOverridesServiceV2 serviceOverridesServiceV2;
   @Mock private Call<ResponseDTO<SettingValueResponseDTO>> request;
   @Mock private Call<RestResponse<Boolean>> restRequest;
   @Mock ServiceOverrideV2ValidationHelper overrideV2ValidationHelper;
+  @Mock NGFeatureFlagHelperService ngFeatureFlagHelperService;
 
   @InjectMocks private EnvironmentRefreshHelper refreshHelper;
 

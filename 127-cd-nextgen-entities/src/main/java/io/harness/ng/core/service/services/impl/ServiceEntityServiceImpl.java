@@ -1119,8 +1119,11 @@ public class ServiceEntityServiceImpl implements ServiceEntityService {
 
       String newServiceInputsYaml = createServiceInputsYamlGivenPrimaryArtifactRef(
           serviceYaml, serviceRef, primaryArtifactRefNode == null ? null : primaryArtifactRefNode.asText());
+      boolean allowDifferentInfraForEnvPropagation =
+          featureFlagService.isEnabled(accountId, FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
       return ServiceInputsMergedResponseDto.builder()
-          .mergedServiceInputsYaml(InputSetMergeUtility.mergeInputs(oldServiceInputsYaml, newServiceInputsYaml))
+          .mergedServiceInputsYaml(InputSetMergeUtility.mergeInputs(
+              oldServiceInputsYaml, newServiceInputsYaml, allowDifferentInfraForEnvPropagation))
           .serviceYaml(serviceYaml)
           .build();
     } catch (IOException ex) {

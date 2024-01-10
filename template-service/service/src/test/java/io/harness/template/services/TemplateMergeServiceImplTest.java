@@ -752,7 +752,7 @@ public class TemplateMergeServiceImplTest extends TemplateServiceTestBase {
         + "                script: cd harness\n";
 
     TemplateRetainVariablesResponse templateRetainVariablesResponse =
-        templateMergeService.mergeTemplateInputs(originalTemplateYaml, yamlToBeUpdated);
+        templateMergeService.mergeTemplateInputs(originalTemplateYaml, yamlToBeUpdated, null);
     assertThat(updatedYaml).isEqualTo(templateRetainVariablesResponse.getMergedTemplateInputs());
   }
 
@@ -769,7 +769,7 @@ public class TemplateMergeServiceImplTest extends TemplateServiceTestBase {
         + "      script: \"<+input>\"\n"
         + "timeout: \"<+input>\"\n";
     TemplateRetainVariablesResponse templateRetainVariablesResponse =
-        templateMergeService.mergeTemplateInputs(originalTemplateYaml, yamlToBeUpdated);
+        templateMergeService.mergeTemplateInputs(originalTemplateYaml, yamlToBeUpdated, null);
     assertThat(templateRetainVariablesResponse.getMergedTemplateInputs()).isEmpty();
   }
 
@@ -801,7 +801,7 @@ public class TemplateMergeServiceImplTest extends TemplateServiceTestBase {
         + "                      executionTarget: {}\n"
         + "                  timeout: 10m\n";
     TemplateRetainVariablesResponse templateRetainVariablesResponse =
-        templateMergeService.mergeTemplateInputs(originalTemplateYaml, yamlToBeUpdated);
+        templateMergeService.mergeTemplateInputs(originalTemplateYaml, yamlToBeUpdated, null);
     assertThat(updatedYaml).isEqualTo(templateRetainVariablesResponse.getMergedTemplateInputs());
   }
 

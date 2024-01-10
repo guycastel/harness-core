@@ -31,5 +31,6 @@ public interface TemplateMergeService {
       JsonNode entityJsonNode, boolean getMergedYamlWithTemplateField, boolean loadFromCache,
       boolean appendInputSetValidator, String yamlVersion);
 
-  TemplateRetainVariablesResponse mergeTemplateInputs(String newTemplateInputs, String originalTemplateInputs);
+  TemplateRetainVariablesResponse mergeTemplateInputs(
+      String newTemplateInputs, String originalTemplateInputs, String accountId);
 }

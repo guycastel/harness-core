@@ -103,13 +103,12 @@ public class CDInputsValidationHelperTest extends NgManagerTestBase {
   @Mock NGSettingsClient settingsClient;
 
   @Mock HPersistence hPersistence;
-  @Mock NGFeatureFlagHelperService featureFlagHelperService;
   @Mock EnvironmentEntitySetupUsageHelper environmentEntitySetupUsageHelper;
   @Mock private Call<ResponseDTO<SettingValueResponseDTO>> request;
   @Mock private Call<RestResponse<Boolean>> restRequest;
   @Mock ServiceOverridesServiceV2 serviceOverridesServiceV2;
   @Mock ServiceOverrideV2ValidationHelper overrideV2ValidationHelper;
-  @Mock io.harness.utils.NGFeatureFlagHelperService ngFeatureFlagHelperService;
+  @Mock NGFeatureFlagHelperService ngFeatureFlagHelperService;
   ServiceEntityServiceImpl serviceEntityService;
   EnvironmentServiceImpl environmentService;
   InfrastructureEntityServiceImpl infrastructureEntityService;
@@ -127,15 +126,15 @@ public class CDInputsValidationHelperTest extends NgManagerTestBase {
     infrastructureEntityService = spy(new InfrastructureEntityServiceImpl(infrastructureRepository, transactionTemplate,
         outboxService, customDeploymentEntitySetupHelper, infrastructureEntitySetupUsageHelper, hPersistence,
         serviceOverridesServiceV2, overrideV2ValidationHelper, null, environmentService, gitAwareEntityHelper,
-        cdGitXService, gitXSettingsHelper));
+        cdGitXService, gitXSettingsHelper, ngFeatureFlagHelperService));
     environmentService = spy(new EnvironmentServiceImpl(environmentRepository, entitySetupUsageService, eventProducer,
         outboxService, transactionTemplate, infrastructureEntityService, clusterService, serviceOverrideService,
         serviceOverridesServiceV2, serviceEntityService, accountClient, settingsClient,
         environmentEntitySetupUsageHelper, overrideV2ValidationHelper, environmentFilterHelper, gitXSettingsHelper,
-        cdGitXService));
+        cdGitXService, ngFeatureFlagHelperService));
     environmentRefreshHelper =
         spy(new EnvironmentRefreshHelper(environmentService, infrastructureEntityService, serviceOverrideService,
-            serviceOverridesServiceV2, accountClient, overrideV2ValidationHelper, featureFlagHelperService));
+            serviceOverridesServiceV2, accountClient, overrideV2ValidationHelper, ngFeatureFlagHelperService));
     on(entityFetchHelper).set("serviceEntityService", serviceEntityService);
     on(CDInputsValidationHelper).set("serviceEntityService", serviceEntityService);
     on(CDInputsValidationHelper).set("entityFetchHelper", entityFetchHelper);

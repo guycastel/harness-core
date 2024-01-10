@@ -17,6 +17,7 @@ import io.harness.mongo.index.MongoIndex;
 import io.harness.ng.DbAliases;
 import io.harness.ng.core.NGAccountAccess;
 import io.harness.ngsettings.SettingCategory;
+import io.harness.ngsettings.entities.UserSetting.UserSettingKeys;
 import io.harness.persistence.PersistentEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -59,11 +60,12 @@ public abstract class Setting implements PersistentEntity, NGAccountAccess {
   public static List<MongoIndex> mongoIndexes() {
     return ImmutableList.<MongoIndex>builder()
         .add(CompoundMongoIndex.builder()
-                 .name("accountIdentifier_orgIdentifier_projectIdentifier_identifier_unique_idx")
+                 .name("accountIdentifier_orgIdentifier_projectIdentifier_identifier_userId_unique_idx")
                  .field(SettingKeys.accountIdentifier)
                  .field(SettingKeys.orgIdentifier)
                  .field(SettingKeys.projectIdentifier)
                  .field(SettingKeys.identifier)
+                 .field(UserSettingKeys.userId)
                  .unique(true)
                  .build())
         .add(CompoundMongoIndex.builder()

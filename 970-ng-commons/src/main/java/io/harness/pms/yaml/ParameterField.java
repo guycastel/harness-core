@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 @NoArgsConstructor
 @OwnedBy(PIPELINE)
 @RecasterAlias("parameterField")
-@Slf4j
 public class ParameterField<T> {
   @NotExpression private String expressionValue;
   private boolean expression;

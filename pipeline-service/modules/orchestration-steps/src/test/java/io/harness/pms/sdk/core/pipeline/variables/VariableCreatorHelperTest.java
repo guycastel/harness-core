@@ -8,12 +8,14 @@
 package io.harness.pms.sdk.core.pipeline.variables;
 
 import static io.harness.rule.OwnerRule.ARCHIT;
+import static io.harness.rule.OwnerRule.RISHIKESH;
 import static io.harness.yaml.core.VariableExpression.IteratePolicy.REGULAR_WITH_CUSTOM_FIELD;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.harness.CategoryTest;
 import io.harness.category.element.UnitTests;
+import io.harness.encryption.SecretRefData;
 import io.harness.plancreator.pipeline.PipelineInfoConfig;
 import io.harness.plancreator.stages.stage.StageElementConfig;
 import io.harness.pms.contracts.plan.YamlExtraProperties;
@@ -275,6 +277,19 @@ public class VariableCreatorHelperTest extends CategoryTest {
         .isEqualTo("test.dummyB.dummyC.b");
   }
 
+  @Test
+  @Owner(developers = RISHIKESH)
+  @Category(UnitTests.class)
+  public void createVariablesForParameterFieldWithValueAsSecret() throws IOException {
+    Map<String, ParameterField<SecretRefData>> variables = new HashMap<>();
+    SecretRefData secretRefData = new SecretRefData("test");
+    ParameterField<SecretRefData> field = new ParameterField(secretRefData, null, false, null, null, false);
+    variables.put("test_secret", field);
+    DummyG dummyg = DummyG.builder().variables(variables).build();
+    List<String> variablesList = VariableCreatorHelper.getExpressionsInObject(dummyg, "dummyG");
+    assertThat(variablesList.get(0)).isEqualTo("dummyG.variables.test_secret");
+  }
+
   @Data
   @Builder
   private static class DummyA {
@@ -321,5 +336,11 @@ public class VariableCreatorHelperTest extends CategoryTest {
   private static class DummyF {
     @VariableExpression(skipVariableExpression = true) String identifier;
     String value;
+  }
+
+  @Data
+  @Builder
+  private static class DummyG {
+    Map<String, ParameterField<SecretRefData>> variables;
   }
 }

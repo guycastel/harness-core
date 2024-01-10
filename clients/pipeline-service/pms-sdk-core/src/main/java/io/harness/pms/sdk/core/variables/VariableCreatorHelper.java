@@ -13,6 +13,7 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.data.structure.UUIDGenerator;
+import io.harness.encryption.SecretRefData;
 import io.harness.exception.InvalidRequestException;
 import io.harness.pms.contracts.plan.YamlExtraProperties;
 import io.harness.pms.contracts.plan.YamlProperties;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import io.swagger.annotations.ApiModelProperty;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -260,7 +262,8 @@ public class VariableCreatorHelper {
   }
 
   private boolean isPrimitiveDataType(Class<?> cls) {
-    return String.class.isAssignableFrom(cls) || ClassUtils.isPrimitiveOrWrapper(cls) || cls.isEnum();
+    return String.class.isAssignableFrom(cls) || ClassUtils.isPrimitiveOrWrapper(cls) || cls.isEnum()
+        || SecretRefData.class.isAssignableFrom(cls);
   }
 
   private void addYamlPropertyForPrimitiveVariables(Field field, Object obj, Field fieldUUid,
@@ -449,7 +452,7 @@ public class VariableCreatorHelper {
         ApiModelProperty annotation = field.getAnnotation(ApiModelProperty.class);
         return annotation.hidden();
       } else {
-        return field.isAnnotationPresent(JsonIgnore.class);
+        return field.isAnnotationPresent(JsonIgnore.class) || Modifier.isStatic(field.getModifiers());
       }
     }
   }

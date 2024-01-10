@@ -133,8 +133,9 @@ public class CDInputsValidationHelperTest extends NgManagerTestBase {
         serviceOverridesServiceV2, serviceEntityService, accountClient, settingsClient,
         environmentEntitySetupUsageHelper, overrideV2ValidationHelper, environmentFilterHelper, gitXSettingsHelper,
         cdGitXService));
-    environmentRefreshHelper = spy(new EnvironmentRefreshHelper(environmentService, infrastructureEntityService,
-        serviceOverrideService, serviceOverridesServiceV2, accountClient, overrideV2ValidationHelper));
+    environmentRefreshHelper =
+        spy(new EnvironmentRefreshHelper(environmentService, infrastructureEntityService, serviceOverrideService,
+            serviceOverridesServiceV2, accountClient, overrideV2ValidationHelper, featureFlagHelperService));
     on(entityFetchHelper).set("serviceEntityService", serviceEntityService);
     on(CDInputsValidationHelper).set("serviceEntityService", serviceEntityService);
     on(CDInputsValidationHelper).set("entityFetchHelper", entityFetchHelper);

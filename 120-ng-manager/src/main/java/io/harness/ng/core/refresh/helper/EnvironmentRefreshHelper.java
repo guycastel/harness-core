@@ -13,6 +13,7 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.beans.FeatureName;
 import io.harness.cdng.visitor.YamlTypes;
 import io.harness.common.NGExpressionUtils;
 import io.harness.data.structure.EmptyPredicate;
@@ -31,11 +32,13 @@ import io.harness.pms.merger.YamlConfig;
 import io.harness.pms.merger.fqn.FQN;
 import io.harness.pms.merger.helpers.RuntimeInputsValidator;
 import io.harness.pms.merger.helpers.YamlRefreshHelper;
+import io.harness.pms.plan.creation.PlanCreatorUtils;
 import io.harness.pms.yaml.YAMLFieldNameConstants;
 import io.harness.pms.yaml.YamlField;
 import io.harness.pms.yaml.YamlNode;
 import io.harness.pms.yaml.YamlNodeUtils;
 import io.harness.pms.yaml.YamlUtils;
+import io.harness.utils.NGFeatureFlagHelperService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,8 +66,11 @@ public class EnvironmentRefreshHelper {
   AccountClient accountClient;
 
   ServiceOverrideV2ValidationHelper overrideV2ValidationHelper;
+  NGFeatureFlagHelperService featureFlagHelperService;
+
   private static final String STAGES_KEY = "stages";
   private static final String DUMMY_NODE = "dummy";
+  private static final String ENVIRONMENT_FQN_PATH = "spec.environment";
 
   public boolean isEnvironmentField(String fieldName, JsonNode envValue) {
     return YamlTypes.ENVIRONMENT_YAML.equals(fieldName) && envValue.isObject()
@@ -81,7 +87,9 @@ public class EnvironmentRefreshHelper {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode infraDefsNode = envJsonNode.get(YamlTypes.INFRASTRUCTURE_DEFS);
     JsonNode serviceOverrideInputs = envJsonNode.get(YamlTypes.SERVICE_OVERRIDE_INPUTS);
-    validateEnvironmentYamlWithUseFromStage(envJsonNode, errorNodeSummary);
+    boolean allowDifferentInfraForEnvPropagation = featureFlagHelperService.isEnabled(
+        context.getAccountId(), FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
+    validateEnvironmentYamlWithUseFromStage(envJsonNode, errorNodeSummary, allowDifferentInfraForEnvPropagation);
     if (envRefJsonNode != null) {
       envRefValue = envRefJsonNode.asText();
       JsonNode envInputsNode = envJsonNode.get(YamlTypes.ENVIRONMENT_INPUTS);
@@ -120,8 +128,8 @@ public class EnvironmentRefreshHelper {
       }
 
       if (infraDefsNode != null) {
-        if (!validateInfraDefsWithoutEnvRef(
-                context, errorNodeSummary, mapper, infraDefsNode, stageYamlNodeInResolvedTemplatesYaml)) {
+        if (!validateInfraDefsWithoutEnvRef(context, errorNodeSummary, mapper, infraDefsNode,
+                stageYamlNodeInResolvedTemplatesYaml, allowDifferentInfraForEnvPropagation)) {
           return;
         }
       }
@@ -134,13 +142,19 @@ public class EnvironmentRefreshHelper {
   }
 
   private void validateEnvironmentYamlWithUseFromStage(
-      JsonNode envJsonNode, InputsValidationResponse errorNodeSummary) {
+      JsonNode envJsonNode, InputsValidationResponse errorNodeSummary, boolean allowDifferentInfraForEnvPropagation) {
     JsonNode environmentInputs = envJsonNode.get(YamlTypes.ENVIRONMENT_INPUTS);
     JsonNode serviceOverrideInputs = envJsonNode.get(YamlTypes.SERVICE_OVERRIDE_INPUTS);
     JsonNode infraDefs = envJsonNode.get(YamlTypes.INFRASTRUCTURE_DEFS);
     if (envJsonNode.get(YamlTypes.USE_FROM_STAGE) != null) {
-      if (environmentInputs != null || serviceOverrideInputs != null || infraDefs != null) {
-        errorNodeSummary.setValid(false);
+      if (allowDifferentInfraForEnvPropagation) {
+        if (environmentInputs != null || serviceOverrideInputs != null) {
+          errorNodeSummary.setValid(false);
+        }
+      } else {
+        if (environmentInputs != null || serviceOverrideInputs != null || infraDefs != null) {
+          errorNodeSummary.setValid(false);
+        }
       }
     }
   }
@@ -181,7 +195,7 @@ public class EnvironmentRefreshHelper {
       return;
     }
     YamlNode envNodeInResolvedTemplatesYaml =
-        YamlNodeUtils.goToPathUsingFqn(stageYamlNodeInResolvedTemplatesYaml, "spec.environment");
+        YamlNodeUtils.goToPathUsingFqn(stageYamlNodeInResolvedTemplatesYaml, ENVIRONMENT_FQN_PATH);
     if (envNodeInResolvedTemplatesYaml == null) {
       log.warn("env node in Resolved templates yaml is null");
       return;
@@ -245,9 +259,9 @@ public class EnvironmentRefreshHelper {
 
   private boolean validateInfraDefsWithoutEnvRef(EntityRefreshContext context,
       InputsValidationResponse errorNodeSummary, ObjectMapper mapper, JsonNode infraDefsNode,
-      YamlNode stageYamlNodeInResolvedTemplatesYaml) {
+      YamlNode stageYamlNodeInResolvedTemplatesYaml, boolean allowDifferentInfraForEnvPropagation) {
     YamlNode envNodeInResolvedTemplatesYaml =
-        YamlNodeUtils.goToPathUsingFqn(stageYamlNodeInResolvedTemplatesYaml, "spec.environment");
+        YamlNodeUtils.goToPathUsingFqn(stageYamlNodeInResolvedTemplatesYaml, ENVIRONMENT_FQN_PATH);
     if (envNodeInResolvedTemplatesYaml == null) {
       log.warn("Env node in Resolved templates yaml is null");
       return true;
@@ -259,15 +273,30 @@ public class EnvironmentRefreshHelper {
       return true;
     }
     if (checkIfInfraDefsToBeValidated(infraDefsNode, infraDefsNodeInResolvedTemplatesYaml, mapper)) {
-      if (envNodeInResolvedTemplatesYaml.getField(YamlTypes.ENVIRONMENT_REF) == null) {
+      YamlNode finalEnvNode = envNodeInResolvedTemplatesYaml;
+      YamlField useFromStageYamlField = finalEnvNode.getField(YamlTypes.USE_FROM_STAGE);
+      if (allowDifferentInfraForEnvPropagation && useFromStageYamlField != null) {
+        YamlField propagatedFromStageConfig = PlanCreatorUtils.getStageConfig(
+            useFromStageYamlField, useFromStageYamlField.getNode().getStringValue(YamlTypes.STAGE));
+        if (propagatedFromStageConfig == null) {
+          return true;
+        }
+        finalEnvNode = YamlNodeUtils.goToPathUsingFqn(propagatedFromStageConfig.getNode(), ENVIRONMENT_FQN_PATH);
+        if (finalEnvNode == null) {
+          return true;
+        }
+      }
+
+      if (finalEnvNode.getField(YamlTypes.ENVIRONMENT_REF) == null) {
         log.warn("Skipping because couldn't find envRef value");
         return true;
       }
-      JsonNode envRefNode =
-          envNodeInResolvedTemplatesYaml.getField(YamlTypes.ENVIRONMENT_REF).getNode().getCurrJsonNode();
+      JsonNode envRefNode = finalEnvNode.getField(YamlTypes.ENVIRONMENT_REF).getNode().getCurrJsonNode();
       String envRefValue = envRefNode.asText();
-
-      String environmentBranch = GitXUtils.getBranchFromNode(envNodeInResolvedTemplatesYaml);
+      String environmentBranch = GitXUtils.getBranchFromNode(finalEnvNode);
+      if (allowDifferentInfraForEnvPropagation && NGExpressionUtils.isRuntimeOrExpressionField(envRefValue)) {
+        return true;
+      }
       return validateInfraDefsInput(context, errorNodeSummary, envRefValue, environmentBranch, mapper, infraDefsNode);
     }
     return true;
@@ -282,7 +311,9 @@ public class EnvironmentRefreshHelper {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode infraDefsNode = envObjectNode.get(YamlTypes.INFRASTRUCTURE_DEFS);
     JsonNode serviceOverrideInputs = envObjectNode.get(YamlTypes.SERVICE_OVERRIDE_INPUTS);
-    if (refreshEnvironmentYamlWithUseFromStage(envObjectNode)) {
+    boolean allowDifferentInfraForEnvPropagation = featureFlagHelperService.isEnabled(
+        context.getAccountId(), FeatureName.CDS_SUPPORT_DIFFERENT_INFRA_DURING_ENV_PROPAGATION);
+    if (refreshEnvironmentYamlWithUseFromStage(envObjectNode, allowDifferentInfraForEnvPropagation)) {
       return envObjectNode;
     }
     if (envRefJsonNode != null) {
@@ -313,8 +344,8 @@ public class EnvironmentRefreshHelper {
         return envObjectNode;
       }
       if (infraDefsNode != null) {
-        refreshInfraDefsWithoutEnvRef(
-            context, envObjectNode, mapper, infraDefsNode, stageYamlNodeInResolvedTemplatesYaml);
+        refreshInfraDefsWithoutEnvRef(context, envObjectNode, mapper, infraDefsNode,
+            stageYamlNodeInResolvedTemplatesYaml, allowDifferentInfraForEnvPropagation);
       }
       if (serviceOverrideInputs != null) {
         refreshServiceOverrideInputsWithoutEnvRef(
@@ -324,8 +355,14 @@ public class EnvironmentRefreshHelper {
     return envObjectNode;
   }
 
-  private boolean refreshEnvironmentYamlWithUseFromStage(ObjectNode envObjectNode) {
+  private boolean refreshEnvironmentYamlWithUseFromStage(
+      ObjectNode envObjectNode, boolean allowDifferentInfraForEnvPropagation) {
     if (envObjectNode.get(YamlTypes.USE_FROM_STAGE) != null) {
+      if (allowDifferentInfraForEnvPropagation) {
+        envObjectNode.remove(YamlTypes.ENVIRONMENT_INPUTS);
+        envObjectNode.remove(YamlTypes.SERVICE_OVERRIDE_INPUTS);
+        return false;
+      }
       envObjectNode.remove(YamlTypes.ENVIRONMENT_INPUTS);
       envObjectNode.remove(YamlTypes.SERVICE_OVERRIDE_INPUTS);
       envObjectNode.remove(YamlTypes.INFRASTRUCTURE_DEFS);
@@ -409,7 +446,7 @@ public class EnvironmentRefreshHelper {
       return;
     }
     YamlNode envNodeInResolvedTemplatesYaml =
-        YamlNodeUtils.goToPathUsingFqn(stageYamlNodeInResolvedTemplatesYaml, "spec.environment");
+        YamlNodeUtils.goToPathUsingFqn(stageYamlNodeInResolvedTemplatesYaml, ENVIRONMENT_FQN_PATH);
     if (envNodeInResolvedTemplatesYaml == null) {
       log.warn("Env node in Resolved templates yaml is null");
       return;
@@ -429,10 +466,11 @@ public class EnvironmentRefreshHelper {
   }
 
   private void refreshInfraDefsWithoutEnvRef(EntityRefreshContext context, ObjectNode envObjectNode,
-      ObjectMapper mapper, JsonNode infraDefsNode, YamlNode stageYamlNodeInResolvedTemplatesYaml) {
+      ObjectMapper mapper, JsonNode infraDefsNode, YamlNode stageYamlNodeInResolvedTemplatesYaml,
+      boolean allowDifferentInfraForEnvPropagation) {
     String envRefValue;
     YamlNode envNodeInResolvedTemplatesYaml =
-        YamlNodeUtils.goToPathUsingFqn(stageYamlNodeInResolvedTemplatesYaml, "spec.environment");
+        YamlNodeUtils.goToPathUsingFqn(stageYamlNodeInResolvedTemplatesYaml, ENVIRONMENT_FQN_PATH);
     if (envNodeInResolvedTemplatesYaml == null) {
       log.warn("Env node in Resolved templates yaml is null");
       return;
@@ -444,14 +482,29 @@ public class EnvironmentRefreshHelper {
       return;
     }
     if (checkIfInfraDefsToBeValidated(infraDefsNode, infraDefsNodeInResolvedTemplatesYaml, mapper)) {
-      JsonNode envRefNode =
-          envNodeInResolvedTemplatesYaml.getField(YamlTypes.ENVIRONMENT_REF).getNode().getCurrJsonNode();
+      YamlNode finalEnvNode = envNodeInResolvedTemplatesYaml;
+      YamlField useFromStageYamlField = finalEnvNode.getField(YamlTypes.USE_FROM_STAGE);
+      if (allowDifferentInfraForEnvPropagation && useFromStageYamlField != null) {
+        YamlField propagatedFromStageConfig = PlanCreatorUtils.getStageConfig(
+            useFromStageYamlField, useFromStageYamlField.getNode().getStringValue(YamlTypes.STAGE));
+        if (propagatedFromStageConfig == null) {
+          return;
+        }
+        finalEnvNode = YamlNodeUtils.goToPathUsingFqn(propagatedFromStageConfig.getNode(), ENVIRONMENT_FQN_PATH);
+        if (finalEnvNode == null) {
+          return;
+        }
+      }
+      JsonNode envRefNode = finalEnvNode.getField(YamlTypes.ENVIRONMENT_REF).getNode().getCurrJsonNode();
       if (envRefNode == null) {
         log.warn("Skipping because couldn't find envRef value");
         return;
       }
       envRefValue = envRefNode.asText();
-      String environmentBranch = GitXUtils.getBranchFromNode(envNodeInResolvedTemplatesYaml);
+      String environmentBranch = GitXUtils.getBranchFromNode(finalEnvNode);
+      if (allowDifferentInfraForEnvPropagation && NGExpressionUtils.isRuntimeOrExpressionField(envRefValue)) {
+        return;
+      }
       refreshInfraDefsInput(context, envRefValue, environmentBranch, mapper, envObjectNode, infraDefsNode);
     }
   }

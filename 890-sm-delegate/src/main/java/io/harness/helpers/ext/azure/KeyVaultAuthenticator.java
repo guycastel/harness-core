@@ -22,6 +22,7 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.HttpClient;
 import com.azure.core.http.HttpPipeline;
 import com.azure.core.http.policy.RetryPolicy;
+import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.ManagedIdentityCredentialBuilder;
@@ -134,10 +135,14 @@ public class KeyVaultAuthenticator {
       subscriptionId = subscription.subscriptionId();
     }
 
+    // Get the Azure resource manager endpoint based on the given environment.
+    AzureEnvironment azureEnvironment =
+        AzureUtils.getAzureEnvironment(azureKeyVaultConnectorDTO.getAzureEnvironmentType());
     return new KeyVaultManagementClientBuilder()
         .subscriptionId(subscriptionId)
         .pipeline(httpPipeline)
-        .environment(AzureUtils.getAzureEnvironment(azureKeyVaultConnectorDTO.getAzureEnvironmentType()))
+        .environment(azureEnvironment)
+        .endpoint(azureEnvironment.getResourceManagerEndpoint())
         .buildClient();
   }
 }

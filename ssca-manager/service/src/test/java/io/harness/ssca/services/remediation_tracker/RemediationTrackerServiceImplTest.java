@@ -8,6 +8,7 @@
 package io.harness.ssca.services.remediation_tracker;
 
 import static io.harness.rule.OwnerRule.HUMANSHU_ARORA;
+import static io.harness.rule.OwnerRule.SHASHWAT_SACHAN;
 import static io.harness.rule.OwnerRule.VARSHA_LALWANI;
 import static io.harness.rule.TestUserProvider.testUserProvider;
 import static io.harness.ssca.entities.remediation_tracker.RemediationStatus.COMPLETED;
@@ -54,6 +55,7 @@ import io.harness.spec.server.ssca.v1.model.VulnerabilitySeverity;
 import io.harness.ssca.api.ArtifactApiUtils;
 import io.harness.ssca.beans.EnvType;
 import io.harness.ssca.beans.remediation_tracker.PatchedPendingArtifactEntitiesResult;
+import io.harness.ssca.entities.remediation_tracker.ArtifactInfo;
 import io.harness.ssca.entities.remediation_tracker.CVEVulnerability;
 import io.harness.ssca.entities.remediation_tracker.RemediationTrackerEntity;
 import io.harness.ssca.entities.remediation_tracker.VulnerabilityInfoType;
@@ -73,6 +75,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -134,6 +137,10 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
     when(ticketServiceRestClientService.createTicket(any(), any(), any(), any(), any()))
         .thenReturn(builderFactory.getTicketResponseDto());
     when(ticketServiceUtils.getTicketServiceToken(any())).thenReturn("token");
+    when(ticketServiceRestClientService.getTicket(any(), any(), any(), any(), any()))
+        .thenReturn(builderFactory.getTicketResponseDto());
+    when(ticketServiceRestClientService.getTickets(any(), any(), any(), any(), any(), any()))
+        .thenReturn(List.of(builderFactory.getTicketResponseDto()));
     FieldUtils.writeField(
         remediationTrackerService, "ticketServiceRestClientService", ticketServiceRestClientService, true);
     FieldUtils.writeField(remediationTrackerService, "userClient", userClient, true);
@@ -616,6 +623,57 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   }
 
   @Test
+  @Owner(developers = SHASHWAT_SACHAN)
+  @Category(UnitTests.class)
+  public void testListRemediationsArtifactsWithTicketInfo() throws IllegalAccessException {
+    RemediationTrackerEntity remediationTrackerEntity =
+        createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+
+    Map<String, ArtifactInfo> artifactInfoMap = remediationTrackerEntity.getArtifactInfos();
+
+    ArtifactInfo artifactInfo = artifactInfoMap.get("artifactId");
+    artifactInfo.setTicketId("external");
+
+    artifactInfoMap.put("artifactId", artifactInfo);
+    remediationTrackerEntity.setArtifactInfos(artifactInfoMap);
+
+    repository.save(remediationTrackerEntity);
+
+    setRemediationTrackerToOnGoing(remediationTrackerEntity);
+
+    updatedArtifactsAndCdInstanceSummaries();
+    Pageable pageable = PageResponseUtils.getPageable(0, 3);
+    List<RemediationArtifactListingResponse> response =
+        remediationTrackerService
+            .listRemediationArtifacts(builderFactory.getContext().getAccountId(),
+                builderFactory.getContext().getOrgIdentifier(), builderFactory.getContext().getProjectIdentifier(),
+                remediationTrackerEntity.getUuid(), new RemediationArtifactListingRequestBody(), pageable)
+            .getContent();
+
+    assertThat(response).isNotNull();
+    assertThat(response).hasSize(2);
+
+    assertThat(response.get(0).getId()).isEqualTo("artifactId1");
+    assertThat(response.get(0).getName()).isEqualTo("test/image");
+    assertThat(response.get(0).getTicket()).isNull();
+    assertThat(response.get(0).getDeployments().getPatchedProdCount()).isZero();
+    assertThat(response.get(0).getDeployments().getPatchedNonProdCount()).isZero();
+    assertThat(response.get(0).getDeployments().getPendingProdCount()).isEqualTo(1);
+    assertThat(response.get(0).getDeployments().getPendingNonProdCount()).isZero();
+
+    assertThat(response.get(1).getId()).isEqualTo("artifactId");
+    assertThat(response.get(1).getName()).isEqualTo("test/image");
+    assertThat(response.get(1).getTicket()).isNotNull();
+    assertThat(response.get(1).getTicket().getStatus()).isEqualTo("status");
+    assertThat(response.get(1).getTicket().getUrl()).isEqualTo("url");
+    assertThat(response.get(1).getTicket().getId()).isEqualTo("external");
+    assertThat(response.get(1).getDeployments().getPatchedProdCount()).isEqualTo(3);
+    assertThat(response.get(1).getDeployments().getPatchedNonProdCount()).isEqualTo(1);
+    assertThat(response.get(1).getDeployments().getPendingProdCount()).isEqualTo(2);
+    assertThat(response.get(1).getDeployments().getPendingNonProdCount()).isZero();
+  }
+
+  @Test
   @Owner(developers = VARSHA_LALWANI)
   @Category(UnitTests.class)
   public void testListRemediationsArtifacts_WithPendingRemediationStatus() throws IllegalAccessException {
@@ -848,6 +906,30 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
   }
 
   @Test
+  @Owner(developers = SHASHWAT_SACHAN)
+  @Category(UnitTests.class)
+  public void testGetRemediationDetailsWithTicketInfo() {
+    RemediationTrackerEntity remediationTrackerEntity =
+        createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+
+    remediationTrackerEntity.setTicketId("ticketId");
+    repository.save(remediationTrackerEntity);
+
+    RemediationDetailsResponse response = remediationTrackerService.getRemediationDetails(
+        builderFactory.getContext().getAccountId(), builderFactory.getContext().getOrgIdentifier(),
+        builderFactory.getContext().getProjectIdentifier(), remediationTrackerEntity.getUuid());
+
+    assertThat(response).isNotNull();
+    assertThat(response.getId()).isEqualTo(remediationTrackerEntity.getUuid());
+    assertThat(response.getStatus()).isEqualTo(RemediationStatus.COMPLETED);
+    assertThat(response.getComponent()).isEqualTo("log4j");
+    assertThat(response.getRemediationCondition().getOperator()).isEqualTo(RemediationCondition.OperatorEnum.ALL);
+    assertThat(response.getTicket()).isNotNull();
+    assertThat(response.getTicket().getStatus()).isEqualTo("status");
+    assertThat(response.getTicket().getUrl()).isEqualTo("url");
+  }
+
+  @Test
   @Owner(developers = VARSHA_LALWANI)
   @Category(UnitTests.class)
   public void testGetRemediationDetails_WithExcludedArtifacts() {
@@ -904,6 +986,38 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
     assertThat(response.getBuildPipeline().getId()).isEqualTo("pipelineId");
     assertThat(response.getBuildPipeline().getExecutionId()).isEqualTo("executionId");
     assertThat(response.getBuildPipeline().getName()).isEqualTo("name");
+  }
+
+  @Test
+  @Owner(developers = SHASHWAT_SACHAN)
+  @Category(UnitTests.class)
+  public void testGetArtifactInRemediationDetailsWithTicketInfo() {
+    RemediationTrackerEntity remediationTrackerEntity =
+        createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+
+    Map<String, ArtifactInfo> artifactInfoMap = remediationTrackerEntity.getArtifactInfos();
+
+    ArtifactInfo artifactInfo = artifactInfoMap.get("artifactId");
+    artifactInfo.setTicketId("ticketId");
+
+    artifactInfoMap.put("artifactId", artifactInfo);
+    remediationTrackerEntity.setArtifactInfos(artifactInfoMap);
+
+    repository.save(remediationTrackerEntity);
+
+    RemediationArtifactDetailsResponse response = remediationTrackerService.getRemediationArtifactDetails(
+        builderFactory.getContext().getAccountId(), builderFactory.getContext().getOrgIdentifier(),
+        builderFactory.getContext().getProjectIdentifier(), remediationTrackerEntity.getUuid(), "artifactId");
+    assertThat(response).isNotNull();
+    assertThat(response.getId()).isEqualTo("artifactId");
+    assertThat(response.getRemediationId()).isEqualTo(remediationTrackerEntity.getUuid());
+    assertThat(response.getLatestBuildTag()).isEqualTo("tag");
+    assertThat(response.getBuildPipeline().getId()).isEqualTo("pipelineId");
+    assertThat(response.getBuildPipeline().getExecutionId()).isEqualTo("executionId");
+    assertThat(response.getBuildPipeline().getName()).isEqualTo("name");
+    assertThat(response.getTicket()).isNotNull();
+    assertThat(response.getTicket().getStatus()).isEqualTo("status");
+    assertThat(response.getTicket().getUrl()).isEqualTo("url");
   }
 
   @Test

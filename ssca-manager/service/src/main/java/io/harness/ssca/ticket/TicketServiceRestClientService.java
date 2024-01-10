@@ -17,6 +17,8 @@ public interface TicketServiceRestClientService {
   TicketResponseDto createTicket(
       String authToken, String accountId, String orgId, String projectId, TicketRequestDto ticketRequestDto);
 
-  List<TicketResponseDto> getTickets(String authToken, String module, Map<String, List<String>> identifiers,
-      String accountId, String orgId, String projectId);
+  List<TicketResponseDto> getTickets(String authToken, String module, Map<String, String> identifiers, String accountId,
+      String orgId, String projectId);
+
+  TicketResponseDto getTicket(String authToken, String ticketId, String accountId, String orgId, String projectId);
 }

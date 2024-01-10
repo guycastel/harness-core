@@ -18,4 +18,5 @@ public class TicketResponseDto {
   String id;
   String externalId;
   String url;
+  String status;
 }

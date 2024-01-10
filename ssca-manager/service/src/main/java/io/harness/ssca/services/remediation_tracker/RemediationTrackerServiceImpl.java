@@ -34,6 +34,7 @@ import io.harness.spec.server.ssca.v1.model.RemediationListingResponse;
 import io.harness.spec.server.ssca.v1.model.RemediationTrackerCreateRequestBody;
 import io.harness.spec.server.ssca.v1.model.RemediationTrackerUpdateRequestBody;
 import io.harness.spec.server.ssca.v1.model.RemediationTrackersOverallSummaryResponseBody;
+import io.harness.spec.server.ssca.v1.model.TicketInfo;
 import io.harness.ssca.beans.EnvType;
 import io.harness.ssca.beans.remediation_tracker.PatchedPendingArtifactEntitiesResult;
 import io.harness.ssca.beans.ticket.TicketRequestDto;
@@ -186,7 +187,13 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
       response.setCreatedByName(userInfoOptional.get().getName());
       response.setCreatedByEmail(userInfoOptional.get().getEmail());
     }
-    // TODO fetch info for ticketId
+    if (remediationTracker.getTicketId() != null) {
+      TicketResponseDto ticketResponseDto = ticketServiceRestClientService.getTicket(
+          getAuthToken(accountId), remediationTracker.getTicketId(), accountId, orgId, projectId);
+      if (ticketResponseDto != null) {
+        response.setTicket(getTicketInfo(ticketResponseDto));
+      }
+    }
     return response;
   }
 
@@ -209,7 +216,13 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
       response.setBuildPipeline(pipeline);
       response.setLatestBuildTag(latestArtifact.getTag());
     }
-    // TODO add ticket info
+    if (artifactInfo.getTicketId() != null) {
+      TicketResponseDto ticketResponseDto = ticketServiceRestClientService.getTicket(
+          getAuthToken(accountId), artifactInfo.getTicketId(), accountId, orgId, projectId);
+      if (ticketResponseDto != null) {
+        response.setTicket(getTicketInfo(ticketResponseDto));
+      }
+    }
     return response;
   }
 
@@ -374,8 +387,6 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
           String.format("Remediation Tracker: %s is already closed.", remediationTrackerId));
     }
 
-    String authToken = API_KEY + ticketServiceUtils.getTicketServiceToken(accountId);
-
     if (!isEmpty(body.getArtifactId())) {
       ArtifactInfo artifactInfo = remediationTracker.getArtifactInfos().get(body.getArtifactId());
       if (artifactInfo == null) {
@@ -386,8 +397,8 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
             String.format("Ticket already exists for artifactId: %s.", body.getArtifactId()));
       }
       TicketRequestDto ticketRequestDto = RemediationTrackerMapper.mapToTicketRequestDto(remediationTrackerId, body);
-      TicketResponseDto ticketResponseDto =
-          ticketServiceRestClientService.createTicket(authToken, accountId, orgId, projectId, ticketRequestDto);
+      TicketResponseDto ticketResponseDto = ticketServiceRestClientService.createTicket(
+          getAuthToken(accountId), accountId, orgId, projectId, ticketRequestDto);
       String ticketId = ticketResponseDto.getId();
       artifactInfo.setTicketId(ticketId);
       return ticketId;
@@ -395,8 +406,8 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
 
     else {
       TicketRequestDto ticketRequestDto = RemediationTrackerMapper.mapToTicketRequestDto(remediationTrackerId, body);
-      TicketResponseDto ticketResponseDto =
-          ticketServiceRestClientService.createTicket(authToken, accountId, orgId, projectId, ticketRequestDto);
+      TicketResponseDto ticketResponseDto = ticketServiceRestClientService.createTicket(
+          getAuthToken(accountId), accountId, orgId, projectId, ticketRequestDto);
       String ticketId = ticketResponseDto.getId();
 
       remediationTracker.setTicketId(ticketId);
@@ -457,7 +468,29 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
             .map(artifactInfo -> RemediationTrackerMapper.mapArtifactInfoToArtifactListingResponse(artifactInfo, body))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    // TODO add ticket details
+
+    Map<String, String> identifiers = new HashMap<>();
+    identifiers.put("remediationId", remediationTrackerId);
+    List<TicketResponseDto> ticketResponseDtos = ticketServiceRestClientService.getTickets(
+        getAuthToken(accountId), "SSCA", identifiers, accountId, orgId, projectId);
+
+    Map<String, TicketResponseDto> ticketIdToDTO = ticketResponseDtos.stream().collect(
+        Collectors.toMap(TicketResponseDto::getId, ticketResponseDto -> ticketResponseDto));
+
+    Map<String, RemediationArtifactListingResponse> artifactIdToResponse = artifactListingResponses.stream().collect(
+        Collectors.toMap(RemediationArtifactListingResponse::getId, response -> response));
+
+    for (ArtifactInfo artifactInfo : artifactInfos) {
+      String ticketId = artifactInfo.getTicketId();
+      String artifactId = artifactInfo.getArtifactId();
+      if (ticketId != null) {
+        TicketResponseDto ticketResponseDto = ticketIdToDTO.getOrDefault(ticketId, null);
+        if (ticketResponseDto != null) {
+          RemediationArtifactListingResponse response = artifactIdToResponse.get(artifactId);
+          response.setTicket(getTicketInfo(ticketResponseDto));
+        }
+      }
+    }
     artifactListingResponses = artifactListingResponses.stream()
                                    .sorted(Comparator.comparing(RemediationArtifactListingResponse::getName))
                                    .collect(Collectors.toList());
@@ -772,6 +805,18 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
         .deploymentPipeline(RemediationTrackerMapper.buildDeploymentPipeline(summary))
         .isPatched(details.isPatched())
         .build();
+  }
+
+  private String getAuthToken(String accountId) {
+    return API_KEY + ticketServiceUtils.getTicketServiceToken(accountId);
+  }
+
+  private TicketInfo getTicketInfo(TicketResponseDto ticketResponseDto) {
+    return new TicketInfo()
+        .id(ticketResponseDto.getId())
+        .externalId(ticketResponseDto.getExternalId())
+        .url(ticketResponseDto.getUrl())
+        .status(ticketResponseDto.getStatus());
   }
 
   @Data

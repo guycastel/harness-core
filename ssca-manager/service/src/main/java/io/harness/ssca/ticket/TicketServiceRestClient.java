@@ -17,6 +17,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface TicketServiceRestClient {
@@ -27,6 +28,11 @@ public interface TicketServiceRestClient {
 
   @GET("tickets")
   Call<List<TicketResponseDto>> getTickets(@Header(NextGenAuthenticationFilter.AUTHORIZATION_HEADER) String authToken,
-      @Query("module") String module, @Query("identifiers") Map<String, List<String>> identifiers,
+      @Query("module") String module, @Query("identifiers") Map<String, String> identifiers,
       @Query("accountId") String accountId, @Query("orgId") String orgId, @Query("projectId") String projectId);
+
+  @GET("tickets/{ticketId}")
+  Call<TicketResponseDto> getTicket(@Header(NextGenAuthenticationFilter.AUTHORIZATION_HEADER) String authToken,
+      @Path("ticketId") String ticketId, @Query("accountId") String accountId, @Query("orgId") String orgId,
+      @Query("projectId") String projectId);
 }

@@ -27,9 +27,15 @@ public class TicketServiceRestClientServiceImpl implements TicketServiceRestClie
   }
 
   @Override
-  public List<TicketResponseDto> getTickets(String authToken, String module, Map<String, List<String>> identifiers,
+  public List<TicketResponseDto> getTickets(String authToken, String module, Map<String, String> identifiers,
       String accountId, String orgId, String projectId) {
     return requestExecutor.execute(
         ticketServiceRestClient.getTickets(authToken, module, identifiers, accountId, orgId, projectId));
+  }
+
+  @Override
+  public TicketResponseDto getTicket(
+      String authToken, String ticketId, String accountId, String orgId, String projectId) {
+    return requestExecutor.execute(ticketServiceRestClient.getTicket(authToken, ticketId, accountId, orgId, projectId));
   }
 }

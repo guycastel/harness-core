@@ -34,6 +34,8 @@ import io.harness.serializer.KryoSerializer;
 
 import software.wings.helpers.ext.k8s.request.K8sClusterConfig;
 
+import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
@@ -62,7 +64,9 @@ public class K8sWatchServiceDelegateTest extends DelegateTestBase {
   private WatcherFactory watcherFactory;
   private static final KubernetesConfig KUBERNETES_CONFIG = KubernetesConfig.builder().build();
 
-  @Rule public WireMockRule wireMockRule = new WireMockRule(65221);
+  @Rule
+  public WireMockRule wireMockRule =
+      new WireMockRule(WireMockConfiguration.wireMockConfig().port(Options.DYNAMIC_PORT), false);
   @Inject KryoSerializer kryoSerializer;
 
   private static final String URL_REGEX_SUFFIX = "(\\?(.*))?";

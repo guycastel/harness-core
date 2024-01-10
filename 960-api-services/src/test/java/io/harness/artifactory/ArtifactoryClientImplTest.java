@@ -31,6 +31,7 @@ import io.harness.rule.Owner;
 
 import software.wings.helpers.ext.jenkins.BuildDetails;
 
+import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
@@ -69,7 +70,7 @@ public class ArtifactoryClientImplTest extends CategoryTest {
       new WireMockRule(WireMockConfiguration.wireMockConfig()
                            .usingFilesUnderClasspath("960-api-services/src/test/resources")
                            .disableRequestJournal()
-                           .port(0));
+                           .port(Options.DYNAMIC_PORT));
 
   String url;
 

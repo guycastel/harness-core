@@ -52,6 +52,7 @@ import software.wings.service.intfc.security.EncryptionService;
 import software.wings.utils.JsonUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -78,7 +79,7 @@ public class BambooServiceTest extends WingsBaseTest {
   public WireMockRule wireMockRule = new WireMockRule(WireMockConfiguration.wireMockConfig()
                                                           .usingFilesUnderClasspath("400-rest/src/test/resources")
                                                           .disableRequestJournal()
-                                                          .port(0));
+                                                          .port(Options.DYNAMIC_PORT));
 
   @Inject @InjectMocks DelegateFileManager delegateFileManager;
 

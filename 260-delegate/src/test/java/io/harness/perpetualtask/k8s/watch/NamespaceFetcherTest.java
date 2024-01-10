@@ -22,6 +22,8 @@ import io.harness.CategoryTest;
 import io.harness.category.element.UnitTests;
 import io.harness.rule.Owner;
 
+import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -46,7 +48,9 @@ public class NamespaceFetcherTest extends CategoryTest {
   private static final String NAME = "harness-delegate";
   private static final Map<String, String> LABELS = ImmutableMap.of("k1", "v1", "k2", "v2");
 
-  @Rule public WireMockRule wireMockRule = new WireMockRule(0);
+  @Rule
+  public WireMockRule wireMockRule =
+      new WireMockRule(WireMockConfiguration.wireMockConfig().port(Options.DYNAMIC_PORT), false);
   private static final String URL_REGEX_SUFFIX = "(\\?(.*))?";
   private static final String GET_NAMESPACES_URL = "^/api/v1/namespaces/" + NAME + URL_REGEX_SUFFIX;
 

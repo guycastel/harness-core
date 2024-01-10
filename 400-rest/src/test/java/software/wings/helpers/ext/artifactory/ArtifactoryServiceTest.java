@@ -37,6 +37,7 @@ import software.wings.beans.artifact.ArtifactStreamType;
 import software.wings.helpers.ext.jenkins.BuildDetails;
 import software.wings.utils.RepositoryType;
 
+import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
@@ -69,7 +70,8 @@ public class ArtifactoryServiceTest extends CategoryTest {
   public WireMockRule wireMockRule = new WireMockRule(WireMockConfiguration.wireMockConfig()
                                                           .usingFilesUnderClasspath("400-rest/src/test/resources")
                                                           .disableRequestJournal()
-                                                          .port(0));
+                                                          .port(Options.DYNAMIC_PORT),
+      false);
 
   String url;
 

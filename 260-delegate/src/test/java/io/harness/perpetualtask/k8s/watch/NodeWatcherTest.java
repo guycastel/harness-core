@@ -34,6 +34,8 @@ import io.harness.perpetualtask.k8s.informer.ClusterDetails;
 import io.harness.rule.Owner;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
 import com.google.common.collect.ImmutableMap;
@@ -82,7 +84,9 @@ public class NodeWatcherTest extends CategoryTest {
   private static final UrlPattern NODE_URL_MATCHING = urlMatching("^/api/v1/nodes.*");
 
   @Captor ArgumentCaptor<Map<String, String>> mapArgumentCaptor;
-  @Rule public WireMockRule wireMockRule = new WireMockRule(0);
+  @Rule
+  public WireMockRule wireMockRule =
+      new WireMockRule(WireMockConfiguration.wireMockConfig().port(Options.DYNAMIC_PORT), false);
 
   @Before
   public void setUp() throws Exception {

@@ -61,6 +61,7 @@ import software.wings.persistence.artifact.ArtifactFile;
 import software.wings.utils.RepositoryFormat;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -593,17 +594,17 @@ public class NexusServiceTest extends WingsBaseTest {
   public WireMockRule wireMockRule = new WireMockRule(WireMockConfiguration.wireMockConfig()
                                                           .usingFilesUnderClasspath("400-rest/src/test/resources")
                                                           .disableRequestJournal()
-                                                          .port(0));
+                                                          .port(Options.DYNAMIC_PORT));
   @Rule
   public WireMockRule wireMockRule2 = new WireMockRule(WireMockConfiguration.wireMockConfig()
                                                            .usingFilesUnderClasspath("400-rest/src/test/resources")
                                                            .disableRequestJournal()
-                                                           .port(0));
+                                                           .port(Options.DYNAMIC_PORT));
   @Rule
   public WireMockRule wireMockRule3 = new WireMockRule(WireMockConfiguration.wireMockConfig()
                                                            .usingFilesUnderClasspath("400-rest/src/test/resources")
                                                            .disableRequestJournal()
-                                                           .port(0));
+                                                           .port(Options.DYNAMIC_PORT));
 
   private String DEFAULT_NEXUS_URL;
 

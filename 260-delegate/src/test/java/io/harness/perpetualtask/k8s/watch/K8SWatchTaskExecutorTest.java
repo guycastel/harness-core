@@ -51,6 +51,8 @@ import io.harness.serializer.KryoSerializer;
 import software.wings.helpers.ext.container.ContainerDeploymentDelegateHelper;
 import software.wings.helpers.ext.k8s.request.K8sClusterConfig;
 
+import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -92,7 +94,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 @OwnedBy(HarnessTeam.CE)
 public class K8SWatchTaskExecutorTest extends DelegateTestBase {
-  @Rule public final WireMockRule wireMockRule = new WireMockRule(65217);
+  @Rule
+  public final WireMockRule wireMockRule =
+      new WireMockRule(WireMockConfiguration.wireMockConfig().port(Options.DYNAMIC_PORT), false);
 
   private ApiClient apiClient;
   private DefaultK8sMetricsClient k8sMetricClient;

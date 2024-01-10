@@ -34,6 +34,7 @@ import io.harness.exception.OciHelmDockerApiException;
 import io.harness.rule.Owner;
 import io.harness.security.encryption.SecretDecryptionService;
 
+import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class OciHelmDockerApiHelperTest extends CategoryTest {
       new WireMockRule(WireMockConfiguration.wireMockConfig()
                            .usingFilesUnderClasspath("930-delegate-tasks/src/test/resources")
                            .disableRequestJournal()
-                           .port(0));
+                           .port(Options.DYNAMIC_PORT));
 
   String url;
   String accountId = "accId";

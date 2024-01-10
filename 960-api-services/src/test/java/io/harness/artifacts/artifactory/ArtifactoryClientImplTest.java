@@ -57,7 +57,7 @@ public class ArtifactoryClientImplTest {
                            .usingFilesUnderClasspath("960-api-services/src/test/resources")
                            .disableRequestJournal()
                            .bindAddress("127.0.0.1")
-                           .port(0));
+                           .port(Options.DYNAMIC_PORT));
 
   @InjectMocks private ArtifactoryClientImpl artifactoryClient;
   private ArtifactoryConfigRequest artifactoryConfig2;

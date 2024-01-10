@@ -29,6 +29,8 @@ import io.harness.perpetualtask.k8s.metrics.client.model.pod.PodMetrics;
 import io.harness.perpetualtask.k8s.metrics.client.model.pod.PodMetricsList;
 import io.harness.rule.Owner;
 
+import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.io.Resources;
 import io.kubernetes.client.openapi.ApiException;
@@ -48,7 +50,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultK8sMetricsClientTest extends CategoryTest {
   private static final String NOT_FOUND_MSG = "Not Found";
-  @Rule public WireMockRule wireMockRule = new WireMockRule(0);
+  @Rule
+  public WireMockRule wireMockRule =
+      new WireMockRule(WireMockConfiguration.wireMockConfig().port(Options.DYNAMIC_PORT), false);
 
   JSON json;
   String resourceToString;

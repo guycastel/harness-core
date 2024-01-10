@@ -22,6 +22,8 @@ import io.harness.CategoryTest;
 import io.harness.category.element.UnitTests;
 import io.harness.rule.Owner;
 
+import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
 import io.kubernetes.client.custom.Quantity;
@@ -43,7 +45,9 @@ public class PVCFetcherTest extends CategoryTest {
   private static final String NAMESPACE = "harness";
   private static final String CLAIM_NAME = "mongo-data";
 
-  @Rule public WireMockRule wireMockRule = new WireMockRule(0);
+  @Rule
+  public WireMockRule wireMockRule =
+      new WireMockRule(WireMockConfiguration.wireMockConfig().port(Options.DYNAMIC_PORT), false);
   private static final String URL_REGEX_SUFFIX = "(\\?(.*))?";
   private static final String GET_NAMESPACED_PVC_URL =
       "^/api/v1/namespaces/" + NAMESPACE + "/persistentvolumeclaims/" + CLAIM_NAME + URL_REGEX_SUFFIX;

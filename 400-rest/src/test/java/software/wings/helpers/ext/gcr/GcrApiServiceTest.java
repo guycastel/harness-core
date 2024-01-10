@@ -41,6 +41,7 @@ import software.wings.WingsBaseTest;
 import software.wings.service.mappers.artifact.GcrConfigToInternalMapper;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.Lists;
@@ -64,8 +65,9 @@ public class GcrApiServiceTest extends WingsBaseTest {
   GcrApiServiceImpl gcrService;
   private static final String SHA = "sha256:1123234243";
   @Rule
-  public WireMockRule wireMockRule = new WireMockRule(
-      WireMockConfiguration.wireMockConfig().usingFilesUnderDirectory("400-rest/src/test/resources").port(0));
+  public WireMockRule wireMockRule = new WireMockRule(WireMockConfiguration.wireMockConfig()
+                                                          .usingFilesUnderDirectory("400-rest/src/test/resources")
+                                                          .port(Options.DYNAMIC_PORT));
   private String url;
   String basicAuthHeader = "auth";
   GcrInternalConfig gcpInternalConfig;

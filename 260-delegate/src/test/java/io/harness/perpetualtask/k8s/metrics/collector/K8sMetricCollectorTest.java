@@ -46,6 +46,8 @@ import io.harness.perpetualtask.k8s.metrics.client.model.pod.PodMetricsList;
 import io.harness.perpetualtask.k8s.watch.K8sControllerFetcher;
 import io.harness.rule.Owner;
 
+import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
@@ -84,7 +86,9 @@ public class K8sMetricCollectorTest extends CategoryTest {
                                                             .cloudProviderId("4412d653-3c5d-46bc-ba37-d926f99c7a4a")
                                                             .kubeSystemUid("aa4062a7-d214-4642-8bb5-dfc32e750ed0")
                                                             .build();
-  @Rule public WireMockRule wireMockRule = new WireMockRule(65219);
+  @Rule
+  public WireMockRule wireMockRule =
+      new WireMockRule(WireMockConfiguration.wireMockConfig().port(Options.DYNAMIC_PORT), false);
 
   private K8sMetricCollector k8sMetricCollector;
   private final String URL_REGEX_SUFFIX = "(\\?(.*))?";

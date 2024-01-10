@@ -188,7 +188,7 @@ public class BusinessMappingValidationServiceImpl implements BusinessMappingVali
         throw new InvalidRequestException(String.format("Max shared buckets limit is %s", MAX_SHARED_BUCKETS_LIMIT));
       }
       for (final SharedCost sharedCost : businessMapping.getSharedCosts()) {
-        validateSharedBucket(sharedCost);
+        validateSharedBucket(sharedCost, businessMapping.getName());
         if (sharedCost.getStrategy() == FIXED) {
           final Set<String> costBucketNames =
               businessMapping.getCostTargets().stream().map(CostTarget::getName).collect(Collectors.toSet());
@@ -198,16 +198,19 @@ public class BusinessMappingValidationServiceImpl implements BusinessMappingVali
     }
   }
 
-  private void validateSharedBucket(final SharedCost sharedCost) {
+  private void validateSharedBucket(final SharedCost sharedCost, final String businessMappingName) {
     if (Objects.isNull(sharedCost)) {
       throw new InvalidRequestException("Shared cost bucket can't be null");
     }
     if (isEmpty(sharedCost.getName())) {
-      throw new InvalidRequestException("shared cost bucket name can't be null or empty");
+      throw new InvalidRequestException("Shared cost bucket name can't be null or empty");
     }
     if (Objects.isNull(sharedCost.getStrategy())) {
       throw new InvalidRequestException(
           String.format("Invalid sharing strategy for shared cost bucket %s", sharedCost.getName()));
+    }
+    if (businessMappingName.equals(sharedCost.getName())) {
+      throw new InvalidRequestException("Shared cost bucket name can't be same as cost category name");
     }
     validateRules(sharedCost.getRules(), sharedCost.getName(), true);
   }

@@ -1554,4 +1554,28 @@ public class TerraformApplyStepV2Test extends CategoryTest {
     assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(TerraformApplyStepV2.STEP_TYPE.getType());
     assertThat(stepExecutionTelemetryEventDTO.getProperties().get(OPTIONAL_VAR_FILES)).isEqualTo(true);
   }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTOInheritFromPlan() {
+    Ambiance ambiance = getAmbiance();
+    LinkedHashMap<String, TerraformVarFile> varFiles = new LinkedHashMap();
+    varFiles.put("", TerraformVarFile.builder().build());
+    TerraformApplyStepParameters stepParameters =
+        TerraformApplyStepParameters.infoBuilder()
+            .configuration(TerraformStepConfigurationParameters.builder()
+                               .type(TerraformStepConfigurationType.INHERIT_FROM_PLAN)
+                               .build())
+            .build();
+    StepElementParameters stepElementParameters = StepElementParameters.builder().spec(stepParameters).build();
+    doReturn(true).when(terraformStepHelper).hasOptionalVarFiles(any());
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        terraformApplyStepV2.getStepExecutionTelemetryEventDTO(
+            ambiance, stepElementParameters, TerraformPassThroughData.builder().build());
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(TerraformApplyStepV2.STEP_TYPE.getType());
+    assertThat(stepExecutionTelemetryEventDTO.getProperties().get(OPTIONAL_VAR_FILES)).isEqualTo(null);
+  }
 }

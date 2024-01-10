@@ -188,9 +188,11 @@ public class TerraformApplyStepV2 extends CdTaskChainExecutable {
       Ambiance ambiance, StepBaseParameters stepParameters, PassThroughData passThroughData) {
     HashMap<String, Object> telemetryProperties = new HashMap<>();
     TerraformApplyStepParameters terraformApplyStepParameters = (TerraformApplyStepParameters) stepParameters.getSpec();
-    boolean hasOptionalVarFiles =
-        helper.hasOptionalVarFiles(terraformApplyStepParameters.getConfiguration().getSpec().getVarFiles());
-    telemetryProperties.put(OPTIONAL_VAR_FILES, hasOptionalVarFiles);
+    if (terraformApplyStepParameters.getConfiguration().getSpec() != null) {
+      boolean hasOptionalVarFiles =
+          helper.hasOptionalVarFiles(terraformApplyStepParameters.getConfiguration().getSpec().getVarFiles());
+      telemetryProperties.put(OPTIONAL_VAR_FILES, hasOptionalVarFiles);
+    }
     return StepExecutionTelemetryEventDTO.builder()
         .stepType(STEP_TYPE.getType())
         .properties(telemetryProperties)

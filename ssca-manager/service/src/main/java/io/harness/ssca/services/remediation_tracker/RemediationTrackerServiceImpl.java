@@ -7,9 +7,9 @@
 package io.harness.ssca.services.remediation_tracker;
 
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
+import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.spec.server.ssca.v1.model.Operator.EQUALS;
 
-import io.harness.data.structure.EmptyPredicate;
 import io.harness.exception.InvalidArgumentsException;
 import io.harness.exception.InvalidRequestException;
 import io.harness.ng.core.user.UserInfo;
@@ -61,11 +61,15 @@ import io.harness.ssca.utils.PipelineUtils;
 import io.harness.ticketserviceclient.TicketServiceUtils;
 import io.harness.user.remote.UserClient;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -119,6 +123,10 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
   private String sscaManagerServiceSecret;
 
   private static final String API_KEY = "ApiKey ";
+
+  private static final String REMEDIATION_IDENTIFIER = "remediationId";
+
+  private static final String MODULE = "SSCA";
 
   @Inject
   public RemediationTrackerServiceImpl(@Named("sscaManagerServiceSecret") String sscaManagerServiceSecret) {
@@ -188,8 +196,8 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
       response.setCreatedByEmail(userInfoOptional.get().getEmail());
     }
     if (remediationTracker.getTicketId() != null) {
-      TicketResponseDto ticketResponseDto = ticketServiceRestClientService.getTicket(
-          getAuthToken(accountId), remediationTracker.getTicketId(), accountId, orgId, projectId);
+      TicketResponseDto ticketResponseDto =
+          getTicketResponseDTO(getAuthToken(accountId), remediationTracker.getTicketId(), accountId, orgId, projectId);
       if (ticketResponseDto != null) {
         response.setTicket(getTicketInfo(ticketResponseDto));
       }
@@ -217,8 +225,8 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
       response.setLatestBuildTag(latestArtifact.getTag());
     }
     if (artifactInfo.getTicketId() != null) {
-      TicketResponseDto ticketResponseDto = ticketServiceRestClientService.getTicket(
-          getAuthToken(accountId), artifactInfo.getTicketId(), accountId, orgId, projectId);
+      TicketResponseDto ticketResponseDto =
+          getTicketResponseDTO(getAuthToken(accountId), artifactInfo.getTicketId(), accountId, orgId, projectId);
       if (ticketResponseDto != null) {
         response.setTicket(getTicketInfo(ticketResponseDto));
       }
@@ -325,7 +333,7 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
             .aggregate(aggregationForMeanTime, RemediationTrackerEntity.class,
                 RemediationTrackersOverallSummaryResponseBody.class)
             .getMappedResults();
-    if (EmptyPredicate.isNotEmpty(remediationTrackersOverallSummaryResponseBodies)) {
+    if (isNotEmpty(remediationTrackersOverallSummaryResponseBodies)) {
       overallSummary.setMeanTimeToRemediateInHours(roundOffTwoDecimalPlace(
           remediationTrackersOverallSummaryResponseBodies.get(0).getMeanTimeToRemediateInHours()));
     }
@@ -463,34 +471,32 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
     updateArtifactsAndEnvironments(remediationTracker);
 
     List<ArtifactInfo> artifactInfos = new ArrayList<>(remediationTracker.getArtifactInfos().values());
-    List<RemediationArtifactListingResponse> artifactListingResponses =
-        artifactInfos.stream()
-            .map(artifactInfo -> RemediationTrackerMapper.mapArtifactInfoToArtifactListingResponse(artifactInfo, body))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-    Map<String, String> identifiers = new HashMap<>();
-    identifiers.put("remediationId", remediationTrackerId);
-    List<TicketResponseDto> ticketResponseDtos = ticketServiceRestClientService.getTickets(
-        getAuthToken(accountId), "SSCA", identifiers, accountId, orgId, projectId);
+    Map<String, String> identifiersMap = new HashMap<>();
+    identifiersMap.put(REMEDIATION_IDENTIFIER, remediationTrackerId);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String identifiers = null;
+    List<TicketResponseDto> ticketResponseDtos = new ArrayList<>();
+    try {
+      identifiers = objectMapper.writeValueAsString(identifiersMap);
+      identifiers = URLEncoder.encode(identifiers, StandardCharsets.UTF_8);
+      ticketResponseDtos = ticketServiceRestClientService.getTickets(
+          getAuthToken(accountId), MODULE, identifiers, accountId, orgId, projectId);
+    } catch (JsonProcessingException e) {
+      log.error("Error occurred while converting Identifier map to string");
+    } catch (Exception e) {
+      log.error(
+          String.format("Error occurred while fetching ticket info for tracker with id %s", remediationTrackerId), e);
+    }
 
     Map<String, TicketResponseDto> ticketIdToDTO = ticketResponseDtos.stream().collect(
         Collectors.toMap(TicketResponseDto::getId, ticketResponseDto -> ticketResponseDto));
+    List<RemediationArtifactListingResponse> artifactListingResponses =
+        artifactInfos.stream()
+            .map(artifactInfo
+                -> RemediationTrackerMapper.mapArtifactInfoToArtifactListingResponse(artifactInfo, ticketIdToDTO, body))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
 
-    Map<String, RemediationArtifactListingResponse> artifactIdToResponse = artifactListingResponses.stream().collect(
-        Collectors.toMap(RemediationArtifactListingResponse::getId, response -> response));
-
-    for (ArtifactInfo artifactInfo : artifactInfos) {
-      String ticketId = artifactInfo.getTicketId();
-      String artifactId = artifactInfo.getArtifactId();
-      if (ticketId != null) {
-        TicketResponseDto ticketResponseDto = ticketIdToDTO.getOrDefault(ticketId, null);
-        if (ticketResponseDto != null) {
-          RemediationArtifactListingResponse response = artifactIdToResponse.get(artifactId);
-          response.setTicket(getTicketInfo(ticketResponseDto));
-        }
-      }
-    }
     artifactListingResponses = artifactListingResponses.stream()
                                    .sorted(Comparator.comparing(RemediationArtifactListingResponse::getName))
                                    .collect(Collectors.toList());
@@ -658,7 +664,7 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
       List<ArtifactEntity> pendingArtifactEntities) {
     List<PatchedPendingArtifactEntitiesResult> results =
         getPatchedAndPendingArtifacts(remediationTracker, orchestrationIdsMatchingTrackerFilter);
-    if (EmptyPredicate.isNotEmpty(results)) {
+    if (isNotEmpty(results)) {
       PatchedPendingArtifactEntitiesResult result = results.get(0);
       patchedArtifactEntities.addAll(result.getPatchedArtifacts());
       pendingArtifactEntities.addAll(result.getPendingArtifacts());
@@ -817,6 +823,17 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
         .externalId(ticketResponseDto.getExternalId())
         .url(ticketResponseDto.getUrl())
         .status(ticketResponseDto.getStatus());
+  }
+
+  private TicketResponseDto getTicketResponseDTO(
+      String authToken, String ticketId, String accountId, String orgId, String projectId) {
+    TicketResponseDto ticketResponseDto = null;
+    try {
+      ticketResponseDto = ticketServiceRestClientService.getTicket(authToken, ticketId, accountId, orgId, projectId);
+    } catch (Exception e) {
+      log.error(String.format("Error occurred while fetching ticket info for ticket with id %s", ticketId), e);
+    }
+    return ticketResponseDto;
   }
 
   @Data

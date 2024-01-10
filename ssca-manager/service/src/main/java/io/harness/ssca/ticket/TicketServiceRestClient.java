@@ -11,7 +11,6 @@ import io.harness.ssca.beans.ticket.TicketRequestDto;
 import io.harness.ssca.beans.ticket.TicketResponseDto;
 
 import java.util.List;
-import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -28,8 +27,8 @@ public interface TicketServiceRestClient {
 
   @GET("tickets")
   Call<List<TicketResponseDto>> getTickets(@Header(NextGenAuthenticationFilter.AUTHORIZATION_HEADER) String authToken,
-      @Query("module") String module, @Query("identifiers") Map<String, String> identifiers,
-      @Query("accountId") String accountId, @Query("orgId") String orgId, @Query("projectId") String projectId);
+      @Query("module") String module, @Query("identifiers") String identifiers, @Query("accountId") String accountId,
+      @Query("orgId") String orgId, @Query("projectId") String projectId);
 
   @GET("tickets/{ticketId}")
   Call<TicketResponseDto> getTicket(@Header(NextGenAuthenticationFilter.AUTHORIZATION_HEADER) String authToken,

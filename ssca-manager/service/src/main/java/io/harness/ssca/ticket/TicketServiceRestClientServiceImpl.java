@@ -13,7 +13,6 @@ import io.harness.ssca.client.RequestExecutor;
 
 import com.google.inject.Inject;
 import java.util.List;
-import java.util.Map;
 
 public class TicketServiceRestClientServiceImpl implements TicketServiceRestClientService {
   @Inject private TicketServiceRestClient ticketServiceRestClient;
@@ -27,8 +26,8 @@ public class TicketServiceRestClientServiceImpl implements TicketServiceRestClie
   }
 
   @Override
-  public List<TicketResponseDto> getTickets(String authToken, String module, Map<String, String> identifiers,
-      String accountId, String orgId, String projectId) {
+  public List<TicketResponseDto> getTickets(
+      String authToken, String module, String identifiers, String accountId, String orgId, String projectId) {
     return requestExecutor.execute(
         ticketServiceRestClient.getTickets(authToken, module, identifiers, accountId, orgId, projectId));
   }

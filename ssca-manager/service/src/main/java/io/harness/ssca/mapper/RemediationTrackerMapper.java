@@ -25,8 +25,10 @@ import io.harness.spec.server.ssca.v1.model.RemediationArtifactListingRequestBod
 import io.harness.spec.server.ssca.v1.model.RemediationArtifactListingResponse;
 import io.harness.spec.server.ssca.v1.model.RemediationDetailsResponse;
 import io.harness.spec.server.ssca.v1.model.RemediationListingResponse;
+import io.harness.spec.server.ssca.v1.model.TicketInfo;
 import io.harness.ssca.beans.EnvType;
 import io.harness.ssca.beans.ticket.TicketRequestDto;
+import io.harness.ssca.beans.ticket.TicketResponseDto;
 import io.harness.ssca.entities.CdInstanceSummary;
 import io.harness.ssca.entities.remediation_tracker.ArtifactInfo;
 import io.harness.ssca.entities.remediation_tracker.CVEVulnerability;
@@ -347,14 +349,27 @@ public class RemediationTrackerMapper {
     }
   }
 
-  public RemediationArtifactListingResponse mapArtifactInfoToArtifactListingResponse(
-      ArtifactInfo artifactInfo, RemediationArtifactListingRequestBody body) {
+  public RemediationArtifactListingResponse mapArtifactInfoToArtifactListingResponse(ArtifactInfo artifactInfo,
+      Map<String, TicketResponseDto> ticketIdToDTO, RemediationArtifactListingRequestBody body) {
     RemediationArtifactListingResponse response =
         new RemediationArtifactListingResponse()
             .id(artifactInfo.getArtifactId())
             .name(artifactInfo.getArtifactName())
             .isExcluded(artifactInfo.isExcluded())
             .deployments(mapDeploymentsCount(artifactInfo.getDeploymentsCount(), body.getDeploymentStatus()));
+
+    String ticketId = artifactInfo.getTicketId();
+    if (ticketId != null) {
+      TicketResponseDto ticketResponseDto = ticketIdToDTO.getOrDefault(ticketId, null);
+      if (ticketResponseDto != null) {
+        response.setTicket(new TicketInfo()
+                               .id(ticketResponseDto.getId())
+                               .externalId(ticketResponseDto.getExternalId())
+                               .url(ticketResponseDto.getUrl())
+                               .status(ticketResponseDto.getStatus()));
+      }
+    }
+
     if (shouldIncludeArtifact(response, body.getRemediationStatus())) {
       return response;
     } else {

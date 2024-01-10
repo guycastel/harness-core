@@ -135,6 +135,8 @@ invites {"name": "ng_invite_deleted_name_account_org_project_roleBindings_with_c
 invites {"name": "validUntil_1", "background": true, "expireAfterSeconds": 0} {"validUntil": 1}
 ipAllowlist {"name": "accountId_allowedSourceType_index", "background": true} {"accountIdentifier": 1, "allowedSourceType": 1}
 ipAllowlist {"name": "accountId_identifier_unique_index", "unique": true} {"accountIdentifier": 1, "identifier": 1}
+k8sTrafficRoutingInfo {"name": "accountId_orgId_projectId_stageExecutionId_createdAt", "background": true} {"accountId": 1, "orgId": 1, "projectId": 1, "stageExecutionId": 1, "createdAt": -1}
+k8sTrafficRoutingInfo {"name": "validUntil_1", "background": true, "expireAfterSeconds": 0} {"validUntil": 1}
 mockRoleAssignments {"name": "uniqueMockRoleAssignment", "background": true} {"accountIdentifier": 1, "orgIdentifier": 1, "projectIdentifier": 1, "roleAssignment.roleIdentifier": 1, "roleAssignment.resourceGroupIdentifier": 1, "roleAssignment.resourceGroupIdentifier.identifier": 1, "roleAssignment.resourceGroupIdentifier.type": 1}
 moduleLicenses {"name": "accountIdentifier_moduleLicense_query_index", "background": true} {"accountIdentifier": 1}
 moduleLicenses {"name": "moduleType_status_provisionMonthlyCICreditsIteration", "background": true} {"moduleType": 1, "status": 1, "provisionMonthlyCICreditsIteration": 1}

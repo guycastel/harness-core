@@ -107,12 +107,12 @@ public class K8sTrafficRoutingStep
               FeatureName.CDS_K8S_TRAFFIC_ROUTING_NG.name()));
     }
     InfrastructureOutcome infrastructure = cdStepHelper.getInfrastructureOutcome(ambiance);
-    String releaseName = cdStepHelper.getReleaseName(ambiance, infrastructure);
+    String releaseName = getReleaseName(ambiance);
     K8sTrafficRoutingStepParameters k8sTrafficRoutingStepParameters =
         (K8sTrafficRoutingStepParameters) stepParameters.getSpec();
 
-    // TODO: placeholder until we implement the retrieval of this object from collection or sweeping output
-    TrafficRoutingInfoDTO trafficRoutingInfoDTO = null;
+    TrafficRoutingInfoDTO trafficRoutingInfoDTO =
+        k8sTrafficRoutingHelper.getLatestTrafficRoutingInfoDTOForRelease(ambiance, releaseName);
 
     K8sTrafficRoutingConfig k8sTrafficRoutingConfig = fetchTrafficRoutingConfig(k8sTrafficRoutingStepParameters);
 
@@ -171,10 +171,20 @@ public class K8sTrafficRoutingStep
       K8sTrafficRoutingResponse k8sTrafficRoutingResponse =
           (K8sTrafficRoutingResponse) k8sTaskExecutionResponse.getK8sNGTaskResponse();
       TrafficRoutingInfoDTO trafficRoutingInfoDTO = k8sTrafficRoutingResponse.getInfo();
-      // TODO: placeholder for action of saving traffic routing info into collection or sweeping output
+      String releaseName = getReleaseName(ambiance);
+      k8sTrafficRoutingHelper.saveTrafficRoutingInfoDTO(ambiance, trafficRoutingInfoDTO, releaseName);
     }
 
     return stepResponseBuilder.status(Status.SUCCEEDED).build();
+  }
+
+  private String getReleaseName(Ambiance ambiance) {
+    try {
+      InfrastructureOutcome infrastructure = cdStepHelper.getInfrastructureOutcome(ambiance);
+      return cdStepHelper.getReleaseName(ambiance, infrastructure);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   private K8sTrafficRoutingConfig fetchTrafficRoutingConfig(

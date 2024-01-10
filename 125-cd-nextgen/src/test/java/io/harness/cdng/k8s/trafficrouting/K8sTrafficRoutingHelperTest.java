@@ -11,10 +11,14 @@ import static io.harness.rule.OwnerRule.BUHA;
 import static io.harness.rule.OwnerRule.MLUKIC;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import io.harness.CategoryTest;
 import io.harness.category.element.UnitTests;
+import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfo;
+import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfoDAL;
 import io.harness.delegate.task.k8s.trafficrouting.HeaderConfig;
 import io.harness.delegate.task.k8s.trafficrouting.IstioProviderConfig;
 import io.harness.delegate.task.k8s.trafficrouting.K8sTrafficRoutingConfig;
@@ -26,17 +30,25 @@ import io.harness.delegate.task.k8s.trafficrouting.TrafficRoute;
 import io.harness.delegate.task.k8s.trafficrouting.TrafficRouteRule;
 import io.harness.delegate.task.k8s.trafficrouting.TrafficRoutingDestination;
 import io.harness.exception.InvalidArgumentsException;
+import io.harness.k8s.trafficrouting.TrafficRoutingInfoDTO;
+import io.harness.pms.contracts.ambiance.Ambiance;
+import io.harness.pms.plan.execution.SetupAbstractionKeys;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 public class K8sTrafficRoutingHelperTest extends CategoryTest {
+  @Mock K8sTrafficRoutingInfoDAL k8sTrafficRoutingInfoDAL;
+
   private static final String STABLE_HOST = "stable";
   private static final String STAGE_HOST = "stage";
   private static final String ROOT_SERVICE = "rootService";
@@ -47,6 +59,12 @@ public class K8sTrafficRoutingHelperTest extends CategoryTest {
   private static final String SCHEME_VALUE = "http";
   private static final Integer PORT_VALUE = 8080;
   private static final String AUTHORITY_VALUE = "api.harness.io";
+  private static final String ACCOUNT_ID = "account-1";
+  private static final String ORG_ID = "org-1";
+  private static final String PROJECT_ID = "project-1";
+  private static final String STAGE_EXECUTION_ID = "stageExecution-1";
+  private static final String RELEASE_NAME = "release-1";
+
   private static final List<HeaderConfig> HEADER_CONFIG =
       List.of(HeaderConfig.builder().key("user-agent").value(".*Android.*").build(),
           HeaderConfig.builder().key("Content-Type").value("application/json").build(),
@@ -309,6 +327,83 @@ public class K8sTrafficRoutingHelperTest extends CategoryTest {
     assertThat(k8sTrafficRoutingConfig.get().getRoutes()).isNull();
     assertThat(k8sTrafficRoutingConfig.get().getDestinations()).isNotNull();
     assertThat(k8sTrafficRoutingConfig.get().getDestinations().size()).isEqualTo(destinations.size());
+  }
+
+  @Test
+  @Owner(developers = BUHA)
+  @Category(UnitTests.class)
+  public void testGetLatestTrafficRoutingInfoDTO() {
+    Ambiance ambinace =
+        Ambiance.newBuilder()
+            .putAllSetupAbstractions(Map.of(SetupAbstractionKeys.accountId, ACCOUNT_ID,
+                SetupAbstractionKeys.orgIdentifier, ORG_ID, SetupAbstractionKeys.projectIdentifier, PROJECT_ID))
+            .setStageExecutionId(STAGE_EXECUTION_ID)
+            .build();
+
+    TrafficRoutingInfoDTO trafficRoutingInfoDTO = TrafficRoutingInfoDTO.builder().build();
+
+    doReturn(K8sTrafficRoutingInfo.builder()
+                 .accountId(ACCOUNT_ID)
+                 .orgId(ORG_ID)
+                 .projectId(PROJECT_ID)
+                 .stageExecutionId(STAGE_EXECUTION_ID)
+                 .releaseName(RELEASE_NAME)
+                 .trafficRoutingInfoDTO(trafficRoutingInfoDTO)
+                 .build())
+        .when(k8sTrafficRoutingInfoDAL)
+        .getTrafficRoutingInfoForStageAndRelease(ACCOUNT_ID, ORG_ID, PROJECT_ID, STAGE_EXECUTION_ID, RELEASE_NAME);
+
+    TrafficRoutingInfoDTO latestTrafficRoutingInfoDTO =
+        k8sTrafficRoutingHelper.getLatestTrafficRoutingInfoDTOForRelease(ambinace, RELEASE_NAME);
+
+    assertThat(latestTrafficRoutingInfoDTO).isEqualTo(trafficRoutingInfoDTO);
+  }
+
+  @Test
+  @Owner(developers = BUHA)
+  @Category(UnitTests.class)
+  public void testGetLatestTrafficRoutingInfoDTOReturnsNull() {
+    Ambiance ambinace =
+        Ambiance.newBuilder()
+            .putAllSetupAbstractions(Map.of(SetupAbstractionKeys.accountId, ACCOUNT_ID,
+                SetupAbstractionKeys.orgIdentifier, ORG_ID, SetupAbstractionKeys.projectIdentifier, PROJECT_ID))
+            .setStageExecutionId(STAGE_EXECUTION_ID)
+            .build();
+
+    doReturn(null)
+        .when(k8sTrafficRoutingInfoDAL)
+        .getTrafficRoutingInfoForStageAndRelease(ACCOUNT_ID, ORG_ID, PROJECT_ID, STAGE_EXECUTION_ID, RELEASE_NAME);
+
+    TrafficRoutingInfoDTO latestTrafficRoutingInfoDTO =
+        k8sTrafficRoutingHelper.getLatestTrafficRoutingInfoDTOForRelease(ambinace, RELEASE_NAME);
+
+    assertThat(latestTrafficRoutingInfoDTO).isNull();
+  }
+
+  @Test
+  @Owner(developers = BUHA)
+  @Category(UnitTests.class)
+  public void testSaveTrafficRoutingInfoDTO() {
+    Ambiance ambinace =
+        Ambiance.newBuilder()
+            .putAllSetupAbstractions(Map.of(SetupAbstractionKeys.accountId, ACCOUNT_ID,
+                SetupAbstractionKeys.orgIdentifier, ORG_ID, SetupAbstractionKeys.projectIdentifier, PROJECT_ID))
+            .setStageExecutionId(STAGE_EXECUTION_ID)
+            .build();
+    TrafficRoutingInfoDTO trafficRoutingInfoDTO = TrafficRoutingInfoDTO.builder().build();
+
+    k8sTrafficRoutingHelper.saveTrafficRoutingInfoDTO(ambinace, trafficRoutingInfoDTO, RELEASE_NAME);
+
+    ArgumentCaptor<K8sTrafficRoutingInfo> trafficRoutingInfoArgumentCaptor =
+        ArgumentCaptor.forClass(K8sTrafficRoutingInfo.class);
+    verify(k8sTrafficRoutingInfoDAL).saveK8sTrafficRoutingInfo(trafficRoutingInfoArgumentCaptor.capture());
+    K8sTrafficRoutingInfo trafficRoutingInfo = trafficRoutingInfoArgumentCaptor.getValue();
+    assertThat(trafficRoutingInfo.getAccountId()).isEqualTo(ACCOUNT_ID);
+    assertThat(trafficRoutingInfo.getOrgId()).isEqualTo(ORG_ID);
+    assertThat(trafficRoutingInfo.getProjectId()).isEqualTo(PROJECT_ID);
+    assertThat(trafficRoutingInfo.getStageExecutionId()).isEqualTo(STAGE_EXECUTION_ID);
+    assertThat(trafficRoutingInfo.getReleaseName()).isEqualTo(RELEASE_NAME);
+    assertThat(trafficRoutingInfo.getTrafficRoutingInfoDTO()).isEqualTo(trafficRoutingInfoDTO);
   }
 
   private List<K8sTrafficRoutingDestination> getDestinationSpec() {

@@ -14,6 +14,8 @@ import static java.lang.String.format;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfo;
+import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfoDAL;
 import io.harness.common.ParameterFieldHelper;
 import io.harness.delegate.task.k8s.trafficrouting.HeaderConfig;
 import io.harness.delegate.task.k8s.trafficrouting.K8sTrafficRoutingConfig;
@@ -25,7 +27,11 @@ import io.harness.delegate.task.k8s.trafficrouting.TrafficRouteRule;
 import io.harness.delegate.task.k8s.trafficrouting.TrafficRouteRule.TrafficRouteRuleBuilder;
 import io.harness.delegate.task.k8s.trafficrouting.TrafficRoutingDestination;
 import io.harness.exception.InvalidArgumentsException;
+import io.harness.k8s.trafficrouting.TrafficRoutingInfoDTO;
+import io.harness.pms.contracts.ambiance.Ambiance;
+import io.harness.pms.execution.utils.AmbianceUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +47,8 @@ public class K8sTrafficRoutingHelper {
   private static final String FIELD_MUST_BE_SPECIFIED = "%s rule field or fields must be specified for %s provider";
   private static final String UNSUPPORTED_COMBINATION =
       "Unsupported combination of Provider type: %s Route type: %s and Rule type: %s";
+
+  @Inject K8sTrafficRoutingInfoDAL k8sTrafficRoutingInfoDAL;
 
   public Optional<K8sTrafficRoutingConfig> validateAndGetTrafficRoutingConfig(
       AbstractK8sTrafficRouting trafficRouting) {
@@ -270,5 +278,24 @@ public class K8sTrafficRoutingHelper {
                    .weight(ParameterFieldHelper.getParameterFieldValue(destination.getDestination().getWeight()))
                    .build())
         .collect(Collectors.toList());
+  }
+
+  public void saveTrafficRoutingInfoDTO(
+      Ambiance ambiance, TrafficRoutingInfoDTO trafficRoutingInfoDTO, String releaseName) {
+    k8sTrafficRoutingInfoDAL.saveK8sTrafficRoutingInfo(K8sTrafficRoutingInfo.builder()
+                                                           .accountId(AmbianceUtils.getAccountId(ambiance))
+                                                           .orgId(AmbianceUtils.getOrgIdentifier(ambiance))
+                                                           .projectId(AmbianceUtils.getProjectIdentifier(ambiance))
+                                                           .stageExecutionId(ambiance.getStageExecutionId())
+                                                           .trafficRoutingInfoDTO(trafficRoutingInfoDTO)
+                                                           .releaseName(releaseName)
+                                                           .build());
+  }
+
+  public TrafficRoutingInfoDTO getLatestTrafficRoutingInfoDTOForRelease(Ambiance ambiance, String releaseName) {
+    K8sTrafficRoutingInfo trafficRoutingInfoForStage = k8sTrafficRoutingInfoDAL.getTrafficRoutingInfoForStageAndRelease(
+        AmbianceUtils.getAccountId(ambiance), AmbianceUtils.getOrgIdentifier(ambiance),
+        AmbianceUtils.getProjectIdentifier(ambiance), ambiance.getStageExecutionId(), releaseName);
+    return trafficRoutingInfoForStage != null ? trafficRoutingInfoForStage.getTrafficRoutingInfoDTO() : null;
   }
 }

@@ -22,6 +22,7 @@ import io.harness.cdng.gitops.resume.GitopsStepFinishCallback;
 import io.harness.cdng.infra.InfraUseFromStage;
 import io.harness.cdng.infra.steps.InfraStepParameters;
 import io.harness.cdng.instance.InstanceDeploymentInfo;
+import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfo;
 import io.harness.cdng.pipeline.executions.CDAccountExecutionMetadata;
 import io.harness.cdng.provision.awscdk.beans.AwsCdkConfig;
 import io.harness.cdng.provision.azure.beans.AzureARMConfig;
@@ -69,6 +70,7 @@ public class NGMorphiaRegistrar implements MorphiaRegistrar {
     set.add(AwsCdkConfig.class);
     set.add(GitRestraintInstance.class);
     set.add(DeploymentStagePlanCreationInfo.class);
+    set.add(K8sTrafficRoutingInfo.class);
   }
 
   @Override
@@ -94,5 +96,6 @@ public class NGMorphiaRegistrar implements MorphiaRegistrar {
     h.put("io.harness.cdng.provision.awscdk.beans.AwsCdkConfig", AwsCdkConfig.class);
     h.put("io.harness.cdng.gitops.resume.GitopsStepFinishCallback", GitopsStepFinishCallback.class);
     h.put("io.harness.cdng.creator.plan.stage.DeploymentStagePlanCreationInfo", DeploymentStagePlanCreationInfo.class);
+    h.put("io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfo", K8sTrafficRoutingInfo.class);
   }
 }

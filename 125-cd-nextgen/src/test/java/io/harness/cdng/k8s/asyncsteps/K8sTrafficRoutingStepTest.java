@@ -40,6 +40,7 @@ import io.harness.delegate.TaskId;
 import io.harness.delegate.beans.logstreaming.UnitProgressData;
 import io.harness.delegate.exception.TaskNGDataException;
 import io.harness.delegate.task.k8s.K8sDeployResponse;
+import io.harness.delegate.task.k8s.K8sTrafficRoutingResponse;
 import io.harness.delegate.task.k8s.trafficrouting.IstioProviderConfig;
 import io.harness.delegate.task.k8s.trafficrouting.K8sTrafficRoutingConfig;
 import io.harness.delegate.task.k8s.trafficrouting.K8sTrafficRoutingConfigType;
@@ -47,6 +48,7 @@ import io.harness.delegate.task.k8s.trafficrouting.RouteType;
 import io.harness.delegate.task.k8s.trafficrouting.TrafficRoute;
 import io.harness.delegate.task.k8s.trafficrouting.TrafficRoutingDestination;
 import io.harness.exception.GeneralException;
+import io.harness.k8s.trafficrouting.TrafficRoutingInfoDTO;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.logging.UnitProgress;
 import io.harness.logging.UnitStatus;
@@ -174,6 +176,7 @@ public class K8sTrafficRoutingStepTest {
     ArgumentCaptor<String> releaseNameCaptor = ArgumentCaptor.forClass(String.class);
     verify(k8sStepHelper, times(1)).publishReleaseNameStepDetails(eq(ambiance), releaseNameCaptor.capture());
     assertThat(releaseNameCaptor.getValue()).isEqualTo(releaseName);
+    verify(k8sTrafficRoutingHelper).getLatestTrafficRoutingInfoDTOForRelease(ambiance, releaseName);
     assertThat(asyncExecutableResponse.getCallbackIds(0)).isEqualTo("taskId1");
   }
 
@@ -214,6 +217,9 @@ public class K8sTrafficRoutingStepTest {
   @Category(UnitTests.class)
   public void testHandleAsyncResponseInternal() {
     final StepElementParameters stepElementParameters = StepElementParameters.builder().build();
+    final TrafficRoutingInfoDTO trafficRoutingInfoDTO = TrafficRoutingInfoDTO.builder().build();
+    final K8sTrafficRoutingResponse trafficRoutingResponse =
+        K8sTrafficRoutingResponse.builder().info(trafficRoutingInfoDTO).build();
 
     try (MockedStatic<StrategyHelper> mockRestStatic = Mockito.mockStatic(StrategyHelper.class)) {
       List<UnitProgress> unitProgressList = new ArrayList<>();
@@ -223,6 +229,7 @@ public class K8sTrafficRoutingStepTest {
           -> K8sDeployResponse.builder()
                  .commandUnitsProgress(unitProgressData)
                  .commandExecutionStatus(CommandExecutionStatus.SUCCESS)
+                 .k8sNGTaskResponse(trafficRoutingResponse)
                  .build();
 
       when(StrategyHelper.buildResponseDataSupplier(any())).thenAnswer(a -> k8sDeployResponse);
@@ -231,6 +238,7 @@ public class K8sTrafficRoutingStepTest {
       assertThat(response.getStatus()).isEqualTo(Status.SUCCEEDED);
       assertThat(response.getUnitProgressList().get(0).getStatus()).isEqualTo(UnitStatus.SUCCESS);
       assertThat(response.getUnitProgressList().get(0).getUnitName()).isEqualTo("unit1");
+      verify(k8sTrafficRoutingHelper).saveTrafficRoutingInfoDTO(ambiance, trafficRoutingInfoDTO, releaseName);
     }
   }
 

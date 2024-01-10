@@ -38,6 +38,7 @@ import io.harness.pms.event.overviewLandingPage.DebeziumConsumersConfig;
 import io.harness.pms.sdk.core.PipelineSdkRedisEventsConfig;
 import io.harness.redis.RedisConfig;
 import io.harness.reflection.HarnessReflections;
+import io.harness.remote.client.ResourceGroupClientConfig;
 import io.harness.remote.client.ServiceHttpClientConfig;
 import io.harness.repositories.planExecutionJson.ExpandedJsonLockConfig;
 import io.harness.secret.ConfigSecret;
@@ -126,6 +127,7 @@ public class PipelineServiceConfiguration extends Configuration {
   @JsonProperty("ciServiceSecret") private String ciServiceSecret;
   @JsonProperty("jwtAuthSecret") private String jwtAuthSecret;
   @JsonProperty("jwtIdentityServiceSecret") private String jwtIdentityServiceSecret;
+  @JsonProperty("resourceGroupClientConfig") @ConfigSecret private ResourceGroupClientConfig resourceGroupClientConfig;
   @JsonProperty("redisLockConfig") private RedisConfig redisLockConfig;
   @JsonProperty("distributedLockImplementation") private DistributedLockImplementation distributedLockImplementation;
   @Builder.Default @JsonProperty("allowedOrigins") private List<String> allowedOrigins = new ArrayList<>();

@@ -38,16 +38,16 @@ public class WebhookNotificationServiceImpl implements WebhookNotificationServic
 
   @Inject
   public WebhookNotificationServiceImpl(CDNGStageSummaryResourceClient cdngStageSummaryResourceClient,
-      PlanExecutionMetadataService planExecutionMetadataService) {
+                                        PlanExecutionMetadataService planExecutionMetadataService) {
     this.cdngStageSummaryResourceClient = cdngStageSummaryResourceClient;
     this.planExecutionMetadataService = planExecutionMetadataService;
   }
   @Override
   public ModuleInfo getModuleInfo(
-      Ambiance ambiance, PipelineExecutionSummaryEntity executionSummaryEntity, PipelineEventType eventType) {
+          Ambiance ambiance, PipelineExecutionSummaryEntity executionSummaryEntity, PipelineEventType eventType) {
     Level currentLevel = AmbianceUtils.obtainCurrentLevel(ambiance);
     boolean shouldAddInputYaml =
-        AmbianceUtils.checkIfFeatureFlagEnabled(ambiance, FeatureName.CDS_INPUT_YAML_IN_WEBHOOK_NOTIFICATION.name());
+            AmbianceUtils.checkIfFeatureFlagEnabled(ambiance, FeatureName.CDS_INPUT_YAML_IN_WEBHOOK_NOTIFICATION.name());
     if (currentLevel == null || currentLevel.getStepType().getStepCategory() == StepCategory.PIPELINE) {
       return getModuleInfoForPipelineLevel(executionSummaryEntity, eventType, shouldAddInputYaml);
     }
@@ -58,13 +58,13 @@ public class WebhookNotificationServiceImpl implements WebhookNotificationServic
   }
 
   private ModuleInfo getModuleInfoForPipelineLevel(
-      PipelineExecutionSummaryEntity executionSummaryEntity, PipelineEventType eventType, boolean shouldAddInputYaml) {
+          PipelineExecutionSummaryEntity executionSummaryEntity, PipelineEventType eventType, boolean shouldAddInputYaml) {
     ModuleInfoBuilder moduleInfo = ModuleInfo.builder();
     Map<String, Object> moduleInfoMap = executionSummaryEntity.getModuleInfo().get("cd");
     if (shouldAddInputYaml && eventType == PipelineEventType.PIPELINE_START) {
       PlanExecutionMetadata planExecutionMetadata =
-          planExecutionMetadataService.getWithFieldsIncludedFromSecondary(executionSummaryEntity.getPlanExecutionId(),
-              Sets.newHashSet(PipelineExecutionSummaryEntity.PlanExecutionSummaryKeys.inputSetYaml));
+              planExecutionMetadataService.getWithFieldsIncludedFromSecondary(executionSummaryEntity.getPlanExecutionId(),
+                      Sets.newHashSet(PipelineExecutionSummaryEntity.PlanExecutionSummaryKeys.inputSetYaml));
       if (planExecutionMetadata != null) {
         moduleInfo.inputYaml(planExecutionMetadata.getInputSetYaml());
       }
@@ -90,17 +90,17 @@ public class WebhookNotificationServiceImpl implements WebhookNotificationServic
 
   // TODO: Make this generic
   private ModuleInfo getModuleInfoForStage(PipelineExecutionSummaryEntity executionSummaryEntity, Ambiance ambiance,
-      PipelineEventType pipelineEventType, boolean shouldAddInputYaml) {
+                                           PipelineEventType pipelineEventType, boolean shouldAddInputYaml) {
     Level currentLevel = AmbianceUtils.obtainCurrentLevel(ambiance);
     Map<String, CDStageSummaryResponseDTO> stageSummaryResponseDTOMap = null;
     Optional<Level> strategyLevel = AmbianceUtils.getStrategyLevelFromAmbiance(ambiance);
     String stageIdentifier =
-        strategyLevel.isEmpty() ? currentLevel.getIdentifier() : strategyLevel.get().getIdentifier();
+            strategyLevel.isEmpty() ? currentLevel.getIdentifier() : strategyLevel.get().getIdentifier();
     ModuleInfoBuilder moduleInfoBuilder = ModuleInfo.builder();
     if (shouldAddInputYaml && pipelineEventType == PipelineEventType.STAGE_START) {
       PlanExecutionMetadata planExecutionMetadata =
-          planExecutionMetadataService.getWithFieldsIncludedFromSecondary(executionSummaryEntity.getPlanExecutionId(),
-              Sets.newHashSet(PipelineExecutionSummaryEntity.PlanExecutionSummaryKeys.inputSetYaml));
+              planExecutionMetadataService.getWithFieldsIncludedFromSecondary(executionSummaryEntity.getPlanExecutionId(),
+                      Sets.newHashSet(PipelineExecutionSummaryEntity.PlanExecutionSummaryKeys.inputSetYaml));
       if (planExecutionMetadata != null) {
         moduleInfoBuilder.inputYaml(planExecutionMetadata.getInputSetYaml());
       }
@@ -108,13 +108,13 @@ public class WebhookNotificationServiceImpl implements WebhookNotificationServic
     try {
       if (pipelineEventType != PipelineEventType.STAGE_START) {
         stageSummaryResponseDTOMap = getResponse(cdngStageSummaryResourceClient.listStageExecutionFormattedSummary(
-            executionSummaryEntity.getAccountId(), executionSummaryEntity.getOrgIdentifier(),
-            executionSummaryEntity.getProjectIdentifier(), Lists.newArrayList(currentLevel.getRuntimeId())));
+                executionSummaryEntity.getAccountId(), executionSummaryEntity.getOrgIdentifier(),
+                executionSummaryEntity.getProjectIdentifier(), Lists.newArrayList(currentLevel.getRuntimeId())));
       } else {
         stageSummaryResponseDTOMap = getResponse(
-            cdngStageSummaryResourceClient.listStagePlanCreationFormattedSummary(executionSummaryEntity.getAccountId(),
-                executionSummaryEntity.getOrgIdentifier(), executionSummaryEntity.getProjectIdentifier(),
-                executionSummaryEntity.getPlanExecutionId(), Lists.newArrayList(stageIdentifier)));
+                cdngStageSummaryResourceClient.listStagePlanCreationFormattedSummary(executionSummaryEntity.getAccountId(),
+                        executionSummaryEntity.getOrgIdentifier(), executionSummaryEntity.getProjectIdentifier(),
+                        executionSummaryEntity.getPlanExecutionId(), Lists.newArrayList(stageIdentifier)));
       }
     } catch (Exception ex) {
       log.error("Exception occurred while updating module info during webhook notification", ex);
@@ -133,22 +133,22 @@ public class WebhookNotificationServiceImpl implements WebhookNotificationServic
     if (pipelineEventType != PipelineEventType.STAGE_START) {
       if ((EmptyPredicate.isNotEmpty(stageSummaryResponseDTO.getService())
               && stageSummaryResponseDTO.getService().equals("NA"))
-          || EmptyPredicate.isEmpty(stageSummaryResponseDTO.getArtifactDisplayName())) {
+              || EmptyPredicate.isEmpty(stageSummaryResponseDTO.getArtifactDisplayName())) {
         return ModuleInfo.getModuleInfo(ambiance, executionSummaryEntity);
       }
     }
 
     return moduleInfoBuilder
-        .services(EmptyPredicate.isEmpty(stageSummaryResponseDTO.getServices())
-                ? Lists.newArrayList(stageSummaryResponseDTO.getService())
-                : Lists.newArrayList(stageSummaryResponseDTO.getServices()))
-        .artifactInfo(Lists.newArrayList(stageSummaryResponseDTO.getArtifactDisplayName()))
-        .environments(EmptyPredicate.isEmpty(stageSummaryResponseDTO.getEnvironments())
-                ? Lists.newArrayList(stageSummaryResponseDTO.getEnvironment())
-                : Lists.newArrayList(stageSummaryResponseDTO.getEnvironments()))
-        .infrastructures(EmptyPredicate.isEmpty(stageSummaryResponseDTO.getInfras())
-                ? Lists.newArrayList(stageSummaryResponseDTO.getInfra())
-                : Lists.newArrayList(stageSummaryResponseDTO.getInfras()))
-        .build();
+            .services(EmptyPredicate.isEmpty(stageSummaryResponseDTO.getServices())
+                    ? Lists.newArrayList(stageSummaryResponseDTO.getService())
+                    : Lists.newArrayList(stageSummaryResponseDTO.getServices()))
+            .artifactInfo(Lists.newArrayList(stageSummaryResponseDTO.getArtifactDisplayName()))
+            .environments(EmptyPredicate.isEmpty(stageSummaryResponseDTO.getEnvironments())
+                    ? Lists.newArrayList(stageSummaryResponseDTO.getEnvironment())
+                    : Lists.newArrayList(stageSummaryResponseDTO.getEnvironments()))
+            .infrastructures(EmptyPredicate.isEmpty(stageSummaryResponseDTO.getInfras())
+                    ? Lists.newArrayList(stageSummaryResponseDTO.getInfra())
+                    : Lists.newArrayList(stageSummaryResponseDTO.getInfras()))
+            .build();
   }
 }

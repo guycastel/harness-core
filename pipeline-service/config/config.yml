@@ -640,6 +640,14 @@ featureFlagConfig:
   featureFlagSystem: LOCAL
   syncFeaturesToCF: false
 
+resourceGroupClientConfig:
+  serviceConfig:
+    baseUrl: http://localhost:9005/api/
+    connectTimeOutSeconds: 15
+    readTimeOutSeconds: 15
+    enableHttpLogging: ${ENABLE_HTTP_LOGGING:-false}
+  secret: IC04LYMBf1lDP5oeY4hupxd4HJhLmN6azUku3xEbeE3SUx5G3ZYzhbiwVtK4i7AmqyU9OZkwB4v8E9qM
+
 sscaServiceConfig:
   httpClientConfig:
     baseUrl: http://localhost:8188

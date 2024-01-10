@@ -10,6 +10,7 @@ package io.harness;
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
 import static io.harness.authorization.AuthorizationServiceHeader.BEARER;
 import static io.harness.authorization.AuthorizationServiceHeader.MANAGER;
+import static io.harness.authorization.AuthorizationServiceHeader.NG_MANAGER;
 import static io.harness.authorization.AuthorizationServiceHeader.PIPELINE_SERVICE;
 import static io.harness.eventsframework.EventsFrameworkConstants.ENTITY_CRUD;
 import static io.harness.eventsframework.EventsFrameworkMetadataConstants.ACCOUNT_ENTITY;
@@ -201,6 +202,7 @@ import io.harness.redis.RedisConfig;
 import io.harness.redis.RedissonClientFactory;
 import io.harness.reflection.HarnessReflections;
 import io.harness.remote.client.ClientMode;
+import io.harness.resourcegroupclient.ResourceGroupClientModule;
 import io.harness.secrets.SecretNGManagerClientModule;
 import io.harness.secretusage.SecretRuntimeUsageService;
 import io.harness.secretusage.SecretRuntimeUsageServiceImpl;
@@ -391,6 +393,8 @@ public class PipelineServiceModule extends AbstractModule {
         configuration.getNgManagerServiceSecret(), PIPELINE_SERVICE.getServiceId()));
     install(new ProjectClientModule(configuration.getNgManagerServiceHttpClientConfig(),
         configuration.getNgManagerServiceSecret(), PIPELINE_SERVICE.getServiceId()));
+    install(new ResourceGroupClientModule(configuration.getResourceGroupClientConfig().getServiceConfig(),
+        configuration.getResourceGroupClientConfig().getSecret(), PIPELINE_SERVICE.getServiceId()));
     install(
         YamlSchemaClientModule.getInstance(configuration.getYamlSchemaClientConfig(), PIPELINE_SERVICE.getServiceId()));
     install(new UserClientModule(configuration.getManagerClientConfig(), configuration.getManagerServiceSecret(),
@@ -889,6 +893,16 @@ public class PipelineServiceModule extends AbstractModule {
     return harnessCacheManager.getCache("pmsEventsCache", String.class, Integer.class,
         AccessedExpiryPolicy.factoryOf(Duration.THIRTY_MINUTES), versionInfoManager.getVersionInfo().getBuildNo(),
         true);
+  }
+
+  @Provides
+  @Singleton
+  @Named("roleMigrationCache")
+  public Cache<String, Boolean> roleMigrationCache(
+      HarnessCacheManager harnessCacheManager, VersionInfoManager versionInfoManager) {
+    return harnessCacheManager.getCache("roleMigrationCache", String.class, Boolean.class,
+        AccessedExpiryPolicy.factoryOf(new Duration(TimeUnit.DAYS, 30)),
+        versionInfoManager.getVersionInfo().getBuildNo(), true);
   }
 
   @Provides

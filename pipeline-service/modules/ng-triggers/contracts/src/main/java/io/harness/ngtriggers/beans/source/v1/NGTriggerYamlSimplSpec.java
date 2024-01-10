@@ -16,9 +16,9 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.ngtriggers.beans.source.artifact.ArtifactTriggerConfig;
-import io.harness.ngtriggers.beans.source.artifact.ManifestTriggerConfig;
-import io.harness.ngtriggers.beans.source.artifact.MultiRegionArtifactTriggerConfig;
+import io.harness.ngtriggers.beans.source.v1.artifact.ArtifactTriggerConfig;
+import io.harness.ngtriggers.beans.source.v1.artifact.ManifestTriggerConfig;
+import io.harness.ngtriggers.beans.source.v1.artifact.MultiRegionArtifactTriggerConfig;
 import io.harness.ngtriggers.beans.source.v1.scheduled.ScheduledTriggerYamlSimplConfig;
 import io.harness.ngtriggers.beans.source.v1.webhook.WebhookTriggerYamlSimplConfig;
 

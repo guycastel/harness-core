@@ -82,4 +82,7 @@ public interface YamlSimplConstants {
   String MULTI_REGION_ARTIFACT_TYPE = "multi-region-artifact";
   String ARTIFACT_TYPE = "artifact";
   String MANIFEST_TYPE = "manifest";
+  String HTTP = "http";
+  String S3 = "s3";
+  String GCS = "gcs";
 }

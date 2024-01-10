@@ -238,7 +238,7 @@ public class AwsResourceServiceImplTest extends CategoryTest {
                                                        .commandExecutionStatus(CommandExecutionStatus.SUCCESS)
                                                        .build();
 
-    doReturn(mockResponse).when(serviceHelper).getResponseData(any(), any(), anyString());
+    doReturn(mockResponse).when(serviceHelper).getResponseData(any(), any(), anyString(), any());
 
     List<String> vpcIds = Collections.emptyList();
     Map<String, String> tags = Collections.emptyMap();
@@ -266,7 +266,7 @@ public class AwsResourceServiceImplTest extends CategoryTest {
                                                        .commandExecutionStatus(CommandExecutionStatus.SUCCESS)
                                                        .build();
 
-    doReturn(mockResponse).when(serviceHelper).getResponseData(any(), any(), anyString());
+    doReturn(mockResponse).when(serviceHelper).getResponseData(any(), any(), anyString(), any());
 
     List<AwsEC2Instance> result =
         service.filterHosts(awsConnectorRef, true, "region", null, null, "autoScalingGroupName");

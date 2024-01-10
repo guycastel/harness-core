@@ -24,6 +24,8 @@ import io.harness.cdng.infra.yaml.EcsInfrastructure;
 import io.harness.cdng.infra.yaml.Infrastructure;
 import io.harness.cdng.infra.yaml.InfrastructureDefinitionConfig;
 import io.harness.cdng.infra.yaml.SshWinRmAwsInfrastructure;
+import io.harness.cdng.service.beans.ServiceDefinitionType;
+import io.harness.common.ParameterFieldHelper;
 import io.harness.data.structure.CollectionUtils;
 import io.harness.exception.InvalidRequestException;
 import io.harness.ng.core.artifacts.resources.util.ArtifactResourceUtils;
@@ -34,6 +36,7 @@ import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.ng.core.infrastructure.entity.InfrastructureEntity;
 import io.harness.ng.core.infrastructure.services.InfrastructureEntityService;
 import io.harness.utils.IdentifierRefHelper;
+import io.harness.yaml.infra.HostConnectionTypeKind;
 
 import software.wings.service.impl.aws.model.AwsCFTemplateParamsData;
 import software.wings.service.impl.aws.model.AwsEC2Instance;
@@ -139,19 +142,73 @@ public class AwsHelperResource {
   @GET
   @Path("hosts")
   @ApiOperation(value = "Get all the IAM hosts", nickname = "filterHosts")
-  public ResponseDTO<List<String>> filterHosts(@NotNull @QueryParam("awsConnectorRef") String awsConnectorRef,
+  public ResponseDTO<List<String>> filterHosts(@QueryParam("awsConnectorRef") String awsConnectorRef,
       @NotNull @QueryParam(NGCommonEntityConstants.ACCOUNT_KEY) String accountIdentifier,
       @QueryParam(NGCommonEntityConstants.ORG_KEY) String orgIdentifier,
       @QueryParam(NGCommonEntityConstants.PROJECT_KEY) String projectIdentifier,
+      @Parameter(description = NGCommonEntityConstants.ENV_PARAM_MESSAGE) @QueryParam(
+          NGCommonEntityConstants.ENVIRONMENT_KEY) String envId,
+      @Parameter(description = NGCommonEntityConstants.INFRADEF_PARAM_MESSAGE) @QueryParam(
+          NGCommonEntityConstants.INFRA_DEFINITION_KEY) String infraDefinitionId,
       @RequestBody(required = true, description = "Filter body") @Valid AwsListInstancesFilterDTO filterDTO) {
+    boolean isWinRm;
+    String region;
+    String autoScalingGroupName;
+    List<String> vpcIds = null;
+    Map<String, String> tags = null;
+    String hostConnectionType;
+
+    if (isEmpty(awsConnectorRef)) {
+      if (isEmpty(envId)) {
+        throw new InvalidRequestException(
+            String.valueOf(format("%s must be provided", NGCommonEntityConstants.ENVIRONMENT_KEY)));
+      }
+
+      if (isEmpty(infraDefinitionId)) {
+        throw new InvalidRequestException(
+            String.valueOf(format("%s must be provided", NGCommonEntityConstants.INFRA_DEFINITION_KEY)));
+      }
+
+      InfrastructureDefinitionConfig infrastructureDefinitionConfig = getInfrastructureDefinitionConfig(
+          accountIdentifier, orgIdentifier, projectIdentifier, envId, infraDefinitionId);
+      SshWinRmAwsInfrastructure sshWinRmAwsInfrastructure =
+          (SshWinRmAwsInfrastructure) infrastructureDefinitionConfig.getSpec();
+
+      awsConnectorRef = sshWinRmAwsInfrastructure.getConnectorReference().getValue();
+      isWinRm = infrastructureDefinitionConfig.getDeploymentType() == ServiceDefinitionType.WINRM;
+      region = sshWinRmAwsInfrastructure.getRegion().getValue();
+      autoScalingGroupName = ParameterFieldHelper.getParameterFieldValue(sshWinRmAwsInfrastructure.getAsgName());
+      hostConnectionType =
+          ParameterFieldHelper.getParameterFieldValue(sshWinRmAwsInfrastructure.getHostConnectionType());
+      if (sshWinRmAwsInfrastructure.getAwsInstanceFilter() != null) {
+        vpcIds =
+            ParameterFieldHelper.getParameterFieldValue(sshWinRmAwsInfrastructure.getAwsInstanceFilter().getVpcs());
+        tags = ParameterFieldHelper.getParameterFieldValue(sshWinRmAwsInfrastructure.getAwsInstanceFilter().getTags());
+      }
+    } else {
+      if (filterDTO == null) {
+        throw new InvalidRequestException("Request body missing for AwsListInstancesFilter");
+      }
+
+      isWinRm = filterDTO.isWinRm();
+      region = filterDTO.getRegion();
+      autoScalingGroupName = filterDTO.getAutoScalingGroupName();
+      hostConnectionType = filterDTO.getHostConnectionType();
+      vpcIds = filterDTO.getVpcIds();
+      tags = filterDTO.getTags();
+    }
+
     IdentifierRef connectorRef =
         IdentifierRefHelper.getIdentifierRef(awsConnectorRef, accountIdentifier, orgIdentifier, projectIdentifier);
-    List<AwsEC2Instance> instances = awsHelperService.filterHosts(connectorRef, filterDTO.isWinRm(),
-        filterDTO.getRegion(), filterDTO.getVpcIds(), filterDTO.getTags(), filterDTO.getAutoScalingGroupName());
-    List<String> result = CollectionUtils.emptyIfNull(instances)
-                              .stream()
-                              .map(AwsEC2Instance::getPublicDnsName)
-                              .collect(Collectors.toList());
+    List<AwsEC2Instance> instances =
+        awsHelperService.filterHosts(connectorRef, isWinRm, region, vpcIds, tags, autoScalingGroupName);
+    List<String> result =
+        CollectionUtils.emptyIfNull(instances)
+            .stream()
+            .map(instance
+                -> HostConnectionTypeKind.PRIVATE_IP.equalsIgnoreCase(hostConnectionType) ? instance.getPrivateIp()
+                                                                                          : instance.getPublicIp())
+            .collect(Collectors.toList());
     return ResponseDTO.newResponse(result);
   }
 

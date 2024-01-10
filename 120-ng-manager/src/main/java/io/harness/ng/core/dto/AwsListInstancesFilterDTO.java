@@ -31,8 +31,12 @@ import org.hibernate.validator.constraints.NotBlank;
 @Schema(name = "AwsListInstancesFilter", description = "Properties of the Aws Instance list")
 public class AwsListInstancesFilterDTO {
   @Schema(description = "region") @ApiModelProperty(required = true) @NotBlank private String region;
-  private String autoScalingGroupName;
+  @Schema(description = "AutoScaling Group Name") private String autoScalingGroupName;
   @Schema(description = "vpc ids") private List<String> vpcIds;
   @Schema(description = "key value tags") private Map<String, String> tags;
   @Schema(description = "true if winRm deployment type. default is false") private boolean winRm;
+  @Schema(description = "Host Connection Type")
+  @ApiModelProperty(required = true)
+  @NotBlank
+  private String hostConnectionType;
 }

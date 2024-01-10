@@ -116,6 +116,7 @@ public class AwsResourceServiceImpl implements AwsResourceService {
 
   private static final String EKS_GET_CLUSTERS_EXCEPTION_MESSAGE = "Failed to get AWS EKS clusters";
   private static final Duration EKS_LIST_CLUSTERS_TASK_TIMEOUT = Duration.ofMinutes(5);
+  private static final Duration EC2_LIST_INSTANCES_TASK_TIMEOUT = Duration.ofMinutes(5);
 
   @Override
   public List<String> getCapabilities() {
@@ -252,8 +253,8 @@ public class AwsResourceServiceImpl implements AwsResourceService {
                           .build();
     }
 
-    DelegateResponseData responseData =
-        serviceHelper.getResponseData(access, awsTaskParams, TaskType.NG_AWS_TASK.name());
+    DelegateResponseData responseData = serviceHelper.getResponseData(
+        access, awsTaskParams, TaskType.NG_AWS_TASK.name(), EC2_LIST_INSTANCES_TASK_TIMEOUT);
 
     return getListInstancesTaskExecutionResponse(responseData);
   }

@@ -11,6 +11,9 @@ import static io.harness.rule.OwnerRule.VITALIE;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -20,22 +23,28 @@ import io.harness.CategoryTest;
 import io.harness.beans.IdentifierRef;
 import io.harness.category.element.UnitTests;
 import io.harness.cdng.aws.service.AwsResourceServiceImpl;
+import io.harness.cdng.infra.beans.AwsInstanceFilter;
 import io.harness.cdng.infra.mapper.InfrastructureEntityConfigMapper;
 import io.harness.cdng.infra.yaml.AsgInfrastructure;
 import io.harness.cdng.infra.yaml.InfrastructureConfig;
 import io.harness.cdng.infra.yaml.InfrastructureDefinitionConfig;
 import io.harness.cdng.infra.yaml.SshWinRmAwsInfrastructure;
+import io.harness.cdng.service.beans.ServiceDefinitionType;
 import io.harness.ng.core.artifacts.resources.util.ArtifactResourceUtils;
+import io.harness.ng.core.dto.AwsListInstancesFilterDTO;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.ng.core.infrastructure.entity.InfrastructureEntity;
 import io.harness.ng.core.infrastructure.services.InfrastructureEntityService;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 import io.harness.utils.IdentifierRefHelper;
+import io.harness.yaml.infra.HostConnectionTypeKind;
 
+import software.wings.service.impl.aws.model.AwsEC2Instance;
 import software.wings.service.impl.aws.model.AwsVPC;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -158,6 +167,77 @@ public class AwsHelperResourceTest extends CategoryTest {
       ResponseDTO<List<AwsVPC>> result = awsHelperResource.getVpcs(
           null, ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, null, ENV_ID, INFRA_DEFINITION_ID);
       assertThat(result.getData()).isEqualTo(vpcs);
+    }
+  }
+
+  @Test
+  @Owner(developers = VITALIE)
+  @Category(UnitTests.class)
+  public void filterHosts() {
+    List<AwsEC2Instance> instances = Arrays.asList(
+        AwsEC2Instance.builder().publicIp("1.2.3.1").build(), AwsEC2Instance.builder().publicIp("1.2.3.2").build());
+
+    AwsListInstancesFilterDTO filterDTO = AwsListInstancesFilterDTO.builder()
+                                              .region(REGION)
+                                              .autoScalingGroupName("asg")
+                                              .hostConnectionType(HostConnectionTypeKind.PUBLIC_IP)
+                                              .vpcIds(Collections.EMPTY_LIST)
+                                              .tags(Collections.EMPTY_MAP)
+                                              .build();
+
+    try (MockedStatic<IdentifierRefHelper> ignore = mockStatic(IdentifierRefHelper.class)) {
+      when(IdentifierRefHelper.getIdentifierRef(anyString(), anyString(), anyString(), anyString()))
+          .thenAnswer(i -> identifierRef);
+      when(awsHelperService.filterHosts(any(), anyBoolean(), anyString(), anyList(), anyMap(), anyString()))
+          .thenReturn(instances);
+
+      ResponseDTO<List<String>> result = awsHelperResource.filterHosts(
+          CONNECTOR_REF, ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, null, null, filterDTO);
+      assertThat(result.getData()).contains("1.2.3.1", "1.2.3.2");
+    }
+  }
+
+  @Test
+  @Owner(developers = VITALIE)
+  @Category(UnitTests.class)
+  public void filterHostsByInfra() {
+    List<AwsEC2Instance> instances = Arrays.asList(
+        AwsEC2Instance.builder().publicIp("1.2.3.1").build(), AwsEC2Instance.builder().publicIp("1.2.3.2").build());
+
+    try (MockedStatic<IdentifierRefHelper> ignore = mockStatic(IdentifierRefHelper.class);
+         MockedStatic<InfrastructureEntityConfigMapper> ignore2 = mockStatic(InfrastructureEntityConfigMapper.class)) {
+      when(IdentifierRefHelper.getIdentifierRef(anyString(), anyString(), anyString(), anyString()))
+          .thenAnswer(i -> identifierRef);
+
+      when(InfrastructureEntityConfigMapper.toInfrastructureConfig(any(InfrastructureEntity.class)))
+          .thenAnswer(i
+              -> InfrastructureConfig.builder()
+                     .infrastructureDefinitionConfig(
+                         InfrastructureDefinitionConfig.builder()
+                             .spec(SshWinRmAwsInfrastructure.builder()
+                                       .connectorRef(ParameterField.createValueField(CONNECTOR_REF))
+                                       .region(ParameterField.createValueField(REGION))
+                                       .asgName(ParameterField.createValueField("asg"))
+                                       .hostConnectionType(
+                                           ParameterField.createValueField(HostConnectionTypeKind.PUBLIC_IP))
+                                       .awsInstanceFilter(
+                                           AwsInstanceFilter.builder()
+                                               .vpcs(ParameterField.createValueField(Collections.EMPTY_LIST))
+                                               .tags(ParameterField.createValueField(Collections.EMPTY_MAP))
+                                               .build())
+                                       .build())
+                             .deploymentType(ServiceDefinitionType.WINRM)
+                             .build())
+                     .build());
+
+      when(awsHelperService.filterHosts(any(), anyBoolean(), anyString(), anyList(), anyMap(), anyString()))
+          .thenReturn(instances);
+      when(infrastructureEntityService.get(anyString(), anyString(), anyString(), anyString(), anyString()))
+          .thenReturn(Optional.of(InfrastructureEntity.builder().build()));
+
+      ResponseDTO<List<String>> result = awsHelperResource.filterHosts(
+          null, ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, ENV_ID, INFRA_DEFINITION_ID, null);
+      assertThat(result.getData()).contains("1.2.3.1", "1.2.3.2");
     }
   }
 }

@@ -25,7 +25,7 @@
 - Immutable delegate `trigger publish-delegate`
 </details>
 
-## [Latest PR Check Triggers](https://github.com/harness/harness-core/blob/develop/.github/pull_request_template.md)
+## [Latest PR Check Triggers]
 
 <details>
   <summary>PR Check triggers</summary>
@@ -33,8 +33,8 @@ You can run multiple PR check triggers by comma separating them in a single comm
 
 - Compile: `trigger compileCode`
 - CodeformatCheckstyle: `trigger checkstylecodeformat`
-  - CodeFormat: `trigger codeformat`
-  - Checkstyle: `trigger checkstyle`
+- CodeFormat: `trigger codeformat`
+- Checkstyle: `trigger checkstyle`
 - MessageMetadata: `trigger messagecheck`
 - File-Permission-Check: `trigger checkpermission`
 - Recency: `trigger recency`

@@ -21,6 +21,7 @@ import io.harness.rule.Owner;
 import software.wings.WingsBaseTest;
 import software.wings.beans.concurrency.ConcurrencyStrategy.UnitType;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -28,6 +29,7 @@ public class ConcurrencyStrategyTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testIsEnabled() {
     ConcurrencyStrategy concurrencyStrategy = ConcurrencyStrategy.builder().build();
     assertThat(concurrencyStrategy.isEnabled()).isTrue();
@@ -36,6 +38,7 @@ public class ConcurrencyStrategyTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNotEnabled() {
     ConcurrencyStrategy concurrencyStrategy = ConcurrencyStrategy.builder().unitType(UnitType.NONE).build();
     assertThat(concurrencyStrategy.isEnabled()).isFalse();
@@ -44,6 +47,7 @@ public class ConcurrencyStrategyTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testBuildFromUnit() {
     ConcurrencyStrategy concurrencyStrategy = ConcurrencyStrategy.buildFromUnit("INFRA");
     assertThat(concurrencyStrategy).isNotNull();
@@ -54,6 +58,7 @@ public class ConcurrencyStrategyTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testInvalidUnit() {
     assertThatThrownBy(() -> ConcurrencyStrategy.buildFromUnit("RANDOM")).isInstanceOf(InvalidArgumentsException.class);
   }

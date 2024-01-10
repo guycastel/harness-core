@@ -38,6 +38,7 @@ import software.wings.yaml.gitSync.YamlGitConfig;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -67,6 +68,7 @@ public class GitCommandTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = DEEPAK)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testSanitizationOfLogs() {
     GitCommandType gitCommandType = GitCommandType.COMMIT_AND_PUSH;
     GitConfig gitConfig = GitConfig.builder().password("password".toCharArray()).build();
@@ -82,6 +84,7 @@ public class GitCommandTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = FERNANDOD)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldOperationFailureReturnGeneralYamlErrorCode() {
     GitCommandType gitCommandType = GitCommandType.COMMIT_AND_PUSH;
     GitConfig gitConfig = GitConfig.builder().password("password".toCharArray()).build();

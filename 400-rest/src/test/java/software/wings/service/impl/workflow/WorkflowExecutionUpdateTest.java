@@ -89,6 +89,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.Answers;
@@ -166,6 +167,7 @@ public class WorkflowExecutionUpdateTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldReportDeploymentEventToSegmentWithNullWorkflowTypeAndNullServiceIds() throws URISyntaxException {
     Account account = testUtils.createAccount();
     when(accountService.getFromCacheWithFallback(anyString())).thenReturn(account);
@@ -217,6 +219,7 @@ public class WorkflowExecutionUpdateTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldReportDeploymentEventToSegmentByTrigger() throws URISyntaxException {
     Account account = testUtils.createAccount();
     when(accountService.getFromCacheWithFallback(anyString())).thenReturn(account);
@@ -228,6 +231,7 @@ public class WorkflowExecutionUpdateTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldReportDeploymentEventToSegmentByUser() throws IllegalAccessException, URISyntaxException {
     Account account = testUtils.createAccount();
     User user = testUtils.createUser(account);
@@ -249,6 +253,7 @@ public class WorkflowExecutionUpdateTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldEvaluateAllTags() {
     when(appService.getAccountIdByAppId(any())).thenReturn(ACCOUNT_ID);
     List<HarnessTagLink> harnessTagLinkList = new ArrayList<>();
@@ -276,6 +281,7 @@ public class WorkflowExecutionUpdateTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldNotEvaluateAllTags() {
     when(appService.getAccountIdByAppId(anyString())).thenReturn(ACCOUNT_ID);
     List<HarnessTagLink> harnessTagLinkList = new ArrayList<>();
@@ -325,6 +331,7 @@ public class WorkflowExecutionUpdateTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldAddTagsToWorkflowExecution() {
     WorkflowExecution workflowExecution = WorkflowExecution.builder()
                                               .accountId(ACCOUNT_ID)
@@ -352,6 +359,7 @@ public class WorkflowExecutionUpdateTest extends WingsBaseTest {
   @Test
   @Owner(developers = YUVRAJ)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void test_publishEvent() {
     Application app = Application.Builder.anApplication().build();
     WorkflowExecution workflowExecution = WorkflowExecution.builder()

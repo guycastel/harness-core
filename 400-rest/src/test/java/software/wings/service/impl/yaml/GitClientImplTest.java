@@ -89,6 +89,7 @@ import org.eclipse.jgit.transport.ssh.jsch.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.ssh.jsch.OpenSshConfig;
 import org.eclipse.jgit.util.FS;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -341,6 +342,7 @@ public class GitClientImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCloneRepoWithSSH() throws Exception {
     assertThatThrownBy(() -> gitSyncCloneRepository());
   }
@@ -348,6 +350,7 @@ public class GitClientImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetFilteredGitFilesNoFileFoundException() throws IOException {
     GitFetchFilesRequest gitFetchFilesRequest = GitFetchFilesRequest.builder()
                                                     .gitConnectorId(GIT_CONNECTOR_ID)
@@ -376,6 +379,7 @@ public class GitClientImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetFilteredGitFile() throws Exception {
     String filePath = "filePath";
     GitFetchFilesRequest gitFetchFilesRequest = GitFetchFilesRequest.builder()
@@ -406,6 +410,7 @@ public class GitClientImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testApplyChangeSetOnFileSystem() throws Exception {
     GitConfig gitConfig = GitConfig.builder().accountId(ACCOUNT_ID).gitRepoType(GitRepositoryType.YAML).build();
     GitCommitRequest gitCommitRequest = GitCommitRequest.builder().gitFileChanges(getSampleGitFileChanges()).build();

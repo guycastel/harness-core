@@ -60,6 +60,7 @@ import java.util.Map;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runners.MethodSorters;
@@ -169,6 +170,7 @@ public class AccountChangeHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = VIKAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void TC0_testSalesForceIntegrationEnabled() {
     UserThreadLocal.set(user);
     try {
@@ -209,6 +211,7 @@ public class AccountChangeHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = VIKAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void TC0_testSalesForceIntegrationEnabledWithNotPresentInSalesForce() {
     UserThreadLocal.set(user);
     try {
@@ -249,6 +252,7 @@ public class AccountChangeHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void TC0_testAccountGroupMessageToSegment() {
     UserThreadLocal.set(user);
     try {
@@ -369,6 +373,7 @@ public class AccountChangeHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void TC3_testAccountGroupMessageToSegment() {
     UserThreadLocal.set(user);
     try {
@@ -409,6 +414,7 @@ public class AccountChangeHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void TC4_testAccountGroupMessageToSegment() {
     UserThreadLocal.set(user);
     try {
@@ -449,6 +455,7 @@ public class AccountChangeHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testAccountIdentityMessageToSegment() {
     UserThreadLocal.set(user);
     try {

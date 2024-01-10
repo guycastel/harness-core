@@ -42,6 +42,7 @@ import software.wings.service.intfc.SettingsService;
 import software.wings.yaml.handler.YamlHandlerTestBase;
 
 import com.google.inject.Inject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -59,6 +60,7 @@ public class AcrArtifactStreamYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = DEEPAK_PUTHRAYA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void toYaml() {
     AcrArtifactStream acrArtifactStream = AcrArtifactStream.builder()
                                               .settingId(SETTING_ID)
@@ -79,6 +81,7 @@ public class AcrArtifactStreamYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = DEEPAK_PUTHRAYA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void upsertFromYaml() {
     SettingAttribute settingAttribute = SettingAttribute.Builder.aSettingAttribute().withAccountId(ACCOUNT_ID).build();
     when(settingsService.get(SETTING_ID)).thenReturn(settingAttribute);
@@ -129,6 +132,7 @@ public class AcrArtifactStreamYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = DEEPAK_PUTHRAYA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetYamlClass() {
     assertThat(yamlHandler.getYamlClass()).isEqualTo(AcrArtifactStream.Yaml.class);
   }

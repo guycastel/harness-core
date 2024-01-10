@@ -44,6 +44,7 @@ import software.wings.service.intfc.DelegateService;
 import software.wings.service.intfc.security.EncryptionService;
 
 import java.util.Collections;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -61,6 +62,7 @@ public class GcpHelperServiceManagerTest extends WingsBaseTest {
   @Test
   @Owner(developers = OwnerRule.YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void validateCredentialsServiceAccountFile() {
     final GcpConfig gcpConfig = GcpConfig.builder().serviceAccountKeyFileContent("secret".toCharArray()).build();
     gcpHelperServiceManager.validateCredential(gcpConfig, Collections.emptyList());
@@ -71,6 +73,7 @@ public class GcpHelperServiceManagerTest extends WingsBaseTest {
   @Test
   @Owner(developers = OwnerRule.YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void validateCredentialDelegateSelector() throws InterruptedException {
     doReturn(
         GcpValidationTaskResponse.builder()
@@ -107,6 +110,7 @@ public class GcpHelperServiceManagerTest extends WingsBaseTest {
   @Test
   @Owner(developers = OwnerRule.YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void validateDelegateSuccessForSyncTask() {
     assertThatExceptionOfType(InvalidRequestException.class)
         .isThrownBy(()

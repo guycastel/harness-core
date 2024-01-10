@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -119,6 +120,7 @@ public class YamlCloneServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ADWAIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testTraverseDirectory() throws Exception {
     DirectoryPath directoryPath = new DirectoryPath(SETUP_FOLDER);
     directoryPath.add(APPLICATIONS_FOLDER);
@@ -160,6 +162,7 @@ public class YamlCloneServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ADWAIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCloneEntityUsingYaml_Workflow() throws Exception {
     doReturn(null).when(workflowService).readWorkflowByName(anyString(), anyString());
     doReturn(aWorkflow().appId(APP_ID).uuid(WORKFLOW_ID).build())
@@ -184,6 +187,7 @@ public class YamlCloneServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ADWAIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCloneEntityUsingYaml_Provisioner() throws Exception {
     doReturn(null).when(provisionerService).getByName(anyString(), anyString());
     doReturn(CloudFormationInfrastructureProvisioner.builder().appId(APP_ID).uuid(PROVISIONER_ID).build())

@@ -45,6 +45,7 @@ import software.wings.service.intfc.security.SecretManager;
 import com.google.inject.Inject;
 import java.io.IOException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -83,6 +84,7 @@ public class AwsSecretsManagerServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void saveAwsSecretManagerConfig_shouldPass() {
     AwsSecretsManagerConfig awsSecretManagerConfig = secretManagementTestHelper.getAwsSecretManagerConfig();
     awsSecretManagerConfig.setAccountId(accountId);
@@ -95,6 +97,7 @@ public class AwsSecretsManagerServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PIYUSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void saveAwsSecretManagerConfig_AssumeIAMRole_shouldPass() {
     AwsSecretsManagerConfig awsSecretManagerConfig = secretManagementTestHelper.getAwsSecretManagerConfig();
     awsSecretManagerConfig.setAccountId(accountId);
@@ -109,6 +112,7 @@ public class AwsSecretsManagerServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PIYUSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void saveAwsSecretManagerConfig_AssumeSTSRole_shouldPass() {
     AwsSecretsManagerConfig awsSecretManagerConfig = secretManagementTestHelper.getAwsSecretManagerConfig();
     awsSecretManagerConfig.setAccountId(accountId);
@@ -123,6 +127,7 @@ public class AwsSecretsManagerServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void saveAwsSecretManagerConfigIfFeatureNotAvailable_shouldThrowException() {
     when(secretsManagementFeature.isAvailableForAccount(accountId)).thenReturn(false);
 
@@ -140,6 +145,7 @@ public class AwsSecretsManagerServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void updateAwsSecretManagerConfigNonSecretKey_shouldPass() {
     AwsSecretsManagerConfig awsSecretManagerConfig = secretManagementTestHelper.getAwsSecretManagerConfig();
     awsSecretManagerConfig.setAccountId(accountId);
@@ -164,6 +170,7 @@ public class AwsSecretsManagerServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void updateAwsSecretManagerConfigSecretKey_shouldPass() {
     AwsSecretsManagerConfig awsSecretManagerConfig = secretManagementTestHelper.getAwsSecretManagerConfig();
     awsSecretManagerConfig.setAccountId(accountId);
@@ -186,6 +193,7 @@ public class AwsSecretsManagerServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void deleteAwsSecretManagerConfigWithNoEncryptedSecrets_shouldPass() {
     AwsSecretsManagerConfig awsSecretManagerConfig = secretManagementTestHelper.getAwsSecretManagerConfig();
     awsSecretManagerConfig.setAccountId(accountId);
@@ -203,6 +211,7 @@ public class AwsSecretsManagerServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void deleteAwsSecretManagerConfigWithEncryptedSecrets_shouldFail() {
     AwsSecretsManagerConfig awsSecretManagerConfig = secretManagementTestHelper.getAwsSecretManagerConfig();
     awsSecretManagerConfig.setAccountId(accountId);

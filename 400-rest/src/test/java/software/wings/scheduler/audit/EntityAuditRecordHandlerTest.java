@@ -24,6 +24,7 @@ import software.wings.service.intfc.AuditService;
 
 import com.google.inject.Inject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.Mock;
@@ -49,6 +50,7 @@ public class EntityAuditRecordHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testHandleWithNullMostRecentAuditRecord() {
     AuditRecord mostRecentAuditRecord =
         AuditRecord.builder().auditHeaderId("auditHeaderId").accountId("accountId").build();

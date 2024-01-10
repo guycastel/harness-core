@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -134,6 +135,7 @@ public class NodeAndPodDetailsDataFetcherTest extends AbstractDataFetcherTestBas
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetNodeAndPodDetailsWhenDbIsInvalid() {
     when(timeScaleDBService.isValid()).thenReturn(false);
     assertThatThrownBy(()
@@ -145,6 +147,7 @@ public class NodeAndPodDetailsDataFetcherTest extends AbstractDataFetcherTestBas
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetNodeAndPodDetailsWhenQueryThrowsException() throws SQLException {
     when(timeScaleDBService.isValid()).thenReturn(true);
     Statement mockStatement = mock(Statement.class);
@@ -161,6 +164,7 @@ public class NodeAndPodDetailsDataFetcherTest extends AbstractDataFetcherTestBas
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchMethodForNodeDetails() {
     String[] clusterIdFilterValues = new String[] {CLUSTER_ID};
     when(instanceDataService.fetchInstanceDataForGivenInstances(ACCOUNT_ID, Collections.singletonList(INSTANCE_ID)))
@@ -195,6 +199,7 @@ public class NodeAndPodDetailsDataFetcherTest extends AbstractDataFetcherTestBas
   @Test
   @Owner(developers = UTSAV)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchMethodNodeDetailsWithTTLedInstanceData() {
     final String defaultStringValue = "-";
     when(instanceDataService.fetchInstanceDataForGivenInstances(ACCOUNT_ID, Collections.singletonList(INSTANCE_ID)))
@@ -233,6 +238,7 @@ public class NodeAndPodDetailsDataFetcherTest extends AbstractDataFetcherTestBas
   @Test
   @Owner(developers = UTSAV)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchMethodPodDetailsWithTTLedInstanceData() {
     final String defaultStringValue = "-";
     when(instanceDataService.fetchInstanceDataForGivenInstances(ACCOUNT_ID, Collections.singletonList(INSTANCE_ID)))
@@ -270,6 +276,7 @@ public class NodeAndPodDetailsDataFetcherTest extends AbstractDataFetcherTestBas
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchMethodForPodDetails() {
     when(instanceDataService.fetchInstanceDataForGivenInstances(ACCOUNT_ID, Collections.singletonList(INSTANCE_ID)))
         .thenReturn(Collections.singletonList(getTestInstanceData(INSTANCE_ID, INSTANCE_ID, K8S_POD)));

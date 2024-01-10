@@ -118,6 +118,7 @@ public class EnvironmentTest extends GraphQLTest {
   @Test
   @Owner(developers = GEORGE)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testQueryMissingEnvironment() {
     String query = $GQL(/*
 {

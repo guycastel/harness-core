@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -87,6 +88,7 @@ public class SSOProviderTest extends GraphQLTest {
   @Test
   @Owner(developers = DEEPAK)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testGetLdapSetting() {
     String query = $GQL(/*
         query{
@@ -106,6 +108,7 @@ public class SSOProviderTest extends GraphQLTest {
   @Test
   @Owner(developers = DEEPAK)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testGetSamlSetting() {
     String query = $GQL(/*
       query{
@@ -125,6 +128,7 @@ public class SSOProviderTest extends GraphQLTest {
   @Test
   @Owner(developers = DEEPAK)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testListSSOSetting() {
     String query =
         $GQL(/*

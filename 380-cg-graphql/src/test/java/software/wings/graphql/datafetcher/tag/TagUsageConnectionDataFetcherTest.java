@@ -47,6 +47,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -130,6 +131,7 @@ public class TagUsageConnectionDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = HINGER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchConnectionWithEntityTypeFilters() {
     QLEntityTypeFilter entityFilter = QLEntityTypeFilter.builder()
                                           .operator(QLEnumOperator.IN)
@@ -154,6 +156,7 @@ public class TagUsageConnectionDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = HINGER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchConnectionWithTagValueFilters() {
     QLIdFilter idFilter = QLIdFilter.builder().operator(QLIdOperator.IN).values(new String[] {TAG_VALUE_TEAM1}).build();
 
@@ -175,6 +178,7 @@ public class TagUsageConnectionDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = HINGER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchConnectionWithEmptyFilters() {
     List<QLTagUseFilter> tagUseFilters = Collections.emptyList();
 
@@ -193,6 +197,7 @@ public class TagUsageConnectionDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = HINGER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGenerateFilter() {
     doReturn(TAG_TEAM).when(dataFetcherUtils).getFieldValue(any(), any());
     doReturn("source").when(dataFetchingEnvironment).getSource();

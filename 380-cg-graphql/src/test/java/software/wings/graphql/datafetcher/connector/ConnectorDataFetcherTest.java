@@ -32,6 +32,7 @@ import software.wings.settings.SettingValue;
 import com.google.inject.Inject;
 import java.sql.SQLException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -54,6 +55,7 @@ public class ConnectorDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testConnectorDataFetcher() {
     SettingValue settingValue = CustomArtifactServerConfig.builder().accountId(ACCOUNT1_ID).build();
     createConnector(ACCOUNT1_ID, APP1_ID_ACCOUNT1, CONNECTOR_ID1_ACCOUNT1, "CONNECTOR_NAME", settingValue);

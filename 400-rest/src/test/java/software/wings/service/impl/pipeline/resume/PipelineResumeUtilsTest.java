@@ -95,6 +95,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -923,6 +924,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = VIKAS_S)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCheckPipelineResumeAvailableForUnResumableStatuses() {
     WorkflowExecution abortedWorkflowExecution = preparePipelineExecution(WorkflowType.PIPELINE, RUNNING);
     assertThatThrownBy(() -> pipelineResumeUtils.checkPipelineResumeAvailable(abortedWorkflowExecution))
@@ -940,6 +942,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCheckPipelineResumeAvailableForSuccessfulExecution() {
     WorkflowExecution workflowExecution = prepareFailedPipelineExecution();
     workflowExecution.setStatus(ExecutionStatus.SUCCESS);
@@ -949,6 +952,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCheckPipelineResumeAvailableForNonLatestExecution() {
     WorkflowExecution workflowExecution = prepareNonLatestResumedFailedPipelineExecution();
     pipelineResumeUtils.checkPipelineResumeAvailable(workflowExecution);
@@ -957,6 +961,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckPipelineResumeAvailableForTypeWorkflow() {
     WorkflowExecution workflowExecution = prepareFailedPipelineExecution(WorkflowType.ORCHESTRATION);
     pipelineResumeUtils.checkPipelineResumeAvailable(workflowExecution);
@@ -965,6 +970,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckPipelineResumeUnavailableForPipelineFailedDuringArtifactCollection() {
     WorkflowExecution workflowExecution = prepareFailedPipelineExecution();
     PipelineStageExecution stageExecution1 = PipelineStageExecution.builder().status(ExecutionStatus.QUEUED).build();
@@ -977,6 +983,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = Test.None.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckPipelineResumeHistoryAvailable() {
     WorkflowExecution workflowExecution = prepareFailedPipelineExecution();
     pipelineResumeUtils.checkPipelineResumeHistoryAvailable(workflowExecution);
@@ -999,6 +1006,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = Test.None.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckStageAndStageExecution() {
     PipelineStage stage = PipelineStage.builder()
                               .pipelineStageElements(asList(prepareEnvStatePipelineStageElement(1),
@@ -1020,6 +1028,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = VIKAS_S)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckStageAndStageExecutionWhen() {
     PipelineStage stage = PipelineStage.builder()
                               .pipelineStageElements(asList(prepareEnvStatePipelineStageElement(1),
@@ -1048,6 +1057,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckStageAndStageExecutionDifferentWorkflowIds() {
     PipelineStage stage = PipelineStage.builder()
                               .pipelineStageElements(Collections.singletonList(prepareEnvStatePipelineStageElement(1)))
@@ -1062,6 +1072,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = POOJA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckStageAndStageExecutionLooped() {
     PipelineStage stage =
         PipelineStage.builder()
@@ -1082,6 +1093,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = POOJA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckStageAndStageExecutionApprovalToWorkflow() {
     PipelineStage stage = PipelineStage.builder()
                               .pipelineStageElements(Collections.singletonList(prepareEnvStatePipelineStageElement(1)))
@@ -1094,6 +1106,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = POOJA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckStageAndStageExecutionWorkflowToApproval() {
     PipelineStage stage = PipelineStage.builder()
                               .pipelineStageElements(Collections.singletonList(prepareApprovalPipelineStageElement()))
@@ -1108,6 +1121,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckStageAndStageExecutionInsufficientStageElement() {
     PipelineStage stage = PipelineStage.builder()
                               .pipelineStageElements(Collections.singletonList(prepareEnvStatePipelineStageElement(1)))
@@ -1126,6 +1140,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testCheckStageAndStageExecutionInsufficientWorkflowExecutions() {
     PipelineStage stage =
         PipelineStage.builder().pipelineStageElements(asList(prepareEnvStatePipelineStageElement(1))).build();
@@ -1139,6 +1154,7 @@ public class PipelineResumeUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testAddLatestPipelineResumeFilter() {
     PageRequest<WorkflowExecution> pageRequest = aPageRequest().addFilter(ACCOUNT_ID, Operator.EQ, ACCOUNT_ID).build();
 

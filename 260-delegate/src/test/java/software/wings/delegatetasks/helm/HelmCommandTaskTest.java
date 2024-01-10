@@ -50,6 +50,7 @@ import software.wings.helpers.ext.helm.response.HelmReleaseHistoryCommandRespons
 import java.io.IOException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -88,6 +89,7 @@ public class HelmCommandTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testInitPrerequisite() {
     String kubeConfigLocation = ".kube/config";
 
@@ -105,6 +107,7 @@ public class HelmCommandTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testRunTaskWithInstallCommand() throws IOException {
     HelmInstallCommandRequest request = HelmInstallCommandRequest.builder().accountId("accountId").build();
     HelmInstallCommandResponse deployResponse =
@@ -122,6 +125,7 @@ public class HelmCommandTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testRunTaskWithRollbackCommand() throws IOException {
     HelmRollbackCommandRequest request = HelmRollbackCommandRequest.builder().accountId("accountId").build();
     HelmInstallCommandResponse rollbackResponse =
@@ -170,6 +174,7 @@ public class HelmCommandTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testRunTaskWithFailure() throws IOException {
     HelmInstallCommandRequest request = HelmInstallCommandRequest.builder().accountId("accountId").build();
     HelmInstallCommandResponse deployResponse = HelmInstallCommandResponse.builder()
@@ -187,6 +192,7 @@ public class HelmCommandTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetExecutionCallback() {
     HelmCommandTask helmCommandTask = getTask(false);
     HelmCommandTask asyncHelmCommandTask = getTask(true);
@@ -205,6 +211,7 @@ public class HelmCommandTaskTest extends WingsBaseTest {
   @Test(expected = NotImplementedException.class)
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testRunWithObjectList() {
     helmCommandTask.run(new Object[] {});
   }

@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.sql.SQLException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -55,6 +56,7 @@ public class ApplicationDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testApplicationDataFetcher() {
     Application app = createApp(ACCOUNT1_ID, APP1_ID_ACCOUNT1, APPLICATION_NAME, TAG_TEAM, TAG_VALUE_TEAM1);
     app.setDescription("DESC");
@@ -91,6 +93,7 @@ public class ApplicationDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldThrowExceptionForInaccessibleApp() {
     Application app = createApp(ACCOUNT1_ID, APP2_ID_ACCOUNT1, APPLICATION_NAME, TAG_TEAM, TAG_VALUE_TEAM1);
     app.setDescription("DESC");

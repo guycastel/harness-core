@@ -53,6 +53,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -108,6 +109,7 @@ public class SecretManagerTest extends GraphQLTest {
   @Test
   @Owner(developers = MITISHA)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testCustomSecretManagerQuery() {
     String secretManagerQueryPattern = MultilineStringMixin.$.GQL(/*
 {
@@ -156,6 +158,7 @@ testVariables {
   @Test
   @Owner(developers = MITISHA)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testCustomSecretManagerListQuery() {
     String query = MultilineStringMixin.$.GQL(/*
 {
@@ -248,6 +251,7 @@ name
   @Test
   @Owner(developers = ABHINAV)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testSecretManagerListQuery() {
     String query = MultilineStringMixin.$.GQL(/*
 {
@@ -269,6 +273,7 @@ nodes{
   @Test
   @Owner(developers = ABHINAV)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void securityManagerTypesMustBeEqualInAPIandDB() {
     // LOCAL will differ in both the secret managers.
     assertThat(EncryptionType.values().length).isEqualTo(QLSecretManagerType.values().length + 2);

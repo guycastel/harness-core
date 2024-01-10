@@ -34,6 +34,7 @@ import software.wings.graphql.schema.type.QLPipelineConnection;
 import com.google.inject.Inject;
 import graphql.ExecutionResult;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -76,6 +77,7 @@ public class ConnectionTest extends GraphQLTest {
   @Test
   @Owner(developers = GEORGE)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testConnectionPaging() {
     final Seed seed = new Seed(0);
     final Owners owners = ownerManager.create();

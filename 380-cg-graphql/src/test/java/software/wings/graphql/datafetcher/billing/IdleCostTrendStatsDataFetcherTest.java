@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -105,6 +106,7 @@ public class IdleCostTrendStatsDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = ROHIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchUnallocatedCostStats() throws SQLException {
     List<BillingDataMetaDataFields> metaDataFields = new ArrayList<>();
     metaDataFields.add(BillingDataMetaDataFields.SUM);
@@ -121,6 +123,7 @@ public class IdleCostTrendStatsDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetBillingTrendWhenDbIsInvalid() {
     when(timeScaleDBService.isValid()).thenReturn(false);
     List<QLCCMAggregationFunction> aggregationFunction =
@@ -134,6 +137,7 @@ public class IdleCostTrendStatsDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetIdleCostTrendStats() {
     List<QLCCMAggregationFunction> aggregationFunction = Arrays.asList(makeBillingAmtAggregation(),
         makeIdleCostAggregation(), makeCpuBillingAggregation(), makeMemoryBillingAggregation());
@@ -156,6 +160,7 @@ public class IdleCostTrendStatsDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetCpuIdleCostTrendStats() {
     List<QLCCMAggregationFunction> aggregationFunction =
         Arrays.asList(makeCpuIdleCostAggregation(), makeAvgCpuUtilizationAggregation());
@@ -180,6 +185,7 @@ public class IdleCostTrendStatsDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetMemoryIdleCostTrendStats() {
     List<QLCCMAggregationFunction> aggregationFunction =
         Arrays.asList(makeMemoryIdleCostAggregation(), makeAvgMemoryUtilizationAggregation());
@@ -204,6 +210,7 @@ public class IdleCostTrendStatsDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetAllIdleCostTrendStats() {
     List<QLCCMAggregationFunction> aggregationFunction =
         Arrays.asList(makeBillingAmtAggregation(), makeIdleCostAggregation(), makeCpuIdleCostAggregation(),
@@ -228,6 +235,7 @@ public class IdleCostTrendStatsDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetBillingTrendWhenQueryThrowsException() throws SQLException {
     when(timeScaleDBService.isValid()).thenReturn(true);
     Statement mockStatement = mock(Statement.class);

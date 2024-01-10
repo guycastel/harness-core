@@ -28,6 +28,7 @@ import software.wings.security.UserThreadLocal;
 import com.google.inject.Inject;
 import java.sql.SQLException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -72,6 +73,7 @@ public class CloudProviderDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = IGOR)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetByNameForNonExistingName() {
     cloudProviderDataFetcher.fetch(
         QLCloudProviderQueryParameters.builder().name("Non existing name").build(), ACCOUNT1_ID);

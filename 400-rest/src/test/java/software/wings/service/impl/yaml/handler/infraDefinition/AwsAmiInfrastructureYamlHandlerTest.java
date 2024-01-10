@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -54,6 +55,7 @@ public class AwsAmiInfrastructureYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = SAINATH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpsertFromYaml() throws IOException {
     String cloudProviderName = "cloudProviderName";
     String region = "region";

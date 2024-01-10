@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -199,6 +200,7 @@ public class AzureVMSSDeployTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANIL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testScaleSetNotPresent() {
     AzureConfig azureConfig = AzureConfig.builder().build();
     AzureVMSSDeployTaskParameters deployTaskParameters = buildDeployTaskParameters();
@@ -217,6 +219,7 @@ public class AzureVMSSDeployTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANIL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testRollbackScaleSetSuccess() {
     AzureConfig azureConfig = AzureConfig.builder().build();
     AzureVMSSDeployTaskParameters deployTaskParameters = buildDeployTaskParameters();

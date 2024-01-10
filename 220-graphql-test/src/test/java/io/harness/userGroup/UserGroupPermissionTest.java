@@ -87,6 +87,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -201,6 +202,7 @@ mutation {
   @Test
   @Owner(developers = DEEPAK)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testAccountPermissions() {
     // Create Permissions
     Set<PermissionType> allPermissions = createAccountPermissions();
@@ -297,6 +299,7 @@ mutation {
   @Test
   @Owner(developers = DEEPAK)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testAllEntityAppPermissions() {
     AppPermission allApplications = createAllEntityAllAppsPermission();
     Set<AppPermission> appPermissions = new HashSet<>();

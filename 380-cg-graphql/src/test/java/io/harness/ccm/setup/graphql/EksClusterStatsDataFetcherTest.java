@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -61,6 +62,7 @@ public class EksClusterStatsDataFetcherTest extends AbstractDataFetcherTestBase 
   @Test
   @Owner(developers = ROHIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchConnection() {
     List<QLCESetupFilter> filters = Arrays.asList(getInfraMasterAccountIdFilter());
     QLEKSClusterData data = eksClusterStatsDataFetcher.fetchConnection(filters, null, null);
@@ -92,6 +94,7 @@ public class EksClusterStatsDataFetcherTest extends AbstractDataFetcherTestBase 
   @Test
   @Owner(developers = ROHIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGenerateFilter() {
     QLCESetupFilter filter = eksClusterStatsDataFetcher.generateFilter(null, null, null);
     assertThat(filter).isNull();

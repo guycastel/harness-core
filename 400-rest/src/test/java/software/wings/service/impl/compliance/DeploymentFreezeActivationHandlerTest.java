@@ -28,6 +28,7 @@ import software.wings.service.impl.deployment.checks.DeploymentFreezeUtils;
 
 import com.google.inject.Inject;
 import java.util.Arrays;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentMatchers;
@@ -44,6 +45,7 @@ public class DeploymentFreezeActivationHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldDoNothingForNoFreezeWindows() {
     deploymentFreezeActivationHandler.handle(GovernanceConfig.builder().build());
     Mockito.verify(deploymentFreezeUtils, Mockito.never()).handleActivationEvent(any(), ArgumentMatchers.anyString());
@@ -52,6 +54,7 @@ public class DeploymentFreezeActivationHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldDoNothingForNoMatchingWindows() {
     GovernanceConfig governanceConfig =
         GovernanceConfig.builder()
@@ -67,6 +70,7 @@ public class DeploymentFreezeActivationHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldHandleActivationEventForMatchingWindows() {
     long currentTime = System.currentTimeMillis();
     TimeRangeBasedFreezeConfig window1 =

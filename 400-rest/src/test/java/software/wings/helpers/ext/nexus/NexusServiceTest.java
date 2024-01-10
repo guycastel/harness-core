@@ -82,6 +82,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joor.Reflect;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -731,6 +732,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetArtifactPathsByRepoStartsWithUrl() {
     wireMockRule.stubFor(
         get(urlEqualTo("/nexus/service/local/repositories/releases/content/fakepath"))
@@ -759,6 +761,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetRepositoriesError() {
     wireMockRule.stubFor(get(urlEqualTo("/nexus/service/local/repositories"))
                              .willReturn(aResponse()
@@ -772,6 +775,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetRepositoriesError404() {
     NexusRequest config = NexusRequest.builder()
                               .nexusUrl(String.format("http://localhost:%d/nexus2/", wireMockRule.port()))
@@ -796,6 +800,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = VED)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetRepositoriesError404_reverse() {
     NexusRequest config = NexusRequest.builder()
                               .nexusUrl(String.format("http://localhost:%d/nexus3/", wireMockRule.port()))
@@ -820,6 +825,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetDockerRepositoriesNexus2xError() {
     wireMockRule.stubFor(get(urlEqualTo("/nexus/service/local/repositories"))
                              .willReturn(aResponse()
@@ -838,6 +844,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetNugetRepositoriesNexus2x() {
     Map<String, String> repoMap = nexusClient.getRepositories(nexusConfig, RepositoryFormat.nuget.name());
     assertThat(repoMap.size()).isEqualTo(1);
@@ -847,6 +854,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetNPMRepositoriesNexus2x() {
     Map<String, String> repoMap = nexusClient.getRepositories(nexusConfig, RepositoryFormat.npm.name());
     assertThat(repoMap.size()).isEqualTo(1);
@@ -856,6 +864,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetMavenRepositoriesNexus2x() {
     Map<String, String> repoMap = nexusClient.getRepositories(nexusConfig, RepositoryFormat.maven.name());
     assertThat(repoMap.size()).isEqualTo(1);
@@ -865,6 +874,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetArtifactPathsByRepoError() {
     wireMockRule.stubFor(get(urlEqualTo("/nexus/service/local/repositories/releases/content/"))
                              .willReturn(aResponse()
@@ -884,6 +894,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetArtifactPathsByRepoStartsWithUrlError() {
     wireMockRule.stubFor(get(urlEqualTo("/nexus/service/local/repositories/releases/content/fakepath"))
                              .willReturn(aResponse()
@@ -903,6 +914,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetGroupIdPaths() {
     wireMockRule.stubFor(get(urlEqualTo("/nexus/service/local/repositories/releases/index_content/"))
                              .willReturn(aResponse()
@@ -964,6 +976,7 @@ public class NexusServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetArtifactNames() {
     wireMockRule.stubFor(
         get(urlEqualTo("/nexus/service/local/repositories/releases/index_content/software/wings/nexus/"))

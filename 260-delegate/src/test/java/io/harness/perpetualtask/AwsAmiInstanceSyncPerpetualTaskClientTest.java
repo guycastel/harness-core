@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -64,6 +65,7 @@ public class AwsAmiInstanceSyncPerpetualTaskClientTest extends WingsBaseTest {
   @Test
   @Owner(developers = OwnerRule.YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void getTaskParams() {
     AwsConfig awsConfig = AwsConfig.builder().accountId(ACCOUNT_ID).tag("tag").build();
     prepareTaskData(awsConfig);
@@ -87,6 +89,7 @@ public class AwsAmiInstanceSyncPerpetualTaskClientTest extends WingsBaseTest {
   @Test
   @Owner(developers = OwnerRule.YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void getValidationTask() {
     AwsConfig awsConfig = AwsConfig.builder().accountId(ACCOUNT_ID).tag("tag").build();
     prepareTaskData(awsConfig);

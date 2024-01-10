@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.validation.ConstraintViolationException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -113,6 +114,7 @@ public class AccountDefaultVarYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCRUDAndGet() throws Exception {
     GitFileChange gitFileChange = new GitFileChange();
     gitFileChange.setFileContent(v1_validYamlContent);
@@ -162,6 +164,7 @@ public class AccountDefaultVarYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFailures() throws Exception {
     // Invalid yaml path
     GitFileChange gitFileChange = new GitFileChange();

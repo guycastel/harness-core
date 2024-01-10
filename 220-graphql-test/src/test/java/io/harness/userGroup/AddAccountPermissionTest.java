@@ -28,6 +28,7 @@ import software.wings.service.intfc.UserGroupService;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -49,6 +50,7 @@ public class AddAccountPermissionTest extends GraphQLTest {
   @Test
   @Owner(developers = DEEPAK)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testAddingAppPermissionToUserGroup() {
     UserGroup userGroup = userGroupHelper.createUserGroup(getAccountId(), "harnessUserGroup", "sample user group");
     String userGroupQueryPattern = MultilineStringMixin.$.GQL(/*

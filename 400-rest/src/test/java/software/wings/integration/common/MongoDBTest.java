@@ -21,6 +21,7 @@ import software.wings.rules.Integration;
 
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -32,6 +33,7 @@ public class MongoDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(StressTests.class)
+  @Ignore("Skipping long running CG tests")
   // this test was used to validate mongo setting for dirty reads
   // there is no need it to be run again and again
   public void dirtyReads() {

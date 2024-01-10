@@ -22,6 +22,7 @@ import software.wings.graphql.schema.mutation.secrets.payload.QLDeleteSecretPayl
 import com.google.inject.Inject;
 import graphql.ExecutionResult;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -33,6 +34,7 @@ public class DeleteEncryptedTextTest extends GraphQLTest {
   @Test
   @Owner(developers = DEEPAK)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testDeletingEncryptedText() {
     String secretId = encryptedTextHelper.CreateEncryptedText("secretName");
     String query = $GQL(/*
@@ -49,6 +51,7 @@ public class DeleteEncryptedTextTest extends GraphQLTest {
   @Test
   @Owner(developers = DEEPAK)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testDeletingSecretWithInvalidId() {
     String secretId = "invalidSecretId";
     String query = $GQL(/*

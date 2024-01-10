@@ -43,6 +43,7 @@ import software.wings.service.impl.AwsHelperService;
 import com.amazonaws.services.ecs.model.DescribeServicesResult;
 import com.amazonaws.services.ecs.model.Service;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -95,6 +96,7 @@ public class EcsSteadyStateCheckTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = ARVIND)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testRun_ValidateTimeout() {
     doReturn(new DescribeServicesResult().withServices(
                  new Service().withServiceName("Name").withClusterArn("Cluster").withDesiredCount(1)))

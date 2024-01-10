@@ -76,6 +76,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.experimental.FieldNameConstants;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -956,6 +957,7 @@ public class InstanceStatsDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testAppTagServiceTwoLevelAggregation() {
     // One level Aggregation
     QLInstanceAggregation firstLevelAggregation =

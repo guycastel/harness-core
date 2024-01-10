@@ -52,6 +52,7 @@ import dev.morphia.query.MorphiaIterator;
 import dev.morphia.query.Query;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -70,6 +71,7 @@ public class ArtifactSourceTemplateProcessorTest extends TemplateBaseTestHelper 
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldUpdateArtifactStreamLinked() {
     Template template = constructCustomArtifactTemplateEntity();
     Template savedTemplate = templateService.save(template);

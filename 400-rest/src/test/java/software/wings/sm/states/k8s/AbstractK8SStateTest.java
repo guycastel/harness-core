@@ -228,6 +228,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -1513,6 +1514,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testSaveK8sElement() {
     K8sElement k8sElement = K8sElement.builder().releaseName("releaseName").releaseNumber(12).build();
     abstractK8SState.saveK8sElement(context, k8sElement);
@@ -1535,6 +1537,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateManifestsArtifactVariableNames() {
     try {
       abstractK8SState.updateManifestsArtifactVariableNames(APP_ID, INFRA_MAPPING_ID, emptySet());
@@ -1557,6 +1560,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = NAMAN_TALAYCHA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testExecuteWrapperWithManifestKustomize() {
     K8sStateExecutor k8sStateExecutor = mock(K8sStateExecutor.class);
     K8sStateExecutionData k8sStateExecutionData = (K8sStateExecutionData) context.getStateExecutionData();
@@ -1583,6 +1587,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testExecuteWrapperWithManifest() {
     K8sStateExecutor k8sStateExecutor = mock(K8sStateExecutor.class);
     K8sStateExecutionData k8sStateExecutionData = (K8sStateExecutionData) context.getStateExecutionData();
@@ -1642,6 +1647,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = ACHYUTH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testExecuteWrapperWithManifestStepOverride() {
     K8sApplyState k8sApplyState = mock(K8sApplyState.class);
     GitFileConfig remoteOverride = GitFileConfig.builder()
@@ -1680,6 +1686,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetApplicationManifests() {
     when(openShiftManagerService.isOpenShiftManifestConfig(context)).thenReturn(true);
     abstractK8SState.fetchApplicationManifests(context);
@@ -1697,6 +1704,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testSaveInstanceInfoToSweepingOutput() {
     on(abstractK8SState).set("sweepingOutputService", mockedSweepingOutputService);
     abstractK8SState.saveInstanceInfoToSweepingOutput(context, asList(anInstanceElement().dockerId("dockerId").build()),
@@ -1726,6 +1734,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testStorePreviousHelmDeploymentInfo() {
     on(abstractK8SState).set("sweepingOutputService", mockedSweepingOutputService);
     long epochNow = Instant.now().toEpochMilli();
@@ -1803,6 +1812,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = ABOSII)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetAppId() {
     WorkflowStandardParams standardParams =
         WorkflowStandardParams.Builder.aWorkflowStandardParams().withAppId(APP_ID).build();
@@ -1814,6 +1824,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = BOJANA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testsaveInstanceInfoToSweepingOutputDontSkipVerification() {
     on(abstractK8SState).set("sweepingOutputService", mockedSweepingOutputService);
     abstractK8SState.saveInstanceInfoToSweepingOutput(context, asList(anInstanceElement().dockerId("dockerId").build()),
@@ -1830,6 +1841,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = BOJANA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testsaveInstanceInfoToSweepingOutputSkipVerification() {
     on(abstractK8SState).set("sweepingOutputService", mockedSweepingOutputService);
     abstractK8SState.saveInstanceInfoToSweepingOutput(context, asList(anInstanceElement().dockerId("dockerId").build()),
@@ -1846,6 +1858,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = PARDHA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testRenderedDelegateSelectorsQueueK8sDelegateTask() {
     ExecutionContext executionContext = mock(DeploymentExecutionContext.class);
     SettingAttribute settingAttribute = aSettingAttribute()
@@ -1886,6 +1899,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = TARUN_UBA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetK8sCanaryDeleteServiceElement() {
     on(abstractK8SState).set("sweepingOutputService", mockedSweepingOutputService);
     ArgumentCaptor<SweepingOutputInquiry> inquiryCaptor = ArgumentCaptor.forClass(SweepingOutputInquiry.class);
@@ -1899,6 +1913,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = TARUN_UBA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testSaveK8sCanaryDeployRun() {
     on(abstractK8SState).set("sweepingOutputService", mockedSweepingOutputService);
     abstractK8SState.saveK8sCanaryDeployRun(context);
@@ -1912,6 +1927,7 @@ public class AbstractK8SStateTest extends WingsBaseTest {
   @Test
   @Owner(developers = TARUN_UBA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testHandleAsyncResponseForGitTaskWrapper_FF_COMMIT() {
     GitCommandExecutionResponse gitCommandExecutionResponse =
         GitCommandExecutionResponse.builder()

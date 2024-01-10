@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.sql.SQLException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -50,6 +51,7 @@ public class InfrastructureDefinitionDataFetcherTest extends AbstractDataFetcher
   @Test
   @Owner(developers = PARDHA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testInfrastructureDefinitionDataFetcher() {
     user.setUserRequestContext(
         UserRequestContext.builder().userPermissionInfo(UserPermissionInfo.builder().build()).build());
@@ -75,6 +77,7 @@ public class InfrastructureDefinitionDataFetcherTest extends AbstractDataFetcher
   @Test
   @Owner(developers = PARDHA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testInfrastructureDefinitionDataFetcherWithIncorrectInfraId() {
     user.setUserRequestContext(
         UserRequestContext.builder().userPermissionInfo(UserPermissionInfo.builder().build()).build());

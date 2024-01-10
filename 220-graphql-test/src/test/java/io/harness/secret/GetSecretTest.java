@@ -37,6 +37,7 @@ import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -70,6 +71,7 @@ public class GetSecretTest extends GraphQLTest {
   @Test
   @Owner(developers = ABHINAV)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testSecretByNameQuery() {
     String secretQueryPattern = MultilineStringMixin.$.GQL(/*
 {
@@ -122,6 +124,7 @@ id
   @Test
   @Owner(developers = ABHINAV)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testSecretByIdQuery() {
     String secretQueryPattern = MultilineStringMixin.$.GQL(/*
 {

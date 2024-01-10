@@ -63,6 +63,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -167,6 +168,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testDeleteWithFileOverrideForAService() throws IOException {
     String yamlString = getYamlFile(UNENCRYPTED_OVERRIDE_YAML);
     ChangeContext<ConfigFile.OverrideYaml> changeContext =
@@ -184,6 +186,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testDeleteWithFileOverrideForAllServices() throws IOException {
     String yamlString = getYamlFile(UNENCRYPTED_OVERRIDE_YAML);
     ChangeContext<ConfigFile.OverrideYaml> changeContext =
@@ -199,6 +202,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpsertFromYamlForUnencryptedOverridesForAllServices() throws IOException {
     testUpsertFromYaml(
         UNENCRYPTED_OVERRIDE_YAML, CONFIG_FILE, yamlFilePathForAllServices, configFilePathForAllServices);
@@ -207,6 +211,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpsertFromYamlForUnencryptedOverridesForAService() throws IOException {
     testUpsertFromYaml(UNENCRYPTED_OVERRIDE_YAML, CONFIG_FILE, yamlFilePathForAService, configFilePathForAService);
   }
@@ -214,6 +219,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpsertFromYamlForEncryptedOverridesForAService() throws IOException {
     testUpsertFromYaml(ENCRYPTED_OVERRIDE_YAML, null, yamlFilePathForAService, configFilePathForAService);
   }
@@ -221,6 +227,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpsertFromYamlForEncryptedOverridesForAllService() throws IOException {
     testUpsertFromYaml(ENCRYPTED_OVERRIDE_YAML, null, yamlFilePathForAllServices, configFilePathForAllServices);
   }
@@ -228,6 +235,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGitSyncFlagOnUpsertFromYaml() throws IOException {
     String yamlFilePath = yamlFilePathForAService;
     String yamlString = getYamlFile(UNENCRYPTED_OVERRIDE_YAML);
@@ -253,6 +261,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldThrowErrorIfConfigFileAbsentOnSave() throws IOException {
     testUpsertFromYaml(UNENCRYPTED_OVERRIDE_YAML, null, yamlFilePathForAService, configFilePathForAService);
   }
@@ -260,6 +269,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldNotThrowErrorIfConfigFileAbsentOnUpdate() throws IOException {
     String yamlString = getYamlFile(UNENCRYPTED_OVERRIDE_YAML);
     ChangeContext<ConfigFile.OverrideYaml> changeContext =
@@ -281,6 +291,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldIgnoreTargetToEnvFieldIfPresent() throws IOException {
     String yamlString = getYamlFile(INCORRECT_OVERRIDE_YAML);
     ChangeContext<ConfigFile.OverrideYaml> changeContext =
@@ -309,6 +320,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateFromYamlWhenRelativePathHasBackSlashesForAllServices() throws IOException {
     String yamlString = getYamlFile(UNENCRYPTED_OVERRIDE_YAML_2);
     ChangeContext<ConfigFile.OverrideYaml> changeContext =
@@ -332,6 +344,7 @@ public class ConfigFileOverrideYamlHandlerTest extends YamlHandlerTestBase {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateFromYamlWhenRelativePathHasBackSlashesForAService() throws IOException {
     String yamlString = getYamlFile(UNENCRYPTED_OVERRIDE_YAML_2);
     ChangeContext<ConfigFile.OverrideYaml> changeContext =

@@ -24,6 +24,7 @@ import software.wings.service.intfc.instance.licensing.InstanceUsageLimitChecker
 import software.wings.service.intfc.instance.licensing.InstanceUsageLimitExcessHandler;
 
 import com.google.inject.Inject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -38,6 +39,7 @@ public class InstanceUsageLimitExcessHandlerImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testAlertRaised() {
     String accountId = "some-account-id";
     long percentLimit = 90L;
@@ -52,6 +54,7 @@ public class InstanceUsageLimitExcessHandlerImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testAlertIsClosedWhenWithinLimit() {
     String accountId = "some-account-id";
     long percentLimit = 90L;

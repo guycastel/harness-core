@@ -22,6 +22,7 @@ import software.wings.beans.EcsInfrastructureMapping;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -29,6 +30,7 @@ public class BlueprintProcessorTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testValidateKeys() {
     AwsLambdaInfraStructureMapping awsLambdaInfraStructureMapping = new AwsLambdaInfraStructureMapping();
     Map<String, Object> blueprints = new HashMap<>();

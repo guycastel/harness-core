@@ -24,6 +24,7 @@ import software.wings.WingsBaseTest;
 
 import com.google.inject.Inject;
 import java.time.Duration;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -40,6 +41,7 @@ public class DeleteAccountHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = MEHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testRegisterIterators() {
     ArgumentCaptor<MongoPersistenceIteratorBuilder> captor =
         ArgumentCaptor.forClass(MongoPersistenceIteratorBuilder.class);

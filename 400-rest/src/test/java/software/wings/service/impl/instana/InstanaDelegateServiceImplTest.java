@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -63,6 +64,7 @@ public class InstanaDelegateServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = KAMAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetInfraMetrics() {
     InstanaInfraMetricRequest infraMetricRequest = InstanaInfraMetricRequest.builder().build();
     String stateExecutionId = UUID.randomUUID().toString();

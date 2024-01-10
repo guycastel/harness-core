@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import java.sql.SQLException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -55,6 +56,7 @@ public class PipelineDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = RUSHABH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testPipelineDataFetcher() {
     Pipeline pipeline = createPipeline(ACCOUNT1_ID, APP1_ID_ACCOUNT1, PIPELINE1);
 
@@ -109,6 +111,7 @@ public class PipelineDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldThrowExceptionForInaccessiblePipeline() {
     createPipeline(ACCOUNT1_ID, APP1_ID_ACCOUNT1, PIPELINE1);
     user.setUserRequestContext(

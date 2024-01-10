@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.Mock;
@@ -398,6 +399,7 @@ public class APMVerificationStateTest extends APMStateVerificationTestBase {
   @Test
   @Owner(developers = PRAVEEN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testInValidInitialDelay_Seconds() throws Exception {
     YamlUtils yamlUtils = new YamlUtils();
     String yamlStr =

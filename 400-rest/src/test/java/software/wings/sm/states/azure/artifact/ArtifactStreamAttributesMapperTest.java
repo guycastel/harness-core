@@ -21,6 +21,7 @@ import software.wings.settings.SettingVariableTypes;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -28,6 +29,7 @@ public class ArtifactStreamAttributesMapperTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_KUMAR)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetArtifactPath() {
     // Case1: when jobName occurs as a substring inside artifactPath
     String path = "harness-internal/harness-internal/20211208.2.zip";

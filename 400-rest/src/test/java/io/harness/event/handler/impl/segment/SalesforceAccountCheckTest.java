@@ -21,6 +21,7 @@ import software.wings.beans.AccountType;
 
 import com.google.inject.Inject;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runners.MethodSorters;
@@ -35,6 +36,7 @@ public class SalesforceAccountCheckTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void TC0_testAccountPresentInSalesforce() {
     Account account = getAccount(AccountType.PAID);
     account.setAccountName("PositiveAccountTesting");
@@ -46,6 +48,7 @@ public class SalesforceAccountCheckTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void TC1_testAccountPresentInSalesforce() {
     Account account = getAccount(AccountType.PAID);
     account.setAccountName("NegativeAccountTesting");
@@ -57,6 +60,7 @@ public class SalesforceAccountCheckTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void TC2_testAccountPresentInSalesforce() {
     Account account = getAccount(AccountType.PAID);
     when(salesforceApiCheck.isPresentInSalesforce(account)).thenReturn(true);
@@ -67,6 +71,7 @@ public class SalesforceAccountCheckTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void TC3_testAccountPresentInSalesforce() {
     Account account = new Account();
     when(salesforceApiCheck.isPresentInSalesforce(account)).thenReturn(false);

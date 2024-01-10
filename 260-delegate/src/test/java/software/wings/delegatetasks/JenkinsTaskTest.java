@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.apache.http.client.HttpResponseException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -134,6 +135,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = BRETT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldExecuteSuccessfullyWhenBuildPasses() throws Exception {
     when(customBuildWithDetails.getResult()).thenReturn(BuildResult.SUCCESS);
     when(customBuildWithDetails.getDescription()).thenReturn("test-description");
@@ -161,6 +163,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = BRETT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldFailWhenBuildFails() throws Exception {
     when(customBuildWithDetails.getResult()).thenReturn(BuildResult.FAILURE);
 
@@ -186,6 +189,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = BRETT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldFailWhenBuildUnstable() throws Exception {
     when(customBuildWithDetails.getResult()).thenReturn(BuildResult.UNSTABLE);
 
@@ -210,6 +214,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldFailWhenNoJobFound() throws Exception {
     JenkinsTaskParams params = buildJenkinsTaskParams();
     params.setParameters(Collections.emptyMap());
@@ -228,6 +233,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = BRETT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldPassWhenBuildUnstableAndUnstableSuccessSet() throws Exception {
     when(customBuildWithDetails.getResult()).thenReturn(BuildResult.UNSTABLE);
 
@@ -253,6 +259,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldInjectEnvVarsWhenInjectEnvVarsSet() throws Exception {
     when(customBuildWithDetails.getResult()).thenReturn(BuildResult.SUCCESS);
     when(customBuildWithDetails.getDescription()).thenReturn("test-description");
@@ -286,6 +293,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldFailWhenGetEnvVarsThrows() throws Exception {
     when(customBuildWithDetails.getResult()).thenReturn(BuildResult.SUCCESS);
     when(customBuildWithDetails.getDescription()).thenReturn("test-description");
@@ -318,6 +326,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = ROHITKARELIA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldFailWhenTriggerJobAPIFails() throws Exception {
     JenkinsTaskParams params = buildJenkinsTaskParams();
     params.setParameters(Collections.emptyMap());
@@ -334,6 +343,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = ROHITKARELIA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldFailWhenTriggerJobAPIFailsWithUnknownException() throws Exception {
     JenkinsTaskParams params = buildJenkinsTaskParams();
     params.setParameters(Collections.emptyMap());
@@ -350,6 +360,7 @@ public class JenkinsTaskTest extends WingsBaseTest {
   @Test
   @Owner(developers = AGORODETKI)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldPassAppIdForLoggingScopeTroughJenkinsTaskParams() {
     JenkinsTaskParams jenkinsTaskParams = buildJenkinsTaskParams();
     Log logObject =

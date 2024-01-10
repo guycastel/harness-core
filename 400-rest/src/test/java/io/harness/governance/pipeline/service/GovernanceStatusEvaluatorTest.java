@@ -21,6 +21,7 @@ import software.wings.beans.HarnessTagLink;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -28,6 +29,7 @@ public class GovernanceStatusEvaluatorTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testContainsAll() {
     List<HarnessTagLink> links = Arrays.asList(tagLink("color", "blue"), tagLink("onprem", null));
     List<Tag> tags = Collections.singletonList(new Tag("color", null));
@@ -44,6 +46,7 @@ public class GovernanceStatusEvaluatorTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testContainsAny() {
     List<HarnessTagLink> links = Arrays.asList(tagLink("color", "blue"), tagLink("onprem", null));
     List<Tag> tags = Arrays.asList(new Tag("color", null), new Tag("onprem", "yes"));

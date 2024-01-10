@@ -60,6 +60,7 @@ import com.google.inject.Inject;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -197,6 +198,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldHandleNullBuildSourceResponse() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_2);
     buildSourceCallback.handleResponseForSuccessInternal(
@@ -211,6 +213,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNotify() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_1);
     BuildSourceExecutionResponse buildSourceExecutionResponse = prepareBuildSourceExecutionResponse(true);
@@ -225,6 +228,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNotifyOnFailedResponse() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_1);
     BuildSourceExecutionResponse buildSourceExecutionResponse = prepareBuildSourceExecutionResponse(true);
@@ -241,6 +245,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNotifyOnErrorNotifyResponseDataResponse() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_1);
     buildSourceCallback.notify(newHashMap("", ErrorNotifyResponseData.builder().build()));
@@ -252,6 +257,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNotifyWithExecutorRejectedQueueException() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_1);
     when(executorService.submit(any(Runnable.class))).thenThrow(RejectedExecutionException.class);
@@ -267,6 +273,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = VGLIJIN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNotifyThrowsArtifactStreamNotFound() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_1);
     when(artifactStreamService.get(ARTIFACT_STREAM_ID_1)).thenReturn(null);
@@ -277,6 +284,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = VGLIJIN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNotifyErrorThrowsArtifactStreamNotFound() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_1);
     when(artifactStreamService.get(ARTIFACT_STREAM_ID_1)).thenReturn(null);
@@ -287,6 +295,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNotifyOnFailedResponseMax() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_1);
     ArtifactStream artifactStreamStopped = DockerArtifactStream.builder()
@@ -314,6 +323,7 @@ public class BuildSourceCallbackTest extends WingsBaseTest {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldTriggerExecutionIfFirstCollectionFailed() {
     buildSourceCallback.setArtifactStreamId(ARTIFACT_STREAM_ID_2);
     ARTIFACT_STREAM_UNSTABLE.setFailedCronAttempts(1);

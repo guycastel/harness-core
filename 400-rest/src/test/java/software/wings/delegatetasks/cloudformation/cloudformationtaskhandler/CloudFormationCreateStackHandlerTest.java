@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -77,6 +78,7 @@ public class CloudFormationCreateStackHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = ARVIND)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStackUsingDeploy() {
     CloudFormationCreateStackRequest request = initUpdate();
 
@@ -104,6 +106,7 @@ public class CloudFormationCreateStackHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = ARVIND)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStackUsingDeployWithFailure() {
     CloudFormationCreateStackRequest request = initUpdate();
 

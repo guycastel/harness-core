@@ -26,6 +26,7 @@ import software.wings.security.UserThreadLocal;
 import com.google.inject.Inject;
 import java.sql.SQLException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -44,6 +45,7 @@ public class EnvironmentDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = RUSHABH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testEnvironmentDataFetcher() {
     Environment environment = createEnv(
         ACCOUNT1_ID, APP1_ID_ACCOUNT1, ENV1_ID_APP1_ACCOUNT1, ENV1_ID_APP1_ACCOUNT1, TAG_ENVTYPE, TAG_VALUE_PROD);

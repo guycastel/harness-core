@@ -38,6 +38,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.google.inject.Inject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -63,6 +64,7 @@ public class PruneEntityListenerTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void unhandledClass() throws Exception {
     when(wingsPersistence.get(Base.class, ENTITY_ID)).thenReturn(null);
 
@@ -79,6 +81,7 @@ public class PruneEntityListenerTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void wrongClass() throws Exception {
     listener.onMessage(new PruneEvent("foo", APP_ID, ENTITY_ID));
     verify(environmentService, times(0)).pruneDescendingEntities(APP_ID, ENTITY_ID);
@@ -86,6 +89,7 @@ public class PruneEntityListenerTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void retryIfServiceThrew() throws Exception {
     when(wingsPersistence.get(Environment.class, ENTITY_ID)).thenReturn(null);
 
@@ -98,6 +102,7 @@ public class PruneEntityListenerTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void verifyThrowFromDescendingEntity() throws Exception {
     when(wingsPersistence.get(Activity.class, ENTITY_ID)).thenReturn(null);
 

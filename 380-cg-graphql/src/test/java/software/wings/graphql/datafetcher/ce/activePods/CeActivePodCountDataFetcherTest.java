@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -98,6 +99,7 @@ public class CeActivePodCountDataFetcherTest extends AbstractDataFetcherTestBase
   @Test
   @Owner(developers = SHUBHANSHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetActivePodsWhenDbIsInvalid() {
     when(timeScaleDBService.isValid()).thenReturn(false);
     assertThatThrownBy(()

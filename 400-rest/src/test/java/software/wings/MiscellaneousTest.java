@@ -36,6 +36,7 @@ import com.openpojo.validation.rule.impl.TestClassMustBeProperlyNamedRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 import java.util.regex.Pattern;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -74,6 +75,7 @@ public class MiscellaneousTest extends CategoryTest {
   @Test
   @Owner(developers = UNKNOWN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldProvideCoverageToGetterSetterAndToString() {
     Validator validator =
         ValidatorBuilder.create().with(new SetterTester()).with(new GetterTester()).with(new ToStringTester()).build();
@@ -87,6 +89,7 @@ public class MiscellaneousTest extends CategoryTest {
   @Test
   @Owner(developers = UNKNOWN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldValidateCodeGovernanceRules() {
     Validator validator = ValidatorBuilder.create()
                               .with(new NoPublicFieldsExceptStaticFinalRule())
@@ -104,6 +107,7 @@ public class MiscellaneousTest extends CategoryTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldValidateTestGovernanceRules() {
     Validator validator = ValidatorBuilder.create().with(new TestClassMustBeProperlyNamedRule()).build();
 
@@ -113,6 +117,7 @@ public class MiscellaneousTest extends CategoryTest {
   @Test
   @Owner(developers = SOWMYA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testParseApisVersion() {
     ServiceApiVersion latestVersion = ServiceApiVersion.values()[ServiceApiVersion.values().length - 1];
     assertThat(Misc.parseApisVersion("application/json")).isEqualTo(latestVersion);

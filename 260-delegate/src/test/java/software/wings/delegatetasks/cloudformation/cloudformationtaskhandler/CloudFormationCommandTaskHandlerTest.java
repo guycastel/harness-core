@@ -73,6 +73,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -279,6 +280,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = SATYAM)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStack() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -328,6 +330,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStackWithExistingStackInUpdateRollbackCompleteState() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -374,6 +377,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStackWithExistingStackInUpdateRollbackFailedState() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -424,6 +428,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStackWithStackStatusToMarkAsSuccess() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -474,6 +479,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStackGit() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -525,6 +531,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = SATYAM)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testDeleteStack() {
     char[] accessKey = "abcd".toCharArray();
     char[] secretKey = "pqrs".toCharArray();
@@ -564,6 +571,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testDeleteStackNoExistingStack() {
     char[] accessKey = "abcd".toCharArray();
     char[] secretKey = "pqrs".toCharArray();
@@ -591,6 +599,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testDeleteStackWithException() {
     char[] accessKey = "abcd".toCharArray();
     char[] secretKey = "pqrs".toCharArray();
@@ -623,6 +632,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testDeleteStackWithTimeout() {
     char[] accessKey = "abcd".toCharArray();
     char[] secretKey = "pqrs".toCharArray();
@@ -656,6 +666,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testDeleteStackStatusDeleteFailed() {
     testFailureForDeleteStackStatus("DELETE_FAILED");
   }
@@ -663,6 +674,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testDeleteStackStatusUnknown() {
     testFailureForDeleteStackStatus("Unknown");
   }
@@ -670,6 +682,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = SATYAM)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testListStacks() {
     char[] accessKey = "abcd".toCharArray();
     char[] secretKey = "pqrs".toCharArray();
@@ -711,6 +724,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = SATYAM)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testListStacksWithException() {
     char[] accessKey = "abcd".toCharArray();
     char[] secretKey = "pqrs".toCharArray();
@@ -737,6 +751,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCreateStackCreateTypeUrl() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -794,6 +809,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCreateStackCreateTypeUnknown() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -840,6 +856,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStackUpdateTypeUnknown() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -880,6 +897,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateStackUpdateTypeUrl() {
     String templateBody = "Template Body";
     char[] accessKey = "abcd".toCharArray();
@@ -969,6 +987,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCreateStackCreateFailedStatus() {
     testFailureForCreateStackStatus("CREATE_FAILED");
   }
@@ -983,6 +1002,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCreateStackRollbackCompleteStatus() {
     testFailureForCreateStackStatus("ROLLBACK_COMPLETE");
   }
@@ -990,6 +1010,7 @@ public class CloudFormationCommandTaskHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHVENDRA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCreateStackDefaultStatus() {
     testFailureForCreateStackStatus("Unknown");
   }

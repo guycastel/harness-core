@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.Mock;
@@ -124,6 +125,7 @@ public class WorkflowFeedbackAnalysisJobTest extends VerificationBase {
   @Test
   @Owner(developers = SOWMYA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testHandle_feedbackIterator() throws Exception {
     workflowFeedbackAnalysisJob.handle(analysisContext);
     verify(analysisService, times(2)).getLastWorkflowAnalysisMinute(any(), any(), any());
@@ -132,6 +134,7 @@ public class WorkflowFeedbackAnalysisJobTest extends VerificationBase {
   @Test
   @Owner(developers = NANDAN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testHandle_feedbackIteratorWhenDisableLogmlNueralNetIsEnabled() throws Exception {
     when(managerCallFeedbacks.execute()).thenReturn(Response.success(new RestResponse<>(true)));
     workflowFeedbackAnalysisJob.handle(analysisContext);

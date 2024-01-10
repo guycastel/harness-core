@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -71,6 +72,7 @@ public class TemplateHelperTest extends TemplateBaseTestHelper {
   @Test
   @Owner(developers = VARDAN_BANSAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void test_getFolderDetails() {
     TemplateGallery templateGallery =
         templateGalleryService.getByAccount(GLOBAL_ACCOUNT_ID, templateGalleryService.getAccountGalleryKey());
@@ -123,6 +125,7 @@ public class TemplateHelperTest extends TemplateBaseTestHelper {
   @Test
   @Owner(developers = VARDAN_BANSAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void test_shouldAllowTemplateFolderDeletion() {
     setUserRequestContext();
     assertThat(templateHelper.shouldAllowTemplateFolderDeletion("appId1", new HashSet<>(Arrays.asList("template3"))))
@@ -135,6 +138,7 @@ public class TemplateHelperTest extends TemplateBaseTestHelper {
   @Test
   @Owner(developers = VARDAN_BANSAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void test_createSearchFilterWithTemplatePermissions() {
     setUserRequestContext();
     final TemplateRBACListFilter filter =

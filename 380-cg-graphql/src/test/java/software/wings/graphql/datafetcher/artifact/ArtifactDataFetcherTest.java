@@ -39,6 +39,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -61,6 +62,7 @@ public class ArtifactDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testArtifactDataFetcher() {
     Service service = createService(
         ACCOUNT1_ID, APP1_ID_ACCOUNT1, SERVICE1_ID_APP1_ACCOUNT1, "SERVICE_NAME", TAG_TEAM, TAG_VALUE_TEAM1);

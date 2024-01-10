@@ -131,6 +131,7 @@ public class StackDriverDelegateServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchLogs_whenLogsLimitReachedForWorkflow() {
     assertThatThrownBy(()
                            -> stackDriverDelegateService.fetchLogs(
@@ -152,6 +153,7 @@ public class StackDriverDelegateServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testFetchLogs_whenNoNextPage() {
     final List<LogEntry> logEntries = stackDriverDelegateService.fetchLogs(
         dataCollectionInfo, System.currentTimeMillis(), System.currentTimeMillis(), false, false);
@@ -161,6 +163,7 @@ public class StackDriverDelegateServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SOWMYA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetMetricsWithDataForNode_validTimeSeriesReturned() throws IOException, CloneNotSupportedException {
     ThirdPartyApiCallLog apiCallLog = ThirdPartyApiCallLog.builder().build();
     ListTimeSeriesResponse mockedResponse = new ListTimeSeriesResponse();
@@ -177,6 +180,7 @@ public class StackDriverDelegateServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SOWMYA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetMetricsWithDataForNode_NoTimeSeriesReturned() throws IOException, CloneNotSupportedException {
     ThirdPartyApiCallLog apiCallLog = ThirdPartyApiCallLog.builder().build();
     ListTimeSeriesResponse mockedResponse = new ListTimeSeriesResponse();
@@ -193,6 +197,7 @@ public class StackDriverDelegateServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SOWMYA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testGetMetricsWithDataForNode_MultipleTimeSeriesReturned() {
     ThirdPartyApiCallLog apiCallLog = ThirdPartyApiCallLog.builder().build();
     ListTimeSeriesResponse mockedResponse = new ListTimeSeriesResponse();

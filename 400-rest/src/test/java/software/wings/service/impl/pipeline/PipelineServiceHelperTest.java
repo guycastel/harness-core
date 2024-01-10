@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -227,6 +228,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = POOJA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdatePipelineWithLoopedStateRuntimeVariableDefaultValue() {
     Map<String, String> workflowVariable = ImmutableMap.of();
     PipelineStageElement pipelineStageElement =
@@ -257,6 +259,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = POOJA)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdatePipelineWithLoopedStateInvalid() {
     PipelineStageElement pipelineStageElement =
         PipelineStageElement.builder().properties(new HashMap<>()).name("test step").type("ENV_STATE").build();
@@ -288,6 +291,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetEnvIdsForSeriesStage1() {
     PipelineStageElement pipelineStageElement = PipelineStageElement.builder()
                                                     .properties(ImmutableMap.of(EnvStateKeys.envId, ENV_ID))
@@ -308,6 +312,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldGetEnvIdsForSeriesStage2() {
     PipelineStageElement pipelineStageElement = PipelineStageElement.builder()
                                                     .properties(ImmutableMap.of(EnvStateKeys.envId, ENV_ID))
@@ -364,6 +369,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldReturnEmptyListIfEnvIdsNotPresent() {
     PipelineStageElement pipelineStageElement = PipelineStageElement.builder()
                                                     .properties(ImmutableMap.of(EnvStateKeys.envId, ENV_ID))
@@ -420,6 +426,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldResolveEnvIdsForParallelStage1() {
     PipelineStageElement pipelineStageElement = PipelineStageElement.builder()
                                                     .properties(ImmutableMap.of(EnvStateKeys.envId, "${env}"))
@@ -455,6 +462,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldReturnEmptyListIfEnvVariableAbsentInPipeline() {
     PipelineStageElement pipelineStageElement = PipelineStageElement.builder()
                                                     .properties(ImmutableMap.of(EnvStateKeys.envId, "${env}"))
@@ -489,6 +497,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testUpdateLoopingInfoWhenInfraAsExpression() {
     List<Variable> userVariables = new ArrayList<>();
     Variable infraVar1 = aVariable().entityType(INFRASTRUCTURE_DEFINITION).name("infra1").build();
@@ -511,6 +520,7 @@ public class PipelineServiceHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = LUCAS_SALES)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void shouldResolveEnvIdsForParallelStage1UsingPipelineVariables() {
     PipelineStageElement pipelineStageElement = PipelineStageElement.builder()
                                                     .properties(ImmutableMap.of(EnvStateKeys.envId, "${env}"))

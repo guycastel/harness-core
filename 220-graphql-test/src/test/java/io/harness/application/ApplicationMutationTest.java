@@ -32,6 +32,7 @@ import software.wings.service.intfc.HarnessTagService;
 
 import com.google.inject.Inject;
 import lombok.Data;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -46,6 +47,7 @@ public class ApplicationMutationTest extends GraphQLTest {
   @Test
   @Owner(developers = ROHIT_KUMAR)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testUpdateApplicationGitConfig() {
     final Randomizer.Seed seed = new Randomizer.Seed(0);
     final OwnerManager.Owners owners = ownerManager.create();

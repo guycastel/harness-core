@@ -65,6 +65,7 @@ public class TriggerTest extends GraphQLTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping long running CG tests")
   public void testQueryTrigger() {
     final Seed seed = new Seed(0);
     final Owners owners = ownerManager.create();

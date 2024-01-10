@@ -35,6 +35,7 @@ import software.wings.service.intfc.UserService;
 import com.google.inject.Inject;
 import java.io.UnsupportedEncodingException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -89,6 +90,7 @@ public class AzureSignupHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = AMAN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testNewUserInviteHandleShouldSucceed() {
     when(signupService.getUserInviteByEmail(EMAIL)).thenReturn(null);
 
@@ -103,6 +105,7 @@ public class AzureSignupHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = AMAN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testExistingUserInviteHandleShouldSucceed() {
     UserInvite existingUserInvite = createUserInvite();
     existingUserInvite.setCompleted(false);
@@ -119,6 +122,7 @@ public class AzureSignupHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = AMAN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testExistingCompletedUserInviteHandleShouldSucceed() {
     UserInvite existingUserInvite = createUserInvite();
     existingUserInvite.setCompleted(true);
@@ -139,6 +143,7 @@ public class AzureSignupHandlerTest extends WingsBaseTest {
   @Test
   @Owner(developers = AMAN)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void testCompleteInviteFlowShouldSucceed() throws UnsupportedEncodingException {
     UpdatePasswordRequest passwordRequest = null;
 

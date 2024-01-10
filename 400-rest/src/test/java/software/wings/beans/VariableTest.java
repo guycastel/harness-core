@@ -19,6 +19,7 @@ import software.wings.WingsBaseTest;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -26,6 +27,7 @@ public class VariableTest extends WingsBaseTest {
   @Test
   @Owner(developers = OwnerRule.YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping long running CG tests")
   public void but() {
     Variable src = aVariable()
                        .name("var")

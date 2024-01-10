@@ -479,4 +479,14 @@ public class K8sSwapServiceSelectorsBaseHandlerTest extends CategoryTest {
     k8sSwapServiceSelectorsBaseHandler.updateTrafficRouting(
         kubernetesConfig, release, "service", "service-stage", logCallback);
   }
+
+  @Test
+  @Owner(developers = BUHA)
+  @Category(UnitTests.class)
+  public void testSkipUpdateTrafficRoutingWhenReleaseIsNull() {
+    k8sSwapServiceSelectorsBaseHandler.updateTrafficRouting(
+        kubernetesConfig, null, "service", "service-stage", logCallback);
+
+    verifyNoInteractions(kubernetesContainerService);
+  }
 }

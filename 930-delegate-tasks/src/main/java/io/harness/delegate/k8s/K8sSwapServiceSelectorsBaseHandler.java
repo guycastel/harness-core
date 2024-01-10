@@ -147,10 +147,11 @@ public class K8sSwapServiceSelectorsBaseHandler {
 
   public void updateTrafficRouting(
       KubernetesConfig kubernetesConfig, IK8sRelease release, String stable, String stage, LogCallback logCallback) {
-    TrafficRoutingInfoDTO trafficRoutingInfo = release.getTrafficRoutingInfo();
-    if (trafficRoutingInfo == null) {
+    if (release == null || release.getTrafficRoutingInfo() == null) {
       return;
     }
+    TrafficRoutingInfoDTO trafficRoutingInfo = release.getTrafficRoutingInfo();
+
     String version = trafficRoutingInfo.getVersion();
     String plural = trafficRoutingInfo.getPlural();
     String name = trafficRoutingInfo.getName();

@@ -14,8 +14,6 @@ import static java.lang.String.format;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfo;
-import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfoDAL;
 import io.harness.common.ParameterFieldHelper;
 import io.harness.delegate.task.k8s.trafficrouting.HeaderConfig;
 import io.harness.delegate.task.k8s.trafficrouting.K8sTrafficRoutingConfig;

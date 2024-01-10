@@ -17,8 +17,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import io.harness.CategoryTest;
 import io.harness.category.element.UnitTests;
-import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfo;
-import io.harness.cdng.k8s.trafficrouting.dal.K8sTrafficRoutingInfoDAL;
 import io.harness.delegate.task.k8s.trafficrouting.HeaderConfig;
 import io.harness.delegate.task.k8s.trafficrouting.IstioProviderConfig;
 import io.harness.delegate.task.k8s.trafficrouting.K8sTrafficRoutingConfig;

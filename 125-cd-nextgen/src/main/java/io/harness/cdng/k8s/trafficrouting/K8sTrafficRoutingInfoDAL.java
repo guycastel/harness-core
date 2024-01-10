@@ -5,12 +5,11 @@
  * https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
  */
 
-package io.harness.cdng.k8s.trafficrouting.dal;
+package io.harness.cdng.k8s.trafficrouting;
 
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.cdng.provision.terraformcloud.dal.TerraformCloudConfig;
 import io.harness.persistence.HPersistence;
 
 import com.google.inject.Inject;
@@ -35,7 +34,7 @@ public class K8sTrafficRoutingInfoDAL {
             .filter(K8sTrafficRoutingInfo.K8sTrafficRoutingInfoKeys.orgId, orgId)
             .filter(K8sTrafficRoutingInfo.K8sTrafficRoutingInfoKeys.projectId, projectId)
             .filter(K8sTrafficRoutingInfo.K8sTrafficRoutingInfoKeys.stageExecutionId, stageExecutionId)
-            .order(Sort.descending(TerraformCloudConfig.TerraformCloudConfigKeys.createdAt));
+            .order(Sort.descending(K8sTrafficRoutingInfo.K8sTrafficRoutingInfoKeys.createdAt));
 
     if (releaseName != null) {
       query.filter(K8sTrafficRoutingInfo.K8sTrafficRoutingInfoKeys.releaseName, releaseName);

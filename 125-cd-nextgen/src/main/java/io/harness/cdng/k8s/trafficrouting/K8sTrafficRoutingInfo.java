@@ -5,7 +5,7 @@
  * https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
  */
 
-package io.harness.cdng.k8s.trafficrouting.dal;
+package io.harness.cdng.k8s.trafficrouting;
 
 import io.harness.annotations.StoreIn;
 import io.harness.annotations.dev.CodePulse;

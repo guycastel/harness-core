@@ -53,6 +53,7 @@ public class CodeLocalClient implements CodeModuleLicenseClient {
             .numberOfRepositories(REPO_COUNT_FREE)
             .maxRepoSizeString(REPO_SIZE_FREE.toString())
             .maxRepoSizeInBytes(REPO_SIZE_FREE.toBytes())
+            .expiryTime(Long.MAX_VALUE)
             .build();
       default:
         throw new UnsupportedOperationException("Requested edition is not supported");

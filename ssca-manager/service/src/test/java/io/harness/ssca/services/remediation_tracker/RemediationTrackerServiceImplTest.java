@@ -1154,6 +1154,30 @@ public class RemediationTrackerServiceImplTest extends SSCAManagerTestBase {
     assertThat(remediationTrackerEntity.getTicketId()).isEqualTo("external");
   }
 
+  @Test
+  @Owner(developers = HUMANSHU_ARORA)
+  @Category(UnitTests.class)
+  public void testCreateTicketWhenArtifactIdNotNull() {
+    RemediationTrackerEntity remediationTrackerEntity =
+        createRemediationTrackerEntity(remediationTrackerCreateRequestBody);
+
+    remediationTrackerEntity.setStatus(ON_GOING);
+
+    repository.save(remediationTrackerEntity);
+
+    CreateTicketRequest createTicketRequest = builderFactory.getCreateTicketRequest();
+
+    String ticketId = remediationTrackerService.createTicket(builderFactory.getContext().getProjectIdentifier(),
+        remediationTrackerEntity.getUuid(), builderFactory.getContext().getOrgIdentifier(), createTicketRequest,
+        builderFactory.getContext().getAccountId());
+
+    remediationTrackerEntity = remediationTrackerService.getRemediationTracker(remediationTrackerEntity.getUuid());
+    ArtifactInfo artifactInfo = remediationTrackerEntity.getArtifactInfos().get("artifactId");
+
+    assertThat(ticketId).isEqualTo("external");
+    assertThat(artifactInfo.getTicketId()).isEqualTo("external");
+  }
+
   private RemediationTrackerEntity createRemediationTrackerEntity(RemediationTrackerCreateRequestBody requestBody) {
     String remediationTrackerId = remediationTrackerService.createRemediationTracker(
         builderFactory.getContext().getAccountId(), builderFactory.getContext().getOrgIdentifier(),

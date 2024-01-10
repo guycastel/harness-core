@@ -407,6 +407,12 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
           getAuthToken(accountId), accountId, orgId, projectId, ticketRequestDto);
       String ticketId = ticketResponseDto.getId();
       artifactInfo.setTicketId(ticketId);
+
+      Criteria criteria = Criteria.where(RemediationTrackerEntityKeys.uuid).is(remediationTracker.getUuid());
+      Update update = new Update();
+      update.set(RemediationTrackerEntityKeys.artifactInfos, remediationTracker.getArtifactInfos());
+      repository.update(new Query(criteria), update);
+
       return ticketId;
     }
 

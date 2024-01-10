@@ -1,6 +1,6 @@
 #Any edit in this file should accompany an increment in version.
 name: permissionsConfiguration
-version: 71
+version: 72
 permissions:
   - identifier: core_project_delete
     name: Delete Project
@@ -292,6 +292,14 @@ permissions:
       - project
   - identifier: core_environment_access
     name: Runtime Access to Environment
+    status: ACTIVE
+    includeInAllRoles: false
+    allowedScopeLevels:
+      - account
+      - organization
+      - project
+  - identifier: core_environment_rollback
+    name: Post Prod Rollback Access to Environment
     status: ACTIVE
     includeInAllRoles: false
     allowedScopeLevels:

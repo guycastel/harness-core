@@ -23,6 +23,7 @@ import io.harness.ccm.graphql.dto.recommendation.RecommendationItemDTO;
 import io.harness.ccm.graphql.query.recommendation.RecommendationsOverviewQueryV2;
 import io.harness.ccm.graphql.utils.GraphQLToRESTHelper;
 import io.harness.ccm.helper.RecommendationQueryHelper;
+import io.harness.ccm.rbac.CCMRbacHelper;
 import io.harness.ccm.remote.beans.recommendation.CCMRecommendationFilterPropertiesDTO;
 import io.harness.ccm.remote.beans.recommendation.K8sRecommendationFilterPropertiesDTO;
 import io.harness.ccm.views.dto.CreateRuleExecutionDTO;
@@ -111,13 +112,15 @@ public class GovernanceRuleExecutionResource {
   public static final String GCP_CREDENTIALS_PATH = "GOOGLE_APPLICATION_CREDENTIALS";
   public static final String MALFORMED_ERROR = "Request payload is malformed";
   private final RuleExecutionService ruleExecutionService;
+  private final CCMRbacHelper rbacHelper;
   @Inject CENextGenConfiguration configuration;
   @Inject private BigQueryService bigQueryService;
   @Inject private RecommendationsOverviewQueryV2 recommendationsOverviewQueryV2;
 
   @Inject
-  public GovernanceRuleExecutionResource(RuleExecutionService ruleExecutionService) {
+  public GovernanceRuleExecutionResource(RuleExecutionService ruleExecutionService, CCMRbacHelper rbacHelper) {
     this.ruleExecutionService = ruleExecutionService;
+    this.rbacHelper = rbacHelper;
   }
 
   @POST
@@ -162,6 +165,7 @@ public class GovernanceRuleExecutionResource {
           NGCommonEntityConstants.ACCOUNT_KEY) @AccountIdentifier @NotNull @Valid String accountId,
       @RequestBody(required = true, description = "Request body containing CreateRuleExecutionFilterDTO object")
       @Valid CreateRuleExecutionFilterDTO createRuleExecutionFilterDTO) {
+    rbacHelper.checkRuleViewPermission(accountId, null, null);
     RuleExecutionFilter ruleExecutionFilter = createRuleExecutionFilterDTO.getRuleExecutionFilter();
     ruleExecutionFilter.setAccountId(accountId);
     return ResponseDTO.newResponse(ruleExecutionService.filterExecution(ruleExecutionFilter));
@@ -181,6 +185,7 @@ public class GovernanceRuleExecutionResource {
   public ResponseDTO<FilterValues>
   filterValues(@Parameter(required = true, description = NGCommonEntityConstants.ACCOUNT_PARAM_MESSAGE) @QueryParam(
       NGCommonEntityConstants.ACCOUNT_KEY) @AccountIdentifier @NotNull @Valid String accountId) {
+    rbacHelper.checkRuleViewPermission(accountId, null, null);
     return ResponseDTO.newResponse(ruleExecutionService.filterValue(accountId));
   }
 
@@ -302,6 +307,7 @@ public class GovernanceRuleExecutionResource {
           NGCommonEntityConstants.ACCOUNT_KEY) @AccountIdentifier @NotNull @Valid String accountId,
       @RequestBody(required = true, description = "Request body containing CreateRuleExecutionFilterDTO object")
       @Valid CreateRuleExecutionFilterDTO createRuleExecutionFilterDTO) {
+    rbacHelper.checkRuleViewPermission(accountId, null, null);
     RuleExecutionFilter ruleExecutionFilter = createRuleExecutionFilterDTO.getRuleExecutionFilter();
     ruleExecutionFilter.setAccountId(accountId);
     return ResponseDTO.newResponse(ruleExecutionService.getOverviewExecutionDetails(accountId, ruleExecutionFilter));

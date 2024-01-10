@@ -372,7 +372,11 @@ public class RecommendationsOverviewQueryV2 {
       condition = condition.and(CE_RECOMMENDATIONS.ID.in(filter.getIds()));
     } else {
       if (!isEmpty(filter.getResourceTypes())) {
-        condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.in(enumToString(filter.getResourceTypes())));
+        List<ResourceType> resourceTypes = filter.getResourceTypes();
+        if (!rbacHelper.hasRuleViewPermission(accountId, null, null)) {
+          resourceTypes.remove(ResourceType.GOVERNANCE);
+        }
+        condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.in(enumToString(resourceTypes)));
       }
       if (!isEmpty(filter.getRecommendationStates())) {
         condition =
@@ -406,7 +410,11 @@ public class RecommendationsOverviewQueryV2 {
       condition = condition.and(CE_RECOMMENDATIONS.ID.in(filter.getIds()));
     }
     if (!isEmpty(filter.getResourceTypes())) {
-      condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.in(enumToString(filter.getResourceTypes())));
+      List<ResourceType> resourceTypes = filter.getResourceTypes();
+      if (!rbacHelper.hasRuleViewPermission(accountId, null, null)) {
+        resourceTypes.remove(ResourceType.GOVERNANCE);
+      }
+      condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.in(enumToString(resourceTypes)));
     }
     if (!isEmpty(filter.getRecommendationStates())) {
       condition =

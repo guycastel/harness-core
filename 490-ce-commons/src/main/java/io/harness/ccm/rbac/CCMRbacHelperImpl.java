@@ -274,6 +274,12 @@ public class CCMRbacHelperImpl implements CCMRbacHelper {
   }
 
   @Override
+  public boolean hasRuleViewPermission(String accountIdentifier, String orgIdentifier, String projectIdentifier) {
+    return accessControlClient.hasAccess(ResourceScope.of(accountIdentifier, orgIdentifier, projectIdentifier),
+        Resource.of(GOVERNANCE_RULE, null), RULE_VIEW);
+  }
+
+  @Override
   public void checkRuleDeletePermission(String accountIdentifier, String orgIdentifier, String projectIdentifier) {
     accessControlClient.checkForAccessOrThrow(ResourceScope.of(accountIdentifier, orgIdentifier, projectIdentifier),
         Resource.of(GOVERNANCE_RULE, null), RULE_DELETE,

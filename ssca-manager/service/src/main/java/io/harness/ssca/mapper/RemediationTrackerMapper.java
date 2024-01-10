@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.BooleanUtils;
 
 @OwnedBy(HarnessTeam.SSCA)
 @UtilityClass
@@ -102,7 +103,7 @@ public class RemediationTrackerMapper {
 
     return TicketRequestDto.builder()
         .description(requestBody.getDescription())
-        .exists(requestBody.isExists())
+        .exists(BooleanUtils.toBoolean(requestBody.isExists()))
         .externalId(requestBody.getExternalId())
         .identifiers(identifiersCopy)
         .issueType(requestBody.getIssueType())

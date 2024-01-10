@@ -272,7 +272,7 @@ public class BuilderFactory {
   }
 
   public TicketResponseDto getTicketResponseDto() {
-    return TicketResponseDto.builder().externalId("external").build();
+    return TicketResponseDto.builder().id("external").build();
   }
 
   public EnforcementSummaryEntityBuilder getEnforcementSummaryBuilder() {

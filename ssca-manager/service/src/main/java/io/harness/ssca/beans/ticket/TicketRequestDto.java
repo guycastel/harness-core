@@ -19,7 +19,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TicketRequestDto {
   String description;
-  boolean exists;
+  Boolean exists;
   String externalId;
   Map<String, List<String>> identifiers;
   String issueType;

@@ -388,7 +388,7 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
       TicketRequestDto ticketRequestDto = RemediationTrackerMapper.mapToTicketRequestDto(remediationTrackerId, body);
       TicketResponseDto ticketResponseDto =
           ticketServiceRestClientService.createTicket(authToken, accountId, orgId, projectId, ticketRequestDto);
-      String ticketId = ticketResponseDto.getExternalId();
+      String ticketId = ticketResponseDto.getId();
       artifactInfo.setTicketId(ticketId);
       return ticketId;
     }
@@ -397,7 +397,7 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
       TicketRequestDto ticketRequestDto = RemediationTrackerMapper.mapToTicketRequestDto(remediationTrackerId, body);
       TicketResponseDto ticketResponseDto =
           ticketServiceRestClientService.createTicket(authToken, accountId, orgId, projectId, ticketRequestDto);
-      String ticketId = ticketResponseDto.getExternalId();
+      String ticketId = ticketResponseDto.getId();
 
       remediationTracker.setTicketId(ticketId);
 

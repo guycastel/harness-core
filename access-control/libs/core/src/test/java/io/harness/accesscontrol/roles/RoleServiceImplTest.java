@@ -651,4 +651,70 @@ public class RoleServiceImplTest extends AccessControlCoreTestBase {
     }
     verify(roleAssignmentService, times(1)).list(roleAssignmentsPageRequest, roleAssignmentFilter, true);
   }
+
+  @Test
+  @Owner(developers = JIMIT_GANDHI)
+  @Category(UnitTests.class)
+  public void list_PrincipalCountUser_ForHarnessManagedRole() {
+    PageRequest pageRequest = PageRequest.builder().pageIndex(0).pageSize(50).build();
+    Role role = Role.builder()
+                    .identifier(randomAlphabetic(10))
+                    .managed(true)
+                    .name(randomAlphabetic(10))
+                    .createdAt(10L)
+                    .lastModifiedAt(10L)
+                    .build();
+    RoleAssignment roleAssignmentToUser = RoleAssignment.builder()
+                                              .identifier(randomAlphabetic(10))
+                                              .scopeIdentifier(role.getScopeIdentifier())
+                                              .roleIdentifier(role.getIdentifier())
+                                              .principalType(PrincipalType.USER)
+                                              .build();
+    RoleFilter roleFilter = RoleFilter.builder()
+                                .identifierFilter(Sets.newHashSet(roleAssignmentToUser.getRoleIdentifier()))
+                                .scopeIdentifier(role.getScopeIdentifier())
+                                .build();
+
+    PageResponse<Role> rolePageResponse = PageResponse.<Role>builder()
+                                              .content(Collections.singletonList(role))
+                                              .totalPages(1)
+                                              .totalItems(1)
+                                              .pageItemCount(1)
+                                              .pageSize(50)
+                                              .pageIndex(0)
+                                              .empty(false)
+                                              .build();
+    when(roleService.list(any(), any(RoleFilter.class), eq(true))).thenReturn(rolePageResponse);
+
+    PageResponse<RoleAssignment> roleAssignmentPageResponse =
+        PageResponse.<RoleAssignment>builder()
+            .content(Collections.singletonList(roleAssignmentToUser))
+            .totalPages(1)
+            .totalItems(1)
+            .pageItemCount(1)
+            .pageSize(50)
+            .pageIndex(0)
+            .empty(false)
+            .build();
+
+    PageRequest roleAssignmentsPageRequest = PageRequest.builder().pageSize(50000).build();
+    RoleAssignmentFilter roleAssignmentFilter = RoleAssignmentFilter.builder()
+                                                    .scopeFilter(roleFilter.getScopeIdentifier())
+                                                    .roleFilter(roleFilter.getIdentifierFilter())
+                                                    .build();
+    when(roleAssignmentService.list(roleAssignmentsPageRequest, roleAssignmentFilter, true))
+        .thenReturn(roleAssignmentPageResponse);
+
+    PageResponse<RoleWithPrincipalCount> pageResponse =
+        roleService.listWithPrincipalCount(pageRequest, roleFilter, true);
+
+    assertEquals(1, pageResponse.getContent().size());
+    for (int i = 0; i < pageResponse.getContent().size(); i++) {
+      assertEquals(1, (int) pageResponse.getContent().get(i).getRoleAssignedToUserCount());
+      assertTrue(pageResponse.getContent().get(i).isHarnessManaged());
+      assertEquals(10L, pageResponse.getContent().get(i).getCreatedAt().longValue());
+      assertEquals(10L, pageResponse.getContent().get(i).getLastModifiedAt().longValue());
+    }
+    verify(roleAssignmentService, times(1)).list(roleAssignmentsPageRequest, roleAssignmentFilter, true);
+  }
 }

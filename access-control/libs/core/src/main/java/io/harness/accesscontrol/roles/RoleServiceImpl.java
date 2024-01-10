@@ -144,6 +144,9 @@ public class RoleServiceImpl implements RoleService {
       RoleWithPrincipalCount roleWithCount =
           RoleWithPrincipalCount.builder()
               .role(role)
+              .createdAt(role.getCreatedAt())
+              .lastModifiedAt(role.getLastModifiedAt())
+              .harnessManaged(role.isManaged())
               .roleAssignedToUserCount(
                   roleIdentifierMap != null ? roleIdentifierMap.getOrDefault(PrincipalType.USER, 0) : 0)
               .roleAssignedToUserGroupCount(

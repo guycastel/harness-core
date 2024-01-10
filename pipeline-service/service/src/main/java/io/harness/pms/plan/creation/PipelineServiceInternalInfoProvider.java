@@ -144,6 +144,7 @@ public class PipelineServiceInternalInfoProvider implements PipelineServiceInfoP
     planCreators.add(new CfExecutionPMSPlanCreator());
     planCreators.add(new ServiceNowApprovalStepPlanCreator());
     planCreators.add(new JiraApprovalStepPlanCreator());
+    planCreators.add(new io.harness.steps.approval.step.jira.v1.JiraApprovalStepPlanCreator());
     planCreators.add(new HarnessApprovalStepPlanCreator());
     planCreators.add(new BarrierStepPlanCreator());
     planCreators.add(new FlagConfigurationStepPlanCreator());

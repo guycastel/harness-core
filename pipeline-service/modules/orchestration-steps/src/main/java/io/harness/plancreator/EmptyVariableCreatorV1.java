@@ -29,8 +29,8 @@ import java.util.Set;
 @OwnedBy(HarnessTeam.PIPELINE)
 public class EmptyVariableCreatorV1 extends ChildrenVariableCreatorV1<DummyNodeV1> {
   public Set<String> getSupportedStepTypes() {
-    return Set.of(
-        StepSpecTypeConstantsV1.HTTP, StepSpecTypeConstantsV1.SHELL_SCRIPT, StepSpecTypeConstantsV1.WAIT_STEP);
+    return Set.of(StepSpecTypeConstantsV1.HTTP, StepSpecTypeConstantsV1.SHELL_SCRIPT, StepSpecTypeConstantsV1.WAIT_STEP,
+        StepSpecTypeConstantsV1.JIRA_APPROVAL);
   }
 
   public Set<String> getSupportedStageTypes() {

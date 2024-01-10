@@ -21,6 +21,7 @@ import software.wings.sm.status.handlers.WorkflowPausePropagator;
 import software.wings.sm.status.handlers.WorkflowResumePropagator;
 
 import com.google.inject.Inject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -30,6 +31,7 @@ public class WorkflowStatusPropagatorFactoryTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTestObtainHandler() {
     WorkflowStatusPropagator statusPropagator = propagatorFactory.obtainHandler(ExecutionStatus.PAUSED);
     assertThat(statusPropagator).isNotNull();

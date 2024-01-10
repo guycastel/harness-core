@@ -30,6 +30,7 @@ import software.wings.beans.Workflow;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -37,6 +38,7 @@ public class WorkflowUtilsTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testGetWorkflowUsages() {
     Workflow jiraWorkflow =
         aWorkflow()

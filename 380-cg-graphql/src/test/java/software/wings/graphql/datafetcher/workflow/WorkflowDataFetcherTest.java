@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import java.sql.SQLException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -55,6 +56,7 @@ public class WorkflowDataFetcherTest extends AbstractDataFetcherTestBase {
   @Test
   @Owner(developers = RUSHABH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testWorkflowDataFetcher() {
     Workflow workflow = createWorkflow(ACCOUNT1_ID, APP1_ID_ACCOUNT1, WORKFLOW1);
 

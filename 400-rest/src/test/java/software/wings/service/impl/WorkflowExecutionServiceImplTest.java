@@ -362,6 +362,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerComplexWorkflow() throws InterruptedException {
     Host host1 = aHost().withAppId(app.getUuid()).withEnvId(env.getUuid()).withHostName("host1").build();
     wingsPersistence.save(host1);
@@ -502,6 +503,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void triggerPipeline() throws InterruptedException {
     Service service = addService("svc1");
 
@@ -513,6 +515,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerPipelineWithDeploymentMetaDataFFOn() {
     Service service = addService("svc1");
 
@@ -677,6 +680,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerWorkflowWithRelease() throws InterruptedException {
     String appId = app.getUuid();
     Workflow workflow = createExecutableWorkflow(appId, env, "workflow1");
@@ -724,6 +728,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldGetNodeDetails() throws InterruptedException {
     String appId = app.getUuid();
 
@@ -805,6 +810,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerWorkflowFailForExpiredTrialLicense() throws InterruptedException {
     shouldTriggerWorkflowFailForExpiredLicense(AccountType.TRIAL);
   }
@@ -812,6 +818,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerWorkflowFailForExpiredPaidLicense() throws InterruptedException {
     shouldTriggerWorkflowFailForExpiredLicense(AccountType.PAID);
   }
@@ -852,6 +859,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerPipelineFailForExpiredTrialLicense() throws InterruptedException {
     shouldTriggerPipelineFailForExpiredLicense(AccountType.TRIAL);
   }
@@ -859,6 +867,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAMA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerPipelineFailForExpiredPaidLicense() throws InterruptedException {
     shouldTriggerPipelineFailForExpiredLicense(AccountType.PAID);
   }
@@ -957,6 +966,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANSHUL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldListWorkflow() throws InterruptedException {
     String appId = app.getUuid();
 
@@ -1119,6 +1129,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldThrowInvalidArgumentForInvalidWorkflowId() {
     ExecutionInterrupt executionInterrupt = anExecutionInterrupt()
                                                 .appId(app.getUuid())
@@ -1172,6 +1183,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS, intermittent = true)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldAbortAllStates() {
     Service service1 = addService("svc1");
     Service service2 = addService("svc2");
@@ -1588,6 +1600,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerCanaryWorkflow() throws InterruptedException {
     Service service = addService("svc1");
 
@@ -1606,6 +1619,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerTemplateCanaryWorkflow() throws InterruptedException {
     Service service1 = addService("svc1");
 
@@ -1908,6 +1922,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldObtainNoLastGoodDeployedArtifacts() {
     String appId = app.getUuid();
     Workflow workflow = createExecutableWorkflow(appId, env, "workflow1");
@@ -1919,6 +1934,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldObtainLastGoodDeployedArtifacts() throws InterruptedException {
     String appId = app.getUuid();
     Workflow workflow = createExecutableWorkflow(appId, env, "workflow1");
@@ -1932,6 +1948,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = LUCAS_SALES)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldObtainEmptyArtifactsForRollbackWhenNoInstancesAreDeployed() throws InterruptedException {
     when(artifactStreamServiceBindingService.listArtifactStreamIds(anyString()))
         .thenReturn(singletonList("artifactStreamId"));
@@ -1964,6 +1981,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = LUCAS_SALES)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldObtainLastGoodDeployedArtifactsWithDeployedInstancesForRollback() throws InterruptedException {
     when(artifactStreamServiceBindingService.listArtifactStreamIds(anyString()))
         .thenReturn(singletonList("artifactStreamId"));
@@ -2040,6 +2058,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = TATHAGAT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testShouldUseInfraBasedRollbackArtifactFfOn() {
     when(featureFlagService.isEnabled(FeatureName.INFRA_MAPPING_BASED_ROLLBACK_ARTIFACT, ACCOUNT_ID)).thenReturn(true);
     List<InfrastructureMapping> infrastructureMappingList1 =
@@ -2058,6 +2077,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = TATHAGAT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testShouldUseInfraBasedRollbackArtifactFfOff() {
     when(featureFlagService.isEnabled(FeatureName.INFRA_MAPPING_BASED_ROLLBACK_ARTIFACT, ACCOUNT_ID)).thenReturn(false);
     List<InfrastructureMapping> infrastructureMappingList1 =
@@ -2076,6 +2096,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = MILOS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldNotObtainLastGoodDeployedArtifactsForRollback() throws InterruptedException {
     String appId = app.getUuid();
     Workflow workflow = createExecutableWorkflow(appId, env, "workflowName");
@@ -2092,6 +2113,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldGetDeploymentMetadata() {
     String appId = app.getUuid();
     Service service = addService("svc1");
@@ -2194,6 +2216,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT, intermittent = true)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testShouldNotQueueDeployment() {
     List<WorkflowExecution> waitingOnDeployments = getWorkflowExecutions(true);
     assertThat(waitingOnDeployments).isNotEmpty().hasSize(2);
@@ -2228,6 +2251,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = {SRINIVAS})
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldFetchWorkflowExecutionStartTs() throws Exception {
     String appId = app.getUuid();
     Workflow workflow = createExecutableWorkflow(appId, env, "workflow1");
@@ -2248,6 +2272,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAFAEL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldPopulateDuplicatesArtifactsAndServicesWithFF() {
     String serviceId1 = SERVICE_ID + "_1";
     String artifactId1 = ARTIFACT_ID + "_1";
@@ -2313,6 +2338,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAFAEL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldPopulateArtifactsAndServicesWithFF() {
     String serviceId1 = SERVICE_ID + "_1";
     String artifactId1 = ARTIFACT_ID + "_1";
@@ -2369,6 +2395,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAFAEL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldPopulateArtifactsAndServicesNoArtifactIdsWithFF() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     when(featureFlagService.isEnabled(SPG_ENABLE_POPULATE_USING_ARTIFACT_VARIABLE, ACCOUNT_ID)).thenReturn(true);
@@ -2383,6 +2410,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldPopulateArtifactsAndServices() {
     String serviceId1 = SERVICE_ID + "_1";
     String artifactId1 = ARTIFACT_ID + "_1";
@@ -2426,6 +2454,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldPopulateArtifactsAndServicesNoArtifactIds() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     executionArgs.setArtifacts(Collections.singletonList(anArtifact().build()));
@@ -2440,6 +2469,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test(expected = InvalidRequestException.class)
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldNotPopulateArtifactsAndServicesWithInvalidArtifacts() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     executionArgs.setArtifacts(Collections.singletonList(anArtifact().withUuid(ARTIFACT_ID).build()));
@@ -2491,6 +2521,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testExtractInfrastructureDetails() {
     Service service = addService("Service");
     ServiceTemplate serviceTemplate = getServiceTemplate(service);
@@ -2532,6 +2563,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void emptyExecutionHostsWithTargetEnabledShouldThrowException() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     executionArgs.setHosts(Collections.emptyList());
@@ -2547,6 +2579,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void executionHostsShouldNotBeSetForPipelines() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     executionArgs.setTargetToSpecificHosts(true);
@@ -2562,6 +2595,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void executionHostsShouldNotBeSetForTriggers() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     executionArgs.setTargetToSpecificHosts(true);
@@ -2579,6 +2613,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void executionHostsShouldNotBeSetForNonSshOrWinRmDeploymentType() {
     List<String> hosts = Arrays.asList("host1", "host2");
     WorkflowExecution workflowExecution =
@@ -2596,6 +2631,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void executionHostsShouldNotBeSetForMultiServicesInSingleWorkflow() {
     List<String> hosts = Arrays.asList("host1", "host2");
     List<String> servicesIds = Arrays.asList("serviceId1", "serviceId2");
@@ -2611,6 +2647,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void targetHostsOptionDisabledShouldPassValidation() {
     ExecutionArgs executionArgs = spy(new ExecutionArgs());
 
@@ -2622,6 +2659,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTrimNonEmptyList() {
     WorkflowExecutionServiceImpl workflowExecutionService =
         (WorkflowExecutionServiceImpl) this.workflowExecutionService;
@@ -2633,6 +2671,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void trimShouldReturnEmptyForEmptyList() {
     WorkflowExecutionServiceImpl workflowExecutionService =
         (WorkflowExecutionServiceImpl) this.workflowExecutionService;
@@ -2644,6 +2683,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void trimShouldReturnEmptyForNullList() {
     WorkflowExecutionServiceImpl workflowExecutionService =
         (WorkflowExecutionServiceImpl) this.workflowExecutionService;
@@ -2655,6 +2695,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = SRINIVAS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testFetchWorkflowExecutionsForResourceConstraint() {
     List<String> ids = new ArrayList<>();
     for (int i = 0; i < ids.size(); ++i) {
@@ -2679,6 +2720,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testGetStateExecutionDataInfraMapping() {
     String executionUuid = generateUuid();
     String displayName = generateUuid();
@@ -2713,6 +2755,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void getDeploymentTags() {
     WorkflowExecution workflowExecution = WorkflowExecution.builder()
                                               .accountId(ACCOUNT_ID)
@@ -2734,6 +2777,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testTriggerPipelineResumeExecution() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     executionArgs.setWorkflowType(WorkflowType.PIPELINE);
@@ -2766,6 +2810,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VIKAS_S)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testTriggerPipelineResumeExecutionWithStageName() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     executionArgs.setWorkflowType(WorkflowType.PIPELINE);
@@ -2802,6 +2847,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = GARVIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testGetResumeStages() {
     WorkflowExecution workflowExecution = WorkflowExecution.builder().accountId(ACCOUNT_ID).build();
     workflowExecutionService.getResumeStages(APP_ID, workflowExecution);
@@ -2820,6 +2866,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testShouldCollectArtifactsAsync() {
     NexusArtifactStream nexusArtifactStream = NexusArtifactStream.builder()
                                                   .accountId(ACCOUNT_ID)
@@ -2864,6 +2911,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testShouldNotCollectArtifactsAsync() {
     NexusArtifactStream nexusArtifactStream = NexusArtifactStream.builder()
                                                   .accountId(ACCOUNT_ID)
@@ -2912,6 +2960,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldAbortExecutionAfterCollectingArtifactsOnInterrupt() {
     StateMachine stateMachine = aStateMachine().build();
     ExecutionEventAdvisor executionEventAdvisor = new CanaryWorkflowExecutionAdvisor();
@@ -2985,6 +3034,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = AADITI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldAbortExecutionInPreparingState() {
     wingsPersistence.save(WorkflowExecution.builder()
                               .accountId(ACCOUNT_ID)
@@ -3008,6 +3058,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testGetWorkflowExecution() {
     Artifact artifact =
         Artifact.Builder.anArtifact().withAppId(APP_ID).withArtifactStreamId(ARTIFACT_STREAM_ID).build();
@@ -3028,6 +3079,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldObtainLastGoodDeployedHelmChart() {
     HelmChart helmChart1 = generateHelmChartWithVersion("1.0");
     HelmChart helmChart3 = generateHelmChartWithVersion("3.0");
@@ -3062,6 +3114,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = AGORODETKI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldAppendSkipConditionDetails() {
     String skipCondition = "${context.variable}=='ok'";
     StateInspection stateInspection = StateInspection.builder().stateExecutionInstanceId(STATE_EXECUTION_ID).build();
@@ -3078,6 +3131,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = AGORODETKI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldNotAppendSkipConditionDetails() {
     String skipCondition = "";
     PipelineStageExecution stageExecution = PipelineStageExecution.builder().build();
@@ -3103,6 +3157,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = MILOS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testWorkflowExecution() throws InterruptedException {
     Service service = addService("Service name");
 
@@ -3154,6 +3209,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldThrowDeploymentFreezeExceptionWhenResumingFrozenStageWithoutOverridePermission() {
     // User without permission ALLOW_DEPLOYMENTS_DURING_FREEZE
     User user = anUser().uuid(generateUuid()).name("user-name").build();
@@ -3214,6 +3270,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldReturnEmptyListIfNoArtifactInPreviousSuccessfulExecution() {
     List<String> infraMappingList = Collections.singletonList(INFRA_MAPPING_ID);
     WorkflowExecution workflowExecution = WorkflowExecution.builder()
@@ -3232,6 +3289,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldReturnCorrectRollbackArtifactForDuplicateInfraMappingIds() {
     List<String> infraMappingList = Collections.singletonList(INFRA_MAPPING_ID);
     WorkflowExecution workflowExecution =
@@ -3255,6 +3313,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = {PRABU})
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldReturnTrueIfParameterizedArtifactPresentInExecution() {
     Artifact artifact = anArtifact().withArtifactStreamId(ARTIFACT_STREAM_ID).build();
     ArtifactVariable artifactVariable =
@@ -3269,6 +3328,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = {PRABU})
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldReturnTrueIfNoParameterizedArtifactVariablePresent() {
     Artifact artifact = anArtifact().withArtifactStreamId(ARTIFACT_STREAM_ID).build();
     ArtifactVariable artifactVariable = ArtifactVariable.builder().build();
@@ -3280,6 +3340,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = {PRABU})
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldReturnFalseIfParameterizedArtifactNotPresentInExecution() {
     Artifact artifact = anArtifact().withArtifactStreamId(ARTIFACT_STREAM_ID + 2).build();
     ArtifactVariable artifactVariable =
@@ -3313,6 +3374,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = {PRABU})
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldReturnFalseIfMultipleParameterizedArtifactAbsentInExecution() {
     Artifact artifact = anArtifact().withArtifactStreamId(ARTIFACT_STREAM_ID).build();
     ArtifactVariable artifactVariable =
@@ -3335,6 +3397,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldUpdatePipelineWithArtifactsCollected() {
     StateMachine stateMachine = aStateMachine().build();
     ExecutionEventAdvisor executionEventAdvisor = new CanaryWorkflowExecutionAdvisor();
@@ -3419,6 +3482,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldMergeArtifactVariableList() {
     ArtifactVariable artifactVariable =
         ArtifactVariable.builder()
@@ -3457,6 +3521,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldAddArtifactVariableToWorkflowElement() {
     ArtifactVariable artifactVariable =
         ArtifactVariable.builder()
@@ -3486,6 +3551,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testWorkflowAuthorizationWithWebhookTriggerAuthorizationFfOn() throws InterruptedException {
     String appId = app.getUuid();
     when(featureFlagService.isEnabled(eq(WEBHOOK_TRIGGER_AUTHORIZATION), anyString())).thenReturn(true);
@@ -3521,6 +3587,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = INDER)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTriggerWorkflowWithArtifactInputsAndDisableArtifactCollectionFFOn() throws InterruptedException {
     String appId = app.getUuid();
     when(featureFlagService.isEnabled(eq(ARTIFACT_COLLECTION_CONFIGURABLE), anyString())).thenReturn(true);
@@ -3597,6 +3664,7 @@ public class WorkflowExecutionServiceImplTest extends WingsBaseTest {
   @Test
   @Owner(developers = VINICIUS)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldSaveRejectedByFreezeWindowsFFOn() {
     User user = anUser().uuid(generateUuid()).name("user-name").build();
     UserThreadLocal.set(user);

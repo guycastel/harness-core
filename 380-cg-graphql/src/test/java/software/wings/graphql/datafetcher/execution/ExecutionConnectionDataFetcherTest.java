@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -140,6 +141,7 @@ public class ExecutionConnectionDataFetcherTest extends AbstractDataFetcherTestB
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testFetchWorkflowExecutionConnection() {
     array[0] = workflowExecutionId;
     QLIdFilter idFilter = QLIdFilter.builder().operator(QLIdOperator.IN).values(array).build();

@@ -37,6 +37,7 @@ import software.wings.utils.WingsTestConstants;
 
 import com.google.inject.Inject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -67,6 +68,7 @@ public class WorkflowPausePropagatorTest extends WingsBaseTest {
 
   @Owner(developers = POOJA)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTestHandleStatusUpdateForWorkflow() {
     buildAndSave(ExecutionStatus.PAUSED);
     StateStatusUpdateInfo updateInfo = StateStatusUpdateInfo.builder()

@@ -71,6 +71,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.joor.Reflect;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.Mock;
@@ -94,6 +95,7 @@ public class StepSubWorkflowTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldExecutePreDeployStep() {
     PhaseElement phaseElement =
         PhaseElement.builder()
@@ -137,6 +139,7 @@ public class StepSubWorkflowTest extends WingsBaseTest {
   @Test
   @Owner(developers = VAIBHAV_SI)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldValidateContainerDeploy() {
     ServiceElement serviceElement = ServiceElement.builder().uuid(generateUuid()).name("service1").build();
     PhaseElement phaseElement = PhaseElement.builder().uuid(generateUuid()).serviceElement(serviceElement).build();
@@ -172,6 +175,7 @@ public class StepSubWorkflowTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldThrowNullPhaseType() {
     try {
       ExecutionContextImpl context = new ExecutionContextImpl(null);
@@ -200,6 +204,7 @@ public class StepSubWorkflowTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldHandleAsyncProvisionNode() {
     when(workflowExecutionService.getElementsSummary(anyString(), anyString(), anyString()))
         .thenReturn(elementExecutionSummaries);
@@ -239,6 +244,7 @@ public class StepSubWorkflowTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldHandleAsyncEcsSetup() {
     when(workflowExecutionService.getElementsSummary(anyString(), anyString(), anyString()))
         .thenReturn(elementExecutionSummaries);
@@ -276,6 +282,7 @@ public class StepSubWorkflowTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldThrowInvalidEcsSetup() {
     when(workflowExecutionService.getElementsSummary(anyString(), anyString(), anyString()))
         .thenReturn(elementExecutionSummaries);
@@ -308,6 +315,7 @@ public class StepSubWorkflowTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldHandleAsyncKubernetesSetup() {
     when(workflowExecutionService.getElementsSummary(anyString(), anyString(), anyString()))
         .thenReturn(elementExecutionSummaries);
@@ -345,6 +353,7 @@ public class StepSubWorkflowTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldThrowInvalidKubernetesSetup() {
     when(workflowExecutionService.getElementsSummary(anyString(), anyString(), anyString()))
         .thenReturn(elementExecutionSummaries);

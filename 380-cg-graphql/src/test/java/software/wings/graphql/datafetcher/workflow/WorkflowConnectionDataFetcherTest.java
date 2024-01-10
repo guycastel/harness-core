@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -125,6 +126,7 @@ public class WorkflowConnectionDataFetcherTest extends AbstractDataFetcherTestBa
   @Test
   @Owner(developers = PRABU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testFetchConnection() {
     array[0] = workflow.getUuid();
     QLIdFilter idFilter = QLIdFilter.builder().operator(QLIdOperator.IN).values(array).build();

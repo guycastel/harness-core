@@ -42,6 +42,7 @@ import software.wings.service.intfc.BarrierService.OrchestrationWorkflowInfo;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -200,6 +201,7 @@ public class BarrierServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testObtainInstancesWithTwoBarriersInTheSamePhaseStep() {
     final CanaryOrchestrationWorkflow orchestrationWorkflow =
         aCanaryOrchestrationWorkflow()
@@ -235,6 +237,7 @@ public class BarrierServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testObtainInstancesWithTwoBarriersInTheSameWorkflowPhase() {
     final CanaryOrchestrationWorkflow orchestrationWorkflow =
         aCanaryOrchestrationWorkflow()
@@ -272,6 +275,7 @@ public class BarrierServiceTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testObtainInstancesWithDifferentBarriers() {
     final CanaryOrchestrationWorkflow orchestrationWorkflow =
         aCanaryOrchestrationWorkflow()

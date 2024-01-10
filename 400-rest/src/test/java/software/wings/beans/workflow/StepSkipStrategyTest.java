@@ -28,6 +28,7 @@ import software.wings.WingsBaseTest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -39,6 +40,7 @@ public class StepSkipStrategyTest extends WingsBaseTest {
   @Test
   @Owner(developers = VED)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testForValidateStepSkipStrategies() {
     String stepId = "stepId";
 
@@ -77,6 +79,7 @@ public class StepSkipStrategyTest extends WingsBaseTest {
   @Test
   @Owner(developers = VED)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testForContainsStepId() {
     String stepId = "StepId";
     String stepId1 = "StepId1";

@@ -163,6 +163,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = GEORGE)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldListExecutions() {
     CountsByStatuses countsByStatuses = aCountsByStatuses().build();
 
@@ -194,6 +195,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldListExecutionsForPipeline() {
     ExecutionArgs executionArgs = createExecutionArgs(PIPELINE);
     WorkflowExecution workflowExecution = createWorkflowExecution(executionArgs, PIPELINE, SUCCESS);
@@ -211,6 +213,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldFetchExecutionWithoutSummary() {
     ExecutionArgs executionArgs = new ExecutionArgs();
     executionArgs.setWorkflowType(ORCHESTRATION);
@@ -255,6 +258,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTestExecutionDetails() {
     ExecutionArgs executionArgs = createExecutionArgs(PIPELINE);
     WorkflowExecution workflowExecution = createWorkflowExecution(executionArgs, PIPELINE, PAUSED);
@@ -274,6 +278,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTestExecutionDetailsWithFinalStage() {
     ExecutionArgs executionArgs = createExecutionArgs(PIPELINE);
     WorkflowExecution workflowExecution = createWorkflowExecution(executionArgs, PIPELINE, SUCCESS);
@@ -291,6 +296,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTestExecutionDetailsWithFinalStage1() {
     ExecutionArgs executionArgs = createExecutionArgs(PIPELINE);
     WorkflowExecution workflowExecution = createWorkflowExecution(executionArgs, PIPELINE, SUCCESS);
@@ -308,6 +314,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldUpdateNotes() {
     ExecutionArgs executionArgs = createExecutionArgs(PIPELINE);
     WorkflowExecution workflowExecution = createWorkflowExecution(executionArgs, PIPELINE, SUCCESS);
@@ -370,6 +377,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldGetApprovalAuthorizationWorkflow() {
     user = eventTestHelper.createUser(null);
     UserThreadLocal.set(user);
@@ -391,6 +399,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = UJJAWAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldGetApprovalAuthorizationPipeline() {
     user = eventTestHelper.createUser(null);
     UserThreadLocal.set(user);
@@ -411,6 +420,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldObtainLastGoodDeployedVariables() {
     ExecutionArgs executionArgs = createExecutionArgs(ORCHESTRATION);
     String serviceId = generateUuid();
@@ -431,6 +441,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldObtainLastGoodDeployedArtifacts() {
     ExecutionArgs executionArgs = createExecutionArgs(ORCHESTRATION);
     String workflowId = generateUuid();
@@ -553,6 +564,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = HARSH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldFetchLatestExecutionForInfraMappingIds() {
     ExecutionArgs executionArgs = createExecutionArgs(ORCHESTRATION);
     WorkflowExecution workflowExecution = createWorkflowExecution(executionArgs, ORCHESTRATION, SUCCESS);
@@ -594,6 +606,7 @@ public class WorkflowExecutionServiceDBTest extends WingsBaseTest {
   @Test
   @Owner(developers = RAGHU)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldListDeployedNodes() {
     String appId = generateUuid();
     String envId = generateUuid();

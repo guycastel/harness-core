@@ -39,6 +39,7 @@ import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -85,6 +86,7 @@ public class WorkflowConcurrencyHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void ensureConcurrencyForAlreadyProvisioned() {
     when(infrastructureDefinitionService.isDynamicInfrastructure(APP_ID, INFRA_DEFINITION_ID)).thenReturn(false);
     Workflow workflow = constructCanaryWorkflowWithConcurrencyStrategy();

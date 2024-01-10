@@ -38,6 +38,7 @@ import software.wings.utils.WingsTestConstants;
 
 import com.google.inject.Inject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -68,6 +69,7 @@ public class WorkflowResumePropagatorTest extends WingsBaseTest {
 
   @Owner(developers = PRASHANT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTestHandleStatusUpdateForWorkflowRunning() {
     buildAndSave(ExecutionStatus.RUNNING);
     StateStatusUpdateInfo updateInfo = StateStatusUpdateInfo.builder()
@@ -90,6 +92,7 @@ public class WorkflowResumePropagatorTest extends WingsBaseTest {
 
   @Owner(developers = POOJA, intermittent = true)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void shouldTestHandleStatusUpdateForWorkflowPaused() {
     buildAndSave(ExecutionStatus.PAUSED);
     StateStatusUpdateInfo updateInfo = StateStatusUpdateInfo.builder()

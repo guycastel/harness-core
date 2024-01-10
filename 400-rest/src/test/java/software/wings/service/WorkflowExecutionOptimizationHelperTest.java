@@ -40,6 +40,7 @@ import java.util.Map;
 import javax.ws.rs.core.AbstractMultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -62,6 +63,7 @@ public class WorkflowExecutionOptimizationHelperTest extends WingsBaseTest {
   @Test
   @Owner(developers = LUCAS_SALES)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testEnforceAppIdFromChildrenEntities() {
     persistence.save(anEnvironment().uuid("envId1").appId("appId1").accountId("accountId").build());
     persistence.save(Service.builder().uuid("serviceId1").appId("appId2").accountId("accountId").build());

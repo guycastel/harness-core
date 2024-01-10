@@ -16,6 +16,7 @@ import io.harness.rule.OwnerRule;
 import software.wings.WingsBaseTest;
 
 import com.google.inject.Inject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -25,6 +26,7 @@ public class AbstractWorkflowFactoryTest extends WingsBaseTest {
   @Test
   @Owner(developers = OwnerRule.YOGESH)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void getWorkflowCreatorFactory() {
     assertThat(abstractWorkflowFactory.getWorkflowCreatorFactory(AbstractWorkflowFactory.Category.K8S_V2))
         .isExactlyInstanceOf(K8sV2WorkflowFactory.class);

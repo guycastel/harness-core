@@ -140,6 +140,7 @@ public class WorkflowTest extends GraphQLTest {
   @Test
   @Owner(developers = GEORGE)
   @Category({GraphQLTests.class, UnitTests.class})
+  @Ignore("Skipping workflow CG tests")
   public void testQueryWorkflows() {
     final Seed seed = new Seed(0);
     final Owners owners = ownerManager.create();

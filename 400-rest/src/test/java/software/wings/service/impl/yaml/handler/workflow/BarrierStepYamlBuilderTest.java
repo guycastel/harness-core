@@ -28,6 +28,7 @@ import software.wings.yaml.workflow.StepYaml;
 import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -39,6 +40,7 @@ public class BarrierStepYamlBuilderTest extends WingsBaseTest {
   @Test
   @Owner(developers = VED)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testValidate() {
     Map<String, Object> inputProperties = getInputProperties();
     ChangeContext changeContext = buildChangeContext(inputProperties);

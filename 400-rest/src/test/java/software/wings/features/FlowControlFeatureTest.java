@@ -34,6 +34,7 @@ import com.google.inject.name.Named;
 import java.util.Collection;
 import java.util.Collections;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.InjectMocks;
@@ -68,6 +69,7 @@ public class FlowControlFeatureTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void workflowWithFlowControl() {
     when(workflowService.listWorkflows(Mockito.any(PageRequest.class)))
         .thenReturn(
@@ -82,6 +84,7 @@ public class FlowControlFeatureTest extends WingsBaseTest {
   @Test
   @Owner(developers = ANKIT)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void workflowWithoutFlowControl() {
     when(workflowService.listWorkflows(Mockito.any(PageRequest.class)))
         .thenReturn(

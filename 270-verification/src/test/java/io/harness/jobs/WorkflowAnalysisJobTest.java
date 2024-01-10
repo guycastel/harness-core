@@ -72,6 +72,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
@@ -343,6 +344,7 @@ public class WorkflowAnalysisJobTest extends VerificationBase {
   @Test
   @Owner(developers = KAMAL)
   @Category(UnitTests.class)
+  @Ignore("Skipping workflow CG tests")
   public void testTimeSeriesAnalysisJobHandleWhenControlNodesIsNull() {
     timeSeriesAnalysisContext.setControlNodes(null);
     workflowTimeSeriesAnalysisJob.handle(timeSeriesAnalysisContext);

@@ -39,8 +39,9 @@ public class StageExecutionInstanceInfoServiceImpl implements StageExecutionInst
 
   @Override
   public StageExecutionInstanceInfo append(String accountIdentifier, String orgIdentifier, String projectIdentifier,
-      String pipelineExecutionId, String stageExecutionId, StepExecutionInstanceInfo stepExecutionInstanceInfo) {
+      String pipelineExecutionId, String stageExecutionId, StepExecutionInstanceInfo stepExecutionInstanceInfo,
+      String stepPath) {
     return repository.append(accountIdentifier, orgIdentifier, projectIdentifier, pipelineExecutionId, stageExecutionId,
-        stepExecutionInstanceInfo);
+        stepExecutionInstanceInfo, stepPath);
   }
 }

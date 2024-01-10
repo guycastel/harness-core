@@ -20,5 +20,6 @@ public interface StageExecutionInstanceInfoService {
   List<StepExecutionInstanceInfo> get(String accountIdentifier, String orgIdentifier, String projectIdentifier,
       String pipelineExecutionId, String stageExecutionId);
   StageExecutionInstanceInfo append(String accountIdentifier, String orgIdentifier, String projectIdentifier,
-      String pipelineExecutionId, String stageExecutionId, StepExecutionInstanceInfo stepExecutionInstanceInfo);
+      String pipelineExecutionId, String stageExecutionId, StepExecutionInstanceInfo stepExecutionInstanceInfo,
+      String stepPath);
 }

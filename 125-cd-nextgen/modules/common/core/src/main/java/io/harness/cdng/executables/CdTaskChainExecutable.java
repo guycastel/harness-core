@@ -98,6 +98,7 @@ public abstract class CdTaskChainExecutable extends TaskChainExecutableWithCapab
     if (responseSupplier != null) {
       try {
         ResponseData responseData = responseSupplier.get();
+
         if (responseData instanceof CDDelegateTaskNotifyResponseData) {
           StepExecutionInstanceInfo stepExecutionInstanceInfo =
               ((CDDelegateTaskNotifyResponseData) responseData).getStepExecutionInstanceInfo();
@@ -105,7 +106,8 @@ public abstract class CdTaskChainExecutable extends TaskChainExecutableWithCapab
             stageExecutionInstanceInfoService.append(AmbianceUtils.getAccountId(ambiance),
                 AmbianceUtils.getOrgIdentifier(ambiance), AmbianceUtils.getProjectIdentifier(ambiance),
                 AmbianceUtils.getPipelineExecutionIdentifier(ambiance),
-                AmbianceUtils.getStageExecutionIdForExecutionMode(ambiance), stepExecutionInstanceInfo);
+                AmbianceUtils.getStageExecutionIdForExecutionMode(ambiance), stepExecutionInstanceInfo,
+                AmbianceUtils.getStepPath(ambiance));
           }
         }
       } catch (Exception ex) {

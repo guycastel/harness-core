@@ -20,6 +20,7 @@ import static io.harness.rule.OwnerRule.GARVIT;
 import static io.harness.rule.OwnerRule.NAMAN;
 import static io.harness.rule.OwnerRule.PRASHANT;
 import static io.harness.rule.OwnerRule.SAHIL;
+import static io.harness.rule.OwnerRule.TARUN_UBA;
 import static io.harness.rule.OwnerRule.VED;
 import static io.harness.rule.OwnerRule.VINICIUS;
 import static io.harness.rule.OwnerRule.VIVEK_DIXIT;
@@ -1579,5 +1580,54 @@ public class AmbianceUtilsTest extends CategoryTest {
     Ambiance ambiance = Ambiance.newBuilder().addAllLevels(List.of(l1, l2, l3, l4, l5)).build();
 
     assertThat(Optional.of(l4)).isEqualTo(AmbianceUtils.getNearestStepGroupLevelWithStrategyFromAmbiance(ambiance));
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testGetStepPath() {
+    Level l1 = Level.newBuilder()
+                   .setIdentifier("i1")
+                   .setRuntimeId("r1")
+                   .setSetupId("s1")
+                   .setGroup("STEP_GROUP")
+                   .setStepType(StepType.newBuilder().setStepCategory(STEP_GROUP).setType("STEP_GROUP"))
+                   .build();
+    Level l2 = Level.newBuilder()
+                   .setIdentifier("i2")
+                   .setRuntimeId("r2")
+                   .setSetupId("s2")
+                   .setGroup("STEP_GROUP")
+                   .setStepType(StepType.newBuilder().setStepCategory(STEP_GROUP).setType("STEP_GROUP"))
+                   .build();
+    Level l3 = Level.newBuilder()
+                   .setIdentifier("i3")
+                   .setRuntimeId("r3")
+                   .setSetupId("s3")
+                   .setGroup("STEP_GROUP")
+                   .setStepType(StepType.newBuilder().setStepCategory(STEP_GROUP).setType("STEP_GROUP"))
+                   .build();
+    Level l4 = Level.newBuilder()
+                   .setIdentifier("i4")
+                   .setRuntimeId("r4")
+                   .setSetupId("s4")
+                   .setStepType(StepType.newBuilder().setStepCategory(STEP).setType("STEP"))
+                   .build();
+    Ambiance ambiance = Ambiance.newBuilder().addAllLevels(List.of(l1, l2, l3, l4)).build();
+    assertThat("basePath/i1/i2/i3/i4").isEqualTo(AmbianceUtils.getStepPath(ambiance));
+  }
+
+  @Test
+  @Owner(developers = TARUN_UBA)
+  @Category(UnitTests.class)
+  public void testGetStepPathNoGroups() {
+    Level l1 = Level.newBuilder()
+                   .setIdentifier("i1")
+                   .setRuntimeId("r1")
+                   .setSetupId("s1")
+                   .setStepType(StepType.newBuilder().setStepCategory(STEP).setType("STEP"))
+                   .build();
+    Ambiance ambiance = Ambiance.newBuilder().addAllLevels(List.of(l1)).build();
+    assertThat("basePath/i1").isEqualTo(AmbianceUtils.getStepPath(ambiance));
   }
 }

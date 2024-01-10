@@ -16,5 +16,6 @@ import io.harness.delegate.cdng.execution.StepExecutionInstanceInfo;
 @OwnedBy(CDP)
 public interface StageExecutionInstanceInfoRepositoryCustom {
   StageExecutionInstanceInfo append(String accountIdentifier, String orgIdentifier, String projectIdentifier,
-      String pipelineExecutionId, String stageExecutionId, StepExecutionInstanceInfo stepExecutionInstanceInfo);
+      String pipelineExecutionId, String stageExecutionId, StepExecutionInstanceInfo stepExecutionInstanceInfo,
+      String stepPath);
 }

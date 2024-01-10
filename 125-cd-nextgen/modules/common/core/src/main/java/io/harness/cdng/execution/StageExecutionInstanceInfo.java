@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -56,6 +57,7 @@ public class StageExecutionInstanceInfo implements PersistentEntity, UuidAware {
   @NotNull private String pipelineExecutionId;
   @NotNull private String stageExecutionId;
   @NotNull private List<StepExecutionInstanceInfo> instanceInfos;
+  @NotNull private Map<String, StepExecutionInstanceInfo> instanceInfoMap;
   public static List<MongoIndex> mongoIndexes() {
     return ImmutableList.<MongoIndex>builder()
         .add(CompoundMongoIndex.builder()

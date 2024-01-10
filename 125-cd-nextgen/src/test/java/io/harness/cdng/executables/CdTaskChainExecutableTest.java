@@ -78,7 +78,7 @@ public class CdTaskChainExecutableTest extends CategoryTest {
 
     verify(stageExecutionInstanceInfoService)
         .append(anyString(), anyString(), anyString(), anyString(), anyString(),
-            eq(StepExecutionInstanceInfo.builder().build()));
+            eq(StepExecutionInstanceInfo.builder().build()), anyString());
   }
 
   @Test
@@ -95,7 +95,7 @@ public class CdTaskChainExecutableTest extends CategoryTest {
 
     verify(stageExecutionInstanceInfoService)
         .append(anyString(), anyString(), anyString(), anyString(), anyString(),
-            eq(StepExecutionInstanceInfo.builder().build()));
+            eq(StepExecutionInstanceInfo.builder().build()), anyString());
   }
 
   @Test

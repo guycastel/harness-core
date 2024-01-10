@@ -13,9 +13,10 @@ import io.harness.cdng.execution.StageExecutionInstanceInfo;
 import io.harness.cdng.execution.StageExecutionInstanceInfo.StageExecutionInstanceInfoKeys;
 import io.harness.delegate.cdng.execution.StepExecutionInstanceInfo;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import java.util.Map;
 import lombok.AllArgsConstructor;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -28,15 +29,18 @@ public class StageExecutionInstanceInfoRepositoryCustomImpl implements StageExec
 
   @Override
   public StageExecutionInstanceInfo append(String accountIdentifier, String orgIdentifier, String projectIdentifier,
-      String pipelineExecutionId, String stageExecutionId, StepExecutionInstanceInfo stepExecutionInstanceInfo) {
+      String pipelineExecutionId, String stageExecutionId, StepExecutionInstanceInfo stepExecutionInstanceInfo,
+      String stepPath) {
     Query query = new Query();
     query.addCriteria(
         createCriteria(accountIdentifier, orgIdentifier, projectIdentifier, pipelineExecutionId, stageExecutionId));
     StageExecutionInstanceInfo instanceInfo = mongoTemplate.findOne(query, StageExecutionInstanceInfo.class);
 
     if (null != instanceInfo) {
-      Update update = new Update().push(StageExecutionInstanceInfoKeys.instanceInfos, stepExecutionInstanceInfo);
-      return mongoTemplate.findAndModify(query, update, StageExecutionInstanceInfo.class);
+      Update update =
+          new Update().set(StageExecutionInstanceInfoKeys.instanceInfoMap + "." + stepPath, stepExecutionInstanceInfo);
+      return mongoTemplate.findAndModify(
+          query, update, FindAndModifyOptions.options().upsert(true), StageExecutionInstanceInfo.class);
     } else {
       StageExecutionInstanceInfo newInstanceInfo = StageExecutionInstanceInfo.builder()
                                                        .accountIdentifier(accountIdentifier)
@@ -44,8 +48,9 @@ public class StageExecutionInstanceInfoRepositoryCustomImpl implements StageExec
                                                        .projectIdentifier(projectIdentifier)
                                                        .pipelineExecutionId(pipelineExecutionId)
                                                        .stageExecutionId(stageExecutionId)
-                                                       .instanceInfos(Lists.newArrayList(stepExecutionInstanceInfo))
+                                                       .instanceInfoMap(Map.of(stepPath, stepExecutionInstanceInfo))
                                                        .build();
+
       return mongoTemplate.save(newInstanceInfo);
     }
   }

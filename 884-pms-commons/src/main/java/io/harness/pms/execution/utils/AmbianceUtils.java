@@ -63,6 +63,7 @@ public class AmbianceUtils {
   public static final String STAGE = "STAGE";
   public static final String SPECIAL_CHARACTER_REGEX = "[^a-zA-Z0-9]";
   public static final String PIE_SIMPLIFY_LOG_BASE_KEY = "PIE_SIMPLIFY_LOG_BASE_KEY";
+  public static final String STEP_GROUP = "STEP_GROUP";
   public static final String PIE_SECRETS_OBSERVER = "PIE_SECRETS_OBSERVER";
   public static final int MAX_CHARACTERS_FOR_IDENTIFIER_POSTFIX = 127;
 
@@ -611,5 +612,16 @@ public class AmbianceUtils {
       return stringMap.containsKey(featureFlagName) && Boolean.TRUE.equals(stringMap.get(featureFlagName));
     }
     return false;
+  }
+
+  public String getStepPath(Ambiance ambiance) {
+    List<Level> levelsList = ambiance.getLevelsList();
+    List<String> paths = new ArrayList<>();
+    paths.add("basePath");
+    levelsList.stream()
+        .filter(level -> STEP_GROUP.equals(level.getGroup()))
+        .forEach(level -> paths.add(level.getIdentifier()));
+    paths.add(obtainStepIdentifier(ambiance));
+    return String.join("/", paths);
   }
 }

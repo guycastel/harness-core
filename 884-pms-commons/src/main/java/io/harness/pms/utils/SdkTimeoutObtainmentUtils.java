@@ -13,6 +13,7 @@ import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 import io.harness.common.NGExpressionUtils;
+import io.harness.data.structure.EmptyPredicate;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.yaml.core.timeout.Timeout;
 
@@ -41,7 +42,8 @@ public class SdkTimeoutObtainmentUtils {
       return timeout;
     }
     if (ParameterField.isBlank(timeout)) {
-      return ParameterField.createValueField(Timeout.fromString(maxTimeout));
+      return ParameterField.createValueField(
+          Timeout.fromString(EmptyPredicate.isNotEmpty(maxTimeout) ? maxTimeout : MAX_TIMEOUT));
     }
     return getTimeoutParameterField(timeout, maxTimeout);
   }
@@ -56,8 +58,13 @@ public class SdkTimeoutObtainmentUtils {
   }
   private ParameterField<Timeout> getMinTimeoutValue(ParameterField<Timeout> givenTimeout, String maxTimeout) {
     Timeout maxTimeoutValue = Timeout.fromString(maxTimeout);
-    if (ParameterField.isBlank(givenTimeout) && null != maxTimeoutValue
-        && givenTimeout.getValue().getTimeoutInMillis() > maxTimeoutValue.getTimeoutInMillis()) {
+    if (null == maxTimeoutValue) {
+      maxTimeoutValue = Timeout.fromString(MAX_TIMEOUT);
+    }
+    if (ParameterField.isBlank(givenTimeout)) {
+      return ParameterField.createValueField(maxTimeoutValue);
+    }
+    if (givenTimeout.getValue().getTimeoutInMillis() > maxTimeoutValue.getTimeoutInMillis()) {
       return ParameterField.createValueField(maxTimeoutValue);
     }
     return givenTimeout;

@@ -67,27 +67,49 @@ public class StageTimeoutUtilsTest extends CategoryTest {
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
   public void shouldReturnSdkTimeOutObtainment() throws IOException {
-    long duration = 10;
-    ParameterField<Timeout> timeoutParameterField = ParameterField.createValueField(
-        Timeout.builder().timeoutString("10h").timeoutInMillis(TimeUnit.HOURS.toMillis(duration)).build());
+    ParameterField<Timeout> timeoutParameterField =
+        ParameterField.createValueField(Timeout.builder().timeoutString("12h").timeoutInMillis(43200000).build());
     ParameterField<Timeout> sdkTimeoutObtainment =
         SdkTimeoutObtainmentUtils.getTimeout(timeoutParameterField, "10h", false);
 
-    assertThat(timeoutParameterField).isNotNull();
-    assertThat(timeoutParameterField.getValue().getTimeoutString()).isEqualTo("10h");
+    assertThat(sdkTimeoutObtainment).isNotNull();
+    assertThat(sdkTimeoutObtainment.getValue().getTimeoutString()).isEqualTo("10h");
+    assertThat(sdkTimeoutObtainment.getValue().getTimeoutInMillis()).isEqualTo(36000000L);
 
     sdkTimeoutObtainment = SdkTimeoutObtainmentUtils.getTimeout(ParameterField.createValueField(null), "10d", false);
 
     assertThat(sdkTimeoutObtainment).isNotNull();
-    assertThat(timeoutParameterField.getValue().getTimeoutString()).isEqualTo("10h");
+    assertThat(sdkTimeoutObtainment.getValue().getTimeoutString()).isEqualTo("10d");
   }
 
   @Test
   @Owner(developers = SHIVAM)
   @Category(UnitTests.class)
-  public void shouldReturnNull() {
+  public void shouldNotReturnNull() {
     ParameterField<Timeout> timeoutParameterField =
         SdkTimeoutObtainmentUtils.getTimeout(ParameterField.createValueField(null), "10h", false);
+    assertThat(timeoutParameterField).isNotNull();
+    assertThat(timeoutParameterField.getValue().getTimeoutString()).isEqualTo("10h");
+
+    ParameterField<Timeout> timeout =
+        ParameterField.createValueField(Timeout.builder().timeoutString("6h").timeoutInMillis(21600000).build());
+    timeoutParameterField = SdkTimeoutObtainmentUtils.getTimeout(timeout, null, false);
+    assertThat(timeoutParameterField).isNotNull();
+    assertThat(timeoutParameterField.getValue().getTimeoutString()).isEqualTo("6h");
+
+    // Default Timeout
+    timeoutParameterField = SdkTimeoutObtainmentUtils.getTimeout(ParameterField.createValueField(null), null, false);
+    assertThat(timeoutParameterField).isNotNull();
+    assertThat(timeoutParameterField.getValue().getTimeoutString()).isEqualTo("8w");
+
+    // Default Timeout
+    timeoutParameterField = SdkTimeoutObtainmentUtils.getTimeout(ParameterField.createValueField(null), "", false);
+    assertThat(timeoutParameterField).isNotNull();
+    assertThat(timeoutParameterField.getValue().getTimeoutString()).isEqualTo("8w");
+
+    ParameterField<Timeout> timeoutParameterField2 =
+        SdkTimeoutObtainmentUtils.getTimeout(ParameterField.createValueField(null), "10h", false);
+    timeoutParameterField = SdkTimeoutObtainmentUtils.getTimeout(timeoutParameterField2, "", false);
     assertThat(timeoutParameterField).isNotNull();
     assertThat(timeoutParameterField.getValue().getTimeoutString()).isEqualTo("10h");
   }

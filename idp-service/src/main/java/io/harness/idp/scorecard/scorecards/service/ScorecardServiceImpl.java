@@ -11,6 +11,7 @@ import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.idp.common.Constants.DOT_SEPARATOR;
 import static io.harness.idp.common.Constants.GLOBAL_ACCOUNT_ID;
+import static io.harness.idp.common.DateUtils.yesterdayInMilliseconds;
 import static io.harness.outbox.TransactionOutboxModule.OUTBOX_TRANSACTION_TEMPLATE;
 import static io.harness.remote.client.NGRestUtils.getGeneralResponse;
 import static io.harness.springdata.PersistenceUtils.DEFAULT_RETRY_POLICY;
@@ -310,7 +311,8 @@ public class ScorecardServiceImpl implements ScorecardService {
       throw new InvalidRequestException(String.format("Scorecard stats not found for scorecardId [%s]", identifier));
     }
     List<ScorecardStatsEntity> scorecardStatsEntities =
-        scorecardStatsRepository.findByAccountIdentifierAndScorecardIdentifier(accountIdentifier, identifier);
+        scorecardStatsRepository.findByAccountIdentifierAndScorecardIdentifierAndLastUpdatedAtGreaterThan(
+            accountIdentifier, identifier, yesterdayInMilliseconds());
     return ScorecardStatsMapper.toDTO(scorecardStatsEntities, scorecardEntity.getName());
   }
 

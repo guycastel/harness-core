@@ -19,6 +19,6 @@ import org.springframework.data.repository.CrudRepository;
 @OwnedBy(HarnessTeam.IDP)
 public interface ScorecardStatsRepository
     extends CrudRepository<ScorecardStatsEntity, String>, ScorecardStatsRepositoryCustom {
-  List<ScorecardStatsEntity> findByAccountIdentifierAndScorecardIdentifier(
-      String accountIdentifier, String scorecardIdentifier);
+  List<ScorecardStatsEntity> findByAccountIdentifierAndScorecardIdentifierAndLastUpdatedAtGreaterThan(
+      String accountIdentifier, String scorecardIdentifier, long milliseconds);
 }

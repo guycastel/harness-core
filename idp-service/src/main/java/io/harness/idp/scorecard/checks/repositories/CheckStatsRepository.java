@@ -18,6 +18,6 @@ import org.springframework.data.repository.CrudRepository;
 @HarnessRepo
 @OwnedBy(HarnessTeam.IDP)
 public interface CheckStatsRepository extends CrudRepository<CheckStatsEntity, String>, CheckStatsRepositoryCustom {
-  List<CheckStatsEntity> findByAccountIdentifierAndCheckIdentifierAndIsCustom(
-      String accountIdentifier, String identifier, boolean isCustom);
+  List<CheckStatsEntity> findByAccountIdentifierAndCheckIdentifierAndIsCustomAndLastUpdatedAtGreaterThan(
+      String accountIdentifier, String identifier, boolean isCustom, long milliseconds);
 }

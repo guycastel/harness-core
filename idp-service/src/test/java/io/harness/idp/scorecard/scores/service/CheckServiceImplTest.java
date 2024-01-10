@@ -11,6 +11,7 @@ import static io.harness.idp.common.Constants.CATALOG_IDENTIFIER;
 import static io.harness.idp.common.Constants.DOT_SEPARATOR;
 import static io.harness.idp.common.Constants.GITHUB_IDENTIFIER;
 import static io.harness.idp.common.Constants.GLOBAL_ACCOUNT_ID;
+import static io.harness.idp.common.DateUtils.yesterdayInMilliseconds;
 import static io.harness.idp.scorecard.datapoints.constants.DataPoints.CATALOG_TECH_DOCS;
 import static io.harness.idp.scorecard.datapoints.constants.DataPoints.IS_BRANCH_PROTECTED;
 import static io.harness.idp.scorecard.datapoints.constants.Inputs.FILE_PATH;
@@ -301,8 +302,8 @@ public class CheckServiceImplTest extends CategoryTest {
   public void testGetCheckStats() {
     when(checkRepository.findByAccountIdentifierAndIdentifier(ACCOUNT_ID, GITHUB_CHECK_ID))
         .thenReturn(getCheckEntities().get(0));
-    when(checkStatsRepository.findByAccountIdentifierAndCheckIdentifierAndIsCustom(
-             ACCOUNT_ID, GITHUB_CHECK_ID, Boolean.TRUE))
+    when(checkStatsRepository.findByAccountIdentifierAndCheckIdentifierAndIsCustomAndLastUpdatedAtGreaterThan(
+             ACCOUNT_ID, GITHUB_CHECK_ID, Boolean.TRUE, yesterdayInMilliseconds()))
         .thenReturn(getCheckStatsEntities());
     CheckStatsResponse response = checkServiceImpl.getCheckStats(ACCOUNT_ID, GITHUB_CHECK_ID, Boolean.TRUE);
     assertEquals(GITHUB_CHECK_NAME, response.getName());

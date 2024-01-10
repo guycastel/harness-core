@@ -12,6 +12,7 @@ import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.idp.common.CommonUtils.addGlobalAccountIdentifierAlong;
 import static io.harness.idp.common.Constants.DOT_SEPARATOR;
 import static io.harness.idp.common.Constants.GLOBAL_ACCOUNT_ID;
+import static io.harness.idp.common.DateUtils.yesterdayInMilliseconds;
 import static io.harness.outbox.TransactionOutboxModule.OUTBOX_TRANSACTION_TEMPLATE;
 import static io.harness.springdata.PersistenceUtils.DEFAULT_RETRY_POLICY;
 
@@ -173,8 +174,8 @@ public class CheckServiceImpl implements CheckService {
       throw new InvalidRequestException(String.format("Check stats not found for checkId [%s]", identifier));
     }
     List<CheckStatsEntity> checkStatsEntities =
-        checkStatsRepository.findByAccountIdentifierAndCheckIdentifierAndIsCustom(
-            accountIdentifier, identifier, custom);
+        checkStatsRepository.findByAccountIdentifierAndCheckIdentifierAndIsCustomAndLastUpdatedAtGreaterThan(
+            accountIdentifier, identifier, custom, yesterdayInMilliseconds());
     return CheckStatsMapper.toDTO(checkStatsEntities, checkEntity.getName());
   }
 

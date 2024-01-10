@@ -8,6 +8,7 @@
 package io.harness.idp.scorecard.scores.service;
 
 import static io.harness.idp.common.Constants.GLOBAL_ACCOUNT_ID;
+import static io.harness.idp.common.DateUtils.yesterdayInMilliseconds;
 import static io.harness.rule.OwnerRule.VIGNESWARA;
 
 import static junit.framework.TestCase.assertEquals;
@@ -238,7 +239,8 @@ public class ScorecardServiceImplTest extends CategoryTest {
   public void testGetScorecardStats() {
     when(scorecardRepository.findByAccountIdentifierAndIdentifier(ACCOUNT_ID, SCORECARD_ID))
         .thenReturn(getScorecardEntity());
-    when(scorecardStatsRepository.findByAccountIdentifierAndScorecardIdentifier(ACCOUNT_ID, SCORECARD_ID))
+    when(scorecardStatsRepository.findByAccountIdentifierAndScorecardIdentifierAndLastUpdatedAtGreaterThan(
+             ACCOUNT_ID, SCORECARD_ID, yesterdayInMilliseconds()))
         .thenReturn(getScorecardStatsEntities());
     ScorecardStatsResponse response = scorecardServiceImpl.getScorecardStats(ACCOUNT_ID, SCORECARD_ID);
     assertEquals(SCORECARD_NAME, response.getName());

@@ -21,6 +21,7 @@ import io.harness.pms.merger.fqn.FQNNode;
 import io.harness.rule.Owner;
 
 import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -56,5 +57,26 @@ public class FQNTest extends CategoryTest {
     fqn.setFqnList(Arrays.asList(FQNNode.builder().uuidValue("step").build(),
         FQNNode.builder().uuidValue("spec").nodeType(FQNNode.NodeType.UUID).build()));
     assertEquals(fqn.getExpressionFqnWithoutIgnoring(), "spec");
+  }
+
+  @Test
+  @Owner(developers = BRIJESH)
+  @Category(UnitTests.class)
+  public void testGetFqnForGivenRelativePath() {
+    FQN fqn = FQN.builder()
+                  .fqnList(List.of(FQNNode.builder().nodeType(FQNNode.NodeType.KEY).key("spec").build(),
+                      FQNNode.builder().nodeType(FQNNode.NodeType.KEY).key("steps").build(),
+                      FQNNode.builder().nodeType(FQNNode.NodeType.KEY_WITH_UUID).key("step_1").build(),
+                      FQNNode.builder().nodeType(FQNNode.NodeType.KEY).key("spec").build(),
+                      FQNNode.builder().nodeType(FQNNode.NodeType.KEY).key("f1").build(),
+                      FQNNode.builder().nodeType(FQNNode.NodeType.KEY).key("f1_1").build()))
+                  .build();
+
+    assertEquals(fqn.getFqnForGivenRelativePath("new_f1").getExpressionFqn(), "spec.steps.null.spec.f1.new_f1");
+    assertEquals(
+        fqn.getFqnForGivenRelativePath("new_f1/new_f2").getExpressionFqn(), "spec.steps.null.spec.f1.new_f1.new_f2");
+    assertEquals(fqn.getFqnForGivenRelativePath("../new_ff1").getExpressionFqn(), "spec.steps.null.spec.new_ff1");
+    assertEquals(fqn.getFqnForGivenRelativePath("../new_ff2/new_ff2_1").getExpressionFqn(),
+        "spec.steps.null.spec.new_ff2.new_ff2_1");
   }
 }

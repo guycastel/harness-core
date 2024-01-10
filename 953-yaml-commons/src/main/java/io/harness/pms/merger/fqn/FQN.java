@@ -222,17 +222,27 @@ public class FQN {
     return FQN.builder().fqnList(newList).build();
   }
 
-  public FQN getSiblingFQN(String siblingFieldName) {
+  public FQN getFqnForGivenRelativePath(String path) {
+    String[] pathComponents = path.split("/");
     FQN siblingFqn = getFQNCopy();
     List<FQNNode> siblingFqnList = siblingFqn.getFqnList();
-    FQNNode currentFQNLastNode = fqnList.get(fqnList.size() - 1);
-    siblingFqnList.set(siblingFqnList.size() - 1,
-        FQNNode.builder()
-            .key(siblingFieldName)
-            .nodeType(currentFQNLastNode.getNodeType())
-            .uuidKey(currentFQNLastNode.getUuidKey())
-            .uuidValue(currentFQNLastNode.getUuidValue())
-            .build());
+    // Removing the FQNNode for the current field. So the FQN will have path till parent.
+    siblingFqnList.remove(siblingFqnList.size() - 1);
+
+    // Iterating according to the path.
+    for (String pathComponent : pathComponents) {
+      if (".".equals(pathComponent)) {
+        continue;
+      }
+      if ("..".equals(pathComponent)) {
+        if (siblingFqnList.size() == 0) {
+          break;
+        }
+        siblingFqnList.remove(siblingFqnList.size() - 1);
+      } else {
+        siblingFqnList.add(FQNNode.builder().key(pathComponent).nodeType(NodeType.KEY).build());
+      }
+    }
     return siblingFqn;
   }
 }

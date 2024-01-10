@@ -159,7 +159,7 @@ public class InputsSchemaServiceImpl implements InputsSchemaService {
                                               .builder()
                                               // Assuming dependency is always on a field from same step
                                               .parentNodeType(fieldSchemaNodeInfo.getEntityType())
-                                              .fqn(fqn.getSiblingFQN(requiredField.asText()))
+                                              .fqn(fqn.getFqnForGivenRelativePath(requiredField.asText()))
                                               .build()));
         inputMetadata.setRequiredFieldMetadata(requiredFieldsMetadata);
       }

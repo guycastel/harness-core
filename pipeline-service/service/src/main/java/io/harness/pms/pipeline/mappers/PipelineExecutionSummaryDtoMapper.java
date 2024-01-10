@@ -77,6 +77,7 @@ public class PipelineExecutionSummaryDtoMapper {
         .totalStagesCount(getStagesCount(layoutNodeDTOMap, startingNodeId))
         .runSequence(pipelineExecutionSummaryEntity.getRunSequence())
         .tags(pipelineExecutionSummaryEntity.getTags())
+        .labels(pipelineExecutionSummaryEntity.getLabels())
         .modules(EmptyPredicate.isEmpty(pipelineExecutionSummaryEntity.getModules())
                 ? new ArrayList<>()
                 : pipelineExecutionSummaryEntity.getModules())

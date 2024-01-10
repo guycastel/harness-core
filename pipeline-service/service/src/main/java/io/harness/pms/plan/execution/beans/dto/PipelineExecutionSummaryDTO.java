@@ -6,6 +6,7 @@
  */
 
 package io.harness.pms.plan.execution.beans.dto;
+
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
 
 import io.harness.abort.AbortedBy;
@@ -24,6 +25,7 @@ import io.harness.pms.contracts.plan.ExecutionMode;
 import io.harness.pms.contracts.plan.ExecutionTriggerInfo;
 import io.harness.pms.contracts.plan.PipelineStageInfo;
 import io.harness.pms.execution.ExecutionStatus;
+import io.harness.yaml.core.NGLabel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -59,6 +61,7 @@ public class PipelineExecutionSummaryDTO {
   ExecutionStatus status;
 
   List<NGTag> tags;
+  List<NGLabel> labels;
 
   ExecutionTriggerInfo executionTriggerInfo;
   @Deprecated ExecutionErrorInfo executionErrorInfo;

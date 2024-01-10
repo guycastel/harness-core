@@ -505,6 +505,22 @@ public class UserGroupServiceImplTest extends CategoryTest {
     verify(userGroupRepository, times(1)).findAll(criteria, page);
   }
 
+  @Test(expected = InvalidRequestException.class)
+  @Owner(developers = BHAVYA)
+  @Category(UnitTests.class)
+  public void testValidateRegex_throwsInvalidRequestException_forInvalidRegex() {
+    String regex = "abc(";
+    userGroupService.checkIfItsValidRegex(regex);
+  }
+
+  @Test
+  @Owner(developers = BHAVYA)
+  @Category(UnitTests.class)
+  public void testValidateRegex_forValidRegex_DoesNotThrowError() {
+    String regex = "abc*";
+    userGroupService.checkIfItsValidRegex(regex);
+  }
+
   @Test
   @Owner(developers = MEENAKSHI)
   @Category(UnitTests.class)

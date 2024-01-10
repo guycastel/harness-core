@@ -108,6 +108,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -767,11 +769,20 @@ public class UserGroupServiceImpl implements UserGroupService {
       criteria = createScopeCriteria(accountIdentifier, orgIdentifier, projectIdentifier);
     }
     if (isNotBlank(searchTerm)) {
+      checkIfItsValidRegex(searchTerm);
       Criteria searchCriteria = new Criteria().orOperator(Criteria.where(UserGroupKeys.name).regex(searchTerm, "i"),
           Criteria.where(UserGroupKeys.tags).regex(searchTerm, "i"));
       criteria.andOperator(searchCriteria);
     }
     return criteria;
+  }
+
+  protected void checkIfItsValidRegex(String regex) {
+    try {
+      Pattern.compile(regex);
+    } catch (PatternSyntaxException ex) {
+      throw new InvalidRequestException(String.format("Search term is an invalid regex - %s", ex.getMessage()));
+    }
   }
 
   private Criteria createScopeCriteriaIncludingInheritedUserGroups(

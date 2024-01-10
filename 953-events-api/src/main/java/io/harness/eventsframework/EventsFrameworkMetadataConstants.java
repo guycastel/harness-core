@@ -56,6 +56,10 @@ public final class EventsFrameworkMetadataConstants {
   public static final String USER_SCOPE_RECONCILIATION = "userScopeReconciliation";
   public static final String CHAOS_EXPERIMENT = "chaosexperiment";
   public static final String CHAOS_HUB = "chaoshub";
+
+  // Note that OPA_GOVERNANCE if changed, redis EntityTypeOPA needs to be changed in policy-mgmt as well.
+  public static final String OPA_GOVERNANCE_POLICY = "opaGovernancePolicy";
+  public static final String OPA_GOVERNANCE_POLICYSET = "opaGovernancePolicySet";
   public static final String CHAOS_INFRASTRUCTURE = "chaosinfrastructure";
   public static final String CHAOS_GAMEDAY = "chaosgameday";
 

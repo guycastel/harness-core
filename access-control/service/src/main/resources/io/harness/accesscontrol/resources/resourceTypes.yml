@@ -51,9 +51,9 @@ resourceTypes:
     permissionKey: dashboards
   - identifier: TEMPLATE
     permissionKey: template
-  - identifier: GOVERNANCEPOLICY
+  - identifier: GOVERNANCE_POLICY
     permissionKey: governancePolicy
-  - identifier: GOVERNANCEPOLICYSETS
+  - identifier: GOVERNANCE_POLICY_SETS
     permissionKey: governancePolicySets
   - identifier: MONITOREDSERVICE
     permissionKey: monitoredservice

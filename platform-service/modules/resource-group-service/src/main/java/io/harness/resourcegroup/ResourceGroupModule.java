@@ -38,6 +38,8 @@ import io.harness.ipallowlist.IPAllowListClient;
 import io.harness.ipallowlist.IPAllowListClientModule;
 import io.harness.migration.NGMigrationSdkModule;
 import io.harness.ng.core.event.MessageListener;
+import io.harness.opaclient.OpaClientModule;
+import io.harness.opaclient.OpaServiceClient;
 import io.harness.organization.OrganizationClientModule;
 import io.harness.organization.remote.OrganizationClient;
 import io.harness.outbox.api.OutboxEventHandler;
@@ -138,6 +140,7 @@ public class ResourceGroupModule extends AbstractModule {
     requireBinding(CodeResourceClient.class);
     requireBinding(GovernanceRuleClient.class);
     requireBinding(FeatureFlagResourceClient.class);
+    requireBinding(OpaServiceClient.class);
   }
 
   private void installResourceValidators() {
@@ -193,5 +196,7 @@ public class ResourceGroupModule extends AbstractModule {
     install(new FeatureFlagResourceClientModule(
         ServiceHttpClientConfig.builder().baseUrl(resourceClients.getCeNextGen().getBaseUrl()).build(),
         resourceClients.getCeNextGen().getSecret(), RESOUCE_GROUP_SERVICE.toString(), ClientMode.PRIVILEGED));
+    install(new OpaClientModule(resourceClients.getOpaClientConfig(), resourceClients.getPolicyManagerSecret(),
+        RESOUCE_GROUP_SERVICE.toString()));
   }
 }

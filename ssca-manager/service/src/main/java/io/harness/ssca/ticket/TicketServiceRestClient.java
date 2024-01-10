@@ -7,10 +7,10 @@
 package io.harness.ssca.ticket;
 
 import io.harness.security.NextGenAuthenticationFilter;
+import io.harness.ssca.beans.ticket.TicketListingResponseDto;
 import io.harness.ssca.beans.ticket.TicketRequestDto;
 import io.harness.ssca.beans.ticket.TicketResponseDto;
 
-import com.google.gson.JsonObject;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -26,7 +26,7 @@ public interface TicketServiceRestClient {
       @Body TicketRequestDto ticketRequestDto);
 
   @GET("tickets")
-  Call<JsonObject> getTickets(@Header(NextGenAuthenticationFilter.AUTHORIZATION_HEADER) String authToken,
+  Call<TicketListingResponseDto> getTickets(@Header(NextGenAuthenticationFilter.AUTHORIZATION_HEADER) String authToken,
       @Query("module") String module, @Query("identifiers") String identifiers, @Query("accountId") String accountId,
       @Query("orgId") String orgId, @Query("projectId") String projectId);
 

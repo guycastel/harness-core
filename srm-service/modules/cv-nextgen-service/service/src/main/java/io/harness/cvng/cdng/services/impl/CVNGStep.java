@@ -25,6 +25,7 @@ import io.harness.cvng.cdng.beans.ResolvedCVConfigInfo;
 import io.harness.cvng.cdng.beans.v2.BaselineType;
 import io.harness.cvng.cdng.entities.CVNGStepTask;
 import io.harness.cvng.cdng.entities.CVNGStepTask.CVNGStepTaskBuilder;
+import io.harness.cvng.cdng.instrumentation.CVNGTelemetryHelper;
 import io.harness.cvng.cdng.services.api.CVNGStepTaskService;
 import io.harness.cvng.cdng.services.api.PipelineStepMonitoredServiceResolutionService;
 import io.harness.cvng.client.NextGenService;
@@ -108,6 +109,7 @@ public class CVNGStep extends AsyncExecutableWithCapabilities {
   @Inject private OpaServiceClient opaServiceClient;
 
   @Inject private NextGenService nextGenService;
+  @Inject CVNGTelemetryHelper cvngTelemetryHelper;
 
   @Override
   public AsyncExecutableResponse executeAsyncAfterRbac(
@@ -219,6 +221,12 @@ public class CVNGStep extends AsyncExecutableWithCapabilities {
                                       .verificationJobInstanceId(verificationJobInstanceId)
                                       .build();
       cvngStepTaskService.create(cvngStepTask);
+      try {
+        cvngTelemetryHelper.publishCVNGStepExecutionEvent(cvngStepTask, monitoredServiceType, stepParameters);
+      } catch (Exception ex) {
+        log.error(
+            "Error while publishing telemetry for the CVNG Execute step with id {}", verificationJobInstanceId, ex);
+      }
       if (isDemoEnabled && !shouldFailVerification) {
         sideKickService.schedule(DemoActivitySideKickData.builder().deploymentActivityId(activityId).build(),
             activity.getActivityStartTime().plus(Duration.ofMinutes(10)));

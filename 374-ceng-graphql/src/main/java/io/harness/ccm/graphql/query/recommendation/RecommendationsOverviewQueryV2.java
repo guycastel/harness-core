@@ -374,9 +374,15 @@ public class RecommendationsOverviewQueryV2 {
       if (!isEmpty(filter.getResourceTypes())) {
         List<ResourceType> resourceTypes = filter.getResourceTypes();
         if (!rbacHelper.hasRuleViewPermission(accountId, null, null)) {
-          resourceTypes.remove(ResourceType.GOVERNANCE);
+          if (resourceTypes.contains(ResourceType.GOVERNANCE)) {
+            resourceTypes.remove(ResourceType.GOVERNANCE);
+          } else {
+            condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.notEqual(ResourceType.GOVERNANCE.name()));
+          }
         }
         condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.in(enumToString(resourceTypes)));
+      } else if (!rbacHelper.hasRuleViewPermission(accountId, null, null)) {
+        condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.notEqual(ResourceType.GOVERNANCE.name()));
       }
       if (!isEmpty(filter.getRecommendationStates())) {
         condition =
@@ -412,9 +418,15 @@ public class RecommendationsOverviewQueryV2 {
     if (!isEmpty(filter.getResourceTypes())) {
       List<ResourceType> resourceTypes = filter.getResourceTypes();
       if (!rbacHelper.hasRuleViewPermission(accountId, null, null)) {
-        resourceTypes.remove(ResourceType.GOVERNANCE);
+        if (resourceTypes.contains(ResourceType.GOVERNANCE)) {
+          resourceTypes.remove(ResourceType.GOVERNANCE);
+        } else {
+          condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.notEqual(ResourceType.GOVERNANCE.name()));
+        }
       }
       condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.in(enumToString(resourceTypes)));
+    } else if (!rbacHelper.hasRuleViewPermission(accountId, null, null)) {
+      condition = condition.and(CE_RECOMMENDATIONS.RESOURCETYPE.notEqual(ResourceType.GOVERNANCE.name()));
     }
     if (!isEmpty(filter.getRecommendationStates())) {
       condition =

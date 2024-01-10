@@ -68,8 +68,6 @@ import com.google.inject.name.Named;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -478,7 +476,6 @@ public class RemediationTrackerServiceImpl implements RemediationTrackerService 
     List<TicketResponseDto> ticketResponseDtos = new ArrayList<>();
     try {
       identifiers = objectMapper.writeValueAsString(identifiersMap);
-      identifiers = URLEncoder.encode(identifiers, StandardCharsets.UTF_8);
       ticketResponseDtos = ticketServiceRestClientService.getTickets(
           getAuthToken(accountId), MODULE, identifiers, accountId, orgId, projectId);
     } catch (JsonProcessingException e) {

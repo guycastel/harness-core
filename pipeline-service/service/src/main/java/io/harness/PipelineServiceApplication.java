@@ -193,8 +193,7 @@ import io.harness.service.impl.DelegateSyncServiceImpl;
 import io.harness.springdata.HMongoTemplate;
 import io.harness.steps.PodCleanupUpdateEventHandler;
 import io.harness.steps.approval.step.custom.IrregularApprovalInstanceHandler;
-import io.harness.steps.barriers.event.BarrierDropper;
-import io.harness.steps.barriers.event.BarrierPositionHelperEventHandler;
+import io.harness.steps.barriers.event.BarrierEventHandler;
 import io.harness.steps.barriers.event.BarrierWithinStrategyExpander;
 import io.harness.steps.barriers.service.BarrierServiceImpl;
 import io.harness.steps.common.NodeExecutionMetadataDeleteObserver;
@@ -549,8 +548,7 @@ public class PipelineServiceApplication extends Application<PipelineServiceConfi
     nodeExecutionService.getNodeStatusUpdateSubject().register(
         injector.getInstance(Key.get(StageStatusUpdateNotificationEventHandler.class)));
     nodeExecutionService.getNodeStatusUpdateSubject().register(
-        injector.getInstance(Key.get(BarrierPositionHelperEventHandler.class)));
-    nodeExecutionService.getNodeStatusUpdateSubject().register(injector.getInstance(Key.get(BarrierDropper.class)));
+        injector.getInstance(Key.get(BarrierEventHandler.class)));
     nodeExecutionService.getNodeStatusUpdateSubject().register(
         injector.getInstance(Key.get(NodeExecutionStatusUpdateEventHandler.class)));
     nodeExecutionService.getNodeStatusUpdateSubject().register(

@@ -14,16 +14,20 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.beans.FeatureName;
 import io.harness.engine.observers.NodeStatusUpdateObserver;
 import io.harness.engine.observers.NodeUpdateInfo;
 import io.harness.execution.NodeExecution;
 import io.harness.lock.AcquiredLock;
 import io.harness.lock.PersistentLocker;
 import io.harness.observer.AsyncInformObserver;
+import io.harness.plancreator.steps.common.StepElementParameters;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.ambiance.Level;
+import io.harness.pms.contracts.execution.Status;
 import io.harness.pms.execution.utils.AmbianceUtils;
+import io.harness.pms.serializer.recaster.RecastOrchestrationUtils;
+import io.harness.steps.barriers.BarrierSpecParameters;
+import io.harness.steps.barriers.BarrierStep;
 import io.harness.steps.barriers.beans.BarrierExecutionInstance;
 import io.harness.steps.barriers.beans.BarrierPositionInfo.BarrierPosition.BarrierPositionType;
 import io.harness.steps.barriers.service.BarrierService;
@@ -32,7 +36,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.time.Duration;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +44,18 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 @OwnedBy(HarnessTeam.PIPELINE)
-public class BarrierPositionHelperEventHandler implements AsyncInformObserver, NodeStatusUpdateObserver {
+public class BarrierEventHandler implements AsyncInformObserver, NodeStatusUpdateObserver {
   @Inject @Named("OrchestrationVisualizationExecutorService") ExecutorService executorService;
   @Inject BarrierService barrierService;
   @Inject private PersistentLocker persistentLocker;
 
   @Override
   public void onNodeStatusUpdate(NodeUpdateInfo nodeUpdateInfo) {
+    updateBarrierPosition(nodeUpdateInfo);
+    dropBarrier(nodeUpdateInfo);
+  }
+
+  private void updateBarrierPosition(NodeUpdateInfo nodeUpdateInfo) {
     String planExecutionId = nodeUpdateInfo.getPlanExecutionId();
     NodeExecution nodeExecution = nodeUpdateInfo.getNodeExecution();
     try {
@@ -62,15 +70,17 @@ public class BarrierPositionHelperEventHandler implements AsyncInformObserver, N
         positionType = BarrierPositionType.STEP;
       }
       if (positionType != null) {
-        updatePosition(planExecutionId, positionType, nodeExecution);
+        updateBarrierPositionInternal(planExecutionId, positionType, nodeExecution);
       }
-    } catch (Exception e) {
-      log.error("Failed to update barrier position for planExecutionId: [{}]", planExecutionId);
-      throw e;
+    } catch (Exception ex) {
+      log.error(String.format("Failed to update barrier position for planExecutionId: [%s], nodeExecutionId: [%s]",
+                    planExecutionId, nodeExecution.getUuid()),
+          ex);
+      throw ex;
     }
   }
 
-  private List<BarrierExecutionInstance> updatePosition(
+  private void updateBarrierPositionInternal(
       String planExecutionId, BarrierPositionType type, NodeExecution nodeExecution) {
     Ambiance ambiance = nodeExecution.getAmbiance();
     Level level = Objects.requireNonNull(AmbianceUtils.obtainCurrentLevel(ambiance));
@@ -82,9 +92,37 @@ public class BarrierPositionHelperEventHandler implements AsyncInformObserver, N
     }
     try (AcquiredLock<?> ignore = persistentLocker.waitToAcquireLock(
              BARRIER_UPDATE_LOCK + planExecutionId, Duration.ofSeconds(20), Duration.ofSeconds(60))) {
-      return barrierService.updatePosition(
+      barrierService.updatePosition(
           planExecutionId, type, level.getSetupId(), nodeExecution.getUuid(), stageRuntimeId, stepGroupRuntimeId);
     }
+  }
+
+  private void dropBarrier(NodeUpdateInfo nodeUpdateInfo) {
+    String planExecutionId = nodeUpdateInfo.getPlanExecutionId();
+    NodeExecution nodeExecution = nodeUpdateInfo.getNodeExecution();
+    try {
+      if (shouldTryToDropBarrier(nodeExecution)) {
+        StepElementParameters stepElementParameters =
+            RecastOrchestrationUtils.fromMap(nodeExecution.getResolvedStepParameters(), StepElementParameters.class);
+        BarrierSpecParameters barrierSpecParameters = (BarrierSpecParameters) stepElementParameters.getSpec();
+
+        BarrierExecutionInstance barrierExecutionInstance =
+            barrierService.findByIdentifierAndPlanExecutionId(barrierSpecParameters.getBarrierRef(), planExecutionId);
+        barrierService.update(barrierExecutionInstance);
+      }
+    } catch (Exception ex) {
+      log.error(String.format("Failed to drop barrier for planExecutionId: [%s], nodeExecutionId: [%s]",
+                    planExecutionId, nodeExecution.getUuid()),
+          ex);
+      throw ex;
+    }
+  }
+
+  private boolean shouldTryToDropBarrier(NodeExecution nodeExecution) {
+    /* Only attempt to drop barrier if the step is Barrier step and if status is ASYNC_WAITING,
+       which is the initial status of a barrier step when beginning its execution. */
+    return BarrierStep.STEP_TYPE.equals(AmbianceUtils.getCurrentStepType(nodeExecution.getAmbiance()))
+        && Status.ASYNC_WAITING.equals(nodeExecution.getStatus());
   }
 
   @Override

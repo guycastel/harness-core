@@ -43,6 +43,7 @@ import io.harness.delegate.AccountId;
 import io.harness.delegate.beans.connector.ConnectorType;
 import io.harness.delegate.beans.connector.scm.GitConnectionType;
 import io.harness.delegate.beans.connector.scm.ScmConnector;
+import io.harness.exception.InternalServerErrorException;
 import io.harness.exception.InvalidRequestException;
 import io.harness.exception.WingsException;
 import io.harness.gitsync.beans.GitRepositoryDTO;
@@ -545,8 +546,8 @@ public class ScmFacilitatorServiceImpl implements ScmFacilitatorService {
   @Override
   public void updateGitCache(ScmUpdateGitCacheRequestDTO scmUpdateGitCacheRequestDTO) {
     if (!isBatchGetFileTaskSupportedByDelegates(scmUpdateGitCacheRequestDTO.getAccountIdentifier())) {
-      processGetBatchFileTaskUsingSingleGetFileAPI(scmUpdateGitCacheRequestDTO.getScmGetFileByBranchRequestDTOMap());
-      return;
+      log.warn(
+          "Some of the delegates in the account are not eligible to perform GetBatchFile operation. Proceeding with the GetBatchFile operation even though the operation might fail.");
     }
 
     Map<GetBatchFileRequestIdentifier, GitFileRequestV2> gitFileRequestMapForManager = new HashMap<>();

@@ -274,6 +274,7 @@ io.harness.yaml.sto.variables.STOYamlNmapConfig
 io.harness.beans.yaml.extended.TIDotNetBuildEnvName
 io.harness.beans.execution.CustomExecutionSource
 io.harness.yaml.sto.variables.STOYamlTargetType
+io.harness.yaml.sto.variables.STOYamlTargetDetection
 io.harness.advisers.rollback.RollbackTriggeredOutput
 io.harness.beans.steps.nodes.V1.BackgroundStepNodeV1
 io.harness.ci.beans.entities.TIServiceConfig

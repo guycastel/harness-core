@@ -6,6 +6,7 @@
   "SECURITY_SCAN_TYPE": "instance",
   "SECURITY_TARGET_NAME": "test",
   "SECURITY_TARGET_VARIANT": "variant",
+  "SECURITY_TARGET_DETECTION": "manual",
   "SECURITY_WORKSPACE": "/tmp",
 
   "SECURITY_INSTANCE_ENVIRONMENT": "variant",

@@ -14,6 +14,7 @@ import static io.harness.yaml.schema.beans.SupportedPossibleFieldTypes.runtime;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.yaml.YamlSchemaTypes;
+import io.harness.yaml.sto.variables.STOYamlTargetDetection;
 import io.harness.yaml.sto.variables.STOYamlTargetType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,6 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
+
 @Data
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -38,5 +40,20 @@ public class STOYamlTarget {
 
   @NotNull @ApiModelProperty(dataType = STRING_CLASSPATH) protected ParameterField<String> variant;
 
+  @ApiModelProperty(dataType = "io.harness.yaml.sto.variables.STOYamlTargetDetection")
+  protected ParameterField<STOYamlTargetDetection> detection;
+
   @ApiModelProperty(dataType = STRING_CLASSPATH) protected ParameterField<String> workspace;
+
+  public STOYamlTargetDetection getDetection() {
+    if (detection == null) {
+      return null;
+    }
+    if (detection.fetchFinalValue() instanceof String) {
+      String targetDetection = (String) detection.fetchFinalValue();
+      return STOYamlTargetDetection.getValue(targetDetection);
+    } else {
+      return (STOYamlTargetDetection) detection.fetchFinalValue();
+    }
+  }
 }

@@ -49,6 +49,7 @@ import io.harness.yaml.sto.variables.STOYamlMetasploitConfig;
 import io.harness.yaml.sto.variables.STOYamlNmapConfig;
 import io.harness.yaml.sto.variables.STOYamlProwlerConfig;
 import io.harness.yaml.sto.variables.STOYamlScanMode;
+import io.harness.yaml.sto.variables.STOYamlTargetDetection;
 import io.harness.yaml.sto.variables.STOYamlTargetType;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -98,7 +99,8 @@ public class STOSettingsUtilsTest {
     BlackDuckStepInfo step =
         BlackDuckStepInfo.builder()
             .mode(scanMode)
-            .target(createTarget(STOYamlTargetType.REPOSITORY, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.REPOSITORY, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .auth(STOYamlAuth.builder()
@@ -126,7 +128,8 @@ public class STOSettingsUtilsTest {
     BlackDuckStepInfo step =
         BlackDuckStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.REPOSITORY, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.REPOSITORY, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .auth(createAuthSettings())
@@ -147,7 +150,8 @@ public class STOSettingsUtilsTest {
     MendStepInfo step =
         MendStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.CONTAINER, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.CONTAINER, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .auth(createAuthSettings())
@@ -167,7 +171,8 @@ public class STOSettingsUtilsTest {
     MendStepInfo step =
         MendStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.CONTAINER, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.CONTAINER, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .auth(createAuthSettings())
@@ -187,7 +192,8 @@ public class STOSettingsUtilsTest {
     FossaStepInfo step =
         FossaStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.REPOSITORY, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.REPOSITORY, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .auth(createAuthSettings())
@@ -206,7 +212,8 @@ public class STOSettingsUtilsTest {
     OsvScannerStepInfo step =
         OsvScannerStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.CONTAINER, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.CONTAINER, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .image(createImageSettings())
@@ -225,7 +232,8 @@ public class STOSettingsUtilsTest {
     AwsEcrStepInfo step =
         AwsEcrStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.CONTAINER, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.CONTAINER, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .auth(createAuthSettings())
@@ -245,7 +253,8 @@ public class STOSettingsUtilsTest {
     ProwlerStepInfo step =
         ProwlerStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.CONFIGURATION, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.CONFIGURATION, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .auth(createAuthSettings())
@@ -264,7 +273,8 @@ public class STOSettingsUtilsTest {
     NmapStepInfo step =
         NmapStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.INSTANCE, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.INSTANCE, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .instance(createInstanceSettings())
@@ -283,7 +293,8 @@ public class STOSettingsUtilsTest {
     CustomIngestStepInfo step =
         CustomIngestStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.INSTANCE, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.INSTANCE, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .config(STOYamlCustomIngestConfig.SARIF)
@@ -301,7 +312,8 @@ public class STOSettingsUtilsTest {
     MetasploitStepInfo step =
         MetasploitStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.INSTANCE, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.INSTANCE, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .instance(createInstanceSettings())
@@ -320,7 +332,8 @@ public class STOSettingsUtilsTest {
     BurpStepInfo step =
         BurpStepInfo.builder()
             .mode(ParameterField.createValueField(STOYamlScanMode.ORCHESTRATION))
-            .target(createTarget(STOYamlTargetType.INSTANCE, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
+            .target(createTarget(
+                STOYamlTargetType.INSTANCE, STOYamlTargetDetection.MANUAL, TARGET_NAME, TARGET_VARIANT, WORKSPACE))
             .ingestion(createIngestionSettings(INGESTION_FILE_NAME))
             .advanced(createAdvancedSettings(STOYamlLogSerializer.BASIC, STOYamlLogLevel.DEBUG, CLI_PARAMS, ""))
             .instance(createInstanceSettings())
@@ -402,11 +415,13 @@ public class STOSettingsUtilsTest {
         .build();
   }
 
-  private static STOYamlTarget createTarget(STOYamlTargetType type, String name, String variant, String workspace) {
+  private static STOYamlTarget createTarget(
+      STOYamlTargetType type, STOYamlTargetDetection targetDetection, String name, String variant, String workspace) {
     return STOYamlTarget.builder()
         .type(type)
         .variant(ParameterField.createValueField(variant))
         .name(ParameterField.createValueField(name))
+        .detection(ParameterField.createValueField(targetDetection))
         .workspace(ParameterField.createValueField(workspace))
         .build();
   }

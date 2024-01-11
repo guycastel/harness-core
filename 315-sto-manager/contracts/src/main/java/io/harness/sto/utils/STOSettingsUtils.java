@@ -70,6 +70,7 @@ import io.harness.yaml.sto.variables.STOYamlLogLevel;
 import io.harness.yaml.sto.variables.STOYamlLogSerializer;
 import io.harness.yaml.sto.variables.STOYamlSBOMFormat;
 import io.harness.yaml.sto.variables.STOYamlScanMode;
+import io.harness.yaml.sto.variables.STOYamlTargetDetection;
 import io.harness.yaml.sto.variables.STOYamlTargetType;
 
 import com.google.inject.Singleton;
@@ -281,8 +282,14 @@ public final class STOSettingsUtils {
       map.put(getSTOKey("scan_type"),
           targetType != null ? targetType.getYamlName() : STOYamlTargetType.REPOSITORY.getYamlName());
 
-      String targetName = resolveStringParameter("target.name", stepType, identifier, target.getName(), true);
-      String targetVariant = resolveStringParameter("target.variant", stepType, identifier, target.getVariant(), true);
+      STOYamlTargetDetection targetDetection = target.getDetection();
+      map.put(getSTOKey("target_detection"),
+          targetDetection != null ? targetDetection.getYamlName() : STOYamlTargetDetection.MANUAL.getYamlName());
+      boolean isManualTargetDetection = targetDetection == STOYamlTargetDetection.MANUAL;
+      String targetName =
+          resolveStringParameter("target.name", stepType, identifier, target.getName(), isManualTargetDetection);
+      String targetVariant =
+          resolveStringParameter("target.variant", stepType, identifier, target.getVariant(), isManualTargetDetection);
 
       map.put(getSTOKey("target_name"), targetName);
       map.put(getSTOKey("target_variant"), targetVariant);

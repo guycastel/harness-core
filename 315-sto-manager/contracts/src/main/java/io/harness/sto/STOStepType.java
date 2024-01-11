@@ -16,7 +16,6 @@ import static io.harness.beans.steps.STOStepSpecTypeConstants.SCA;
 import static io.harness.beans.steps.STOStepSpecTypeConstants.SECURITY;
 
 import io.harness.EntityType;
-import io.harness.ModuleType;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.FeatureName;
 import io.harness.beans.steps.nodes.security.AnchoreScanNode;

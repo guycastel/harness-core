@@ -147,7 +147,7 @@ public class GkeClusterHelper {
     String oidcAccessToken = null;
     Container gkeContainerService = gcpHelperService.getGkeContainerService(
         serviceAccountKeyFileContent, useDelegate, gcpOidcTokenExchangeDetailsForDelegate);
-    if (gkeContainerService != null && gkeContainerService.getRequestFactory() != null
+    if (isNotEmpty(oidcProjectId) && gkeContainerService != null && gkeContainerService.getRequestFactory() != null
         && gkeContainerService.getRequestFactory().getInitializer() != null
         && ((GoogleCredential) gkeContainerService.getRequestFactory().getInitializer()).getAccessToken() != null) {
       oidcAccessToken = ((GoogleCredential) gkeContainerService.getRequestFactory().getInitializer()).getAccessToken();

@@ -51,9 +51,9 @@ public class CiStepParametersUtils {
   }
 
   public void saveCIStepStatusInfo(Ambiance ambiance, StepExecutionStatus status, String stepIdentifier) {
-    Query<StepStatusMetadata> query = persistence.createQuery(StepStatusMetadata.class)
-                                          .field(StepStatusMetadataKeys.stageExecutionId)
-                                          .equal(ambiance.getStageExecutionId());
+    Query<StepStatusMetadata> query =
+        persistence.createQuery(StepStatusMetadata.class)
+            .filter(StepStatusMetadataKeys.stageExecutionId, ambiance.getStageExecutionId());
 
     UpdateOperations<StepStatusMetadata> update = persistence.createUpdateOperations(StepStatusMetadata.class)
                                                       .set(StepStatusMetadataKeys.status, status)

@@ -13,6 +13,7 @@ import io.harness.annotation.HarnessEntity;
 import io.harness.annotations.StoreIn;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.delegate.task.stepstatus.StepExecutionStatus;
+import io.harness.mongo.index.FdIndex;
 import io.harness.mongo.index.FdTtlIndex;
 import io.harness.persistence.PersistentEntity;
 
@@ -22,6 +23,7 @@ import dev.morphia.annotations.Id;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -41,7 +43,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class StepStatusMetadata implements PersistentEntity {
   @Id @org.springframework.data.annotation.Id String uuid;
 
-  String stageExecutionId;
+  @FdIndex @NotNull String stageExecutionId;
 
   StepExecutionStatus status;
 

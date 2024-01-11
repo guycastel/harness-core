@@ -40,6 +40,7 @@ progressUpdate {"name": "createdAt_1", "background": true} {"createdAt": 1}
 progressUpdate {"name": "validUntil_1", "background": true, "expireAfterSeconds": 0} {"validUntil": 1}
 stageDetails {"name": "accountId_1", "background": true} {"accountId": 1}
 stepStatusMetadata {"name": "expireAfter_1", "background": true, "expireAfterSeconds": 0} {"expireAfter": 1}
+stepStatusMetadata {"name": "stageExecutionId_1", "background": true} {"stageExecutionId": 1}
 stepexecutionparameters {"name": "account_runtime", "background": true} {"accountId": 1, "runTimeId": 1}
 stepexecutionparameters {"name": "account_stageruntime", "background": true} {"accountId": 1, "stageRunTimeId": 1}
 waitInstances {"name": "correlationIds_1", "background": true} {"correlationIds": 1}

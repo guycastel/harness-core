@@ -26,7 +26,6 @@ import io.harness.plancreator.steps.common.SpecParameters;
 import io.harness.plancreator.steps.common.StepElementParameters;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.execution.AsyncExecutableResponse;
-import io.harness.pms.contracts.steps.StepCategory;
 import io.harness.pms.execution.utils.AmbianceUtils;
 import io.harness.pms.sdk.core.data.OptionalSweepingOutput;
 import io.harness.pms.sdk.core.resolver.RefObjectUtils;
@@ -147,7 +146,7 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
   }
 
   private String getLogPrefix(Ambiance ambiance) {
-    return LogStreamingStepClientFactory.getLogBaseKey(ambiance, StepCategory.STEP.name());
+    return LogStreamingStepClientFactory.getLogBaseKey(ambiance, null);
   }
 
   private void abortTasks(List<String> allCallbackIds, String callbackId) {

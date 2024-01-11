@@ -62,7 +62,7 @@ public class DownloadManifestsCommonHelperTest extends CategoryTest {
     DownloadAwsS3StepInfo downloadAwsS3StepInfo = DownloadAwsS3StepInfo.infoBuilder().build();
     StepElementParameters stepElementParameters =
         downloadManifestsCommonHelper.getDownloadS3StepElementParameters(manifestOutcome, downloadAwsS3StepInfo);
-    assertThat(stepElementParameters.getIdentifier()).isEqualTo(identifier);
+    assertThat(stepElementParameters.getIdentifier()).isEqualTo("download-aws-s3" + identifier);
     assertThat(stepElementParameters.getName()).isEqualTo(identifier);
   }
 
@@ -72,7 +72,8 @@ public class DownloadManifestsCommonHelperTest extends CategoryTest {
   public void testGetDownloadS3StepIdentifier() {
     String identifier = "identifier";
     ManifestOutcome manifestOutcome = ServerlessAwsLambdaManifestOutcome.builder().identifier(identifier).build();
-    assertThat(downloadManifestsCommonHelper.getDownloadS3StepIdentifier(manifestOutcome)).isEqualTo(identifier);
+    assertThat(downloadManifestsCommonHelper.getDownloadS3StepIdentifier(manifestOutcome))
+        .isEqualTo("download-aws-s3" + identifier);
   }
 
   @Test
@@ -154,7 +155,7 @@ public class DownloadManifestsCommonHelperTest extends CategoryTest {
 
     DownloadAwsS3StepNode downloadAwsS3StepNode =
         downloadManifestsCommonHelper.getAwsS3StepNode(cdAbstractStepNode, manifestOutcome, downloadAwsS3StepInfo);
-    assertThat(downloadAwsS3StepNode.getIdentifier()).isEqualTo(identifier);
+    assertThat(downloadAwsS3StepNode.getIdentifier()).isEqualTo("download-aws-s3" + identifier);
     assertThat(downloadAwsS3StepNode.getName()).isEqualTo(identifier);
     assertThat(downloadAwsS3StepNode.getUuid()).isEqualTo(identifier);
     assertThat(downloadAwsS3StepNode.getDownloadAwsS3StepInfo()).isEqualTo(downloadAwsS3StepInfo);
@@ -172,7 +173,7 @@ public class DownloadManifestsCommonHelperTest extends CategoryTest {
     StepElementParameters stepElementParameters =
         downloadManifestsCommonHelper.getDownloadHarnessStoreStepElementParameters(
             manifestOutcome, downloadHarnessStoreStepInfo);
-    assertThat(stepElementParameters.getIdentifier()).isEqualTo(identifier);
+    assertThat(stepElementParameters.getIdentifier()).isEqualTo("download-harness-store" + identifier);
     assertThat(stepElementParameters.getName()).isEqualTo(identifier);
   }
 
@@ -183,7 +184,7 @@ public class DownloadManifestsCommonHelperTest extends CategoryTest {
     String identifier = "identifier";
     ManifestOutcome manifestOutcome = ServerlessAwsLambdaManifestOutcome.builder().identifier(identifier).build();
     assertThat(downloadManifestsCommonHelper.getDownloadHarnessStoreStepIdentifier(manifestOutcome))
-        .isEqualTo(identifier);
+        .isEqualTo("download-harness-store" + identifier);
   }
 
   @Test
@@ -244,7 +245,7 @@ public class DownloadManifestsCommonHelperTest extends CategoryTest {
     DownloadHarnessStoreStepNode downloadHarnessStoreStepNode =
         downloadManifestsCommonHelper.getDownloadHarnessStoreStepNode(
             cdAbstractStepNode, manifestOutcome, downloadHarnessStoreStepInfo);
-    assertThat(downloadHarnessStoreStepNode.getIdentifier()).isEqualTo(identifier);
+    assertThat(downloadHarnessStoreStepNode.getIdentifier()).isEqualTo("download-harness-store" + identifier);
     assertThat(downloadHarnessStoreStepNode.getName()).isEqualTo(identifier);
     assertThat(downloadHarnessStoreStepNode.getUuid()).isEqualTo(identifier);
     assertThat(downloadHarnessStoreStepNode.getDownloadHarnessStoreStepInfo()).isEqualTo(downloadHarnessStoreStepInfo);

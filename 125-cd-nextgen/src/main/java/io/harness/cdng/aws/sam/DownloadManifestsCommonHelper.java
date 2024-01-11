@@ -195,14 +195,14 @@ public class DownloadManifestsCommonHelper {
         (DownloadAwsS3StepParameters) downloadAwsS3StepInfo.getSpecParameters();
     return StepElementParameters.builder()
         .name(manifestOutcome.getIdentifier())
-        .identifier(manifestOutcome.getIdentifier())
+        .identifier(getDownloadS3StepIdentifier(manifestOutcome))
         .spec(downloadAwsS3StepParameters)
         .timeout(ParameterField.createValueField(DEFAULT_TIMEOUT))
         .build();
   }
 
   public String getDownloadS3StepIdentifier(ManifestOutcome manifestOutcome) {
-    return manifestOutcome.getIdentifier();
+    return "download-aws-s3" + manifestOutcome.getIdentifier();
   }
 
   @NotNull
@@ -213,7 +213,7 @@ public class DownloadManifestsCommonHelper {
 
     downloadHarnessStoreStepNode.setFailureStrategies(cdAbstractStepNode.getFailureStrategies());
     downloadHarnessStoreStepNode.setTimeout(cdAbstractStepNode.getTimeout());
-    downloadHarnessStoreStepNode.setIdentifier(getDownloadS3StepIdentifier(manifestOutcome));
+    downloadHarnessStoreStepNode.setIdentifier(getDownloadHarnessStoreStepIdentifier(manifestOutcome));
     downloadHarnessStoreStepNode.setName(manifestOutcome.getIdentifier());
     downloadHarnessStoreStepNode.setUuid(manifestOutcome.getIdentifier());
     return downloadHarnessStoreStepNode;
@@ -242,13 +242,13 @@ public class DownloadManifestsCommonHelper {
         (DownloadHarnessStoreStepParameters) downloadHarnessStoreStepInfo.getSpecParameters();
     return StepElementParameters.builder()
         .name(manifestOutcome.getIdentifier())
-        .identifier(manifestOutcome.getIdentifier())
+        .identifier(getDownloadHarnessStoreStepIdentifier(manifestOutcome))
         .spec(downloadHarnessStoreStepParameters)
         .timeout(ParameterField.createValueField(DEFAULT_TIMEOUT))
         .build();
   }
 
   public String getDownloadHarnessStoreStepIdentifier(ManifestOutcome manifestOutcome) {
-    return manifestOutcome.getIdentifier();
+    return "download-harness-store" + manifestOutcome.getIdentifier();
   }
 }

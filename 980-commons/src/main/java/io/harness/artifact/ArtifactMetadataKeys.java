@@ -34,7 +34,10 @@ public interface ArtifactMetadataKeys {
   String packageType = "packageType";
   String feed = "feed";
   String region = "region";
+  String groupId = "groupId";
   String project = "project";
+  String extension = "extension";
+  String classifier = "classifier";
 
   String FILE_NAME = "fileName";
   String IMAGE_PATH = "imagePath";

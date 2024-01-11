@@ -10,7 +10,6 @@ package io.harness.delegate.task.artifacts.nexus;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.artifact.ArtifactMetadataKeys;
-import io.harness.data.structure.EmptyPredicate;
 import io.harness.delegate.task.artifacts.ArtifactSourceType;
 import io.harness.delegate.task.artifacts.response.ArtifactBuildDetailsNG;
 import io.harness.delegate.task.artifacts.response.ArtifactDelegateResponse;
@@ -21,6 +20,7 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import org.jooq.tools.StringUtils;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -52,8 +52,37 @@ public class NexusArtifactDelegateResponse extends ArtifactDelegateResponse {
                                    && getBuildDetails() != null && getBuildDetails().getMetadata() != null)
         ? "\nTo pull image use: docker pull " + getBuildDetails().getMetadata().get(ArtifactMetadataKeys.IMAGE)
         : null;
-    return "type: " + (getSourceType() != null ? getSourceType().getDisplayName() : null) + "\nrepository: "
-        + getRepositoryName() + "\nimagePath: " + getArtifactPath() + "\ntag: " + getTag() + "\nrepository type: "
-        + getRepositoryFormat() + (EmptyPredicate.isNotEmpty(dockerPullCommand) ? dockerPullCommand : "");
+    switch (RepositoryFormat.valueOf(getRepositoryFormat())) {
+      case docker:
+        return "type: " + (getSourceType() != null ? getSourceType().getDisplayName() : null)
+            + "\nrepository: " + getRepositoryName() + "\nimagePath: " + getArtifactPath() + "\ntag: " + getTag()
+            + "\nrepository type: " + getRepositoryFormat() + StringUtils.defaultIfBlank(dockerPullCommand, "");
+      case maven:
+        return "type: " + (getSourceType() != null ? getSourceType().getDisplayName() : null) + "\nrepository: "
+            + getRepositoryName() + "\nGroupId: " + getMetaDataValue(ArtifactMetadataKeys.groupId) + "\nArtifactPath: "
+            + getArtifactPath() + "\nExtension: " + getMetaDataValue(ArtifactMetadataKeys.extension)
+            + "\nClassifier: " + getMetaDataValue(ArtifactMetadataKeys.classifier) + "\ntag: " + getTag()
+            + "\nrepository type: " + getRepositoryFormat();
+
+      case npm:
+      case nuget:
+        return "type: " + (getSourceType() != null ? getSourceType().getDisplayName() : null) + "\nrepository: "
+            + getRepositoryName() + "\npackageName: " + getMetaDataValue(ArtifactMetadataKeys.Package)
+            + "\ntag: " + getTag() + "\nrepository type: " + getRepositoryFormat();
+      case raw:
+        return "type: " + (getSourceType() != null ? getSourceType().getDisplayName() : null) + "\nrepository: "
+            + getRepositoryName() + "\ntag: " + getTag() + "\nrepository type: " + getRepositoryFormat();
+
+      default:
+        return "Unknown repository format: "
+            + "\nrepository: " + null;
+    }
+  }
+
+  private String getMetaDataValue(String value) {
+    if (getBuildDetails() != null && getBuildDetails().getMetadata() != null) {
+      return getBuildDetails().getMetadata().get(value);
+    }
+    return null;
   }
 }

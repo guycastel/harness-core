@@ -190,7 +190,7 @@ public class EnforcementStepServiceImpl implements EnforcementStepService {
       Map<String, String> exemptedComponents, EnforcementResultEntity resultEntity) {
     String uniqueComponentKey = ExemptionHelper.getUniqueComponentKeyFromEnforcementResultEntity(resultEntity);
     if (exemptedComponents.containsKey(uniqueComponentKey)) {
-      resultEntity.setExempted(true);
+      resultEntity.setIsExempted(true);
       resultEntity.setExemptionId(exemptedComponents.get(uniqueComponentKey));
     }
   }

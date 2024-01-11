@@ -172,7 +172,9 @@ public class EnforcementStepServiceImplTest extends SSCAManagerTestBase {
     List<EnforcementResultEntity> capturedViolations = argument.getAllValues().get(0);
     assertThat(capturedViolations.size()).isEqualTo(4);
     assertThat(capturedViolations.get(0).getViolationType()).isEqualTo(ViolationType.DENYLIST_VIOLATION.getViolation());
+    assertThat(capturedViolations.get(0).getIsExempted()).isNull();
     assertThat(capturedViolations.get(1).getViolationType()).isEqualTo(ViolationType.DENYLIST_VIOLATION.getViolation());
+    assertThat(capturedViolations.get(1).getIsExempted()).isNull();
     assertThat(capturedViolations.get(2).getViolationType())
         .isEqualTo(ViolationType.ALLOWLIST_VIOLATION.getViolation());
     assertThat(capturedViolations.get(3).getViolationType())
@@ -212,18 +214,18 @@ public class EnforcementStepServiceImplTest extends SSCAManagerTestBase {
     List<EnforcementResultEntity> capturedViolations = argument.getAllValues().get(0);
     assertThat(capturedViolations.size()).isEqualTo(4);
     assertThat(capturedViolations.get(0).getViolationType()).isEqualTo(ViolationType.DENYLIST_VIOLATION.getViolation());
-    assertThat(capturedViolations.get(0).isExempted()).isTrue();
+    assertThat(capturedViolations.get(0).getIsExempted()).isTrue();
     assertThat(capturedViolations.get(0).getExemptionId()).isNotBlank();
     assertThat(capturedViolations.get(1).getViolationType()).isEqualTo(ViolationType.DENYLIST_VIOLATION.getViolation());
-    assertThat(capturedViolations.get(1).isExempted()).isTrue();
+    assertThat(capturedViolations.get(1).getIsExempted()).isTrue();
     assertThat(capturedViolations.get(1).getExemptionId()).isNotBlank();
     assertThat(capturedViolations.get(2).getViolationType())
         .isEqualTo(ViolationType.ALLOWLIST_VIOLATION.getViolation());
-    assertThat(capturedViolations.get(2).isExempted()).isTrue();
+    assertThat(capturedViolations.get(2).getIsExempted()).isTrue();
     assertThat(capturedViolations.get(2).getExemptionId()).isNotBlank();
     assertThat(capturedViolations.get(3).getViolationType())
         .isEqualTo(ViolationType.ALLOWLIST_VIOLATION.getViolation());
-    assertThat(capturedViolations.get(3).isExempted()).isTrue();
+    assertThat(capturedViolations.get(3).getIsExempted()).isTrue();
     assertThat(capturedViolations.get(3).getExemptionId()).isNotBlank();
     assertThat(enforceSbomResponseBody.getStatus()).isEqualTo("status");
   }

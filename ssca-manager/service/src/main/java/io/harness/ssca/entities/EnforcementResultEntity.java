@@ -55,6 +55,6 @@ public class EnforcementResultEntity implements PersistentEntity {
   @Field("packagemanager") String packageManager;
   List<String> license;
   String purl;
-  @NonFinal @Setter boolean isExempted;
+  @NonFinal @Setter Boolean isExempted;
   @NonFinal @Setter String exemptionId;
 }

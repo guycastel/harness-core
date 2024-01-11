@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.data.mongodb.core.query.Criteria;
 
 public class EnforcementSummaryServiceImpl implements EnforcementSummaryService {
@@ -31,9 +32,9 @@ public class EnforcementSummaryServiceImpl implements EnforcementSummaryService 
       int exemptedComponentCount) {
     String status = EnforcementStatus.ENFORCEMENT_STATUS_PASS.getValue();
     List<EnforcementResultEntity> activeDenyResultViolations =
-        denyListResult.stream().filter(violation -> !violation.isExempted()).toList();
+        denyListResult.stream().filter(violation -> !BooleanUtils.toBoolean(violation.getIsExempted())).toList();
     List<EnforcementResultEntity> activeAllowResultViolations =
-        allowListResult.stream().filter(violation -> !violation.isExempted()).toList();
+        allowListResult.stream().filter(violation -> !BooleanUtils.toBoolean(violation.getIsExempted())).toList();
     if (!activeDenyResultViolations.isEmpty() || !activeAllowResultViolations.isEmpty()) {
       status = EnforcementStatus.ENFORCEMENT_STATUS_FAIL.getValue();
     }

@@ -250,6 +250,7 @@ message GithubProvider {
     GithubApp github_app = 2;
   }
   bool isGithubApp = 3;
+  bool isAnonymous = 4;
 }
 
 message GitlabProvider {

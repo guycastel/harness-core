@@ -113,7 +113,7 @@ func defaultTransport(skip bool, additionalCertsPath string, log *zap.SugaredLog
 
 	proxyURL, _ := url.Parse(proxy)
 
-	return  &http.Transport{
+	return &http.Transport{
 		Proxy:           http.ProxyURL(proxyURL),
 		TLSClientConfig: tlsConfig(skip, additionalCertsPath, log),
 	}
@@ -159,15 +159,22 @@ func GetGitClient(p pb.Provider, log *zap.SugaredLogger) (client *scm.Client, er
 				return nil, err
 			}
 		}
-		var token string
-		switch p.GetGithub().GetProvider().(type) {
-		case *pb.GithubProvider_AccessToken:
-			token = p.GetGithub().GetAccessToken()
-		default:
-			return nil, status.Errorf(codes.Unimplemented, "Github Application not implemented yet")
-		}
-		client.Client = &http.Client{
-			Transport: oauthTransport(token, p.GetSkipVerify(), p.GetAdditionalCertsPath(), log, p.GetProxy()),
+		isGithubAnonymous := IsGithubAnonymous(p)
+		if isGithubAnonymous {
+			client.Client = &http.Client{
+				Transport: defaultTransport(p.GetSkipVerify(), p.GetAdditionalCertsPath(), log, p.GetProxy()),
+			}
+		} else {
+			var token string
+			switch p.GetGithub().GetProvider().(type) {
+			case *pb.GithubProvider_AccessToken:
+				token = p.GetGithub().GetAccessToken()
+			default:
+				return nil, status.Errorf(codes.Unimplemented, "Github Application not implemented yet")
+			}
+			client.Client = &http.Client{
+				Transport: oauthTransport(token, p.GetSkipVerify(), p.GetAdditionalCertsPath(), log, p.GetProxy()),
+			}
 		}
 	case *pb.Provider_Gitlab:
 		if p.GetEndpoint() == "" {
@@ -316,4 +323,10 @@ func GetProvider(p pb.Provider) string {
 	default:
 		return "unknown provider"
 	}
+}
+
+// Finds out if provider is Github Anonymous
+func IsGithubAnonymous(p pb.Provider) (out bool) {
+	gitProvider := GetProvider(p)
+	return gitProvider == "github" && p.GetGithub().GetIsAnonymous()
 }

@@ -26,6 +26,8 @@ import io.harness.delegate.beans.connector.scm.bitbucket.BitbucketUsernameTokenA
 import io.harness.delegate.beans.connector.scm.github.GithubApiAccessDTO;
 import io.harness.delegate.beans.connector.scm.github.GithubAppSpecDTO;
 import io.harness.delegate.beans.connector.scm.github.GithubConnectorDTO;
+import io.harness.delegate.beans.connector.scm.github.GithubHttpAuthenticationType;
+import io.harness.delegate.beans.connector.scm.github.GithubHttpCredentialsDTO;
 import io.harness.delegate.beans.connector.scm.github.GithubOauthDTO;
 import io.harness.delegate.beans.connector.scm.github.GithubTokenSpecDTO;
 import io.harness.delegate.beans.connector.scm.gitlab.GitlabApiAccessDTO;
@@ -264,6 +266,11 @@ public class ScmGitProviderMapper {
   }
 
   private GithubProvider createGithubProvider(GithubConnectorDTO githubConnector) {
+    boolean isGitHubAnonymous = isGithubConnectorAnonymous(githubConnector);
+    if (isGitHubAnonymous) {
+      return GithubProvider.newBuilder().setIsAnonymous(true).build();
+    }
+
     switch (githubConnector.getApiAccess().getType()) {
       case GITHUB_APP:
         // todo @aradisavljevic: switch to scm provider for github app after it is implemented
@@ -279,6 +286,17 @@ public class ScmGitProviderMapper {
         throw new NotImplementedException(String.format(
             "The scm apis for the api access type %s is not supported", githubConnector.getApiAccess().getType()));
     }
+  }
+
+  private boolean isGithubConnectorAnonymous(GithubConnectorDTO githubConnector) {
+    boolean isAnonymous = false;
+    if (githubConnector.getAuthentication().getAuthType().equals(GitAuthType.HTTP)
+        && githubConnector.getAuthentication().getCredentials() instanceof GithubHttpCredentialsDTO) {
+      isAnonymous = ((GithubHttpCredentialsDTO) githubConnector.getAuthentication().getCredentials())
+                        .getType()
+                        .equals(GithubHttpAuthenticationType.ANONYMOUS);
+    }
+    return isAnonymous;
   }
 
   private HarnessProvider createHarnessProvider(HarnessConnectorDTO harnessConnector) {

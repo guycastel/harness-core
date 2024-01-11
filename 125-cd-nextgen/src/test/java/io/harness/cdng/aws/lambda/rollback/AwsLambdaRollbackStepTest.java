@@ -56,7 +56,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,7 +84,7 @@ public class AwsLambdaRollbackStepTest extends CDNGTestBase {
   @Mock private ExecutionSweepingOutputService executionSweepingOutputService;
   @InjectMocks private AwsLambdaRollbackStep awsLambdaRollbackStep;
 
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   private final AwsLambdaInfrastructureOutcome infrastructureOutcome = AwsLambdaInfrastructureOutcome.builder()
                                                                            .connectorRef("account.tas")

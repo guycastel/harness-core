@@ -109,8 +109,8 @@ import io.harness.service.DelegateGrpcClientWrapper;
 import io.harness.steps.EntityReferenceExtractorUtils;
 import io.harness.steps.TaskRequestsUtils;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
 import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 import io.harness.utils.IdentifierRefHelper;
 import io.harness.utils.NGFeatureFlagHelperService;
 import io.harness.walktree.visitor.entityreference.beans.VisitedSecretReference;
@@ -167,7 +167,7 @@ public class ManifestsStepV2 implements SyncExecutable<EmptyStepParameters>, Asy
   @Inject private StrategyHelper strategyHelper;
   @Inject private ServiceEnvironmentsLogCallbackUtility serviceEnvironmentsLogUtility;
   @Inject private SecretRuntimeUsageService secretRuntimeUsageService;
-  @Inject private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Inject private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   private static final String OVERRIDE_PROJECT_SETTING_IDENTIFIER = "service_override_v2";
 
@@ -185,7 +185,7 @@ public class ManifestsStepV2 implements SyncExecutable<EmptyStepParameters>, Asy
     List<String> callbackIds = new ArrayList<>();
     if (manifestSpec.isPresent()) {
       Optional<ManifestsOutcome> manifestsOutcome = manifestSpec.get().getOptionalManifestsOutcome();
-      deploymentsInstrumentationHelper.publishStepEvent(ambiance, getStepExecutionTelemetryEventDTO(manifestsOutcome));
+      stepsInstrumentationHelper.publishStepEvent(ambiance, getStepExecutionTelemetryEventDTO(manifestsOutcome));
       manifestsOutcome.ifPresent(manifests -> handleManifests(ambiance, manifests, callbackIds, logCallback));
       saveManifestConfigurationOutcome(ambiance, manifestSpec.get().getPrimaryManifestId());
     }
@@ -207,7 +207,7 @@ public class ManifestsStepV2 implements SyncExecutable<EmptyStepParameters>, Asy
           }
         });
         if (isNotEmpty(manifestTypes)) {
-          telemetryProperties.put(DeploymentsInstrumentationHelper.MANIFEST_TYPES, new HashSet<>(manifestTypes));
+          telemetryProperties.put(StepsInstrumentationHelper.MANIFEST_TYPES, new HashSet<>(manifestTypes));
         }
       });
 

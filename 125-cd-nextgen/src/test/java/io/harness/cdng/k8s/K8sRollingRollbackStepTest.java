@@ -59,7 +59,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 import io.harness.steps.StepHelper;
 import io.harness.telemetry.TelemetryReporter;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public class K8sRollingRollbackStepTest extends CategoryTest {
   @Mock private K8sStepHelper k8sStepHelper;
   @Mock private CDStepHelper cdStepHelper;
   @Mock private InstanceInfoService instanceInfoService;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @InjectMocks private K8sRollingRollbackStep k8sRollingRollbackStep;
   @Mock private AccountService accountService;
   @Mock private StepHelper stepHelper;

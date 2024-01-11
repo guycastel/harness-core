@@ -62,8 +62,8 @@ import io.harness.pms.sdk.core.steps.io.StepResponse.StepResponseBuilder;
 import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
 import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -89,7 +89,7 @@ public class K8sRollingStep extends CdTaskChainExecutable implements K8sStepExec
   @Inject private InstanceInfoService instanceInfoService;
   @Inject private CDFeatureFlagHelper cdFeatureFlagHelper;
   @Inject private ReleaseMetadataFactory releaseMetadataFactory;
-  @Inject private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Inject private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @Override
   public void validateResources(Ambiance ambiance, StepBaseParameters stepParameters) {
@@ -190,7 +190,7 @@ public class K8sRollingStep extends CdTaskChainExecutable implements K8sStepExec
       Ambiance ambiance, StepBaseParameters stepParameters, PassThroughData passThroughData) {
     K8sRollingStepParameters k8sRollingStepParameters = (K8sRollingStepParameters) stepParameters.getSpec();
     HashMap<String, Object> telemetryProperties = new HashMap<>();
-    telemetryProperties.put(DeploymentsInstrumentationHelper.K8S_SKIP_DRY_RUN,
+    telemetryProperties.put(StepsInstrumentationHelper.K8S_SKIP_DRY_RUN,
         ParameterFieldHelper.getBooleanParameterFieldValue(k8sRollingStepParameters.getSkipDryRun()));
     return StepExecutionTelemetryEventDTO.builder()
         .stepType(STEP_TYPE.getType())

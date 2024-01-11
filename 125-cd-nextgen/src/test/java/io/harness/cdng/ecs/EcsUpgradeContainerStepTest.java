@@ -54,7 +54,7 @@ import io.harness.pms.sdk.core.steps.io.StepInputPackage;
 import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.TaskType;
 
@@ -91,7 +91,7 @@ public class EcsUpgradeContainerStepTest extends CategoryTest {
   @Mock private ExecutionSweepingOutputService executionSweepingOutputService;
   @Mock private OutcomeService outcomeService;
   @Mock private InstanceInfoService instanceInfoService;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @Test
   @Owner(developers = PRAGYESH)

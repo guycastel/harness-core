@@ -60,7 +60,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 import io.harness.steps.StepHelper;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.TaskType;
 
@@ -125,7 +125,7 @@ public class AsgBlueGreenRollbackStepTest extends CategoryTest {
   @Spy private OutcomeService outcomeService;
   @Mock AccountService accountService;
   @Mock StepHelper stepHelper;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @BeforeClass
   public static void setup() throws IOException {

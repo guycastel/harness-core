@@ -223,7 +223,7 @@ import io.harness.steps.EntityReferenceExtractorUtils;
 import io.harness.steps.StepHelper;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 import io.harness.utils.NGFeatureFlagHelperService;
 
 import software.wings.beans.ServiceHookDelegateConfig;
@@ -286,7 +286,7 @@ public class K8sStepHelperTest extends CDNGTestBase {
   @Mock private FileStoreService fileStoreService;
   @Spy @InjectMocks private K8sEntityHelper k8sEntityHelper;
   @Spy @InjectMocks private CDStepHelper cdStepHelper;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @Spy @InjectMocks private K8sManifestDelegateMapper k8sManifestDelegateMapper;
   @Spy @InjectMocks private K8sStepHelper k8sStepHelper;
 

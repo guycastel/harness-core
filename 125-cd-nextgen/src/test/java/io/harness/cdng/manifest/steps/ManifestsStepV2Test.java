@@ -16,7 +16,7 @@ import static io.harness.data.structure.UUIDGenerator.generateUuid;
 import static io.harness.rule.OwnerRule.ABOSII;
 import static io.harness.rule.OwnerRule.PRATYUSH;
 import static io.harness.rule.OwnerRule.RISHABH;
-import static io.harness.telemetry.helpers.DeploymentsInstrumentationHelper.MANIFEST_TYPES;
+import static io.harness.telemetry.helpers.StepsInstrumentationHelper.MANIFEST_TYPES;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -109,8 +109,8 @@ import io.harness.serializer.KryoSerializer;
 import io.harness.service.DelegateGrpcClientWrapper;
 import io.harness.steps.EntityReferenceExtractorUtils;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
 import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 import io.harness.utils.NGFeatureFlagHelperService;
 import io.harness.walktree.visitor.entityreference.beans.VisitedSecretReference;
 
@@ -162,7 +162,7 @@ public class ManifestsStepV2Test extends CategoryTest {
   @Mock private ServiceEnvironmentsLogCallbackUtility serviceEnvironmentsLogUtility;
   @Mock private SecretRuntimeUsageService secretRuntimeUsageService;
 
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @InjectMocks private ManifestsStepV2 step = new ManifestsStepV2();
 
@@ -916,7 +916,7 @@ public class ManifestsStepV2Test extends CategoryTest {
   public void svcAndEnvLevelOverridesV2HelmRepoOverride() throws IOException {
     svcAndEnvLevelOverridesV2HelmRepoOverride(
         () -> step.executeAsync(buildAmbiance(), new EmptyStepParameters(), null, null));
-    verify(deploymentsInstrumentationHelper).publishStepEvent(any(), any());
+    verify(stepsInstrumentationHelper).publishStepEvent(any(), any());
   }
 
   private <T> void svcAndEnvLevelOverridesV2HelmRepoOverride(Supplier<T> executeMethod) throws IOException {

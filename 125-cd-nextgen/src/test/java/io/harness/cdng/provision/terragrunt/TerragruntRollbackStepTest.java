@@ -59,7 +59,7 @@ import io.harness.security.encryption.EncryptedRecordData;
 import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
 import io.harness.steps.TaskRequestsUtils;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.VaultConfig;
 
@@ -96,7 +96,7 @@ public class TerragruntRollbackStepTest extends CategoryTest {
   @Mock private TerragruntConfigDAL terragruntConfigDAL;
   @Mock private CDFeatureFlagHelper cdFeatureFlagHelper;
 
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @InjectMocks private TerragruntRollbackStep terragruntRollbackStep = new TerragruntRollbackStep();
 
   @Test

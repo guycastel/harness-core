@@ -61,7 +61,7 @@ import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.sdk.core.steps.io.StepResponse.StepOutcome;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
@@ -81,7 +81,7 @@ public class K8sBGSwapServicesStepTest extends CategoryTest {
   @Mock private InfrastructureOutcome infrastructureOutcome;
   @Mock private K8sInfraDelegateConfig infraDelegateConfig;
   @Mock private ExecutionSweepingOutputService executionSweepingOutputService;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @InjectMocks private K8sBGSwapServicesStep k8sBGSwapServicesStep;
 

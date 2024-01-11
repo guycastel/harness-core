@@ -68,7 +68,7 @@ import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
 import io.harness.steps.TaskRequestsUtils;
 import io.harness.supplier.ThrowingSupplier;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -100,7 +100,7 @@ public class TasSwapRollbackStepTest extends CDNGTestBase {
   @Mock private TasEntityHelper tasEntityHelper;
   @Mock private ExecutionSweepingOutputService executionSweepingOutputService;
 
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @InjectMocks private TasSwapRollbackStep tasSwapRollbackStep;
 
   private final TanzuApplicationServiceInfrastructureOutcome infrastructureOutcome =

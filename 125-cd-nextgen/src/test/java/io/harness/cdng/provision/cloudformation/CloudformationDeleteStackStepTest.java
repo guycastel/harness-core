@@ -52,7 +52,7 @@ import io.harness.rule.Owner;
 import io.harness.steps.StepHelper;
 import io.harness.steps.StepUtils;
 import io.harness.steps.TaskRequestsUtils;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,7 +93,7 @@ public class CloudformationDeleteStackStepTest extends CategoryTest {
   @Mock private StepHelper stepHelper;
   @Mock CDFeatureFlagHelper cdFeatureFlagHelper;
 
-  @Mock DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @InjectMocks private CloudformationDeleteStackStep cloudformationDeleteStackStep;
   @Captor ArgumentCaptor<List<EntityDetail>> captor;

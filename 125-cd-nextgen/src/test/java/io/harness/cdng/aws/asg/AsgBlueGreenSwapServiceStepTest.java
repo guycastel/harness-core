@@ -55,7 +55,7 @@ import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.TaskType;
 
@@ -112,7 +112,7 @@ public class AsgBlueGreenSwapServiceStepTest extends CategoryTest {
   @Spy @InjectMocks private AsgBlueGreenSwapServiceStep asgBlueGreenSwapServiceStep;
   @Spy private InstanceInfoService instanceInfoService;
   @Mock ExecutionSweepingOutputService executionSweepingOutputService;
-  @Mock DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock StepsInstrumentationHelper stepsInstrumentationHelper;
   @Spy private OutcomeService outcomeService;
 
   @BeforeClass

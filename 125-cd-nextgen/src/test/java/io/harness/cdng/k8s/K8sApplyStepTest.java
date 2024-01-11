@@ -69,8 +69,8 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 import io.harness.secretusage.SecretRuntimeUsageService;
 import io.harness.steps.EntityReferenceExtractorUtils;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
 import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 import io.harness.walktree.visitor.entityreference.beans.VisitedSecretReference;
 
 import com.google.common.collect.ImmutableMap;
@@ -93,7 +93,7 @@ public class K8sApplyStepTest extends AbstractK8sStepExecutorTestBase {
   @Mock private EntityReferenceExtractorUtils entityReferenceExtractorUtils;
   @Mock private SecretRuntimeUsageService secretRuntimeUsageService;
 
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @Test
   @Owner(developers = ABOSII)

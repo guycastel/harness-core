@@ -53,8 +53,8 @@ import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
 import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.TaskType;
 
@@ -78,7 +78,7 @@ public class K8sDryRunManifestStep extends CdTaskChainExecutable implements K8sS
   @Inject protected KryoSerializer kryoSerializer;
   @Inject protected StepHelper stepHelper;
   @Inject private CDFeatureFlagHelper cdFeatureFlagHelper;
-  @Inject private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Inject private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @Override
   public TaskChainResponse executeK8sTask(ManifestOutcome k8sManifestOutcome, Ambiance ambiance,

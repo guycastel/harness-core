@@ -42,8 +42,8 @@ import io.harness.steps.executable.AsyncExecutableWithRbac;
 import io.harness.steps.plugin.ContainerStepConstants;
 import io.harness.tasks.BinaryResponseData;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
 import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 import io.harness.utils.PluginUtils;
 import io.harness.waiter.WaitNotifyEngine;
 
@@ -71,7 +71,7 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
   @Inject Supplier<DelegateCallbackToken> delegateCallbackTokenSupplier;
   @Inject ExecutionSweepingOutputService executionSweepingOutputService;
   @Inject PluginUtils pluginUtils;
-  @Inject private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Inject private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   public static String DELEGATE_SVC_ENDPOINT = "delegate-service:8080";
 
@@ -192,7 +192,7 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
     StepExecutionTelemetryEventDTO telemetryEventDTO =
         getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
     if (telemetryEventDTO != null) {
-      deploymentsInstrumentationHelper.publishStepEvent(ambiance, telemetryEventDTO);
+      stepsInstrumentationHelper.publishStepEvent(ambiance, telemetryEventDTO);
     }
   }
 

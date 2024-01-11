@@ -22,8 +22,8 @@ import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
 import io.harness.steps.executable.TaskExecutableWithCapabilities;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.tasks.ResponseData;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
 import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 import io.harness.utils.PolicyEvalUtils;
 
 import com.google.inject.Inject;
@@ -36,7 +36,7 @@ public abstract class CdTaskExecutable<R extends ResponseData> extends TaskExecu
   @Inject OpaServiceClient opaServiceClient;
   @Inject StageExecutionInstanceInfoService stageExecutionInstanceInfoService;
 
-  @Inject private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Inject private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   // evaluating policies added in advanced section of the steps and updating status and failure info in the step
   // response
@@ -62,7 +62,7 @@ public abstract class CdTaskExecutable<R extends ResponseData> extends TaskExecu
   private void handleTelemetryProperties(Ambiance ambiance, StepBaseParameters stepParameters) {
     StepExecutionTelemetryEventDTO telemetryEventDTO = getStepExecutionTelemetryEventDTO(ambiance, stepParameters);
     if (telemetryEventDTO != null) {
-      deploymentsInstrumentationHelper.publishStepEvent(ambiance, telemetryEventDTO);
+      stepsInstrumentationHelper.publishStepEvent(ambiance, telemetryEventDTO);
     }
   }
 

@@ -9,6 +9,7 @@ package io.harness.steps.approval.harness;
 
 import static io.harness.eraro.ErrorCode.APPROVAL_REJECTION;
 import static io.harness.rule.OwnerRule.PRABU;
+import static io.harness.rule.OwnerRule.RITEK_ROUNAK;
 import static io.harness.rule.OwnerRule.SARTHAK_KASAT;
 import static io.harness.rule.OwnerRule.SOURABH;
 import static io.harness.rule.OwnerRule.vivekveman;
@@ -70,6 +71,8 @@ import io.harness.steps.approval.step.harness.beans.ScheduledDeadline;
 import io.harness.steps.approval.step.harness.entities.HarnessApprovalInstance;
 import io.harness.steps.approval.step.harness.outcomes.HarnessApprovalStepOutcome;
 import io.harness.telemetry.helpers.ApprovalInstrumentationHelper;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 import io.harness.user.remote.UserClient;
 import io.harness.utils.PmsFeatureFlagHelper;
 
@@ -106,6 +109,7 @@ public class HarnessApprovalStepTest {
   @Mock private UserClient userClient;
   @Mock private PmsFeatureFlagHelper pmsFeatureFlagHelper;
   @Mock private ApprovalInstrumentationHelper instrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @InjectMocks private HarnessApprovalStep harnessApprovalStep;
   private ILogStreamingStepClient logStreamingStepClient;
 
@@ -363,6 +367,18 @@ public class HarnessApprovalStepTest {
     verify(logStreamingStepClient).closeStream(ShellScriptTaskNG.COMMAND_UNIT);
   }
 
+  @Test
+  @Owner(developers = RITEK_ROUNAK)
+  @Category(UnitTests.class)
+  public void testGetStepExecutionTelemetryEventDTO() {
+    Ambiance ambiance = buildAmbiance();
+    StepElementParameters stepElementParameters = getStepElementParameters();
+
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO = harnessApprovalStep.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+
+    assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(harnessApprovalStep.STEP_TYPE.getType());
+  }
+
   private StepElementParameters getStepElementParameters() {
     return StepElementParameters.builder()
         .identifier("_id")
@@ -390,6 +406,7 @@ public class HarnessApprovalStepTest {
                 .build())
         .build();
   }
+
   private StepElementParameters getStepElementParametersWithEmptyUserGroup() {
     return StepElementParameters.builder()
         .identifier("_id")

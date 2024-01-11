@@ -55,7 +55,7 @@ import io.harness.steps.StepHelper;
 import io.harness.steps.StepUtils;
 import io.harness.steps.TaskRequestsUtils;
 import io.harness.supplier.ThrowingSupplier;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.TaskType;
 
@@ -91,7 +91,7 @@ public class FetchLinkedAppsStepTest extends CategoryTest {
   @Mock StepHelper stepHelper;
   @Mock ExecutionSweepingOutputService executionSweepingOutputService;
   @Mock GitopsResourceClient gitopsResourceClient;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @Mock BaseUrls baseUrls;
 
   @InjectMocks FetchLinkedAppsStep fetchLinkedAppsStep;

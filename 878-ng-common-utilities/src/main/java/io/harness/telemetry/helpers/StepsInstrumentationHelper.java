@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Singleton
 @OwnedBy(HarnessTeam.CDP)
-public class DeploymentsInstrumentationHelper extends InstrumentationHelper {
+public class StepsInstrumentationHelper extends InstrumentationHelper {
   public static final String ORG_ID = "org_id";
   public static final String PROJECT_ID = "project_id";
   public static final String STEP_EXECUTION_EVENT_NAME_PREFIX = "step_execution_";

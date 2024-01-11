@@ -42,7 +42,7 @@ import io.harness.pms.sdk.core.resolver.outputs.ExecutionSweepingOutputService;
 import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
@@ -55,7 +55,7 @@ import org.mockito.Mock;
 @OwnedBy(HarnessTeam.CDP)
 public class K8sDryRunManifestStepTest extends AbstractK8sStepExecutorTestBase {
   @Mock ExecutionSweepingOutputService executionSweepingOutputService;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @InjectMocks private K8sDryRunManifestStep k8sDryRunManifestStep;
   @Mock private CDFeatureFlagHelper cdFeatureFlagHelper;
 

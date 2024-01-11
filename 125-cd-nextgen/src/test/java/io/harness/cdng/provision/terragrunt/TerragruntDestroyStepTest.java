@@ -52,7 +52,7 @@ import io.harness.security.encryption.EncryptedRecordData;
 import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
 import io.harness.steps.TaskRequestsUtils;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.VaultConfig;
 
@@ -83,7 +83,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 public class TerragruntDestroyStepTest extends CategoryTest {
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @Mock private KryoSerializer kryoSerializer;
   @Mock private TerragruntStepHelper terragruntStepHelper;
   @Mock private PipelineRbacHelper pipelineRbacHelper;

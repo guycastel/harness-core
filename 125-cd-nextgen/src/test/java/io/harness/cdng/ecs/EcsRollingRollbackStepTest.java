@@ -54,7 +54,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 import io.harness.steps.StepHelper;
 import io.harness.supplier.ThrowingSupplier;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.TaskType;
 
@@ -88,7 +88,7 @@ public class EcsRollingRollbackStepTest extends CategoryTest {
   @Mock private AccountClient accountClient;
   @Mock private StepHelper stepHelper;
   @Mock private OutcomeService outcomeService;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @Spy private EcsStepCommonHelper ecsStepCommonHelper;
 
   @Spy @InjectMocks private EcsRollingRollbackStep ecsRollingDeployStep;

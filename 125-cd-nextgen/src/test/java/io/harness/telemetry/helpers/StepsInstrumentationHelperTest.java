@@ -8,7 +8,7 @@
 package io.harness.telemetry.helpers;
 
 import static io.harness.rule.OwnerRule.TMACARI;
-import static io.harness.telemetry.helpers.DeploymentsInstrumentationHelper.STEP_EXECUTION_EVENT_NAME_PREFIX;
+import static io.harness.telemetry.helpers.StepsInstrumentationHelper.STEP_EXECUTION_EVENT_NAME_PREFIX;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,8 +34,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class DeploymentsInstrumentationHelperTest extends CategoryTest {
-  @InjectMocks DeploymentsInstrumentationHelper instrumentationHelper;
+public class StepsInstrumentationHelperTest extends CategoryTest {
+  @InjectMocks StepsInstrumentationHelper instrumentationHelper;
   @Mock TelemetryReporter telemetryReporter;
   @Before
   public void setUp() {
@@ -58,10 +58,10 @@ public class DeploymentsInstrumentationHelperTest extends CategoryTest {
             captor.capture(), any(), any(), any());
 
     HashMap<String, Object> propertiesMap = captor.getValue();
-    assertThat(propertiesMap.get(DeploymentsInstrumentationHelper.STAGE_EXECUTION_ID)).isEqualTo("stageExecutionId");
-    assertThat(propertiesMap.get(DeploymentsInstrumentationHelper.PIPELINE_EXECUTION_ID)).isEqualTo("planExecutionId");
-    assertThat(propertiesMap.get(DeploymentsInstrumentationHelper.ORG_ID)).isEqualTo("test-org");
-    assertThat(propertiesMap.get(DeploymentsInstrumentationHelper.PROJECT_ID)).isEqualTo("test-project");
+    assertThat(propertiesMap.get(StepsInstrumentationHelper.STAGE_EXECUTION_ID)).isEqualTo("stageExecutionId");
+    assertThat(propertiesMap.get(StepsInstrumentationHelper.PIPELINE_EXECUTION_ID)).isEqualTo("planExecutionId");
+    assertThat(propertiesMap.get(StepsInstrumentationHelper.ORG_ID)).isEqualTo("test-org");
+    assertThat(propertiesMap.get(StepsInstrumentationHelper.PROJECT_ID)).isEqualTo("test-project");
   }
 
   @Test

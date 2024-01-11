@@ -52,7 +52,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
 import io.harness.steps.StepHelper;
 import io.harness.steps.TaskRequestsUtils;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.Collections;
 import java.util.List;
@@ -84,7 +84,7 @@ public class TerraformCloudRollbackStepTest extends CategoryTest {
   @Mock private StepHelper stepHelper;
   @Mock private CDFeatureFlagHelper cdFeatureFlagHelper;
 
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @InjectMocks private TerraformCloudRollbackStep terraformCloudRollbackStep = new TerraformCloudRollbackStep();
 
   @Before

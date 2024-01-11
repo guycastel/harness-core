@@ -16,6 +16,8 @@ import io.harness.pms.contracts.execution.Status;
 import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
 import io.harness.steps.executable.AsyncExecutableWithCapabilities;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 import io.harness.utils.PolicyEvalUtils;
 
 import com.google.inject.Inject;
@@ -24,12 +26,14 @@ import com.google.inject.Inject;
 @OwnedBy(PIPELINE)
 public abstract class PipelineAsyncExecutable extends AsyncExecutableWithCapabilities {
   @Inject OpaServiceClient opaServiceClient;
+  @Inject private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   // evaluating policies added in advanced section of the steps and updating status and failure info in the step
   // response
   @Override
   public StepResponse postAsyncValidate(
       Ambiance ambiance, StepBaseParameters stepParameters, StepResponse stepResponse) {
+    handleTelemetryEventDTO(ambiance, stepParameters);
     if (Status.SUCCEEDED.equals(stepResponse.getStatus())) {
       return PolicyEvalUtils.evalPolicies(ambiance, stepParameters, stepResponse, opaServiceClient);
     }
@@ -38,4 +42,18 @@ public abstract class PipelineAsyncExecutable extends AsyncExecutableWithCapabil
 
   @Override
   public void validateResources(Ambiance ambiance, StepBaseParameters stepParameters) {}
+
+  private void handleTelemetryEventDTO(
+          Ambiance ambiance, StepBaseParameters stepParameters) {
+    StepExecutionTelemetryEventDTO telemetryEventDTO =
+            getStepExecutionTelemetryEventDTO(ambiance, stepParameters);
+    if (telemetryEventDTO != null) {
+      stepsInstrumentationHelper.publishStepEvent(ambiance, telemetryEventDTO);
+    }
+  }
+
+  protected StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
+          Ambiance ambiance, StepBaseParameters stepParameters) {
+    return null;
+  }
 }

@@ -60,7 +60,7 @@ import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.sdk.core.steps.io.StepResponse.StepOutcome;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class K8sRollingStepTest extends AbstractK8sStepExecutorTestBase {
   @Mock private InstanceInfoService instanceInfoService;
   @Mock private CDFeatureFlagHelper cdFeatureFlagHelper;
   @Mock StageExecutionInstanceInfoService stageExecutionInstanceInfoService;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   @InjectMocks private K8sRollingStep k8sRollingStep;
   final String canaryStepFqn = "canaryStep";

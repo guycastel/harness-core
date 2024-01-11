@@ -59,6 +59,7 @@ import io.harness.serializer.OrchestrationBeansRegistrars;
 import io.harness.serializer.OrchestrationStepsModuleRegistrars;
 import io.harness.service.intfc.DelegateAsyncService;
 import io.harness.service.intfc.DelegateSyncService;
+import io.harness.telemetry.TelemetryReporter;
 import io.harness.testlib.module.MongoRuleMixin;
 import io.harness.testlib.module.TestMongoModule;
 import io.harness.threading.CurrentThreadExecutor;
@@ -232,6 +233,7 @@ public class OrchestrationStepsRule implements MethodRule, InjectorRuleMixin, Mo
         bind(DelegateAsyncService.class).toInstance(mock(DelegateAsyncService.class));
         bind(UserClient.class).toInstance(mock(UserClient.class));
         bind(OpaServiceClient.class).toInstance(mock(OpaServiceClient.class));
+        bind(TelemetryReporter.class).toInstance(mock(TelemetryReporter.class));
         bind(AccountClient.class).toInstance(mock(AccountClient.class));
         bind(FeatureFlagService.class).toInstance(mock(FeatureFlagService.class));
         bind(new TypeLiteral<DelegateServiceGrpc.DelegateServiceBlockingStub>() {

@@ -65,7 +65,7 @@ import io.harness.rule.Owner;
 import io.harness.serializer.KryoSerializer;
 import io.harness.steps.StepHelper;
 import io.harness.steps.TaskRequestsUtils;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,7 +100,7 @@ public class TerraformDestroyStepTest extends CategoryTest {
   @Mock private StepHelper stepHelper;
   @Mock private TerraformConfigDAL terraformConfigDAL;
   @InjectMocks private TerraformDestroyStep terraformDestroyStep;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @Captor ArgumentCaptor<List<EntityDetail>> captor;
 
   private Ambiance getAmbiance() {

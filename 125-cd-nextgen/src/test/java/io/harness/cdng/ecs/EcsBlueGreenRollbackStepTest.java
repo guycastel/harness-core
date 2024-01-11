@@ -58,7 +58,7 @@ import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import software.wings.beans.TaskType;
 
@@ -93,7 +93,7 @@ public class EcsBlueGreenRollbackStepTest extends CategoryTest {
   @Mock private OutcomeService outcomeService;
   @Mock private CDFeatureFlagHelper cdFeatureFlagHelper;
 
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @Spy @InjectMocks private EcsBlueGreenRollbackStep ecsBlueGreenRollbackStep;
   @Test
   @Owner(developers = ALLU_VAMSI)

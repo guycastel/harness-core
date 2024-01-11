@@ -47,7 +47,7 @@ import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.rule.Owner;
-import io.harness.telemetry.helpers.DeploymentsInstrumentationHelper;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
 
 import java.util.Arrays;
 import lombok.SneakyThrows;
@@ -60,7 +60,7 @@ import org.mockito.Mock;
 @OwnedBy(HarnessTeam.CDP)
 public class K8sDeleteStepTest extends AbstractK8sStepExecutorTestBase {
   @Mock private OutcomeService outcomeService;
-  @Mock private DeploymentsInstrumentationHelper deploymentsInstrumentationHelper;
+  @Mock private StepsInstrumentationHelper stepsInstrumentationHelper;
   @InjectMocks private K8sDeleteStep deleteStep;
 
   @Test

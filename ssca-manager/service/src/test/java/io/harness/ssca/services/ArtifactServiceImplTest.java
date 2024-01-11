@@ -36,6 +36,7 @@ import io.harness.spec.server.ssca.v1.model.ArtifactListingRequestBody;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingRequestBody.EnvironmentTypeEnum;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingRequestBody.PolicyViolationEnum;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingResponse;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2;
 import io.harness.ssca.api.ArtifactApiUtils;
 import io.harness.ssca.beans.EnvType;
 import io.harness.ssca.entities.CdInstanceSummary;
@@ -292,9 +293,11 @@ public class ArtifactServiceImplTest extends SSCAManagerTestBase {
         .thenReturn(List.of(builderFactory.getEnforcementSummaryBuilder().build()));
 
     Pageable pageable = PageResponseUtils.getPageable(0, 2, ArtifactApiUtils.getSortFieldMapping("name"), "ASC");
-    Page<ArtifactListingResponse> artifactEntityPage = artifactService.listLatestArtifacts(
+    Page<ArtifactListingResponseV2> artifactEntityPageV2 = artifactService.listLatestArtifacts(
         builderFactory.getContext().getAccountId(), builderFactory.getContext().getOrgIdentifier(),
-        builderFactory.getContext().getProjectIdentifier(), pageable);
+        builderFactory.getContext().getProjectIdentifier(), pageable, "image");
+    Page<ArtifactListingResponse> artifactEntityPage =
+        ArtifactApiUtils.toArtifactListingResponseList(artifactEntityPageV2);
 
     List<ArtifactListingResponse> artifactListingResponses = artifactEntityPage.toList();
 
@@ -348,13 +351,14 @@ public class ArtifactServiceImplTest extends SSCAManagerTestBase {
 
     Pageable pageable = PageResponseUtils.getPageable(0, 2, ArtifactApiUtils.getSortFieldMapping("name"), "ASC");
     artifactService.listLatestArtifacts(builderFactory.getContext().getAccountId(),
-        builderFactory.getContext().getOrgIdentifier(), builderFactory.getContext().getProjectIdentifier(), pageable);
+        builderFactory.getContext().getOrgIdentifier(), builderFactory.getContext().getProjectIdentifier(), pageable,
+        "image");
 
     ArgumentCaptor<Aggregation> argument = ArgumentCaptor.forClass(Aggregation.class);
     Mockito.verify(artifactRepository).findAll(argument.capture());
     assertThat(argument.getValue().toString())
         .isEqualTo(String.format(
-            "{ \"aggregate\" : \"__collection__\", \"pipeline\" : [{ \"$match\" : { \"accountId\" : \"%s\", \"orgId\" : \"%s\", \"projectId\" : \"%s\", \"invalid\" : false}}, { \"$sort\" : { \"createdOn\" : -1}}, { \"$group\" : { \"_id\" : \"$artifactId\", \"document\" : { \"$first\" : \"$$ROOT\"}}}, { \"$sort\" : { \"document.name\" : 1}}, { \"$project\" : { \"_id\" : 0}}, { \"$skip\" : 0}, { \"$limit\" : 2}]}",
+            "{ \"aggregate\" : \"__collection__\", \"pipeline\" : [{ \"$match\" : { \"accountId\" : \"%s\", \"orgId\" : \"%s\", \"projectId\" : \"%s\", \"invalid\" : false, \"type\" : \"image\"}}, { \"$sort\" : { \"createdOn\" : -1}}, { \"$group\" : { \"_id\" : \"$artifactId\", \"document\" : { \"$first\" : \"$$ROOT\"}}}, { \"$sort\" : { \"document.name\" : 1}}, { \"$project\" : { \"_id\" : 0}}, { \"$skip\" : 0}, { \"$limit\" : 2}]}",
             builderFactory.getContext().getAccountId(), builderFactory.getContext().getOrgIdentifier(),
             builderFactory.getContext().getProjectIdentifier()));
   }
@@ -382,9 +386,12 @@ public class ArtifactServiceImplTest extends SSCAManagerTestBase {
                                                 .environmentType(EnvironmentTypeEnum.ALL)
                                                 .policyViolation(PolicyViolationEnum.ALLOW);
 
-    Page<ArtifactListingResponse> artifactEntityPage = artifactService.listArtifacts(
+    Page<ArtifactListingResponseV2> artifactEntityPageV2 = artifactService.listArtifacts(
         builderFactory.getContext().getAccountId(), builderFactory.getContext().getOrgIdentifier(),
-        builderFactory.getContext().getProjectIdentifier(), filterBody, Pageable.ofSize(2).withPage(0));
+        builderFactory.getContext().getProjectIdentifier(), filterBody, Pageable.ofSize(2).withPage(0), "image");
+
+    Page<ArtifactListingResponse> artifactEntityPage =
+        ArtifactApiUtils.toArtifactListingResponseList(artifactEntityPageV2);
 
     List<ArtifactListingResponse> artifactListingResponses = artifactEntityPage.toList();
 
@@ -477,12 +484,12 @@ public class ArtifactServiceImplTest extends SSCAManagerTestBase {
 
     artifactService.listArtifacts(builderFactory.getContext().getAccountId(),
         builderFactory.getContext().getOrgIdentifier(), builderFactory.getContext().getProjectIdentifier(), filterBody,
-        Pageable.ofSize(2).withPage(0));
+        Pageable.ofSize(2).withPage(0), "image");
 
     verify(artifactRepository, times(1)).findAll(criteriaArgumentCaptor.capture(), any());
     Criteria criteria = criteriaArgumentCaptor.getValue();
     Document document = criteria.getCriteriaObject();
-    assertEquals(6, document.size());
+    assertEquals(7, document.size());
     assertThat(document.get(ArtifactEntityKeys.name).toString()).isEqualTo(searchTerm);
   }
 
@@ -496,12 +503,12 @@ public class ArtifactServiceImplTest extends SSCAManagerTestBase {
 
     artifactService.listArtifacts(builderFactory.getContext().getAccountId(),
         builderFactory.getContext().getOrgIdentifier(), builderFactory.getContext().getProjectIdentifier(), filterBody,
-        Pageable.ofSize(2).withPage(0));
+        Pageable.ofSize(2).withPage(0), "image");
 
     verify(artifactRepository, times(1)).findAll(criteriaArgumentCaptor.capture(), any());
     Criteria criteria = criteriaArgumentCaptor.getValue();
     Document document = criteria.getCriteriaObject();
-    assertEquals(5, document.size());
+    assertEquals(6, document.size());
     assertThat(document.get(ArtifactEntityKeys.name)).isEqualTo(null);
   }
 

@@ -210,9 +210,9 @@ public class SearchServiceImpl implements SearchService {
   }
 
   public List<String> getOrchestrationIds(
-      String accountId, String orgIdentifier, String projectIdentifier, ArtifactFilter filter) {
+      String accountId, String orgIdentifier, String projectIdentifier, String type, ArtifactFilter filter) {
     List<Hit<SSCAArtifact>> artifacts =
-        listArtifacts(accountId, orgIdentifier, projectIdentifier, filter, Pageable.unpaged());
+        listArtifacts(accountId, orgIdentifier, projectIdentifier, type, filter, Pageable.unpaged());
 
     if (artifacts != null) {
       return artifacts.stream()
@@ -225,14 +225,14 @@ public class SearchServiceImpl implements SearchService {
   }
 
   @Override
-  public List<Hit<SSCAArtifact>> listArtifacts(
-      String accountId, String orgIdentifier, String projectIdentifier, ArtifactFilter filter, Pageable pageable) {
+  public List<Hit<SSCAArtifact>> listArtifacts(String accountId, String orgIdentifier, String projectIdentifier,
+      String type, ArtifactFilter filter, Pageable pageable) {
     String index = elasticSearchIndexManager.getIndex(accountId);
 
     // Temporary fix to increase the size of the returned values. This will soon be migrated to a paginated ELK query
     SearchRequest searchRequest = SearchRequest.of(s
         -> s.index(index)
-               .query(ArtifactQueryBuilder.getQuery(accountId, orgIdentifier, projectIdentifier, filter))
+               .query(ArtifactQueryBuilder.getQuery(accountId, orgIdentifier, projectIdentifier, type, filter))
                .size(10000));
 
     try {

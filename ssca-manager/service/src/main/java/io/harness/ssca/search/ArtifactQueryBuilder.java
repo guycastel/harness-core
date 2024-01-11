@@ -36,7 +36,7 @@ public class ArtifactQueryBuilder {
     return OperatorEnum.values()[operator.ordinal()];
   }
   public Query getQuery(
-      String accountId, String orgIdentifier, String projectIdentifier, ArtifactFilter artifactFilter) {
+      String accountId, String orgIdentifier, String projectIdentifier, String type, ArtifactFilter artifactFilter) {
     BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
     List<Query> matchQueries = new ArrayList<>();
 
@@ -46,6 +46,7 @@ public class ArtifactQueryBuilder {
     matchQueries.add(ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.orgIdentifier, orgIdentifier));
     matchQueries.add(ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.projectIdentifier, projectIdentifier));
     matchQueries.add(ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.invalid, false));
+    matchQueries.add(ElasticSearchQueryBuilder.matchFieldValue(SSCAArtifactKeys.type, type));
 
     if (artifactFilter != null) {
       if (!StringUtils.isEmpty(artifactFilter.getSearchTerm())) {

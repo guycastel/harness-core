@@ -33,9 +33,12 @@ import io.harness.spec.server.ssca.v1.model.ArtifactDeploymentViewResponse;
 import io.harness.spec.server.ssca.v1.model.ArtifactDeploymentViewResponse.EnvTypeEnum;
 import io.harness.spec.server.ssca.v1.model.ArtifactDetailResponse;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingRequestBody;
-import io.harness.spec.server.ssca.v1.model.ArtifactListingResponse;
-import io.harness.spec.server.ssca.v1.model.ArtifactListingResponse.ActivityEnum;
-import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseScorecard;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2Deployment;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2Orchestration;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2PolicyEnforcement;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2Scorecard;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2Variant;
 import io.harness.spec.server.ssca.v1.model.ComponentFilter;
 import io.harness.spec.server.ssca.v1.model.LicenseFilter;
 import io.harness.spec.server.ssca.v1.model.OneOfArtifactMetadata;
@@ -349,8 +352,8 @@ public class ArtifactServiceImpl implements ArtifactService {
   }
 
   @Override
-  public Page<ArtifactListingResponse> listLatestArtifacts(
-      String accountId, String orgIdentifier, String projectIdentifier, Pageable pageable) {
+  public Page<ArtifactListingResponseV2> listLatestArtifacts(
+      String accountId, String orgIdentifier, String projectIdentifier, Pageable pageable, String type) {
     Criteria criteria = Criteria.where(ArtifactEntityKeys.accountId)
                             .is(accountId)
                             .and(ArtifactEntityKeys.orgId)
@@ -358,7 +361,9 @@ public class ArtifactServiceImpl implements ArtifactService {
                             .and(ArtifactEntityKeys.projectId)
                             .is(projectIdentifier)
                             .and(ArtifactEntityKeys.invalid)
-                            .is(false);
+                            .is(false)
+                            .and(ArtifactEntityKeys.type)
+                            .is(type);
 
     MatchOperation matchOperation = match(criteria);
     SortOperation sortOperation = sort(Sort.by(Direction.DESC, ArtifactEntityKeys.createdOn));
@@ -377,8 +382,8 @@ public class ArtifactServiceImpl implements ArtifactService {
     // "kmpySmUISimoRrJL6NL73w", "orgId" : "default", "projectId" : "LocalPipeline", "invalid" : false}}, { "$sort" : {
     // "lastUpdatedAt" : -1, "sort" : 1}}, { "$group" : { "_id" : "$artifactId", "document" : { "$first" : "$$ROOT"}}},
     // { "$project" : { "_id" : 0}}, { "$skip" : skip}, { "$limit" : limit}]}
-    List<ArtifactListingResponse> artifactListingResponses =
-        getArtifactListingResponses(accountId, orgIdentifier, projectIdentifier, artifactEntities);
+    List<ArtifactListingResponseV2> artifactListingResponses =
+        getArtifactListingResponsesV2(accountId, orgIdentifier, projectIdentifier, artifactEntities);
 
     CountOperation countOperation = count().as("count");
     aggregation = Aggregation.newAggregation(matchOperation, groupByArtifactId, countOperation);
@@ -388,15 +393,16 @@ public class ArtifactServiceImpl implements ArtifactService {
   }
 
   @Override
-  public Page<ArtifactListingResponse> listArtifacts(String accountId, String orgIdentifier, String projectIdentifier,
-      ArtifactListingRequestBody body, Pageable pageable) {
+  public Page<ArtifactListingResponseV2> listArtifacts(String accountId, String orgIdentifier, String projectIdentifier,
+      ArtifactListingRequestBody body, Pageable pageable, String type) {
     if (featureFlagService.isFeatureFlagEnabled(accountId, FeatureName.SSCA_USE_ELK.name())) {
-      List<String> orchestrationIds = searchService.getOrchestrationIds(accountId, orgIdentifier, projectIdentifier,
-          ArtifactFilter.builder()
-              .searchTerm(body.getSearchTerm())
-              .componentFilter(body.getComponentFilter())
-              .licenseFilter(body.getLicenseFilter())
-              .build());
+      List<String> orchestrationIds =
+          searchService.getOrchestrationIds(accountId, orgIdentifier, projectIdentifier, type,
+              ArtifactFilter.builder()
+                  .searchTerm(body.getSearchTerm())
+                  .componentFilter(body.getComponentFilter())
+                  .licenseFilter(body.getLicenseFilter())
+                  .build());
 
       if (orchestrationIds.isEmpty()) {
         return Page.empty();
@@ -408,8 +414,8 @@ public class ArtifactServiceImpl implements ArtifactService {
 
       Page<ArtifactEntity> artifactEntities = artifactRepository.findAll(criteria, pageable);
 
-      List<ArtifactListingResponse> artifactListingResponses =
-          getArtifactListingResponses(accountId, orgIdentifier, projectIdentifier, artifactEntities.toList());
+      List<ArtifactListingResponseV2> artifactListingResponses =
+          getArtifactListingResponsesV2(accountId, orgIdentifier, projectIdentifier, artifactEntities.toList());
 
       return new PageImpl<>(artifactListingResponses, pageable, artifactEntities.getTotalElements());
     }
@@ -421,7 +427,9 @@ public class ArtifactServiceImpl implements ArtifactService {
                             .and(ArtifactEntityKeys.projectId)
                             .is(projectIdentifier)
                             .and(ArtifactEntityKeys.invalid)
-                            .is(false);
+                            .is(false)
+                            .and(ArtifactEntityKeys.type)
+                            .is(type);
 
     if (!StringUtils.isEmpty(body.getSearchTerm())) {
       criteria.and(ArtifactEntityKeys.name).regex(body.getSearchTerm(), "i");
@@ -444,8 +452,8 @@ public class ArtifactServiceImpl implements ArtifactService {
 
     Page<ArtifactEntity> artifactEntities = artifactRepository.findAll(criteria, pageable);
 
-    List<ArtifactListingResponse> artifactListingResponses =
-        getArtifactListingResponses(accountId, orgIdentifier, projectIdentifier, artifactEntities.toList());
+    List<ArtifactListingResponseV2> artifactListingResponses =
+        getArtifactListingResponsesV2(accountId, orgIdentifier, projectIdentifier, artifactEntities.toList());
 
     return new PageImpl<>(artifactListingResponses, pageable, artifactEntities.getTotalElements());
   }
@@ -604,7 +612,7 @@ public class ArtifactServiceImpl implements ArtifactService {
         criteria, Sort.by(Direction.DESC, ArtifactEntityKeys.createdOn), new ArrayList<>());
   }
 
-  private List<ArtifactListingResponse> getArtifactListingResponses(
+  private List<ArtifactListingResponseV2> getArtifactListingResponsesV2(
       String accountId, String orgIdentifier, String projectIdentifier, List<ArtifactEntity> artifactEntities) {
     List<String> orchestrationIds =
         artifactEntities.stream().map(ArtifactEntity::getOrchestrationId).collect(Collectors.toList());
@@ -629,7 +637,7 @@ public class ArtifactServiceImpl implements ArtifactService {
     Set<String> baselineEntityOrchestrationIds =
         baselineEntities.stream().map(entity -> entity.getOrchestrationId()).collect(Collectors.toSet());
 
-    List<ArtifactListingResponse> responses = new ArrayList<>();
+    List<ArtifactListingResponseV2> responses = new ArrayList<>();
     for (ArtifactEntity artifact : artifactEntities) {
       EnforcementSummaryEntity enforcementSummary = EnforcementSummaryEntity.builder().build();
 
@@ -641,30 +649,35 @@ public class ArtifactServiceImpl implements ArtifactService {
       if (baselineEntityOrchestrationIds.contains(artifact.getOrchestrationId())) {
         baseline = true;
       }
-      ArtifactListingResponseScorecard scorecard = new ArtifactListingResponseScorecard();
+      ArtifactListingResponseV2Scorecard scorecard = new ArtifactListingResponseV2Scorecard();
       if (artifact.getScorecard() != null) {
         scorecard.setAvgScore(artifact.getScorecard().getAvgScore());
         scorecard.setMaxScore(artifact.getScorecard().getMaxScore());
       }
 
       responses.add(
-          new ArtifactListingResponse()
+          new ArtifactListingResponseV2()
               .id(artifact.getArtifactId())
               .name(artifact.getName())
-              .tag(artifact.getTag())
               .url(artifact.getUrl())
+              .variant(new ArtifactListingResponseV2Variant().type(getVariantType(artifact)).value(artifact.getTag()))
               .componentsCount(artifact.getComponentsCount().intValue())
-              .allowListViolationCount(String.valueOf(enforcementSummary.getAllowListViolationCount()))
-              .denyListViolationCount(String.valueOf(enforcementSummary.getDenyListViolationCount()))
-              .enforcementId(enforcementSummary.getEnforcementId())
-              .activity(artifact.getProdEnvCount() + artifact.getNonProdEnvCount() == 0 ? ActivityEnum.GENERATED
-                                                                                        : ActivityEnum.DEPLOYED)
+              .policyEnforcement(
+                  new ArtifactListingResponseV2PolicyEnforcement()
+                      .id(enforcementSummary.getEnforcementId())
+                      .allowListViolationCount(String.valueOf(enforcementSummary.getAllowListViolationCount()))
+                      .denyListViolationCount(String.valueOf(enforcementSummary.getDenyListViolationCount())))
+              .orchestration(new ArtifactListingResponseV2Orchestration()
+                                 .id(artifact.getOrchestrationId())
+                                 .pipelineId(artifact.getPipelineId())
+                                 .pipelineExecutionId(artifact.getPipelineExecutionId()))
+              .deployment(new ArtifactListingResponseV2Deployment()
+                              .activity(artifact.getProdEnvCount() + artifact.getNonProdEnvCount() == 0
+                                      ? ArtifactListingResponseV2Deployment.ActivityEnum.GENERATED
+                                      : ArtifactListingResponseV2Deployment.ActivityEnum.DEPLOYED)
+                              .prodEnvCount(artifact.getProdEnvCount().intValue())
+                              .nonProdEnvCount(artifact.getNonProdEnvCount().intValue()))
               .updated(String.format("%d", artifact.getLastUpdatedAt()))
-              .prodEnvCount(artifact.getProdEnvCount().intValue())
-              .nonProdEnvCount(artifact.getNonProdEnvCount().intValue())
-              .orchestrationId(artifact.getOrchestrationId())
-              .buildPipelineId(artifact.getPipelineId())
-              .buildPipelineExecutionId(artifact.getPipelineExecutionId())
               .baseline(baseline)
               .scorecard(scorecard));
     }
@@ -786,5 +799,24 @@ public class ArtifactServiceImpl implements ArtifactService {
     }
     criteria.andOperator(filterCriteria);
     return new HashSet<>(artifactRepository.findDistinctArtifactIds(criteria));
+  }
+
+  private String getVariantType(ArtifactEntity artifact) {
+    if (artifact.getType().equals("image")) {
+      return "tag";
+    } else if (artifact.getType().equals("repository")) {
+      RepositoryArtifactSpec spec = (RepositoryArtifactSpec) artifact.getSpec();
+      if (spec.getBranch() != null) {
+        return "branch";
+      }
+      if (spec.getGitTag() != null) {
+        return "gitTag";
+      }
+      if (spec.getCommitSha() != null) {
+        return "commit";
+      }
+    }
+    throw new IllegalStateException(
+        String.format("Artifact Variant type not found for artifact _id: %s", artifact.getId()));
   }
 }

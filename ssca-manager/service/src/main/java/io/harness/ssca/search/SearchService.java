@@ -38,8 +38,8 @@ public interface SearchService {
   boolean deleteIndex(String indexName);
 
   List<String> getOrchestrationIds(
-      String accountId, String orgIdentifier, String projectIdentifier, ArtifactFilter filter);
+      String accountId, String orgIdentifier, String projectIdentifier, String type, ArtifactFilter filter);
 
-  List<Hit<SSCAArtifact>> listArtifacts(
-      String accountId, String orgIdentifier, String projectIdentifier, ArtifactFilter filter, Pageable pageable);
+  List<Hit<SSCAArtifact>> listArtifacts(String accountId, String orgIdentifier, String projectIdentifier, String type,
+      ArtifactFilter filter, Pageable pageable);
 }

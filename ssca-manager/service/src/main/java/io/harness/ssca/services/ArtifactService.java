@@ -13,7 +13,7 @@ import io.harness.spec.server.ssca.v1.model.ArtifactDeploymentViewRequestBody;
 import io.harness.spec.server.ssca.v1.model.ArtifactDeploymentViewResponse;
 import io.harness.spec.server.ssca.v1.model.ArtifactDetailResponse;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingRequestBody;
-import io.harness.spec.server.ssca.v1.model.ArtifactListingResponse;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2;
 import io.harness.spec.server.ssca.v1.model.SbomProcessRequestBody;
 import io.harness.ssca.beans.EnvType;
 import io.harness.ssca.beans.SbomDTO;
@@ -61,11 +61,11 @@ public interface ArtifactService {
 
   void saveArtifact(ArtifactEntity artifact);
 
-  Page<ArtifactListingResponse> listLatestArtifacts(
-      String accountId, String orgIdentifier, String projectIdentifier, Pageable pageable);
+  Page<ArtifactListingResponseV2> listLatestArtifacts(
+      String accountId, String orgIdentifier, String projectIdentifier, Pageable pageable, String type);
 
-  Page<ArtifactListingResponse> listArtifacts(String accountId, String orgIdentifier, String projectIdentifier,
-      ArtifactListingRequestBody body, Pageable pageable);
+  Page<ArtifactListingResponseV2> listArtifacts(String accountId, String orgIdentifier, String projectIdentifier,
+      ArtifactListingRequestBody body, Pageable pageable, String type);
 
   List<PatchedPendingArtifactEntitiesResult> listDeployedArtifactsFromIdsWithCriteria(String accountId,
       String orgIdentifier, String projectIdentifier, Set<String> artifactIds, List<String> orchestrationIds);

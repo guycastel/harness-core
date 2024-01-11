@@ -15,6 +15,7 @@ import io.harness.spec.server.ssca.v1.model.ArtifactDeploymentViewResponse;
 import io.harness.spec.server.ssca.v1.model.ArtifactDetailResponse;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingRequestBody;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingResponse;
+import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2;
 import io.harness.ssca.services.ArtifactService;
 import io.harness.ssca.utils.PageResponseUtils;
 
@@ -62,9 +63,10 @@ public class ArtifactApiImpl implements ArtifactApi {
       String harnessAccount, @Min(1L) @Max(1000L) Integer limit, String order, @Min(0L) Integer page, String sort) {
     sort = ArtifactApiUtils.getSortFieldMapping(sort);
     Pageable pageable = PageResponseUtils.getPageable(page, limit, sort, order);
-    Page<ArtifactListingResponse> artifactEntities =
-        artifactService.listArtifacts(harnessAccount, org, project, body, pageable);
-    return PageResponseUtils.getPagedResponse(artifactEntities);
+    Page<ArtifactListingResponseV2> artifactEntities =
+        artifactService.listArtifacts(harnessAccount, org, project, body, pageable, "image");
+    Page<ArtifactListingResponse> artifactEntitiesV1 = ArtifactApiUtils.toArtifactListingResponseList(artifactEntities);
+    return PageResponseUtils.getPagedResponse(artifactEntitiesV1);
   }
 
   @Override
@@ -72,8 +74,9 @@ public class ArtifactApiImpl implements ArtifactApi {
       @Min(1L) @Max(1000L) Integer limit, String order, @Min(0L) Integer page, String sort) {
     sort = ArtifactApiUtils.getSortFieldMapping(sort);
     Pageable pageable = PageResponseUtils.getPageable(page, limit, sort, order);
-    Page<ArtifactListingResponse> artifactEntities =
-        artifactService.listLatestArtifacts(harnessAccount, org, project, pageable);
-    return PageResponseUtils.getPagedResponse(artifactEntities);
+    Page<ArtifactListingResponseV2> artifactEntities =
+        artifactService.listLatestArtifacts(harnessAccount, org, project, pageable, "image");
+    Page<ArtifactListingResponse> artifactEntitiesV1 = ArtifactApiUtils.toArtifactListingResponseList(artifactEntities);
+    return PageResponseUtils.getPagedResponse(artifactEntitiesV1);
   }
 }

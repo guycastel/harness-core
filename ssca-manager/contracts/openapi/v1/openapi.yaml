@@ -1,6 +1,6 @@
 openapi: 3.0.0
 x-stoplight:
-  id: 5pyzvwgvoxkys
+  id: 7jpb9t40mrrit
 info:
   title: Harness NextGen Software Delivery Platform API Reference
   version: '1.0'
@@ -43,7 +43,7 @@ paths:
       security:
         - x-api-key: []
       x-stoplight:
-        id: 5e99m0d6395rf
+        id: dm710c7nh4mk9
   '/v1/org/{org}/project/{project}/sbom/enforcement':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -76,7 +76,7 @@ paths:
       security:
         - x-api-key: []
       x-stoplight:
-        id: thjgy0256jgom
+        id: lcwzl3nzlmx9y
   /v1/token:
     get:
       summary: Issue a cross-service token
@@ -87,7 +87,7 @@ paths:
           $ref: '#/components/responses/TokenIssueResponseBody'
       operationId: Token#IssueToken
       x-stoplight:
-        id: heskgh9a1ci1z
+        id: jttege64qi2lq
       description: Issue a cross-service token
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
@@ -102,7 +102,7 @@ paths:
           $ref: '#/components/responses/ArtifactSbomResponseBody'
       operationId: downloadSbom
       x-stoplight:
-        id: gllr2uxqkafsx
+        id: qubx13c2x3jyw
       description: Download SBOM for an artifact
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
@@ -136,7 +136,7 @@ paths:
           $ref: '#/components/responses/OrchestrationSummaryResponseBody'
       operationId: getOrchestrationSummary
       x-stoplight:
-        id: cg2hvg6yqu3du
+        id: 2svq5psnnzfde
       description: Get Orchestration Summary
       security:
         - x-api-key: []
@@ -161,7 +161,7 @@ paths:
           $ref: '#/components/responses/EnforcementSummaryResponseBody'
       operationId: getEnforcementSummary
       x-stoplight:
-        id: w9op7vto5w6ks
+        id: 25bs10j079vbq
       description: Get Enforcement Summary
       security:
         - x-api-key: []
@@ -179,7 +179,7 @@ paths:
           $ref: '#/components/responses/PolicyViolationResponse'
       operationId: getPolicyViolations
       x-stoplight:
-        id: 89f9nf9wt2m6m
+        id: o4ey9d2rb0xau
       security:
         - x-api-key: []
       parameters:
@@ -232,7 +232,7 @@ paths:
       tags:
         - enforcement
       x-stoplight:
-        id: fc0yvbgvtx6cw
+        id: re0rzwnr61196
   '/v1/org/{org}/project/{project}/enforcement-result':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -253,7 +253,7 @@ paths:
       tags:
         - enforcement
       x-stoplight:
-        id: s586jup0mkj6p
+        id: 0n8lcovapgk94
   '/v1/org/{org}/project/{project}/enforcement-summary':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -274,7 +274,7 @@ paths:
       tags:
         - enforcement
       x-stoplight:
-        id: u83is5aznkg1h
+        id: rrh0imgvchxty
   '/v1/org/{org}/project/{project}/artifacts':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -310,14 +310,14 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/ArtifactListingRequestBody'
       x-stoplight:
-        id: h636x9uqqm844
+        id: 5aabkpr2mo0l3
   '/v1/orgs/{org}/projects/{project}/artifacts':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
       - $ref: '#/components/parameters/ProjectParam'
     post:
       summary: List All Artifacts
-      operationId: list
+      operationId: listArtifacts
       responses:
         '200':
           $ref: '#/components/responses/ArtifactListingResponseBodyV2'
@@ -345,23 +345,26 @@ paths:
             type: string
             enum:
               - image
-              - repo
+              - repository
           in: query
           name: type
           description: Type of artifacts to be listed
           required: true
         - schema:
-            type: boolean
-            default: 'false'
+            type: string
+            enum:
+              - all
+              - latest
+            default: all
           in: query
-          name: latest_only
-          description: Flag used to for toggling to latest artifacts view
+          name: view_mode
+          description: Mode in which artifacts should be listed
       security:
         - x-api-key: []
       requestBody:
         $ref: '#/components/requestBodies/ArtifactListingRequestBody'
       x-stoplight:
-        id: t64ihysfjku4q
+        id: dgn5km4vo54nq
   '/v1/org/{org}/project/{project}/grouped-artifacts':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -395,7 +398,7 @@ paths:
       security:
         - x-api-key: []
       x-stoplight:
-        id: yrouffqxgj0rd
+        id: ppxsqr46aii69
   '/v1/org/{org}/project/{project}/artifact/{artifact}/tag/{tag}/components':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -436,7 +439,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ArtifactComponentViewRequestBody'
       x-stoplight:
-        id: bsnfdyocli8ak
+        id: o2amnh4518oog
   '/v1/org/{org}/project/{project}/artifact/{artifact}/tag/{tag}/deployments':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -480,7 +483,7 @@ paths:
               $ref: '#/components/schemas/ArtifactDeploymentViewRequestBody'
         description: ''
       x-stoplight:
-        id: 1aztf68k207jp
+        id: y0xr44cz9lpgp
   '/v1/org/{org}/project/{project}/artifact/{artifact}/tag/{tag}/details':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -505,7 +508,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
       x-stoplight:
-        id: veeimdssflq25
+        id: nfb4rt8nn89qw
   '/v1/org/{org}/project/{project}/orchestration/{orchestration-id}/sbom-scorecard':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -528,7 +531,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: myxno8u8qa1zb
+        id: n1zq25bdt9l41
       description: Save SBOM Scorecard
       requestBody:
         content:
@@ -551,7 +554,7 @@ paths:
         '400':
           description: Bad Request
       x-stoplight:
-        id: cocrnbzrli1ex
+        id: v7703zs86df8b
       description: Get SBOM Scorecard
       security:
         - x-api-key: []
@@ -582,7 +585,7 @@ paths:
           description: Not Found
       operationId: getConfigById
       x-stoplight:
-        id: ot7vzrmypkswe
+        id: aurlp3mzpkjn3
       security:
         - x-api-key: []
       parameters:
@@ -599,7 +602,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: b7438fcp4lr3t
+        id: f80dl184rb31g
       security:
         - x-api-key: []
       parameters:
@@ -618,7 +621,7 @@ paths:
         '400':
           description: Bad Request
       x-stoplight:
-        id: u5elxskzdf1k7
+        id: 44rq1uhsby4rw
       security:
         - x-api-key: []
       parameters:
@@ -641,7 +644,7 @@ paths:
           description: Bad Request
       operationId: listConfigs
       x-stoplight:
-        id: cmjkvsyqrr2gd
+        id: 25eyhnbi081rj
       security:
         - x-api-key: []
       parameters:
@@ -671,7 +674,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: bqwbtctc008sb
+        id: rkzcfa4ldx8pb
       description: Save Config By ID
       security:
         - x-api-key: []
@@ -710,7 +713,7 @@ paths:
           description: Not Found
       operationId: getConfigByNameAndType
       x-stoplight:
-        id: 5o7si8ynl5h7g
+        id: yzsj3he5djbrp
       security:
         - x-api-key: []
       parameters:
@@ -730,7 +733,7 @@ paths:
           $ref: '#/components/responses/BaselineResponseBody'
       operationId: getBaselineForArtifact
       x-stoplight:
-        id: 7j162lze9ouqj
+        id: 0jy1zw09qa2gd
       description: Get the baseline for an artifact
       security:
         - x-api-key: []
@@ -747,7 +750,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: i2razo3nqitqv
+        id: 6op2lfdmf5iz2
       description: Save the baseline for an artifact
       security:
         - x-api-key: []
@@ -778,7 +781,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: ppc3giq0rtbxa
+        id: mtrknrm6m6aav
       description: This API calculates and stores drift between 2 versions of an artifact with TTL of 1 hour.
       tags:
         - sbomDrift
@@ -814,7 +817,7 @@ paths:
           description: Internal Server Error
       operationId: getComponentDrift
       x-stoplight:
-        id: wjhf37azhjdsp
+        id: 0f1r1yeajdhwp
       description: Get component drift for provided drift ID.
       security:
         - x-api-key: []
@@ -860,7 +863,7 @@ paths:
           description: Internal Server Error
       operationId: getLicenseDrift
       x-stoplight:
-        id: 6yi650b5r00z5
+        id: zle3hxm48ndns
       description: Get license drift for provided drift ID.
       security:
         - x-api-key: []
@@ -900,7 +903,7 @@ paths:
           description: Internal Server Error
       operationId: createRemediationTracker
       x-stoplight:
-        id: ztvgshfz8r4ci
+        id: 40lhcndl1jhv7
       description: Create Remediation Tracker.
       security:
         - x-api-key: []
@@ -946,7 +949,7 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/RemediationListingRequestBody'
       x-stoplight:
-        id: kaona7zfatszp
+        id: aqvy16tlruzpx
   '/v1/orgs/{org}/projects/{project}/remediations/{remediation}':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -969,7 +972,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: 9uz7srmxmdcpg
+        id: yqagjqerrejr4
       tags:
         - Remediation
       description: Update Remediation Tracker.
@@ -996,7 +999,7 @@ paths:
           description: Internal Server Error
       operationId: getOverallSummary
       x-stoplight:
-        id: c4e29l9u4fda3
+        id: jjl6x0rfewj3o
       description: Get Overall summary of Remediation Trackers.
       security:
         - x-api-key: []
@@ -1025,7 +1028,7 @@ paths:
           description: Internal Server Error
       operationId: calculateDriftForOrchestrationStep
       x-stoplight:
-        id: 7ifs8myrdx4yt
+        id: jxr5fe7l71ffi
       security:
         - x-api-key: []
       parameters:
@@ -1055,7 +1058,7 @@ paths:
           description: Internal Server Error
       operationId: closeRemediationTracker
       x-stoplight:
-        id: afgzux3hs02od
+        id: 6lrxb8yv6yo1h
       description: Close Remediation Tracker.
       security:
         - x-api-key: []
@@ -1084,7 +1087,7 @@ paths:
           description: Internal Server Error
       operationId: excludeArtifact
       x-stoplight:
-        id: sljwll7mj8n3z
+        id: 35u3lz70qi5ui
       description: Exclude Artifact From Remediation Tracker.
       security:
         - x-api-key: []
@@ -1115,7 +1118,7 @@ paths:
           description: Internal Server Error
       operationId: getRemediationDetails
       x-stoplight:
-        id: 87t19vn4ibw7z
+        id: ynx300ki1nmeu
       description: Get Remediation Details.
       security:
         - x-api-key: []
@@ -1144,7 +1147,7 @@ paths:
           description: Internal Server Error
       operationId: getArtifactListForRemediation
       x-stoplight:
-        id: mmii0ktzo2u9p
+        id: 9wumqakeipj8u
       description: Get Remediation Details.
       security:
         - x-api-key: []
@@ -1183,7 +1186,7 @@ paths:
           description: Internal Server Error
       operationId: getEnvironmentListForRemediation
       x-stoplight:
-        id: fitmlgn6v9a1l
+        id: 7rg4mr3zpx9vh
       description: Get All Environments impacted with Remediation.
       security:
         - x-api-key: []
@@ -1219,7 +1222,7 @@ paths:
           description: Internal Server Error
       operationId: getArtifactInRemediationDetails
       x-stoplight:
-        id: tgl1or3ja5rp5
+        id: utj8rzbkdw42l
       description: Get Details of a Artifact in a Remediation Tracker.
       security:
         - x-api-key: []
@@ -1254,7 +1257,7 @@ paths:
           description: Internal Server Error
       operationId: getDeploymentsListForArtifactInRemediation
       x-stoplight:
-        id: mt4i7i4974c7l
+        id: 6n1v9g4wclxcc
       description: Get Deployments List for Artifact In Remediation.
       security:
         - x-api-key: []
@@ -1276,7 +1279,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: 62fpvtd6817yq
+        id: pjvqobjf5zgci
       description: Create Ticket
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
@@ -1312,7 +1315,7 @@ paths:
           description: Internal Server Error
       operationId: listExemptionsForProject
       x-stoplight:
-        id: s8us8c5epimsj
+        id: o4drvo72leiqx
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
         - $ref: '#/components/parameters/Limit'
@@ -1352,7 +1355,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: gkawp2eexe9wg
+        id: sd4xmpdyerwks
       description: Create exemption for project
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
@@ -1391,7 +1394,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ExemptionRequestDTO'
       x-stoplight:
-        id: najmv42nkbz5i
+        id: my8zekpweb8o3
       tags:
         - exemptions
   '/v1/orgs/{org}/projects/{project}/exemptions/{exemption}':
@@ -1419,7 +1422,7 @@ paths:
         - $ref: '#/components/parameters/AccountHeader'
       description: Get exemption for project
       x-stoplight:
-        id: 3f94txgdx7kbu
+        id: bg0pe4kb8nzkn
     put:
       summary: Update exemption for project
       operationId: updateExemptionForProject
@@ -1435,7 +1438,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: m334pm3d0w4t5
+        id: yusup4gogv3yx
       description: Update exemption for project
       requestBody:
         description: ''
@@ -1458,7 +1461,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: ppdftpsdtrvui
+        id: 88h6qz82zc5mk
       description: Delete exemption for project
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
@@ -1490,7 +1493,7 @@ paths:
         - $ref: '#/components/parameters/AccountHeader'
       description: Get exemption for artifact
       x-stoplight:
-        id: pmle03jn0w989
+        id: st13x4va98zfw
     put:
       summary: Update exemption for artifact
       operationId: updateExemptionForArtifact
@@ -1517,7 +1520,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
       x-stoplight:
-        id: y7ahs8x9ob4n4
+        id: 4x13zwjnryabr
     delete:
       summary: Delete exemption for artifact
       operationId: deleteExemptionForArtifact
@@ -1534,7 +1537,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
       x-stoplight:
-        id: te2y2rk4a021j
+        id: 3pe9q49s0gdn7
   '/v1/orgs/{org}/projects/{project}/exemptions/{exemption}/review':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -1557,7 +1560,7 @@ paths:
         '500':
           description: Internal Server Error
       x-stoplight:
-        id: l19mx4pbtab5a
+        id: 4uql3e4jou934
       description: Review exemption for project
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
@@ -1593,7 +1596,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AccountHeader'
       x-stoplight:
-        id: szuejrt6kcrtd
+        id: 82bpgks1fqheo
       requestBody:
         description: Shared Request
         content:
@@ -1605,7 +1608,7 @@ components:
     Artifact:
       title: Artifact
       x-stoplight:
-        id: 4dgg4yzvj1mp2
+        id: wyrqpglrlbr89
       type: object
       x-examples: {}
       properties:
@@ -1618,7 +1621,7 @@ components:
           description: type of the artifact
           enum:
             - image
-            - repo
+            - repository
           default: image
           example: image
         name:
@@ -1636,7 +1639,7 @@ components:
           example: 'https://console.cloud.google.com/gcr/images/imageName'
         metadata:
           x-stoplight:
-            id: 4m42oo9d8o95i
+            id: 0hc8eb19mjkz4
           oneOf:
             - $ref: '#/components/schemas/ContainerArtifactMetadata'
             - $ref: '#/components/schemas/RepositoryArtifactMetadata'
@@ -1647,7 +1650,7 @@ components:
     SbomProcess:
       title: SbomProcess
       x-stoplight:
-        id: w6aut2cf2rvyf
+        id: 8dtxlavtlx02g
       type: object
       properties:
         name:
@@ -1673,7 +1676,7 @@ components:
     Attestation:
       title: Attestation
       x-stoplight:
-        id: qb5g6jo25p0pl
+        id: n7i2sjq0peuy2
       type: object
       properties:
         is_attested:
@@ -1687,7 +1690,7 @@ components:
     SbomMetadata:
       title: SbomMetadata
       x-stoplight:
-        id: ynjr0wxnr42xt
+        id: antonglxsa8nv
       type: object
       properties:
         format:
@@ -1741,7 +1744,7 @@ components:
     SbomProcessRequestBody:
       title: SbomProcessRequestBody
       x-stoplight:
-        id: 6ztcznk5aw0h5
+        id: opp9le4qumxce
       type: object
       properties:
         artifact:
@@ -1755,7 +1758,7 @@ components:
     SbomProcessResponseBody:
       title: SbomProcessResponseBody
       x-stoplight:
-        id: 2pq7c6994uskg
+        id: eb1qn5mx05q5u
       type: object
       properties:
         artifact_id:
@@ -1764,7 +1767,7 @@ components:
     EnforceSbomResponseBody:
       title: SbomEnforceResponseBody
       x-stoplight:
-        id: lml2964qttdvj
+        id: ccz7ps4o75428
       type: object
       properties:
         enforcement_id:
@@ -1778,7 +1781,7 @@ components:
     EnforceSbomRequestBody:
       title: SbomEnforceRequestBody
       x-stoplight:
-        id: je1h8q0ts9bn9
+        id: u9p8qemaxitm5
       type: object
       properties:
         enforcement_id:
@@ -1799,7 +1802,7 @@ components:
     TokenIssueResponseBody:
       title: TokenIssueResponseBody
       x-stoplight:
-        id: oi8vagre36sag
+        id: px6asofm2dypi
       type: object
       x-internal: true
       properties:
@@ -1814,18 +1817,18 @@ components:
         token:
           type: string
           x-stoplight:
-            id: cimbdu5t5j8y2
+            id: 1d7eq2a5l5qfq
           description: Issued cross-service JWT
       required:
         - token
       title: ''
       x-internal: true
       x-stoplight:
-        id: hs8alr1rewsaf
+        id: 1djcumumg9nzq
     ArtifactSbomResponseBody:
       title: ArtifactSbomResponseBody
       x-stoplight:
-        id: v4ba8owlr7vae
+        id: gr9xwud1inde8
       type: object
       properties:
         sbom:
@@ -1834,16 +1837,16 @@ components:
     OrchestrationSummaryResponse:
       title: OrchestrationSummary
       x-stoplight:
-        id: 459u83jpr9q8d
+        id: pnoe05n4zra0f
       type: object
       properties:
         step_execution_id:
           type: string
           x-stoplight:
-            id: kn7exite14qm5
+            id: hswimb304zjqd
         is_attested:
           x-stoplight:
-            id: nqta2nrfn2cql
+            id: 3zno5ow7asu1g
           type: boolean
         artifact:
           $ref: '#/components/schemas/Artifact'
@@ -1856,7 +1859,7 @@ components:
     EnforcementSummaryResponse:
       title: EnforcementSummaryResponse
       x-stoplight:
-        id: q2t3nupgjufoy
+        id: sopgdqhuf2v78
       type: object
       properties:
         artifact:
@@ -1864,33 +1867,33 @@ components:
         enforcement_id:
           type: string
           x-stoplight:
-            id: ljam5n3zh87vm
+            id: fw05hw1g20kp0
         allow_list_violation_count:
           type: integer
           x-stoplight:
-            id: ton1scohhk1tj
+            id: 89fd7d6phr5l5
         deny_list_violation_count:
           type: integer
           x-stoplight:
-            id: sviktwl1ljspb
+            id: c2t0d4lgmjdwc
         status:
           type: string
           x-stoplight:
-            id: lwf45lbkmpzyc
+            id: 2tp1fwern7x5g
         exempted_component_count:
           type: integer
       description: Enforcement Summary
     SbomDetails:
       title: SbomDetails
       x-stoplight:
-        id: 714tynj9nyswf
+        id: 4oragmm597fco
       type: object
       description: Sbom Details
       properties:
         name:
           type: string
           x-stoplight:
-            id: fhshe0qz5ix2w
+            id: 0v09x1kkqa3m7
       required:
         - name
     PolicyViolation:
@@ -1900,41 +1903,41 @@ components:
         enforcement_id:
           type: string
           x-stoplight:
-            id: w8dl0qreqmkd5
+            id: ojoriy34i2a5u
         artifact_id:
           type: string
           x-stoplight:
-            id: upu85nna2uwed
+            id: xdcyzikozvu4x
         tag:
           type: string
         image_name:
           type: string
           x-stoplight:
-            id: 6jzt0ykas12th
+            id: um4k94i782vex
         account:
           type: string
           x-stoplight:
-            id: svdnf4dnmfsyz
+            id: hfzmy4j10rb81
         org:
           type: string
           x-stoplight:
-            id: h1cwq7gml41xa
+            id: y21k1ci3lyynh
         project:
           type: string
           x-stoplight:
-            id: 4rurfiksqnadf
+            id: i6562xyhx4z6p
         orchestration_id:
           type: string
           x-stoplight:
-            id: 7y1gzgh2c5srg
+            id: njp359bxpjo2w
         violation_type:
           type: string
           x-stoplight:
-            id: 81r56i4kitq3n
+            id: keqkbozdngnib
         violation_details:
           type: string
           x-stoplight:
-            id: ag0ig9ulz1q72
+            id: tpflwbcvu6rcy
         name:
           type: string
         version:
@@ -1944,11 +1947,11 @@ components:
         supplier_type:
           type: string
           x-stoplight:
-            id: 26eckm4pxhyow
+            id: cdzwfa6g70gx0
         package_manager:
           type: string
           x-stoplight:
-            id: k9p65mzpnlq2z
+            id: fbpeuhc48av03
         license:
           type: array
           items:
@@ -1961,11 +1964,11 @@ components:
           type: string
       title: ''
       x-stoplight:
-        id: o697yy0ko23if
+        id: upxxpnlzm3pcf
     NormalizedSbomComponentDTO:
       title: NormalizedSbomComponentDTO
       x-stoplight:
-        id: 87tttcq2df24l
+        id: 90150odl158ur
       type: object
       description: Normalized SBOM Component Details
       properties:
@@ -2042,7 +2045,7 @@ components:
     EnforcementResultDTO:
       title: EnforcementResultDTO
       x-stoplight:
-        id: sagtl016sfew4
+        id: d0ai8fc7czqjd
       type: object
       description: Enforcement Result Details DTO
       x-examples: {}
@@ -2101,7 +2104,7 @@ components:
     EnvironmentTypeFilter:
       title: EnvironmentTypeFilter
       x-stoplight:
-        id: 43536okhutqcj
+        id: 4muxcx77qt6rt
       enum:
         - Prod
         - PreProd
@@ -2110,14 +2113,14 @@ components:
     EnvironmentType:
       title: EnvironmentType
       x-stoplight:
-        id: w6jkuj6j2reey
+        id: ne06wy1bchxh3
       enum:
         - Prod
         - PreProd
     EnforcementSummaryDTO:
       title: EnforcementSummaryDTO
       x-stoplight:
-        id: a2x1kxmj26hc1
+        id: q1dq3lwj5pliq
       type: object
       description: Enforcement summary detail DTO
       x-examples: {}
@@ -2161,7 +2164,7 @@ components:
     NormalisedSbomComponentRequestBody:
       $ref: '#/components/schemas/Artifact'
       x-stoplight:
-        id: zqj7rd371yg0j
+        id: 301dyc57n19xk
     ArtifactListingRequestBody:
       type: object
       x-examples: {}
@@ -2189,11 +2192,11 @@ components:
             - None
             - All
       x-stoplight:
-        id: 4b1nk8opjrgge
+        id: wg83zha3gmgrd
     ArtifactListingResponse:
       title: ArtifactListingResponse
       x-stoplight:
-        id: vqq7qmbtcdb4n
+        id: 7p89zp1ltpguh
       type: object
       x-examples: {}
       properties:
@@ -2233,20 +2236,20 @@ components:
         baseline:
           type: boolean
           x-stoplight:
-            id: aou4jd0y59os9
+            id: h2w9x78fh0qsm
         scorecard:
           type: object
           x-stoplight:
-            id: 6q0dwi59l8u61
+            id: lfeuknc734otd
           properties:
             max_score:
               type: string
               x-stoplight:
-                id: ib5zz6ma7jhjm
+                id: 42c9imso0r1ky
             avg_score:
               type: string
               x-stoplight:
-                id: bz83cc0ujaya8
+                id: rqurfhl5rws72
       required:
         - id
         - name
@@ -2256,7 +2259,7 @@ components:
       type: object
       x-examples: {}
       x-stoplight:
-        id: 11lpbppagn7hs
+        id: 7d0nax68ky0g9
       properties:
         id:
           type: string
@@ -2288,7 +2291,7 @@ components:
         build_pipeline_name:
           type: string
           x-stoplight:
-            id: 6jhe8jxgx3cmb
+            id: 2g4r0n4389oyk
           description: Pipeline name of build pipeline used to orchestrate the artifact
         build_pipeline_execution_id:
           type: string
@@ -2303,7 +2306,7 @@ components:
     ArtifactComponentViewRequestBody:
       title: ArtifactComponentViewRequestBody
       x-stoplight:
-        id: sdc5h12bep3fo
+        id: a8tk698pawwce
       type: object
       properties:
         component_filter:
@@ -2319,7 +2322,7 @@ components:
     ArtifactDeploymentViewRequestBody:
       title: ArtifactDeploymentViewRequestBody
       x-stoplight:
-        id: 049207sgkanen
+        id: f55nr42lzbq6b
       type: object
       properties:
         environment:
@@ -2339,7 +2342,7 @@ components:
     ArtifactComponentViewResponse:
       title: ArtifactComponentViewResponse
       x-stoplight:
-        id: hzl2ackpps5y8
+        id: jcebe41kf1m8t
       type: object
       properties:
         package_name:
@@ -2357,7 +2360,7 @@ components:
     ArtifactDeploymentViewResponse:
       title: ArtifactDeploymentViewResponse
       x-stoplight:
-        id: vlavvxyppdx6b
+        id: mw8q0vg3sob7d
       type: object
       properties:
         env_id:
@@ -2411,7 +2414,7 @@ components:
     Operator:
       title: Operator
       x-stoplight:
-        id: 0wc0jseyof3od
+        id: xfqihkm4c20wq
       enum:
         - Equals
         - StartsWith
@@ -2439,7 +2442,7 @@ components:
         - value
         - operator
       x-stoplight:
-        id: dzoa5df96d5uj
+        id: wjuk4kww9m81w
     LicenseFilter:
       title: LicenseFilter
       type: object
@@ -2452,123 +2455,123 @@ components:
         - value
         - operator
       x-stoplight:
-        id: 11y2uvfebjf1b
+        id: di94ybyu4fwwt
     Slsa:
       title: Slsa
       x-stoplight:
-        id: 6vh3qvdy46wpl
+        id: imevgnfxsswkb
       type: object
       description: Slsa Verification Data
       properties:
         provenance:
           type: string
           x-stoplight:
-            id: i3zdfg4eowrjf
+            id: 9eemak83dqw63
           description: Slsa provenance data
         policy_outcome_status:
           type: string
           x-stoplight:
-            id: p9tyqah4d740g
+            id: v2pnmrmri4u3f
           description: Slsa policy outcome
     CategoryScorecard:
       title: CategoryScorecard
       x-stoplight:
-        id: kjey21qocp6cm
+        id: npo6e5viyit6o
       type: object
       properties:
         name:
           type: string
           x-stoplight:
-            id: fuz4ry5f49fzh
+            id: ucfbvzv9zuzqo
         is_enabled:
           type: string
           x-stoplight:
-            id: i1abmcvtbm7t1
+            id: ok7dxsi6cg25n
         weightage:
           type: string
           x-stoplight:
-            id: bsvwpkrlxcn17
+            id: 5o55c1ux2o2v9
         max_score:
           type: string
           x-stoplight:
-            id: 3ygn1mq6ejkov
+            id: rrsxcyfbn15wj
         score:
           type: string
           x-stoplight:
-            id: v0kyxri2ss6zw
+            id: kvbwpshzvmyje
         checks:
           type: array
           x-stoplight:
-            id: o8so8m9rucxfz
+            id: 7au4v3emroeff
           items:
             x-stoplight:
-              id: 2kh5skg96xpao
+              id: xl8rlvh7ia71i
             type: object
             properties:
               name:
                 type: string
                 x-stoplight:
-                  id: x4r3gcrhuflhp
+                  id: ft1hbuq3srkt4
               is_enabled:
                 type: string
                 x-stoplight:
-                  id: zflml3d8h54zl
+                  id: 622s8c4xwyb84
               score:
                 type: string
                 x-stoplight:
-                  id: gsf30fjdy7goe
+                  id: qyop7a7ek2a0t
               max_score:
                 type: string
                 x-stoplight:
-                  id: d0thoqfsa5myw
+                  id: st8d40c1gvw4a
               description:
                 type: string
                 x-stoplight:
-                  id: d43fqww4il332
+                  id: i8rz94mej997y
     ScorecardInfo:
       title: ScorecardInfo
       x-stoplight:
-        id: vknuz2ravckea
+        id: 3tt9jatsp6t2a
       type: object
       properties:
         tool_name:
           type: string
           x-stoplight:
-            id: xu9olh17wu56a
+            id: vlwir0q179ktn
         tool_version:
           type: string
           x-stoplight:
-            id: rudeg93cludqj
+            id: z0aw0gojjlaaq
     SbomDetailsForScorecard:
       title: SbomDetailsForScorecard
       x-stoplight:
-        id: 2k11mat3z5wck
+        id: nxi115ygibsml
       type: object
       properties:
         tool_name:
           type: string
           x-stoplight:
-            id: f03df0h202req
+            id: x4wvyqylv4w83
         tool_version:
           type: string
           x-stoplight:
-            id: pna4yrfcg4pyg
+            id: jcnjgulo0hll1
         sbom_file_name:
           type: string
           x-stoplight:
-            id: i75l3p66qb1cr
+            id: w1vfr3n7hpf00
         sbom_format:
           type: string
           x-stoplight:
-            id: w14lizii1c9kz
+            id: j6pk6k144jni6
         sbom_version:
           type: string
           x-stoplight:
-            id: fdvv60uh82hwu
+            id: n4gp94ftpuq6a
         file_format:
           type: string
           x-stoplight:
-            id: 1b3l8dl41bj32
+            id: l0nc6gat3rvbg
     SbomScorecardResponseBody:
       type: object
       x-examples: {}
@@ -2577,31 +2580,31 @@ components:
         orchestration_id:
           type: string
           x-stoplight:
-            id: avvfi0loocaq0
+            id: ubt63fvpknefr
         account_id:
           type: string
           x-stoplight:
-            id: r57fwor2n2yqd
+            id: wmmn6ovb15txz
         org_id:
           type: string
           x-stoplight:
-            id: 1kj2kwufusqhb
+            id: w5xxrurzgftau
         project_id:
           type: string
           x-stoplight:
-            id: 0drpjcry68u0z
+            id: ytc55knunko9a
         avg_score:
           type: string
           x-stoplight:
-            id: tn8knjipgqdlr
+            id: 1jfyo4at5e08e
         max_score:
           type: string
           x-stoplight:
-            id: gotc22i4ij4rc
+            id: f4eoy0nuq8kfm
         creation_on:
           type: string
           x-stoplight:
-            id: exowh5xgzdg7c
+            id: w3pxjoi0oyepe
         sbom_details:
           $ref: '#/components/schemas/SbomDetailsForScorecard'
         score_card_info:
@@ -2611,41 +2614,41 @@ components:
           items:
             $ref: '#/components/schemas/CategoryScorecard'
       x-stoplight:
-        id: gsxsfnk9eiwj6
+        id: k33qy4vrrk6c7
     SbomScorecardRequestBody:
       title: SbomScorecardRequestBody
       x-stoplight:
-        id: ym5olawvs84iq
+        id: nyd9di24fjs16
       type: object
       properties:
         orchestration_id:
           type: string
           x-stoplight:
-            id: m2i0regpvzc73
+            id: q5yet0g76im3z
         account_id:
           type: string
           x-stoplight:
-            id: 98xqfsec45m9q
+            id: zev0370s3nc3k
         org_id:
           type: string
           x-stoplight:
-            id: zomkh6o2l9vt8
+            id: nfi9zlvp7fre1
         project_id:
           type: string
           x-stoplight:
-            id: lb17h4yda4hyy
+            id: roozhrhrar600
         avg_score:
           type: string
           x-stoplight:
-            id: jfvfw5bi1gva0
+            id: xskbt4hgn1mgi
         max_score:
           type: string
           x-stoplight:
-            id: jwazwx34eoewp
+            id: rbwid6z2us7f0
         creation_on:
           type: string
           x-stoplight:
-            id: omtv4if71hmly
+            id: yfa2c549heail
         sbom_details:
           $ref: '#/components/schemas/SbomDetailsForScorecard'
         score_card_info:
@@ -2657,133 +2660,133 @@ components:
     ConfigInfo:
       title: ConfigInfo
       x-stoplight:
-        id: 9k7hiaoeqbm82
+        id: tl1v2x0osqhwy
       type: object
       properties:
         id:
           type: string
           x-stoplight:
-            id: zgszbb3x2bjz3
+            id: qyx07p46fvhau
         name:
           type: string
           x-stoplight:
-            id: 3v2ctv19tas6m
+            id: lmkyq3fe08r5s
         config:
           type: array
           x-stoplight:
-            id: niah5u8nb3w2j
+            id: iwtlgp2t8o4q2
           items:
             x-stoplight:
-              id: qxdstk4i4pft5
+              id: 6ddl0xrjckxu2
             type: object
             properties:
               key:
                 type: string
                 x-stoplight:
-                  id: qdgooq1pgz7qu
+                  id: bkwy7hcoeaaf6
               value:
                 type: string
                 x-stoplight:
-                  id: 0ik505zfd3bwn
+                  id: 4qiwgds7d2fuj
     ConfigRequestBody:
       title: Config
       x-stoplight:
-        id: houhf9y5csz4e
+        id: u1b4tawfxgsxs
       type: object
       properties:
         account_id:
           type: string
           x-stoplight:
-            id: qdtb0x1eeyllu
+            id: zpbd49paphtki
         org_id:
           type: string
           x-stoplight:
-            id: ibitgzg89gvt2
+            id: tjxwetv7r1ow0
         project_id:
           type: string
           x-stoplight:
-            id: r4u7y4g91qma6
+            id: ipo5b13j7apf3
         user_id:
           type: string
           x-stoplight:
-            id: mq6wf75mr28q3
+            id: vsu8kcajk4ipj
         config_id:
           type: string
           x-stoplight:
-            id: 3q83pcwkjg8qe
+            id: r0qsqodmyn0ko
         name:
           type: string
           x-stoplight:
-            id: 8qdfrsc6g4wla
+            id: mtwia8b9v1k6h
         type:
           type: string
           x-stoplight:
-            id: xve9uze376xk3
+            id: h9rvtub0oyfod
         creation_on:
           type: string
           x-stoplight:
-            id: 8klxpu345tmrl
+            id: w7bot62sy551n
         config_info:
           x-stoplight:
-            id: so431mil50tfn
+            id: grigpaxp1ap49
           type: array
           items:
             $ref: '#/components/schemas/ConfigInfo'
     ConfigResponseBody:
       title: ConfigResponse
       x-stoplight:
-        id: y6vsfa8qs2kz9
+        id: dug7c1taqz6um
       type: object
       properties:
         account_id:
           type: string
           x-stoplight:
-            id: dcwv6jcgvjlhq
+            id: pktsh9fs2fkwo
         org_id:
           type: string
           x-stoplight:
-            id: dznrm6krcx33x
+            id: f1cfj8ghrdqgb
         project_id:
           type: string
           x-stoplight:
-            id: qrcrdnjv990tv
+            id: vcpx8s9mz1wfy
         user_id:
           type: string
           x-stoplight:
-            id: dq659md83txcw
+            id: jcaqdngz28ihv
         config_id:
           type: string
           x-stoplight:
-            id: 3khmc1mmd3sdh
+            id: uef6cbs4upvio
         name:
           type: string
           x-stoplight:
-            id: ji1gvp27lv7el
+            id: 3ko3diwnmsbqh
         type:
           type: string
           x-stoplight:
-            id: ke4dufi5ro47k
+            id: 46kc7aaqr1dpa
         creation_on:
           type: string
           x-stoplight:
-            id: cgg0zs8cbrzm5
+            id: wsjd56yx9b45h
         config_info:
           type: array
           x-stoplight:
-            id: v02lmdc5sapvc
+            id: dg533p8wwgxjc
           items:
             $ref: '#/components/schemas/ConfigInfo'
     SaveResponse:
       title: SaveResponse
       x-stoplight:
-        id: ablxwzzeyztvt
+        id: 3rhsr34txjgvy
       type: object
       description: 'response for Save/Update operations '
       properties:
         status:
           type: string
           x-stoplight:
-            id: h1vfgigk2kpuw
+            id: a7ulgs9yp7xzz
     ComponentSummary:
       type: object
       x-examples:
@@ -2816,7 +2819,7 @@ components:
           type: string
           description: Licenses of component
       x-stoplight:
-        id: jgbpbp8uia1ue
+        id: 54lq45qo68wf5
     ComponentDrift:
       type: object
       x-examples:
@@ -2850,49 +2853,49 @@ components:
         new_component:
           $ref: '#/components/schemas/ComponentSummary'
       x-stoplight:
-        id: omwh9oafnjxoe
+        id: sfa6ho2os3z1p
     BaselineRequestBody:
       title: BaselineRequest
       x-stoplight:
-        id: 95j5nbx7b1a3o
+        id: t4tl4xwbxv31c
       type: object
       properties:
         tag:
           type: string
           x-stoplight:
-            id: 7qd2lwmzotyjf
+            id: os6s602vc4qnp
           description: Version of the Artifact
     BaselineResponseBody:
       title: BaselineResponseBody
       x-stoplight:
-        id: laykynpmvvfn2
+        id: j6wwf2l15d9u0
       type: object
       properties:
         artifact_id:
           type: string
           x-stoplight:
-            id: dexf9mn9z7akz
+            id: fgnwiajkzzdax
           description: Id of the artifact
         tag:
           type: string
           x-stoplight:
-            id: v0ikgmfiy4zxc
+            id: 78j7aglezv0ri
           description: Version of the artifact
     ArtifactSbomDriftRequestBody:
       title: ArtifactSbomDriftRequestBody
       x-stoplight:
-        id: 5zxhpsbn77h3d
+        id: afayamt9q4hkr
       type: object
       properties:
         tag:
           type: string
           x-stoplight:
-            id: ug6kvyduw972m
+            id: 1de00vbu170d0
           description: Tag on which drift has to be calculated
         base_tag:
           type: string
           x-stoplight:
-            id: 5kvwzszu197a3
+            id: plrsxbotqp187
           description: Base tag to calculate drift from
       required:
         - tag
@@ -2901,34 +2904,34 @@ components:
     ArtifactSbomDriftResponse:
       title: ArtifactSbomDriftResponse
       x-stoplight:
-        id: umulezb8ca73z
+        id: 26mu4qnbqqjdl
       type: object
       description: Response body for sbom drift calculation between 2 artifact versions.
       properties:
         drift_id:
           type: string
           x-stoplight:
-            id: kezn4fn6ehpaj
+            id: o0q2ky2dt2tmm
           description: Drift ID to get the drift results
         tag:
           type: string
           x-stoplight:
-            id: rhhz73dzaeh16
+            id: 25weedgia97ci
           description: Tag on which drift was calculated
         base_tag:
           type: string
           x-stoplight:
-            id: 86itzi7y0e0dt
+            id: aj97wx1xpwz3t
           description: Base tag from which drift was calculated
         artifact_name:
           type: string
           x-stoplight:
-            id: sznjzeqos0lp6
+            id: lipifyzxex7uk
           description: Artifact name
         total_drifts:
           type: integer
           x-stoplight:
-            id: f9y74r2f071bh
+            id: h24e4weeku1q9
           description: Sum total of component and license drifts.
         component_drift_summary:
           $ref: '#/components/schemas/ComponentDriftSummary'
@@ -2943,12 +2946,12 @@ components:
     LicenseDrift:
       title: LicenseDrift
       x-stoplight:
-        id: hafpiz1hm25x5
+        id: ohpauzgflppr6
       type: object
       properties:
         status:
           x-stoplight:
-            id: 8yrcc2z1c1ajo
+            id: jdzetystgi0g0
           description: |
             Status of license
           enum:
@@ -2957,19 +2960,19 @@ components:
         license:
           type: string
           x-stoplight:
-            id: 5m5m6a5mnavlp
+            id: vn996z0jpcjhi
           description: License name
         components:
           type: array
           x-stoplight:
-            id: 8n18df2hguo3t
+            id: s6dgqzm1ttgq0
           items:
             $ref: '#/components/schemas/ComponentSummary'
       description: Element of license drift
     VulnerabilitySeverity:
       title: VulnerabilitySeverity
       x-stoplight:
-        id: iaeun6beac6r0
+        id: 8ynm5ozr2bmek
       enum:
         - INFO
         - LOW
@@ -2980,30 +2983,30 @@ components:
     ContactInfo:
       title: ContactInfo
       x-stoplight:
-        id: arwc1djmc0nzd
+        id: ijqfm8qxr7qo0
       type: object
       properties:
         name:
           type: string
           x-stoplight:
-            id: 0igyjccx3amgy
+            id: 7bgtd9j65p2po
           description: Name of the contact person.
         email:
           type: string
           x-stoplight:
-            id: ex76z7l1iksrt
+            id: x2pw7cl0fenup
           description: Email of the Contact person.
       description: Contact Details.
     RemediationCondition:
       title: RemediationCondition
       x-stoplight:
-        id: kt8wt3rbzlvgh
+        id: cbblvrdnfl3kc
       type: object
       properties:
         version:
           type: string
           x-stoplight:
-            id: hpbz2jl7cscay
+            id: 45gl417yrb0gg
           description: |
             Component Version for Remediation. For operator like less than, less than equals, range, semantic versioning is required.
         operator:
@@ -3020,20 +3023,20 @@ components:
     RemediationTrackerCreateResponseBody:
       title: RemediationTrackerCreateResponseBody
       x-stoplight:
-        id: qbyker491s6z5
+        id: gubckv4ygu6ci
       type: object
       properties:
         id:
           type: string
           x-stoplight:
-            id: dt1xt2awi9t22
+            id: fs0hrly2ims1o
           description: Remediation Tracker Id.
       required:
         - id
     VulnerabilityInfo:
       title: VulnerabilityInfo
       x-stoplight:
-        id: cm098qa2ag07z
+        id: ylisnorth2abh
       type: object
       discriminator:
         propertyName: type
@@ -3044,12 +3047,12 @@ components:
         component_name:
           type: string
           x-stoplight:
-            id: 9nl28n5on47z6
+            id: gj65tu7emxrju
           description: Name of the component where vulnerability is found.
         vulnerability_description:
           type: string
           x-stoplight:
-            id: pfcg2q73eeh3h
+            id: dru9incqqb6m6
           description: Details of the vulnerability.
         severity:
           $ref: '#/components/schemas/VulnerabilitySeverity'
@@ -3064,7 +3067,7 @@ components:
     CVEVulnerability:
       title: CVEVulnerability
       x-stoplight:
-        id: 3gwav1chz4zlq
+        id: jnazht10cfmog
       x-discriminator-value: CVE
       allOf:
         - $ref: '#/components/schemas/VulnerabilityInfo'
@@ -3073,7 +3076,7 @@ components:
             cve:
               type: string
               x-stoplight:
-                id: ypj9igx5j9vvj
+                id: fer8vh3o8y68m
               description: CVE number of the vulnerability.
           required:
             - cve
@@ -3082,7 +3085,7 @@ components:
     DefaultVulnerability:
       title: DefaultVulnerability
       x-stoplight:
-        id: te3nutj2hty2c
+        id: 2corwl1f10liz
       x-discriminator-value: Default
       type: object
       allOf:
@@ -3090,7 +3093,7 @@ components:
     RemediationTrackerCreateRequestBody:
       title: RemediationTrackerCreateRequestBody
       x-stoplight:
-        id: ux4td3lpqdbeo
+        id: 25be4s2hp68r9
       type: object
       properties:
         vulnerability_info:
@@ -3100,14 +3103,14 @@ components:
         comments:
           type: string
           x-stoplight:
-            id: 541fw9ylbj1wd
+            id: 8y9pna24i165w
           description: Description/comments for the tracker.
         remediation_condition:
           $ref: '#/components/schemas/RemediationCondition'
         target_end_date:
           type: string
           x-stoplight:
-            id: rv9v9urrytrps
+            id: 0bgu35olcp51n
           format: date
           description: Target End Date in UTC.
       required:
@@ -3116,25 +3119,25 @@ components:
     ExcludeArtifactRequest:
       title: ExcludeArtifactRequest
       x-stoplight:
-        id: bd7o9raua0bd7
+        id: yz53bto4nxt8v
       type: object
       properties:
         artifact_id:
           type: string
           x-stoplight:
-            id: lbmecsc2j3a68
+            id: qb2d7ve5nguji
           description: Artifact Id that needs to be excluded from the tracker.
       required:
         - artifact_id
     OrchestrationStepDriftRequestBody:
       title: OrchestrationStepDriftRequestBody
       x-stoplight:
-        id: 80awocf374z3a
+        id: 2y0ri1vurx1oh
       type: object
       properties:
         base:
           x-stoplight:
-            id: lwpmc3olzfvi9
+            id: 4ajxcwrtcbs8j
           enum:
             - baseline
             - last_generated_sbom
@@ -3144,103 +3147,103 @@ components:
     OrchestrationDriftSummary:
       title: OrchestrationDriftSummary
       x-stoplight:
-        id: 8dvcm6f92djiy
+        id: ipd261vvt36y6
       type: object
       properties:
         base:
           x-stoplight:
-            id: 2jr06q490p9ej
+            id: 1hefsexbcrmjk
           type: string
         total_drifts:
           type: integer
           x-stoplight:
-            id: wfdds710eifnh
+            id: 733u14ou234h8
         license_drifts:
           type: integer
           x-stoplight:
-            id: kdiuux2li5ko4
+            id: oq0gxs7w66a7h
         component_drifts:
           type: integer
           x-stoplight:
-            id: zmmodgd6gmht0
+            id: rwi7birmz558q
         components_added:
           type: integer
           x-stoplight:
-            id: akylqhj5fgqyz
+            id: dgbzbgtcclxdp
         components_deleted:
           type: integer
           x-stoplight:
-            id: lvr3n5gu0tn3s
+            id: qvy4lt194h9cp
         components_modified:
           type: integer
           x-stoplight:
-            id: zlsl1t2pwkbgc
+            id: gmvdf664x216t
         license_added:
           type: integer
           x-stoplight:
-            id: 8wa2yulom8095
+            id: vm5wsifbj9fui
         license_deleted:
           type: integer
           x-stoplight:
-            id: k4qwxbo5bpoa5
+            id: eyivao7wf57wn
         base_tag:
           type: string
           x-stoplight:
-            id: 4q7scfbrgeujp
+            id: 33dsntnqagiuu
         drift_id:
           type: string
           x-stoplight:
-            id: ni8g3rr1zbhvh
+            id: cxb1vb0jzp8s7
     OrchestrationScorecardSummary:
       title: OrchestrationScorecardSummary
       x-stoplight:
-        id: 4yg8yr2vh5k0y
+        id: 15bm6e1jmvbhl
       type: object
       properties:
         avg_score:
           type: string
           x-stoplight:
-            id: 77dg0zm9jbemg
+            id: mxqlr9n4tf8jc
         max_score:
           type: string
           x-stoplight:
-            id: ioeb9idb59xzc
+            id: qe3lq7b28xvfb
     RemediationTrackersOverallSummaryResponseBody:
       title: RemediationTrackersOverallSummaryResponseBody
       x-stoplight:
-        id: wzdgksb7rha4e
+        id: 2s2ox7kryaofa
       type: object
       properties:
         mean_time_to_remediate_in_hours:
           type: number
           x-stoplight:
-            id: cgjt65bom8myb
+            id: x5tukw3ffga5t
           format: double
           description: Mean time to complete the Remediation in Hours.
         remediation_counts:
           x-stoplight:
-            id: jrs4upg6g3422
+            id: nfcv9g8qy1bc1
           type: array
           description: List of statuses and their counts.
           items:
             $ref: '#/components/schemas/RemediationCount'
         deployments_count:
           x-stoplight:
-            id: h2cct863h7b24
+            id: yqvh32v6slyv5
           type: object
           description: Total Deployments Count.
           $ref: '#/components/schemas/DeploymentsCount'
     RemediationStatus:
       title: RemediationStatus
       x-stoplight:
-        id: 97744uuoowtxz
+        id: 2k6vaixbff84x
       enum:
         - ON_GOING
         - COMPLETED
     RemediationCount:
       title: RemediationCount
       x-stoplight:
-        id: 5cddkppp79mwc
+        id: 0e2bvpginddeb
       type: object
       properties:
         status:
@@ -3248,7 +3251,7 @@ components:
         count:
           type: integer
           x-stoplight:
-            id: tsio45anrtew1
+            id: xn5xpw9tv4x9s
           format: int64
           default: 0
           description: Number of trackers having the status.
@@ -3258,29 +3261,29 @@ components:
     ComponentDriftSummary:
       title: ComponentDriftSummary
       x-stoplight:
-        id: oejmyzsnhpbcq
+        id: neu8dfx05egdr
       type: object
       description: Component drift summary
       properties:
         total:
           type: integer
           x-stoplight:
-            id: ryo0xhfide4uz
+            id: 33fioyibh29x9
           description: Total number of component drifts.
         added:
           type: integer
           x-stoplight:
-            id: nqho38kghyeag
+            id: f1xso6map9vlu
           description: Number of components added.
         deleted:
           type: integer
           x-stoplight:
-            id: 0s4udpo9q85c2
+            id: wp9kxujsgv0hc
           description: Number of components deleted.
         modified:
           type: integer
           x-stoplight:
-            id: 502qj6ighbpk2
+            id: 62n7rvx3nsnxe
           description: Number of components modified.
       required:
         - total
@@ -3290,23 +3293,23 @@ components:
     LicenseDriftSummary:
       title: LicenseDriftSummary
       x-stoplight:
-        id: 2vyx5czuo3yx9
+        id: h25g5fhr1wydb
       type: object
       properties:
         total:
           type: integer
           x-stoplight:
-            id: et59sv1hbetqu
+            id: 5epm1h97x3nvk
           description: Total number of license drifts.
         added:
           type: integer
           x-stoplight:
-            id: qfc0r2mevxxz0
+            id: d5xmuzakxmojc
           description: Total number of licenses added.
         deleted:
           type: integer
           x-stoplight:
-            id: ovbk2z02m2pmw
+            id: 3t673deyxtwzw
           description: Total number of licenses deleted
       required:
         - total
@@ -3316,12 +3319,12 @@ components:
     RemediationListingRequestBody:
       title: RemediationListingRequestBody
       x-stoplight:
-        id: mu3i85gx9ohx1
+        id: zcc1p8sln1e7q
       type: object
       properties:
         component_name_filter:
           x-stoplight:
-            id: zmkl0pjnxq76d
+            id: hcpf5diccy5g1
           type: object
           description: Filter for Component Name.
           properties:
@@ -3330,13 +3333,13 @@ components:
             value:
               type: string
               x-stoplight:
-                id: vti5f7w2h8e1o
+                id: 1i4p5es7bjpom
           required:
             - operator
             - value
         cve_filter:
           x-stoplight:
-            id: 0vece04t5kjv6
+            id: nbubqt9ylw820
           type: object
           description: Filter for CVE.
           properties:
@@ -3345,14 +3348,14 @@ components:
             value:
               type: string
               x-stoplight:
-                id: 187oj8jn9shzl
+                id: szjt3tsnhj9jl
           required:
             - operator
             - value
     RemediationListingResponse:
       title: RemediationListingResponse
       x-stoplight:
-        id: 7y6r3w6t8s5sl
+        id: 74t9p5goxuunt
       type: object
       x-examples: {}
       properties:
@@ -3362,17 +3365,17 @@ components:
         component:
           type: string
           x-stoplight:
-            id: bxn8881eewx6o
+            id: z7ezc40u1yx8s
           description: Component Name.
         cve:
           type: string
           x-stoplight:
-            id: jlu2ibyo0n4lt
+            id: y4x8zjbor7d2k
           description: CVE number.
         artifacts:
           type: integer
           x-stoplight:
-            id: f6nhhbw7l7sqg
+            id: 9v5vt736kimh4
           description: Total distinct artifacts included in the tracker.
           format: int64
         severity:
@@ -3386,12 +3389,12 @@ components:
         target_date:
           type: string
           x-stoplight:
-            id: gtybcbhysdb40
+            id: tt5uda87enr3w
           description: Target End Date set by the user.
         schedule_status:
           type: string
           x-stoplight:
-            id: tl99rwsdpoz0y
+            id: bkemwhytms7n1
           description: |
             This indicates how we are going with schedule of target date.
         remediation_condition:
@@ -3408,7 +3411,7 @@ components:
     DeploymentsCount:
       title: DeploymentsCount
       x-stoplight:
-        id: xvjkun2wy1q5e
+        id: 2xw31f4lo8zvd
       type: object
       properties:
         pending_prod_count:
@@ -3434,7 +3437,7 @@ components:
     NameOperator:
       title: NameOperator
       x-stoplight:
-        id: 0qx39kahfq7tt
+        id: 2o1ycsdq6avy4
       enum:
         - Equals
         - StartsWith
@@ -3483,11 +3486,11 @@ components:
         artifact_id:
           type: string
           x-stoplight:
-            id: 17j406uk25jw3
+            id: jy736huuydql7
     RemediationArtifactDetailsResponse:
       title: RemediationArtifactDetailsResponse
       x-stoplight:
-        id: 97t1x7xu82gh6
+        id: o97b7maejpqbp
       type: object
       properties:
         id:
@@ -3499,12 +3502,12 @@ components:
         component:
           type: string
           x-stoplight:
-            id: 3mmitkw0abnm2
+            id: ylonmnuau25v4
           description: Component Name.
         cve:
           type: string
           x-stoplight:
-            id: rcq9fzab5hap9
+            id: ne4iw4pfn5te9
           description: CVE number.
         severity:
           $ref: '#/components/schemas/VulnerabilitySeverity'
@@ -3515,12 +3518,12 @@ components:
         artifact_name:
           type: string
           x-stoplight:
-            id: hqgmhom67y2wh
+            id: klybmh19vs1hr
           description: Name of the artifact.
         latest_fixed_artifact:
           type: string
           x-stoplight:
-            id: c9d23h1559915
+            id: 0d3kjcatwoxn4
           description: Latest Orchestrated Artifact with Fix.
         contact:
           $ref: '#/components/schemas/ContactInfo'
@@ -3529,7 +3532,7 @@ components:
         latest_build_tag:
           type: string
           x-stoplight:
-            id: 1ad3wdxt31fd0
+            id: aekir7bnumj21
         ticket:
           $ref: '#/components/schemas/TicketInfo'
       required:
@@ -3543,7 +3546,7 @@ components:
     RemediationDetailsResponse:
       title: RemediationDetailsResponse
       x-stoplight:
-        id: s6ut4ydzablmx
+        id: otbsdia82s94i
       type: object
       properties:
         id:
@@ -3552,12 +3555,12 @@ components:
         component:
           type: string
           x-stoplight:
-            id: e0bi0vrj9ipwe
+            id: d4hu8e4w7kdc5
           description: Component Name.
         cve:
           type: string
           x-stoplight:
-            id: munbo37nduip2
+            id: qm9vwltyyjavb
           description: CVE number.
         severity:
           $ref: '#/components/schemas/VulnerabilitySeverity'
@@ -3566,21 +3569,21 @@ components:
         artifacts:
           type: integer
           x-stoplight:
-            id: ggosypo7qtcse
+            id: 41g8tcd7sve6q
           description: Total distinct artifacts included in the tracker.
           format: int64
           minimum: 0
         artifacts_excluded:
           type: integer
           x-stoplight:
-            id: cr0d799inywub
+            id: ivylrsh6uhq2t
           format: int64
           minimum: 0
           description: Total Number of Excluded Artifacts.
         environments:
           type: integer
           x-stoplight:
-            id: bqoldtlpj6rdf
+            id: vlt49qz8tgeto
           description: Total environments included in the tracker.
           format: int64
           minimum: 0
@@ -3591,25 +3594,25 @@ components:
         vulnerability_description:
           type: string
           x-stoplight:
-            id: tnv6c7n8pdlke
+            id: txdgjrpdhmf78
           description: Details of the vulnerability.
         comments:
           type: string
           x-stoplight:
-            id: 8hckkueqq9k8v
+            id: pm6jaj6t701uv
           description: Description/comments for the tracker.
         ticket:
           $ref: '#/components/schemas/TicketInfo'
         start_time_milli:
           type: integer
           x-stoplight:
-            id: 4lw1ip0i9mf4n
+            id: 5srpqyf0yqsn0
           format: int64
           minimum: 0
         end_time_milli:
           type: integer
           x-stoplight:
-            id: aoic9zwke15y7
+            id: 701h5v3d0dprh
           format: int64
           minimum: 0
           nullable: true
@@ -3618,12 +3621,12 @@ components:
         created_by_name:
           type: string
           x-stoplight:
-            id: tzh8c0sgvz8ny
+            id: 20ivjkbfoy6hs
           description: Name of the User who created the Remediation Tracker.
         created_by_email:
           type: string
           x-stoplight:
-            id: tucg9tg69vjgx
+            id: fwlxxh5p7pw34
           description: Email of the User who created the Remediation Tracker.
       required:
         - id
@@ -3639,23 +3642,23 @@ components:
     PipelineInfo:
       title: PipelineInfo
       x-stoplight:
-        id: 04cankr6mmsmq
+        id: l0ois6rbv6j9e
       type: object
       properties:
         name:
           type: string
           x-stoplight:
-            id: 5hmrh0b7i9yhg
+            id: r6gogqotjmzkj
           description: Name of the pipeline.
         execution_id:
           type: string
           x-stoplight:
-            id: s0szxttne7ozh
+            id: bkrnc9qrealvc
           description: Execution Id of the pipeline.
         id:
           type: string
           x-stoplight:
-            id: g2t6hd6si9hpe
+            id: skowcrq65r7ci
           description: Id of the pipeline.
         triggered_by:
           type: string
@@ -3674,25 +3677,25 @@ components:
     RemediationArtifactListingResponse:
       title: RemediationArtifactListingResponse
       x-stoplight:
-        id: hq30cynnwfzm7
+        id: tmud388vwuz19
       type: object
       properties:
         id:
           type: string
           x-stoplight:
-            id: vcnyr79ege40q
+            id: cv87dkgzj9bbg
           description: Artifact Id.
         name:
           type: string
           x-stoplight:
-            id: ff1ubtdixk8rl
+            id: u4775jaef4a7d
           description: Artifact Name.
         deployments:
           $ref: '#/components/schemas/DeploymentsCount'
         isExcluded:
           type: boolean
           x-stoplight:
-            id: zbrn7etc0pqtt
+            id: z0reu7ak9s575
           description: Whether the artifact is excluded.
         ticket:
           $ref: '#/components/schemas/TicketInfo'
@@ -3704,32 +3707,32 @@ components:
     TicketInfo:
       title: TicketInfo
       x-stoplight:
-        id: 0bh7yrfkireg1
+        id: 9s99rtfsqlfkx
       type: object
       description: Ticket Details.
       properties:
         external_id:
           type: string
           x-stoplight:
-            id: dl8ftdnbl57px
+            id: hr8o6345am6lp
         status:
           type: string
           x-stoplight:
-            id: sggie3a064jil
+            id: bradghe3mov05
         url:
           type: string
           x-stoplight:
-            id: fvenp9f29vgpj
+            id: kgiscg8o0wfpa
         id:
           type: string
           x-stoplight:
-            id: qarcrf6j01vz2
+            id: 21xi6fbtnl26e
       required:
         - external_id
     RemediationArtifactDeploymentsListingResponse:
       title: RemediationArtifactDeploymentsListingResponse
       x-stoplight:
-        id: giysor443yo4o
+        id: wtplsadkh5b2x
       type: object
       properties:
         type:
@@ -3737,17 +3740,17 @@ components:
         name:
           type: string
           x-stoplight:
-            id: vqt89ik98mskn
+            id: w8vtx353pd7fo
           description: Name of the Environment.
         identifier:
           type: string
           x-stoplight:
-            id: jsdryj0id8fqf
+            id: epdjsc87gckvy
           description: Identifier of the Environment.
         tag:
           type: string
           x-stoplight:
-            id: f1xxnnl3tx3y1
+            id: rhbk6zbot9hjo
           description: Tag deployed in the environment.
         status:
           $ref: '#/components/schemas/RemediationStatus'
@@ -3763,7 +3766,7 @@ components:
     RemediationTrackerUpdateRequestBody:
       title: RemediationTrackerUpdateRequestBody
       x-stoplight:
-        id: lc3o45r9dk87h
+        id: oh6ktohfefjon
       type: object
       properties:
         contact:
@@ -3771,18 +3774,18 @@ components:
         comments:
           type: string
           x-stoplight:
-            id: emtzaoapiiw33
+            id: lqdahaxm2zmvm
           description: Description/comments for the tracker.
         target_end_date:
           type: string
           x-stoplight:
-            id: qdzfxizxc4sbz
+            id: icz1avyz0319u
           format: date
           description: Target End Date in UTC.
         vulnerability_description:
           type: string
           x-stoplight:
-            id: m0g8kzc6v6kor
+            id: qxb40jqy0ehyv
           description: Details of the vulnerability.
         severity:
           $ref: '#/components/schemas/VulnerabilitySeverity'
@@ -3795,63 +3798,63 @@ components:
     RemediationTrackerUpdateResponseBody:
       title: RemediationTrackerUpdateResponseBody
       x-stoplight:
-        id: dvwmlowyirngo
+        id: 3etyu57al9o7n
       type: object
       properties:
         id:
           type: string
           x-stoplight:
-            id: zfpfph204t08e
+            id: zyq18u0twshvc
           description: Remediation Tracker Id.
       required:
         - id
     RemediationArtifactListingRequestBody:
       title: RemediationArtifactListingRequestBody
       x-stoplight:
-        id: rlo5llbaic04s
+        id: q13cadr816r42
       type: object
       properties:
         deployment_status:
           type: string
           x-stoplight:
-            id: 2vcztlujo8k2v
+            id: wjo88s0yz12ur
           enum:
             - Prod
             - PreProd
         remediation_status:
           type: string
           x-stoplight:
-            id: cyhinumnrjuv8
+            id: d9urero3gd1tv
           enum:
             - Completed
             - Pending
     RemediationArtifactDeploymentsListingRequestBody:
       title: RemediationArtifactDeploymentsListingRequestBody
       x-stoplight:
-        id: tyy34xh63xadk
+        id: aas5tdh2qz6a4
       type: object
       properties:
         env_identifier:
           type: string
           x-stoplight:
-            id: 2828wepgqbpbb
+            id: 3pt1ctq07df4l
         env_type:
           $ref: '#/components/schemas/EnvironmentTypeFilter'
     EnvironmentInfo:
       title: EnvironmentInfo
       x-stoplight:
-        id: wtb98a1xq246f
+        id: pkoojzafpd1de
       type: object
       properties:
         identifier:
           type: string
           x-stoplight:
-            id: 70w4ty9cgzexs
+            id: j9qfa1l6uy5qs
           description: Identifier of the Environment.
         name:
           type: string
           x-stoplight:
-            id: 45iqzexy1qy4f
+            id: 0psq8xjis9ses
           description: Name of the Environment.
         type:
           $ref: '#/components/schemas/EnvironmentType'
@@ -3863,51 +3866,51 @@ components:
     CreateTicketResponse:
       title: CreateTicketResponse
       x-stoplight:
-        id: 9aguuh5o512om
+        id: ow8a8lhrirg9d
       type: object
       properties:
         id:
           type: string
           x-stoplight:
-            id: 1nbd3r3oygfdm
+            id: g1tfl0bvs8zf7
           description: Ticket Identifier
       required:
         - id
     ExemptionInitiatorDTO:
       type: object
       x-stoplight:
-        id: i8p7cc8onfguu
+        id: avobrnagytl4n
       x-examples: {}
       title: ExemptionInitiatorDTO
       properties:
         project_identifier:
           type: string
           x-stoplight:
-            id: 3wltel9v3591e
+            id: x5ixjti6vhbmg
         enforcement_id:
           type: string
           x-stoplight:
-            id: 7f317ieawbszs
+            id: xnimvti2wyjh6
         artifact_id:
           type: string
           x-stoplight:
-            id: 6miszic2nznhr
+            id: u449cbuojlku5
     ExemptionDurationDTO:
       type: object
       x-stoplight:
-        id: 0by4u77buduic
+        id: aq1cn9fok4czk
       x-examples: {}
       title: ExemptionDurationDTO
       properties:
         always_exempt:
           type: boolean
           x-stoplight:
-            id: oef6yc1jtx8l7
+            id: 9fyhz65b6xqyk
         days:
           type: integer
     ExemptionStatusDTO:
       x-stoplight:
-        id: gsebm50nj364e
+        id: srf6322g11kvk
       type: string
       enum:
         - PENDING
@@ -3918,18 +3921,18 @@ components:
     ExemptionResponseDTO:
       type: object
       x-stoplight:
-        id: j7j319lao7b92
+        id: jidt453hoipqw
       x-examples: {}
       title: ExemptionResponseDTO
       properties:
         component_name:
           type: string
           x-stoplight:
-            id: sg6yagd1xj0iz
+            id: 00nbs5prl6ovb
         component_version:
           type: string
           x-stoplight:
-            id: k77ekka3xuncd
+            id: ttcxyjr0v63r2
         version_operator:
           $ref: '#/components/schemas/Operator'
         reason:
@@ -3943,63 +3946,63 @@ components:
         artifact_id:
           type: string
           x-stoplight:
-            id: cbzisxyw3eo7y
+            id: i8id3hh5425o1
         account_id:
           type: string
           x-stoplight:
-            id: adkww0ohydfj3
+            id: azqbfeyyv45nm
         org_identifier:
           type: string
           x-stoplight:
-            id: kyagj91456ooh
+            id: xncayplooujmh
         project_identifier:
           type: string
           x-stoplight:
-            id: za40h6ioijty5
+            id: lognly4hx0vvv
         created_by_user_id:
           type: string
           x-stoplight:
-            id: zppi40mfhexx2
+            id: o4wzg6avc3lr7
         created_by_name:
           type: string
           x-stoplight:
-            id: 2ec25nyryk1o7
+            id: zeaijdbmmf5ft
         reviewed_by_user_id:
           type: string
           x-stoplight:
-            id: zsorb6ikpsm40
+            id: jto4oouwc7f11
         reviewed_by_name:
           type: string
           x-stoplight:
-            id: 9704i4n3abxan
+            id: 96dz8wg3lh82j
         updated_by:
           type: string
           x-stoplight:
-            id: cvfq6xka5bojd
+            id: mp5hlzpyi9mgc
         review_comment:
           type: string
           x-stoplight:
-            id: 8xu1pvuojg6it
+            id: k23gxoaz4r86c
         created_at:
           type: integer
           format: int64
           x-stoplight:
-            id: 0htrn3r418yc9
+            id: ecf1uwwryrcqa
         updated_at:
           type: integer
           format: int64
           x-stoplight:
-            id: 99e6xrcmyhaln
+            id: s64enpiyamk0k
         valid_until:
           type: integer
           format: int64
           x-stoplight:
-            id: h9ukz1mkketgn
+            id: vlwhq4so2kx5c
         reviewed_at:
           type: integer
           format: int64
           x-stoplight:
-            id: j19ufd4e69x5j
+            id: xp4v5ouwshanr
         exemption_initiator:
           $ref: '#/components/schemas/ExemptionInitiatorDTO'
     ExemptionRequestDTO:
@@ -4009,11 +4012,11 @@ components:
         component_name:
           type: string
           x-stoplight:
-            id: 65gvr169u9w5p
+            id: ra170thg8r65c
         component_version:
           type: string
           x-stoplight:
-            id: wyrv8voqukloe
+            id: 502sktzzgyvtz
         version_operator:
           $ref: '#/components/schemas/Operator'
         reason:
@@ -4031,37 +4034,37 @@ components:
         review_comment:
           type: string
           x-stoplight:
-            id: hfv36kbsptevp
+            id: qy6eheowlei1c
     RepositoryArtifactMetadata:
       title: RepositoryArtifactMetadata
       x-stoplight:
-        id: vengas3i1yt75
+        id: uwv4y0iltp5jx
       type: object
       properties:
         branch:
           type: string
           x-stoplight:
-            id: 58u6bsqtyqsdv
+            id: v2jgfl62eyky5
           description: Branch name of the repository being orchestrated.
         git_tag:
           type: string
           x-stoplight:
-            id: dynvtoi385j90
+            id: sl5xb3m7q896r
           description: Git tag of the repository being orchestrated.
         commit_sha:
           type: string
           x-stoplight:
-            id: jpoahyinegg53
+            id: tarjgeo0prw28
           description: Commit ID of the repository being orchestrated.
     ContainerArtifactMetadata:
       title: ContainerArtifactMetadata
       x-stoplight:
-        id: 1rqvfm6ygafnz
+        id: n043ijt288mlq
       type: object
     ArtifactListingResponseV2:
       type: object
       x-stoplight:
-        id: a9ae414d80cdf
+        id: cslekz3drf06f
       x-examples: {}
       properties:
         id:
@@ -4076,33 +4079,24 @@ components:
         type:
           type: string
           x-stoplight:
-            id: 3tntmiv92g3zo
+            id: 15mzfc1512agw
           description: artifact type
         variant:
           x-stoplight:
-            id: o9yc2fqv6d7n3
-          oneOf:
-            - properties:
-                type:
-                  type: string
-                  x-stoplight:
-                    id: 284hp5vik517d
-                  description: Artifact Variant Type
-                value:
-                  type: string
-                  x-stoplight:
-                    id: xjdtbvwbm3fej
-                  description: Variant Value
-            - x-stoplight:
-                id: 2th8tec289pzu
-              properties:
-                value:
-                  type: string
-                  x-stoplight:
-                    id: 7glkpvlrf1agm
-                  description: Variant Value
+            id: 39gln2nxhac7a
           description: Artifact variant details
           type: object
+          properties:
+            type:
+              type: string
+              x-stoplight:
+                id: lco2hu92eaje3
+              description: Type of the variant.
+            value:
+              type: string
+              x-stoplight:
+                id: tc59a1l1uwkw6
+              description: value of the variant for the aritfact.
         components_count:
           type: integer
           description: Number of components of the artifact
@@ -4124,64 +4118,66 @@ components:
         policy_enforcement:
           type: object
           x-stoplight:
-            id: 22bnfql731eo1
+            id: jxxnt7d98qbox
           properties:
-            enforcement_id:
+            id:
               type: string
               x-stoplight:
-                id: alycnpp1hqhs4
+                id: 412dnotlcgtic
               description: Enforcement Step Id for the artifact lastest enfrocement.
             allow_list_violation_count:
               type: string
               x-stoplight:
-                id: hlmp2sqd77neg
+                id: j1ppfmdlp78a0
               description: Count of the allow list policy violations
             deny_list_violation_count:
               type: string
               x-stoplight:
-                id: v1hst6r58g77f
+                id: 26i8rbzyvkwxg
               description: Count of the deny list policy violations
         deployment:
           type: object
           x-stoplight:
-            id: xedow34zay6yd
+            id: 6slvde6qzxwfx
           properties:
             activity:
               type: string
+              enum:
+                - DEPLOYED
+                - GENERATED
               x-stoplight:
-                id: hcbzzdqpkgjwd
+                id: 107v7wva98j39
               description: Latest deployment activity of the artifact
             prod_env_count:
               type: integer
               x-stoplight:
-                id: 4n4jln4o8scn9
+                id: 2y9640s7dd4ne
               description: Count of production environment this artifact is currently deployed.
             non_prod_env_count:
               type: integer
               x-stoplight:
-                id: 7skn1fj2ss0n5
+                id: wtlknen843pok
               description: Count of pre-production environment this artifact is currently deployed.
         orchestration:
           type: object
           x-stoplight:
-            id: zuc2x0d4njnbl
+            id: ip1tewhowppws
           properties:
-            orchestration_id:
+            id:
               type: string
               x-stoplight:
-                id: onjnbn0nsos6z
+                id: 53bq2dxo7obpt
               description: Orchestration step execution ID for the aritfact.
-            build_pipeline_id:
+            pipeline_id:
               type: string
               x-stoplight:
-                id: 5mr8ktqqhld20
+                id: twg7tjdzskgfj
               description: Build pipeline Id used for orchestration of the artifact
-            build_pipeline_execution_id:
+            pipeline_execution_id:
               type: string
               x-stoplight:
-                id: 4nrkw3trad0sf
+                id: 7cm866hv8wotk
               description: Build pipeline execution Id used for orchestration of the artifact
-      title: ''
   parameters:
     OrgParam:
       name: org

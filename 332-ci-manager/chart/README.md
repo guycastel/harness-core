@@ -152,7 +152,7 @@ A Helm chart for Kubernetes
 | securityImage.image.imagePullSecrets | list | `[]` |  |
 | securityImage.image.registry | string | `"docker.io"` |  |
 | securityImage.image.repository | string | `"harness/sto-plugin"` |  |
-| securityImage.image.tag | string | `"1.13.0"` |  |
+| securityImage.image.tag | string | `"1.25.0"` |  |
 | service.grpcport | int | `9979` |  |
 | service.port | int | `7090` |  |
 | service.type | string | `"ClusterIP"` |  |

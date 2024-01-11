@@ -235,9 +235,6 @@ public class MergeHelper {
         FQNNode fqnNode = fqnList.get(i);
         if (fqnNode.getNodeType() == NodeType.KEY && acceptAllChildrenKeys.contains(fqnNode.getKey())) {
           newKeys.add(FQN.builder().fqnList(fqnList.subList(0, i + 2)).build());
-          // if the nonIgnorableKey is environmentGroup.environments.values, then once environmentGroup.environments is
-          // added as a new key, we should break as environmentGroup.environments.values is not needed anymore
-          break;
         }
       }
     }

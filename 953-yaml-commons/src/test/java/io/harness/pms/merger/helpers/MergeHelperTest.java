@@ -11,6 +11,7 @@ import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
 import static io.harness.pms.merger.helpers.MergeHelper.mergeRuntimeInputValuesIntoOriginalYaml;
 import static io.harness.rule.OwnerRule.BRIJESH;
 import static io.harness.rule.OwnerRule.DEV_MITTAL;
+import static io.harness.rule.OwnerRule.HINGER;
 import static io.harness.rule.OwnerRule.NAMAN;
 import static io.harness.rule.OwnerRule.PRASHANTSHARMA;
 import static io.harness.rule.OwnerRule.SRIDHAR;
@@ -698,5 +699,65 @@ public class MergeHelperTest extends CategoryTest {
     mergeJsonNode = MergeHelper.mergeRuntimeInputValuesIntoOriginalJsonNode(
         templateJsonNode, List.of(inputSetJsonNode2, inputSetJsonNode1), false);
     assertThat(YamlPipelineUtils.writeYamlString(mergeJsonNode)).isEqualTo(mergedYaml);
+  }
+
+  @Test
+  @Owner(developers = HINGER)
+  @Category(UnitTests.class)
+  public void testAddNonIgnorableKeysWithTemplate() {
+    String templateYaml = "dummy:\n"
+        + "  stages:\n"
+        + "    - stage:\n"
+        + "        name: ascpasc\n"
+        + "        identifier: ascpasc\n"
+        + "        tags: {}\n"
+        + "        template:\n"
+        + "          templateRef: s1\n"
+        + "          versionLabel: v1\n"
+        + "          templateInputs:\n"
+        + "            type: Deployment\n"
+        + "            spec:\n"
+        + "              environment:\n"
+        + "                environmentRef: <+input>\n"
+        + "                environmentInputs: <+input>\n"
+        + "                serviceOverrideInputs: <+input>\n"
+        + "                infrastructureDefinitions: <+input>\n"
+        + "              service:\n"
+        + "                serviceRef: <+input>\n"
+        + "                serviceInputs: <+input>\n";
+
+    //
+    String runtimeYaml = "dummy:\n"
+        + "  stages:\n"
+        + "    - stage:\n"
+        + "        identifier: ascpasc\n"
+        + "        template:\n"
+        + "          templateInputs:\n"
+        + "            type: Deployment\n"
+        + "            spec:\n"
+        + "              environment:\n"
+        + "                environmentRef: env_1001_1\n"
+        + "                infrastructureDefinitions:\n"
+        + "                  - identifier: infra_1001_1\n"
+        + "                    inputs:\n"
+        + "                      identifier: infra_1001_1\n"
+        + "                      type: KubernetesDirect\n"
+        + "                      spec:\n"
+        + "                        connectorRef: account.Harness_Kubernetes_Cluster\n"
+        + "                        namespace: default\n"
+        + "              service:\n"
+        + "                serviceRef: svc_1101_2\n"
+        + "                serviceInputs:\n"
+        + "                  serviceDefinition:\n"
+        + "                    type: Kubernetes\n"
+        + "                    spec:\n"
+        + "                      variables:\n"
+        + "                        - name: va1\n"
+        + "                          type: String\n"
+        + "                          value: acs\n"
+        + "                gitBranch: move-patch\n";
+    String merged =
+        MergeHelper.mergeRuntimeInputValuesAndCheckForRuntimeInOriginalYaml(templateYaml, runtimeYaml, true, true);
+    assertThat(merged).contains("gitBranch: move-patch");
   }
 }

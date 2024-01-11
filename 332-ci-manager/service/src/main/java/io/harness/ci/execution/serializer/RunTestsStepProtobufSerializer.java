@@ -38,12 +38,13 @@ import io.harness.utils.SweepingOutputSecretEvaluator;
 import io.harness.utils.TimeoutUtils;
 import io.harness.yaml.core.timeout.Timeout;
 import io.harness.yaml.core.variables.NGVariable;
+import io.harness.yaml.core.variables.OutputNGVariable;
 
 import com.google.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 @OwnedBy(CI)
@@ -63,8 +64,8 @@ public class RunTestsStepProtobufSerializer implements ProtobufStepSerializer<Ru
     if (port == null) {
       throw new CIStageExecutionException("Port can not be null");
     }
-
-    sweepingOutputSecretEvaluator.resolve(runTestsStepInfo);
+    // we will uncomment once sweepingOutputSecretEvaluator will not conflict with bash notations
+    //    sweepingOutputSecretEvaluator.resolve(runTestsStepInfo);
 
     RunTestsStep.Builder runTestsStepBuilder = RunTestsStep.newBuilder();
     String gitSafeCMD = SerializerUtils.getSafeGitDirectoryCmd(
@@ -107,15 +108,23 @@ public class RunTestsStepProtobufSerializer implements ProtobufStepSerializer<Ru
         resolveBooleanParameter(runTestsStepInfo.getRunOnlySelectedTests(), true));
 
     if (isNotEmpty(runTestsStepInfo.getOutputVariables().getValue())) {
-      List<String> outputVarNames = runTestsStepInfo.getOutputVariables()
-                                        .getValue()
-                                        .stream()
-                                        .map(NGVariable::getName)
-                                        .collect(Collectors.toList());
+      boolean isNGVariable = false;
+      List outputNGVariables = runTestsStepInfo.getOutputVariables().getValue();
+      List<String> outputVarNames = new ArrayList<>();
+      for (Object val : outputNGVariables) {
+        if (val instanceof OutputNGVariable) {
+          outputVarNames.add(((OutputNGVariable) val).getName());
+        } else if (val instanceof NGVariable) {
+          isNGVariable = true;
+          outputVarNames.add(((NGVariable) val).getName());
+        }
+      }
+      if (isNGVariable) {
+        List<OutputVariable> outputVariables =
+            SerializerUtils.getOutputVarFromNGVar(runTestsStepInfo.getOutputVariables().getValue(), identifier);
+        runTestsStepBuilder.addAllOutputs(outputVariables);
+      }
       runTestsStepBuilder.addAllEnvVarOutputs(outputVarNames);
-      List<OutputVariable> outputVariables =
-          SerializerUtils.getOutputVarFromNGVar(runTestsStepInfo.getOutputVariables().getValue(), identifier);
-      runTestsStepBuilder.addAllOutputs(outputVariables);
     }
 
     Map<String, String> envvars =

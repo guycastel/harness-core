@@ -41,13 +41,14 @@ import io.harness.utils.SweepingOutputSecretEvaluator;
 import io.harness.utils.TimeoutUtils;
 import io.harness.yaml.core.timeout.Timeout;
 import io.harness.yaml.core.variables.NGVariable;
+import io.harness.yaml.core.variables.OutputNGVariable;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @Singleton
 @OwnedBy(CI)
@@ -69,8 +70,8 @@ public class RunStepProtobufSerializer implements ProtobufStepSerializer<RunStep
     if (port == null) {
       throw new CIStageExecutionException("Port can not be null");
     }
-
-    sweepingOutputSecretEvaluator.resolve(runStepInfo);
+    // we will uncomment once sweepingOutputSecretEvaluator will not conflict with bash notations
+    //    sweepingOutputSecretEvaluator.resolve(runStepInfo);
 
     String gitSafeCMD = SerializerUtils.getSafeGitDirectoryCmd(
         RunTimeInputHandler.resolveShellType(runStepInfo.getShell()), accountId, featureFlagService);
@@ -114,13 +115,23 @@ public class RunStepProtobufSerializer implements ProtobufStepSerializer<RunStep
     }
 
     if (isNotEmpty(runStepInfo.getOutputVariables().getValue())) {
-      List<String> outputVarNames =
-          runStepInfo.getOutputVariables().getValue().stream().map(NGVariable::getName).collect(Collectors.toList());
+      boolean isNGVariable = false;
+      List outputNGVariables = runStepInfo.getOutputVariables().getValue();
+      List<String> outputVarNames = new ArrayList<>();
+      for (Object val : outputNGVariables) {
+        if (val instanceof OutputNGVariable) {
+          outputVarNames.add(((OutputNGVariable) val).getName());
+        } else if (val instanceof NGVariable) {
+          isNGVariable = true;
+          outputVarNames.add(((NGVariable) val).getName());
+        }
+      }
+      if (isNGVariable) {
+        List<OutputVariable> outputVariables =
+            SerializerUtils.getOutputVarFromNGVar(runStepInfo.getOutputVariables().getValue(), identifier);
+        runStepBuilder.addAllOutputs(outputVariables);
+      }
       runStepBuilder.addAllEnvVarOutputs(outputVarNames);
-
-      List<OutputVariable> outputVariables =
-          SerializerUtils.getOutputVarFromNGVar(runStepInfo.getOutputVariables().getValue(), identifier);
-      runStepBuilder.addAllOutputs(outputVariables);
     }
 
     long timeout = TimeoutUtils.getTimeoutInSeconds(parameterFieldTimeout, runStepInfo.getDefaultTimeout());

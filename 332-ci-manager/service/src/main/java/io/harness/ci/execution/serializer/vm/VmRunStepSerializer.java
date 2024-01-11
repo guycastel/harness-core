@@ -36,6 +36,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.utils.TimeoutUtils;
 import io.harness.yaml.core.timeout.Timeout;
 import io.harness.yaml.core.variables.NGVariable;
+import io.harness.yaml.core.variables.OutputNGVariable;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 @Singleton
@@ -93,11 +93,22 @@ public class VmRunStepSerializer {
 
     List<String> outputVarNames = new ArrayList<>();
     List<StepOutputV2> outputVariables = new ArrayList<>();
+
     if (isNotEmpty(runStepInfo.getOutputVariables().getValue())) {
-      outputVarNames =
-          runStepInfo.getOutputVariables().getValue().stream().map(NGVariable::getName).collect(Collectors.toList());
-      outputVariables = SerializerUtils.getStepOutputV2FromNGVar(
-          runStepInfo.getOutputVariables().getValue(), runStepInfo.getIdentifier());
+      boolean isNGVariable = false;
+      List outputNGVariables = runStepInfo.getOutputVariables().getValue();
+      for (Object val : outputNGVariables) {
+        if (val instanceof OutputNGVariable) {
+          outputVarNames.add(((OutputNGVariable) val).getName());
+        } else if (val instanceof NGVariable) {
+          isNGVariable = true;
+          outputVarNames.add(((NGVariable) val).getName());
+        }
+      }
+      if (isNGVariable) {
+        outputVariables = SerializerUtils.getStepOutputV2FromNGVar(
+            runStepInfo.getOutputVariables().getValue(), runStepInfo.getIdentifier());
+      }
     }
 
     String earlyExitCommand = SerializerUtils.getEarlyExitCommand(runStepInfo.getShell());

@@ -35,6 +35,7 @@ import io.harness.pms.yaml.ParameterField;
 import io.harness.utils.TimeoutUtils;
 import io.harness.yaml.core.timeout.Timeout;
 import io.harness.yaml.core.variables.NGVariable;
+import io.harness.yaml.core.variables.OutputNGVariable;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -42,7 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 @Singleton
@@ -67,14 +67,22 @@ public class VmRunTestStepSerializer {
     }
     List<String> outputVarNames = new ArrayList<>();
     List<StepOutputV2> outputVariables = new ArrayList<>();
+
     if (isNotEmpty(runTestsStepInfo.getOutputVariables().getValue())) {
-      outputVarNames = runTestsStepInfo.getOutputVariables()
-                           .getValue()
-                           .stream()
-                           .map(NGVariable::getName)
-                           .collect(Collectors.toList());
-      outputVariables = SerializerUtils.getStepOutputV2FromNGVar(
-          runTestsStepInfo.getOutputVariables().getValue(), runTestsStepInfo.getIdentifier());
+      boolean isNGVariable = false;
+      List outputNGVariables = runTestsStepInfo.getOutputVariables().getValue();
+      for (Object val : outputNGVariables) {
+        if (val instanceof OutputNGVariable) {
+          outputVarNames.add(((OutputNGVariable) val).getName());
+        } else if (val instanceof NGVariable) {
+          isNGVariable = true;
+          outputVarNames.add(((NGVariable) val).getName());
+        }
+      }
+      if (isNGVariable) {
+        outputVariables = SerializerUtils.getStepOutputV2FromNGVar(
+            runTestsStepInfo.getOutputVariables().getValue(), runTestsStepInfo.getIdentifier());
+      }
     }
     String image =
         RunTimeInputHandler.resolveStringParameter("Image", stepName, identifier, runTestsStepInfo.getImage(), false);

@@ -622,10 +622,11 @@ public class VerificationServiceApplication extends Application<VerificationServ
             .handler(handler)
             .schedulingType(REGULAR)
             .filterExpander(query
-                -> query.or(query.criteria(AccountKeys.accountStatusKey).doesNotExist(),
-                    query.and(query.criteria(AccountKeys.accountStatusKey).equal(AccountStatus.ACTIVE),
-                        query.criteria(AccountKeys.accountType)
-                            .in(Sets.newHashSet(AccountType.TRIAL, AccountType.PAID)))))
+                -> query.and(query.criteria(AccountKeys.createdFromNG).notEqual(true),
+                    query.or(query.criteria(AccountKeys.accountStatusKey).doesNotExist(),
+                        query.and(query.criteria(AccountKeys.accountStatusKey).equal(AccountStatus.ACTIVE),
+                            query.criteria(AccountKeys.accountType)
+                                .in(Sets.newHashSet(AccountType.TRIAL, AccountType.PAID))))))
             .persistenceProvider(injector.getInstance(MorphiaPersistenceProvider.class))
             .redistribute(true)
             .build();

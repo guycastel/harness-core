@@ -97,7 +97,8 @@ public class Account extends Base implements PersistentRegularIterable, NGMigrat
                 .field(AccountKeys.accountDeletionIteration)
                 .build(),
             CompoundMongoIndex.builder()
-                .name("accountStatus_accountType_workflowDataCollectionIteration")
+                .name("accountStatus_accountType_workflowDataCollectionIteration2")
+                .field(AccountKeys.createdFromNG)
                 .field(AccountKeys.accountStatusKey)
                 .field(AccountKeys.accountType)
                 .field(AccountKeys.workflowDataCollectionIteration)

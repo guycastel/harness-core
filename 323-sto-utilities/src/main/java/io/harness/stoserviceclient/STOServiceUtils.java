@@ -7,28 +7,31 @@
 
 package io.harness.stoserviceclient;
 
-import io.harness.annotations.dev.HarnessTeam;
-import io.harness.annotations.dev.OwnedBy;
-import io.harness.exception.GeneralException;
-import io.harness.sto.beans.entities.STOServiceConfig;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.harness.annotations.dev.HarnessTeam;
+import io.harness.annotations.dev.OwnedBy;
+import io.harness.common.STORetryPolicyUtils;
+import io.harness.exception.GeneralException;
+import io.harness.sto.beans.entities.STOServiceConfig;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
+import org.jetbrains.annotations.NotNull;
+import retrofit2.Call;
+import retrofit2.Response;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import retrofit2.Call;
-import retrofit2.Response;
 
 @Getter
 @Setter
@@ -36,6 +39,9 @@ import retrofit2.Response;
 @Singleton
 @OwnedBy(HarnessTeam.STO)
 public class STOServiceUtils {
+  private static final String TOKEN = "token";
+  private static final String API_TOKEN_PREFIX = "ApiKey ";
+  private static final RetryPolicy<Object> RETRY_POLICY = STORetryPolicyUtils.getSTORetryPolicy("Retrying STO Core Call Operation. Attempt No. {}", "Operation Failed. Attempt No. {}");
   private static final String DEFAULT_PAGE_SIZE = "100";
   private final STOServiceClient stoServiceClient;
   private final STOServiceConfig stoServiceConfig;
@@ -51,13 +57,13 @@ public class STOServiceUtils {
     log.info("Initiating token request to STO service: {}", this.stoServiceConfig.getInternalUrl());
     JsonObject responseBody;
     if (accountId == null) {
-      responseBody = makeAPICall(stoServiceClient.generateTokenAllAccounts(this.stoServiceConfig.getGlobalToken()));
+      responseBody = makeAPICallWithRetry(stoServiceClient.generateTokenAllAccounts(this.stoServiceConfig.getGlobalToken()));
     } else {
-      responseBody = makeAPICall(stoServiceClient.generateToken(accountId, this.stoServiceConfig.getGlobalToken()));
+      responseBody = makeAPICallWithRetry(stoServiceClient.generateToken(accountId, this.stoServiceConfig.getGlobalToken()));
     }
 
-    if (responseBody.has("token")) {
-      return responseBody.get("token").getAsString();
+    if (responseBody.has(TOKEN)) {
+      return responseBody.get(TOKEN).getAsString();
     }
 
     log.error("Response from STO service doesn't contain token information: {}", responseBody);
@@ -72,7 +78,7 @@ public class STOServiceUtils {
 
     Map<String, String> result = new HashMap<>();
     String token = getSTOServiceToken(accountId);
-    String accessToken = "ApiKey " + token;
+    String accessToken = API_TOKEN_PREFIX + token;
 
     if ("".equals(token)) {
       result.put("ERROR_MESSAGE", "Failed to authenticate with STO");
@@ -83,7 +89,7 @@ public class STOServiceUtils {
     JsonObject matchingScan = null;
 
     for (int page = 0; page <= totalPages && matchingScan == null; page++) {
-      JsonObject scansResponseBody = makeAPICall(
+      JsonObject scansResponseBody = makeAPICallWithRetry(
           stoServiceClient.getScans(accessToken, accountId, executionId, String.valueOf(page), DEFAULT_PAGE_SIZE));
 
       if (scansResponseBody == null) {
@@ -128,7 +134,7 @@ public class STOServiceUtils {
     String scanStatus = matchingScan.get("status").getAsString();
 
     JsonObject responseBody =
-        makeAPICall(stoServiceClient.getOutputVariables(accessToken, scanId, accountId, orgId, projectId));
+            makeAPICallWithRetry(stoServiceClient.getOutputVariables(accessToken, scanId, accountId, orgId, projectId));
 
     result.put("JOB_ID", scanId);
     result.put("JOB_STATUS", scanStatus);
@@ -156,25 +162,29 @@ public class STOServiceUtils {
   @NotNull
   public String deleteAccountData(String accountId) {
     String token = getSTOServiceToken(null);
-    String accessToken = "ApiKey " + token;
+    String accessToken = API_TOKEN_PREFIX + token;
 
-    return makeAPICall(stoServiceClient.deleteAccountData(accessToken, accountId)).get("status").toString();
+    return makeAPICallWithRetry(stoServiceClient.deleteAccountData(accessToken, accountId)).get("status").toString();
   }
 
   @NotNull
   public String getUsageAllAccounts(long timestamp) {
     String token = getSTOServiceToken(null);
-    String accessToken = "ApiKey " + token;
+    String accessToken = API_TOKEN_PREFIX + token;
 
-    return makeAPICall(stoServiceClient.getUsageAllAccounts(accessToken, String.valueOf(timestamp)))
+    return makeAPICallWithRetry(stoServiceClient.getUsageAllAccounts(accessToken, String.valueOf(timestamp)))
         .get("usage")
         .toString();
+  }
+
+  private JsonObject makeAPICallWithRetry(Call<JsonObject> apiCall) {
+    return Failsafe.with(RETRY_POLICY).get(() -> makeAPICall(apiCall));
   }
 
   private JsonObject makeAPICall(Call<JsonObject> apiCall) {
     Response<JsonObject> response = null;
     try {
-      response = apiCall.execute();
+      response = apiCall.clone().execute();
     } catch (IOException e) {
       throw new GeneralException("API request to STO service call failed", e);
     }

@@ -114,4 +114,9 @@ public class PlanExecutionSummaryCIStageChangeDataHandler extends AbstractChange
   public List<String> getPrimaryKeys() {
     return asList("id", "stageexecutionid", "startts");
   }
+
+  @Override
+  public boolean shouldDelete() {
+    return false;
+  }
 }

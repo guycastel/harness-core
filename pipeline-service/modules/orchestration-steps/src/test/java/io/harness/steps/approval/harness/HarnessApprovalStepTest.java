@@ -374,7 +374,8 @@ public class HarnessApprovalStepTest {
     Ambiance ambiance = buildAmbiance();
     StepElementParameters stepElementParameters = getStepElementParameters();
 
-    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO = harnessApprovalStep.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
+    StepExecutionTelemetryEventDTO stepExecutionTelemetryEventDTO =
+        harnessApprovalStep.getStepExecutionTelemetryEventDTO(ambiance, stepElementParameters);
 
     assertThat(stepExecutionTelemetryEventDTO.getStepType()).isEqualTo(harnessApprovalStep.STEP_TYPE.getType());
   }

@@ -43,17 +43,15 @@ public abstract class PipelineAsyncExecutable extends AsyncExecutableWithCapabil
   @Override
   public void validateResources(Ambiance ambiance, StepBaseParameters stepParameters) {}
 
-  private void handleTelemetryEventDTO(
-          Ambiance ambiance, StepBaseParameters stepParameters) {
-    StepExecutionTelemetryEventDTO telemetryEventDTO =
-            getStepExecutionTelemetryEventDTO(ambiance, stepParameters);
+  private void handleTelemetryEventDTO(Ambiance ambiance, StepBaseParameters stepParameters) {
+    StepExecutionTelemetryEventDTO telemetryEventDTO = getStepExecutionTelemetryEventDTO(ambiance, stepParameters);
     if (telemetryEventDTO != null) {
       stepsInstrumentationHelper.publishStepEvent(ambiance, telemetryEventDTO);
     }
   }
 
   protected StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
-          Ambiance ambiance, StepBaseParameters stepParameters) {
+      Ambiance ambiance, StepBaseParameters stepParameters) {
     return null;
   }
 }

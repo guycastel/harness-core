@@ -8,12 +8,7 @@
 package io.harness.pms.triggers.v1;
 
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
-import static io.harness.common.NGExpressionUtils.EMPTY;
-import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.ARTIFACT;
-import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.MANIFEST;
-import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.MULTIREGIONARTIFACT;
-import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.SCHEDULED;
-import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.WEBHOOK;
+import static io.harness.ngtriggers.beans.source.NGTriggerType.SCHEDULED;
 
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
@@ -39,24 +34,14 @@ import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplType;
 import io.harness.ngtriggers.beans.source.v1.artifact.ArtifactType;
 import io.harness.ngtriggers.beans.source.v1.scheduled.ScheduledTriggerYamlSimplConfig;
 import io.harness.ngtriggers.beans.source.v1.webhook.WebhookTriggerYamlSimplConfig;
-import io.harness.ngtriggers.beans.source.webhook.v2.TriggerEventDataCondition;
 import io.harness.ngtriggers.beans.source.webhook.v2.WebhookTriggerConfigV2;
 import io.harness.ngtriggers.beans.target.TargetType;
-import io.harness.ngtriggers.conditionchecker.ConditionOperator;
 import io.harness.pms.yaml.HarnessYamlVersion;
-import io.harness.spec.server.pipeline.v1.model.ArtifactTriggerSource;
-import io.harness.spec.server.pipeline.v1.model.CronScheduledTriggerSpec;
-import io.harness.spec.server.pipeline.v1.model.ManifestTriggerSource;
-import io.harness.spec.server.pipeline.v1.model.MultiRegionArtifactTriggerSource;
-import io.harness.spec.server.pipeline.v1.model.ScheduledTriggerSource;
-import io.harness.spec.server.pipeline.v1.model.ScheduledTriggerSpec;
+import io.harness.pms.yaml.YamlUtils;
 import io.harness.spec.server.pipeline.v1.model.TriggerBody;
-import io.harness.spec.server.pipeline.v1.model.TriggerConditions;
 import io.harness.spec.server.pipeline.v1.model.TriggerGetResponseBody;
 import io.harness.spec.server.pipeline.v1.model.TriggerRequestBody;
 import io.harness.spec.server.pipeline.v1.model.TriggerResponseBody;
-import io.harness.spec.server.pipeline.v1.model.TriggerSource;
-import io.harness.spec.server.pipeline.v1.model.WebhookTriggerSource;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -79,8 +64,9 @@ public class NGTriggerApiUtils {
 
   public TriggerDetails toTriggerDetails(String accountIdentifier, String orgIdentifier, String projectIdentifier,
       TriggerRequestBody body, String pipeline) {
+    NGTriggerSourceV2 source = toNGTriggerSourceV2(body.getYaml());
     NGTriggerEntity ngTriggerEntity =
-        toTriggerEntity(accountIdentifier, orgIdentifier, projectIdentifier, body, pipeline);
+        toTriggerEntity(accountIdentifier, orgIdentifier, projectIdentifier, body, pipeline, source);
     return TriggerDetails.builder()
         .ngTriggerConfigV2(toNGTriggerConfigV2(pipeline, orgIdentifier, projectIdentifier, body))
         .ngTriggerEntity(ngTriggerEntity)
@@ -88,8 +74,7 @@ public class NGTriggerApiUtils {
   }
 
   public NGTriggerEntity toTriggerEntity(String accountIdentifier, String orgIdentifier, String projectIdentifier,
-      TriggerRequestBody body, String pipeline) {
-    // TODO(Shalini): set type, yaml, and metadata
+      TriggerRequestBody body, String pipeline, NGTriggerSourceV2 source) {
     NGTriggerEntityBuilder entityBuilder =
         NGTriggerEntity.builder()
             .name(body.getName())
@@ -102,19 +87,22 @@ public class NGTriggerApiUtils {
             .targetIdentifier(pipeline)
             .targetType(TargetType.PIPELINE)
             .enabled(body.isEnabled())
-            .pollInterval(body.getSource().getPollInterval() != null ? body.getSource().getPollInterval() : EMPTY)
-            .webhookId(body.getSource().getWebhookId())
+            .yaml(body.getYaml())
+            .type(source.getType())
+            .pollInterval(source.getPollInterval())
+            .webhookId(source.getWebhookId())
+            .metadata(ngTriggerElementMapper.toMetadata(source, accountIdentifier))
             .withServiceV2(true)
             .tags(TagMapper.convertToList(body.getTags()))
             .encryptedWebhookSecretIdentifier(body.getEncryptedWebhookSecretIdentifier())
             .stagesToExecute(body.getStagesToExecute())
             .tags(TagMapper.convertToList(body.getTags()));
 
-    if (body.getSource().getType() == SCHEDULED) {
+    if (source.getType() == SCHEDULED) {
       entityBuilder.nextIterations(new ArrayList<>());
     }
     NGTriggerEntity entity = entityBuilder.build();
-    if (body.getSource().getType() == SCHEDULED) {
+    if (source.getType() == SCHEDULED) {
       List<Long> nextIterations = entity.recalculateNextIterations("unused", true, 0);
       if (!nextIterations.isEmpty()) {
         entity.setNextIterations(nextIterations);
@@ -130,7 +118,7 @@ public class NGTriggerApiUtils {
       case MANIFEST:
         return NGTriggerType.MANIFEST;
       case SCHEDULED:
-        return NGTriggerType.SCHEDULED;
+        return SCHEDULED;
       case ARTIFACT:
         return NGTriggerType.ARTIFACT;
       case MULTI_REGION_ARTIFACT:
@@ -141,7 +129,6 @@ public class NGTriggerApiUtils {
   }
 
   NGTriggerConfigV2 toNGTriggerConfigV2(String pipeline, String org, String project, TriggerRequestBody body) {
-    // TODO(Shalini): set source
     return NGTriggerConfigV2.builder()
         .pipelineIdentifier(pipeline)
         .identifier(body.getIdentifier())
@@ -156,16 +143,22 @@ public class NGTriggerApiUtils {
         .pipelineBranchName(body.getPipelineBranchName())
         .tags(body.getTags())
         .stagesToExecute(body.getStagesToExecute())
+        .source(toNGTriggerSourceV2(body.getYaml()))
         .build();
   }
 
-  public NGTriggerSourceV2 toNGTriggerSourceV2(NGTriggerYamlSimplSource source) {
-    return NGTriggerSourceV2.builder()
-        .pollInterval(source.getInterval())
-        .webhookId(source.getWebhook())
-        .type(toNGTriggerType(source.getType()))
-        .spec(toNGTriggerSpecV2(source))
-        .build();
+  public NGTriggerSourceV2 toNGTriggerSourceV2(String yaml) {
+    try {
+      NGTriggerYamlSimplSource source = YamlUtils.read(yaml, NGTriggerYamlSimplSource.class);
+      return NGTriggerSourceV2.builder()
+          .pollInterval(source.getInterval())
+          .webhookId(source.getWebhook())
+          .type(toNGTriggerType(source.getType()))
+          .spec(toNGTriggerSpecV2(source))
+          .build();
+    } catch (Exception ex) {
+      throw new InvalidRequestException(ex.getMessage());
+    }
   }
 
   NGTriggerSpecV2 toNGTriggerSpecV2(NGTriggerYamlSimplSource source) {
@@ -257,109 +250,7 @@ public class NGTriggerApiUtils {
     triggerBody.setPipelineBranchName(triggerEntity.getTriggerConfigWrapper().getPipelineBranchName());
     triggerBody.setStagesToExecute(triggerEntity.getStagesToExecute());
     triggerBody.setTags(TagMapper.convertToMap(triggerEntity.getTags()));
-    triggerBody.setSource(toTriggerSource(triggerEntity.getTriggerConfigWrapper().getSource()));
+    triggerBody.setYaml(triggerEntity.getYaml());
     return triggerBody;
-  }
-
-  public TriggerSource toTriggerSource(NGTriggerSourceV2 triggerSourceV2) {
-    switch (triggerSourceV2.getType()) {
-      case SCHEDULED:
-        ScheduledTriggerSource source = new ScheduledTriggerSource();
-        source.setPollInterval(triggerSourceV2.getPollInterval());
-        source.setWebhookId(triggerSourceV2.getWebhookId());
-        source.setType(toTriggerTypeEnum(triggerSourceV2.getType()));
-        ScheduledTriggerSpec spec = new ScheduledTriggerSpec();
-        spec.setType(ScheduledTriggerSpec.TypeEnum.CRON);
-        CronScheduledTriggerSpec cronScheduledTriggerSpec = new CronScheduledTriggerSpec();
-        cronScheduledTriggerSpec.setType(
-            ((CronTriggerSpec) ((ScheduledTriggerConfig) triggerSourceV2.getSpec()).getSpec()).getType());
-        cronScheduledTriggerSpec.setExpression(
-            ((CronTriggerSpec) ((ScheduledTriggerConfig) triggerSourceV2.getSpec()).getSpec()).getExpression());
-        spec.setSpec(cronScheduledTriggerSpec);
-        source.setSpec(spec);
-        return source;
-      case WEBHOOK:
-        WebhookTriggerSource webhookTriggerSource = new WebhookTriggerSource();
-        webhookTriggerSource.setWebhookId(triggerSourceV2.getWebhookId());
-        webhookTriggerSource.setPollInterval(triggerSourceV2.getPollInterval());
-        webhookTriggerSource.setType(toTriggerTypeEnum(triggerSourceV2.getType()));
-        webhookTriggerSource.setSpec(ngWebhookTriggerApiUtils.toWebhookTriggerApiSpec(triggerSourceV2.getSpec()));
-        return webhookTriggerSource;
-      case MULTI_REGION_ARTIFACT:
-        MultiRegionArtifactTriggerSource multiRegionArtifactTriggerSource = new MultiRegionArtifactTriggerSource();
-        multiRegionArtifactTriggerSource.setWebhookId(triggerSourceV2.getWebhookId());
-        multiRegionArtifactTriggerSource.setPollInterval(triggerSourceV2.getPollInterval());
-        multiRegionArtifactTriggerSource.setType(toTriggerTypeEnum(triggerSourceV2.getType()));
-        multiRegionArtifactTriggerSource.setSpec(
-            ngArtifactTriggerApiUtils.toMultiRegionArtifactTriggerSpec(triggerSourceV2.getSpec()));
-        return multiRegionArtifactTriggerSource;
-      case ARTIFACT:
-        ArtifactTriggerSource artifactTriggerSource = new ArtifactTriggerSource();
-        artifactTriggerSource.setPollInterval(triggerSourceV2.getPollInterval());
-        artifactTriggerSource.setWebhookId(triggerSourceV2.getWebhookId());
-        artifactTriggerSource.setType(toTriggerTypeEnum(triggerSourceV2.getType()));
-        artifactTriggerSource.setSpec(ngArtifactTriggerApiUtils.toArtifactTriggerSpec(
-            ((ArtifactTriggerConfig) triggerSourceV2.getSpec()).getSpec()));
-        return artifactTriggerSource;
-      case MANIFEST:
-        ManifestTriggerSource manifestTriggerSource = new ManifestTriggerSource();
-        manifestTriggerSource.setPollInterval(triggerSourceV2.getPollInterval());
-        manifestTriggerSource.setWebhookId(triggerSourceV2.getWebhookId());
-        manifestTriggerSource.setType(toTriggerTypeEnum(triggerSourceV2.getType()));
-        manifestTriggerSource.setSpec(ngManifestTriggerApiUtils.toManifestTriggerSpec(triggerSourceV2.getSpec()));
-        return manifestTriggerSource;
-      default:
-        throw new InvalidRequestException("Type " + triggerSourceV2.getType().toString() + " is invalid");
-    }
-  }
-
-  public TriggerSource.TypeEnum toTriggerTypeEnum(NGTriggerType type) {
-    switch (type) {
-      case WEBHOOK:
-        return WEBHOOK;
-      case MANIFEST:
-        return MANIFEST;
-      case SCHEDULED:
-        return SCHEDULED;
-      case ARTIFACT:
-        return ARTIFACT;
-      case MULTI_REGION_ARTIFACT:
-        return MULTIREGIONARTIFACT;
-      default:
-        throw new InvalidRequestException(String.format("NGTrigger not supported for type: %s", type));
-    }
-  }
-
-  TriggerEventDataCondition toTriggerEventDataCondition(TriggerConditions triggerConditions) {
-    return TriggerEventDataCondition.builder()
-        .key(triggerConditions.getKey())
-        .operator(toConditionOperator(triggerConditions.getOperator()))
-        .value(triggerConditions.getValue())
-        .build();
-  }
-
-  ConditionOperator toConditionOperator(TriggerConditions.OperatorEnum operatorEnum) {
-    switch (operatorEnum) {
-      case IN:
-        return ConditionOperator.IN;
-      case NOTIN:
-        return ConditionOperator.NOT_IN;
-      case EQUALS:
-        return ConditionOperator.EQUALS;
-      case NOTEQUALS:
-        return ConditionOperator.NOT_EQUALS;
-      case REGEX:
-        return ConditionOperator.REGEX;
-      case CONTAINS:
-        return ConditionOperator.CONTAINS;
-      case DOESNOTCONTAIN:
-        return ConditionOperator.DOES_NOT_CONTAIN;
-      case ENDSWITH:
-        return ConditionOperator.ENDS_WITH;
-      case STARTSWITH:
-        return ConditionOperator.STARTS_WITH;
-      default:
-        throw new InvalidRequestException("Conditional Operator " + operatorEnum + " is invalid");
-    }
   }
 }

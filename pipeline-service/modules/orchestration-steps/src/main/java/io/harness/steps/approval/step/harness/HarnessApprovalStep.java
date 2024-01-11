@@ -62,9 +62,9 @@ import io.harness.steps.approval.step.harness.outcomes.HarnessApprovalStepOutcom
 import io.harness.steps.executables.PipelineAsyncExecutable;
 import io.harness.tasks.ResponseData;
 import io.harness.telemetry.helpers.ApprovalInstrumentationHelper;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 import io.harness.utils.PmsFeatureFlagHelper;
 import io.harness.utils.TimeStampUtils;
-import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -286,9 +286,10 @@ public class HarnessApprovalStep extends PipelineAsyncExecutable {
 
   @Override
   public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
-          Ambiance ambiance, StepBaseParameters stepParameters) {
+      Ambiance ambiance, StepBaseParameters stepParameters) {
     return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
   }
+
   private void closeLogStream(Ambiance ambiance) {
     ILogStreamingStepClient logStreamingStepClient = logStreamingStepClientFactory.getLogStreamingStepClient(ambiance);
     logStreamingStepClient.closeStream(ShellScriptTaskNG.COMMAND_UNIT);

@@ -24,9 +24,9 @@ import org.springframework.data.domain.Pageable;
 public class ArtifactV2ApiImpl implements ArtifactV2Api {
   @Inject ArtifactService artifactService;
   @Override
-  public Response listArtifacts(@NotNull String type, String org, String project,
-      @Valid ArtifactListingRequestBody body, String harnessAccount, @Min(1L) @Max(1000L) Integer limit, String order,
-      @Min(0L) Integer page, String sort, String viewMode) {
+  public Response artifactList(@NotNull String type, String org, String project, @Valid ArtifactListingRequestBody body,
+      String harnessAccount, @Min(1L) @Max(1000L) Integer limit, String order, @Min(0L) Integer page, String sort,
+      String viewMode) {
     sort = ArtifactApiUtils.getSortFieldMapping(sort);
     Pageable pageable = PageResponseUtils.getPageable(page, limit, sort, order);
     switch (viewMode) {

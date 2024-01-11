@@ -13,6 +13,7 @@ import static io.harness.steps.SdkCoreStepUtils.createStepResponseFromChildRespo
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
+import io.harness.app.beans.entities.StepExecutionParameters;
 import io.harness.beans.stages.IntegrationStageStepParametersPMS;
 import io.harness.beans.steps.outcome.CIStepArtifactOutcome;
 import io.harness.beans.steps.outcome.IntegrationStageOutcome;
@@ -36,6 +37,8 @@ import io.harness.pms.sdk.core.steps.executables.ChildExecutable;
 import io.harness.pms.sdk.core.steps.io.StepInputPackage;
 import io.harness.pms.sdk.core.steps.io.StepResponse;
 import io.harness.pms.sdk.core.steps.io.StepResponseNotifyData;
+import io.harness.pms.serializer.recaster.RecastOrchestrationUtils;
+import io.harness.repositories.StepExecutionParametersRepository;
 import io.harness.tasks.ResponseData;
 
 import com.google.inject.Inject;
@@ -49,6 +52,8 @@ import lombok.extern.slf4j.Slf4j;
 public class IDPStageStepPMS implements ChildExecutable<StageElementParameters> {
   public static final StepType STEP_TYPE =
       StepType.newBuilder().setType("IDPStage").setStepCategory(StepCategory.STAGE).build();
+
+  @Inject private StepExecutionParametersRepository stepExecutionParametersRepository;
 
   @Inject ExecutionSweepingOutputService executionSweepingOutputResolver;
   @Inject OutcomeService outcomeService;
@@ -66,6 +71,15 @@ public class IDPStageStepPMS implements ChildExecutable<StageElementParameters> 
 
     log.info(
         "Executing IDP stage with params accountId {} projectId {} [{}]", accountId, projectIdentifier, stepParameters);
+
+    String stageRuntimeId = AmbianceUtils.getStageRuntimeIdAmbiance(ambiance);
+
+    stepExecutionParametersRepository.save(StepExecutionParameters.builder()
+                                               .accountId(AmbianceUtils.getAccountId(ambiance))
+                                               .stageRunTimeId(stageRuntimeId)
+                                               .runTimeId(AmbianceUtils.obtainCurrentRuntimeId(ambiance))
+                                               .stepParameters(RecastOrchestrationUtils.toJson(stepParameters))
+                                               .build());
 
     IntegrationStageStepParametersPMS integrationStageStepParametersPMS =
         (IntegrationStageStepParametersPMS) stepParameters.getSpecConfig();

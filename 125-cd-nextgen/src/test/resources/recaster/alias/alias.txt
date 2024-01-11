@@ -1329,3 +1329,10 @@ io.harness.cdng.containerStepGroup.DownloadHarnessStoreStepInfo
 io.harness.cdng.k8s.K8sTrafficRoutingStepParameters
 io.harness.cdng.k8s.K8sTrafficRoutingStepNode
 io.harness.cdng.k8s.K8sTrafficRoutingStepInfo
+io.harness.cdng.infra.v1.yaml.InfraDefinitionYamlV1
+io.harness.cdng.environment.v1.filters.EnvInfraFilterYaml
+io.harness.cdng.environment.v1.yaml.EnvironmentsYamlV1
+io.harness.cdng.environment.v1.yaml.EnvironmentYamlV1
+io.harness.cdng.environment.v1.yaml.OverrideInfraYaml
+io.harness.cdng.environment.v1.filters.TagTypeFilterYaml
+io.harness.cdng.environment.v1.yaml.InheritEnvironmentYaml

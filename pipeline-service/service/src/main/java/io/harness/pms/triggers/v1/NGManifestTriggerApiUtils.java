@@ -38,55 +38,54 @@ import io.harness.spec.server.pipeline.v1.model.S3BuildStoreSpec;
 import io.harness.spec.server.pipeline.v1.model.TriggerConditions;
 
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @OwnedBy(HarnessTeam.PIPELINE)
 public class NGManifestTriggerApiUtils {
-  ManifestType toManifestTriggerType(ManifestTriggerSpec.TypeEnum typeEnum) {
+  ManifestType toManifestTriggerType(io.harness.ngtriggers.beans.source.v1.artifact.ManifestType typeEnum) {
     switch (typeEnum) {
-      case HELMCHART:
+      case HELM_MANIFEST:
         return ManifestType.HELM_MANIFEST;
       default:
         throw new InvalidRequestException("Manifest Trigger Type " + typeEnum + " is invalid");
     }
   }
-  ManifestTypeSpec toManifestTypeSpec(ManifestTriggerSpec spec) {
+  ManifestTypeSpec toManifestTypeSpec(io.harness.ngtriggers.beans.source.v1.artifact.ManifestTriggerConfig spec) {
     switch (spec.getType()) {
-      case HELMCHART:
+      case HELM_MANIFEST:
+        io.harness.ngtriggers.beans.source.v1.artifact.HelmManifestSpec helmManifestSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.HelmManifestSpec) spec.getSpec();
         return HelmManifestSpec.builder()
-            .helmVersion(toHelmVersion(spec.getSpec().getHelmVersion()))
-            .chartVersion(spec.getSpec().getChartVersion())
-            .chartName(spec.getSpec().getChartName())
-            .store(toBuildStore(spec.getSpec().getStore()))
-            .eventConditions(spec.getSpec()
-                                 .getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
+            .helmVersion(toHelmVersion(helmManifestSpec.getHelm_version()))
+            .chartVersion(getChartNameAndVersionFromLocation(helmManifestSpec.getChart()).getLeft())
+            .chartName(getChartNameAndVersionFromLocation(helmManifestSpec.getChart()).getRight())
+            .store(toBuildStore(helmManifestSpec.getStore()))
+            .eventConditions(helmManifestSpec.getEvent_conditions())
             .build();
       default:
         throw new InvalidRequestException("Manifest Trigger Type " + spec.getType() + " is invalid");
     }
   }
 
-  HelmVersion toHelmVersion(HelmChartManifestTriggerSpec.HelmVersionEnum helmVersionEnum) {
+  HelmVersion toHelmVersion(io.harness.ngtriggers.beans.source.v1.artifact.version.HelmVersion helmVersionEnum) {
     switch (helmVersionEnum) {
-      case V2:
+      case v2:
         return HelmVersion.V2;
-      case V3:
+      case v3:
         return HelmVersion.V3;
-      case V380:
+      case v380:
         return HelmVersion.V380;
       default:
         throw new InvalidRequestException("Helm Version " + helmVersionEnum + " is invalid");
     }
   }
 
-  BuildStore toBuildStore(io.harness.spec.server.pipeline.v1.model.BuildStore buildStore) {
+  BuildStore toBuildStore(io.harness.ngtriggers.beans.source.v1.artifact.store.BuildStore buildStore) {
     return BuildStore.builder().type(toBuildStoreType(buildStore.getType())).spec(toBuildStoreSpec(buildStore)).build();
   }
 
-  BuildStoreType toBuildStoreType(io.harness.spec.server.pipeline.v1.model.BuildStore.TypeEnum typeEnum) {
+  BuildStoreType toBuildStoreType(io.harness.ngtriggers.beans.source.v1.artifact.BuildStoreType typeEnum) {
     switch (typeEnum) {
       case S3:
         return BuildStoreType.S3;
@@ -99,24 +98,35 @@ public class NGManifestTriggerApiUtils {
     }
   }
 
-  BuildStoreTypeSpec toBuildStoreSpec(io.harness.spec.server.pipeline.v1.model.BuildStore buildStore) {
+  Pair<String, String> getBucketNameAndFolderPathFromLocation(String location) {
+    String[] strings = location.split(":");
+    return Pair.of(strings[0], strings[1]);
+  }
+
+  Pair<String, String> getChartNameAndVersionFromLocation(String location) {
+    String[] strings = location.split("@");
+    return Pair.of(strings[0], strings[1]);
+  }
+
+  BuildStoreTypeSpec toBuildStoreSpec(io.harness.ngtriggers.beans.source.v1.artifact.store.BuildStore buildStore) {
     switch (buildStore.getType()) {
       case HTTP:
-        HttpBuildStoreSpec httpBuildStoreSpec = ((HttpBuildStore) buildStore).getSpec();
-        return HttpBuildStoreTypeSpec.builder().connectorRef(httpBuildStoreSpec.getConnectorRef()).build();
+        return HttpBuildStoreTypeSpec.builder().connectorRef(buildStore.fetchConnectorRef()).build();
       case GCS:
-        GcsBuildStoreSpec gcsBuildStoreSpec = ((GcsBuildStore) buildStore).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.store.GcsBuildStoreTypeSpec gcsBuildStoreSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.store.GcsBuildStoreTypeSpec) buildStore.getSpec();
         return GcsBuildStoreTypeSpec.builder()
-            .bucketName(gcsBuildStoreSpec.getBucketName())
-            .connectorRef(gcsBuildStoreSpec.getConnectorRef())
-            .folderPath(gcsBuildStoreSpec.getFolderPath())
+            .bucketName(getBucketNameAndFolderPathFromLocation(gcsBuildStoreSpec.getLocation()).getLeft())
+            .connectorRef(buildStore.fetchConnectorRef())
+            .folderPath(getBucketNameAndFolderPathFromLocation(gcsBuildStoreSpec.getLocation()).getRight())
             .build();
       case S3:
-        S3BuildStoreSpec s3BuildStoreSpec = ((S3BuildStore) buildStore).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.store.S3BuildStoreTypeSpec s3BuildStoreSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.store.S3BuildStoreTypeSpec) buildStore.getSpec();
         return S3BuildStoreTypeSpec.builder()
-            .bucketName(s3BuildStoreSpec.getBucketName())
-            .connectorRef(s3BuildStoreSpec.getConnectorRef())
-            .folderPath(s3BuildStoreSpec.getFolderPath())
+            .bucketName(getBucketNameAndFolderPathFromLocation(s3BuildStoreSpec.getLocation()).getLeft())
+            .connectorRef(buildStore.fetchConnectorRef())
+            .folderPath(getBucketNameAndFolderPathFromLocation(s3BuildStoreSpec.getLocation()).getRight())
             .region(s3BuildStoreSpec.getRegion())
             .build();
       default:

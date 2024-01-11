@@ -16,21 +16,23 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.ngtriggers.beans.source.v1.webhook.WebhookTriggerYamlSimplSpec;
 import io.harness.ngtriggers.beans.source.v1.webhook.harness.event.HarnessEventSpec;
 import io.harness.ngtriggers.beans.source.v1.webhook.harness.event.HarnessTriggerEvent;
-import io.harness.ngtriggers.beans.source.webhook.v2.WebhookTriggerSpecV2;
 import io.harness.ngtriggers.beans.source.webhook.v2.git.GitAware;
 import io.harness.ngtriggers.beans.source.webhook.v2.git.PayloadAware;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @OwnedBy(PIPELINE)
-public class HarnessSpec implements WebhookTriggerSpecV2 {
+@Value
+public class HarnessSpec implements WebhookTriggerYamlSimplSpec {
   HarnessTriggerEvent type;
 
   @JsonTypeInfo(use = NAME, property = "type", include = EXTERNAL_PROPERTY, visible = true) HarnessEventSpec spec;

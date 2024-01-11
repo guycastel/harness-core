@@ -18,10 +18,12 @@ import io.harness.ngtriggers.beans.source.webhook.v2.TriggerEventDataCondition;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OwnedBy(CDC)
+@Value
 public class AzureArtifactsRegistrySpec implements ArtifactTypeSpec {
   /**
    * Connector Reference

@@ -22,10 +22,12 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import javax.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @JsonTypeName("spec")
+@Value
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @OwnedBy(PIPELINE)
 public class NGTriggerYamlSimplSource {

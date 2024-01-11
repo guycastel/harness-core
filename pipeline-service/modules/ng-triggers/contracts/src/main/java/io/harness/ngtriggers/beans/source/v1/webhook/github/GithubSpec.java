@@ -25,11 +25,13 @@ import io.harness.ngtriggers.beans.source.webhook.v2.git.PayloadAware;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @OwnedBy(PIPELINE)
+@Value
 public class GithubSpec implements WebhookTriggerYamlSimplSpec {
   GithubTriggerEvent type;
 

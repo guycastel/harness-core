@@ -14,21 +14,26 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.ngtriggers.beans.source.NGTriggerSpecV2;
+import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplSpec;
 
 import java.util.List;
 import lombok.Builder;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @OwnedBy(PIPELINE)
-public class MultiRegionArtifactTriggerConfig implements NGTriggerSpecV2, BuildAware {
+@Value
+public class MultiRegionArtifactTriggerConfig implements NGTriggerYamlSimplSpec, BuildAware {
   ArtifactType type;
   List<ArtifactTypeSpecWrapper> sources;
+  Conditions conditions;
 
   @Builder
-  public MultiRegionArtifactTriggerConfig(ArtifactType type, List<ArtifactTypeSpecWrapper> sources) {
+  public MultiRegionArtifactTriggerConfig(
+      ArtifactType type, List<ArtifactTypeSpecWrapper> sources, Conditions conditions) {
     this.type = type;
     this.sources = sources;
+    this.conditions = conditions;
   }
 
   @Override

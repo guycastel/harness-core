@@ -15,6 +15,8 @@ import io.harness.annotations.dev.ProductModule;
 import io.harness.exception.InvalidRequestException;
 import io.harness.ngtriggers.beans.source.NGTriggerSpecV2;
 import io.harness.ngtriggers.beans.source.WebhookTriggerType;
+import io.harness.ngtriggers.beans.source.v1.webhook.WebhookTriggerYamlSimplConfig;
+import io.harness.ngtriggers.beans.source.v1.webhook.WebhookTriggerYamlSimplType;
 import io.harness.ngtriggers.beans.source.webhook.v2.TriggerEventDataCondition;
 import io.harness.ngtriggers.beans.source.webhook.v2.WebhookTriggerConfigV2;
 import io.harness.ngtriggers.beans.source.webhook.v2.WebhookTriggerSpecV2;
@@ -107,17 +109,17 @@ import java.util.stream.Collectors;
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @OwnedBy(HarnessTeam.PIPELINE)
 public class NGWebhookTriggerApiUtils {
-  WebhookTriggerType toWebhookTriggerType(WebhookTriggerSpec.TypeEnum typeEnum) {
+  WebhookTriggerType toWebhookTriggerType(WebhookTriggerYamlSimplType typeEnum) {
     switch (typeEnum) {
       case GITHUB:
         return WebhookTriggerType.GITHUB;
       case GITLAB:
         return WebhookTriggerType.GITLAB;
-      case AZUREREPO:
+      case AZURE:
         return WebhookTriggerType.AZURE;
       case BITBUCKET:
         return WebhookTriggerType.BITBUCKET;
-      case AWSCODECOMMIT:
+      case AWS_CODECOMMIT:
         return WebhookTriggerType.AWS_CODECOMMIT;
       case CUSTOM:
         return WebhookTriggerType.CUSTOM;
@@ -127,109 +129,99 @@ public class NGWebhookTriggerApiUtils {
         throw new InvalidRequestException("Webhook Trigger Type " + typeEnum + " is invalid");
     }
   }
-  WebhookTriggerSpecV2 toWebhookTriggerSpec(WebhookTriggerSpec spec) {
+  WebhookTriggerSpecV2 toWebhookTriggerSpec(WebhookTriggerYamlSimplConfig spec) {
     switch (spec.getType()) {
       case GITHUB:
-        GithubWebhookTriggerSpec githubWebhookSpec = ((GithubWebhookSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.webhook.github.GithubSpec githubWebhookSpec =
+            (io.harness.ngtriggers.beans.source.v1.webhook.github.GithubSpec) spec.getSpec();
         return GithubSpec.builder()
             .type(toGithubTriggerEvent(githubWebhookSpec.getType()))
             .spec(toGithubEventSpec(githubWebhookSpec))
             .build();
       case GITLAB:
-        GitlabWebhookTriggerSpec gitlabWebhookSpec = ((GitlabWebhookSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.webhook.gitlab.GitlabSpec gitlabWebhookSpec =
+            (io.harness.ngtriggers.beans.source.v1.webhook.gitlab.GitlabSpec) spec.getSpec();
         return GitlabSpec.builder()
             .type(toGitlabTriggerEvent(gitlabWebhookSpec.getType()))
             .spec(toGitlabEventSpec(gitlabWebhookSpec))
             .build();
       case BITBUCKET:
-        BitbucketWebhookTriggerSpec bitbucketWebhookTriggerSpec = ((BitbucketWebhookSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.webhook.bitbucket.BitbucketSpec bitbucketWebhookTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.webhook.bitbucket.BitbucketSpec) spec.getSpec();
         return BitbucketSpec.builder()
             .type(toBitbucketTriggerEvent(bitbucketWebhookTriggerSpec.getType()))
             .spec(toBitbucketEventSpec(bitbucketWebhookTriggerSpec))
             .build();
-      case AWSCODECOMMIT:
-        AwsCodeCommitWebhookTriggerSpec awsCodeCommitTriggerSpec = ((AwsCodeCommitWebhookSpec) spec).getSpec();
+      case AWS_CODECOMMIT:
+        io.harness.ngtriggers.beans.source.v1.webhook.awscodecommit.AwsCodeCommitSpec awsCodeCommitTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.webhook.awscodecommit.AwsCodeCommitSpec) spec.getSpec();
         return AwsCodeCommitSpec.builder()
             .type(toAwsCodeCommitTriggerEvent(awsCodeCommitTriggerSpec.getType()))
             .spec(toAwsCodeCommitEventSpec(awsCodeCommitTriggerSpec))
             .build();
-      case AZUREREPO:
-        AzureRepoWebhookTriggerSpec azureRepoWebhookTriggerSpec = ((AzureRepoWebhookSpec) spec).getSpec();
+      case AZURE:
+        io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.AzureRepoSpec azureRepoWebhookTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.AzureRepoSpec) spec.getSpec();
         return AzureRepoSpec.builder()
             .type(toAzureRepoTriggerEvent(azureRepoWebhookTriggerSpec.getType()))
             .spec(toAzureRepoEventSpec(azureRepoWebhookTriggerSpec))
             .build();
       case HARNESS:
-        HarnessWebhookTriggerSpec harnessWebhookTriggerSpec = ((HarnessWebhookSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.webhook.harness.HarnessSpec harnessWebhookTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.webhook.harness.HarnessSpec) spec.getSpec();
         return HarnessSpec.builder()
             .type(toHarnessTriggerEvent(harnessWebhookTriggerSpec.getType()))
             .spec(toHarnessEventSpec(harnessWebhookTriggerSpec))
             .build();
       case CUSTOM:
-        CustomWebhookTriggerSpec customWebhookSpec = ((CustomWebhookSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.webhook.custom.CustomTriggerSpec customWebhookSpec =
+            (io.harness.ngtriggers.beans.source.v1.webhook.custom.CustomTriggerSpec) spec.getSpec();
         return CustomTriggerSpec.builder()
-            .payloadConditions(customWebhookSpec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .headerConditions(customWebhookSpec.getHeaderConditions()
-                                  .stream()
-                                  .map(this::toTriggerEventDataCondition)
-                                  .collect(Collectors.toList()))
-            .jexlCondition(customWebhookSpec.getJexlCondition())
+            .payloadConditions(customWebhookSpec.fetchPayloadConditions())
+            .headerConditions(customWebhookSpec.fetchHeaderConditions())
+            .jexlCondition(customWebhookSpec.fetchJexlCondition())
             .build();
       default:
         throw new InvalidRequestException("Webhook Trigger Type " + spec.getType() + " is invalid");
     }
   }
 
-  BitbucketEventSpec toBitbucketEventSpec(BitbucketWebhookTriggerSpec spec) {
+  BitbucketEventSpec toBitbucketEventSpec(io.harness.ngtriggers.beans.source.v1.webhook.bitbucket.BitbucketSpec spec) {
     switch (spec.getType()) {
       case PUSH:
         return BitbucketPushSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .jexlCondition(spec.getJexlCondition())
-            .repoName(spec.getRepoName())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
             .build();
-      case PRCOMMENT:
-        PRCommentBitbucketWebhookSpec prCommentBitbucketWebhookSpec = (PRCommentBitbucketWebhookSpec) spec;
+      case PR_COMMENT:
+
         return BitbucketPRCommentSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .jexlCondition(spec.getJexlCondition())
-            .repoName(spec.getRepoName())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .actions(prCommentBitbucketWebhookSpec.getActions()
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(spec.fetchGitAware()
+                         .fetchActions()
                          .stream()
                          .map(this::toBitbucketPRCommentAction)
                          .collect(Collectors.toList()))
             .build();
-      case PULLREQUEST:
-        PullRequestBitbucketWebhookSpec pullRequestBitbucketWebhookSpec = (PullRequestBitbucketWebhookSpec) spec;
+      case PULL_REQUEST:
         return BitbucketPRSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .jexlCondition(spec.getJexlCondition())
-            .repoName(spec.getRepoName())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .actions(pullRequestBitbucketWebhookSpec.getActions()
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(spec.fetchGitAware()
+                         .fetchActions()
                          .stream()
                          .map(this::toBitbucketPRAction)
                          .collect(Collectors.toList()))
@@ -239,18 +231,15 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  AwsCodeCommitEventSpec toAwsCodeCommitEventSpec(AwsCodeCommitWebhookTriggerSpec spec) {
+  AwsCodeCommitEventSpec toAwsCodeCommitEventSpec(
+      io.harness.ngtriggers.beans.source.v1.webhook.awscodecommit.AwsCodeCommitSpec spec) {
     switch (spec.getType()) {
       case PUSH:
-        PushAwsCodeCommitWebhookTriggerSpec pushAwsCodeCommitWebhookTriggerSpec = spec.getSpec();
         return AwsCodeCommitPushSpec.builder()
-            .connectorRef(pushAwsCodeCommitWebhookTriggerSpec.getConnectorRef())
-            .jexlCondition(pushAwsCodeCommitWebhookTriggerSpec.getJexlCondition())
-            .payloadConditions(pushAwsCodeCommitWebhookTriggerSpec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .repoName(pushAwsCodeCommitWebhookTriggerSpec.getRepoName())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
             .build();
       default:
         throw new InvalidRequestException(
@@ -258,53 +247,41 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  AzureRepoEventSpec toAzureRepoEventSpec(AzureRepoWebhookTriggerSpec spec) {
+  AzureRepoEventSpec toAzureRepoEventSpec(io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.AzureRepoSpec spec) {
     switch (spec.getType()) {
-      case ISSUECOMMENT:
-        IssueCommentAzureRepoWebhookSpec issueCommentAzureRepoWebhookSpec = (IssueCommentAzureRepoWebhookSpec) spec;
+      case ISSUE_COMMENT:
         return AzureRepoIssueCommentSpec.builder()
-            .repoName(spec.getRepoName())
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .jexlCondition(spec.getJexlCondition())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .actions(issueCommentAzureRepoWebhookSpec.getActions()
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(spec.fetchGitAware()
+                         .fetchActions()
                          .stream()
                          .map(this::toAzureRepoIssueCommentAction)
                          .collect(Collectors.toList()))
             .build();
       case PUSH:
         return AzureRepoPushSpec.builder()
-            .repoName(spec.getRepoName())
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .jexlCondition(spec.getJexlCondition())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
             .build();
-      case PULLREQUEST:
-        PullRequestAzureRepoWebhookSpec pullRequestAzureRepoWebhookSpec = (PullRequestAzureRepoWebhookSpec) spec;
+      case PULL_REQUEST:
         return AzureRepoPRSpec.builder()
-            .repoName(spec.getRepoName())
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .jexlCondition(spec.getJexlCondition())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .actions(pullRequestAzureRepoWebhookSpec.getActions()
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(spec.fetchGitAware()
+                         .fetchActions()
                          .stream()
                          .map(this::toAzureRepoPRAction)
                          .collect(Collectors.toList()))
@@ -314,190 +291,144 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  HarnessEventSpec toHarnessEventSpec(HarnessWebhookTriggerSpec spec) {
+  HarnessEventSpec toHarnessEventSpec(io.harness.ngtriggers.beans.source.v1.webhook.harness.HarnessSpec spec) {
     switch (spec.getType()) {
-      case ISSUECOMMENT:
-        IssueCommentHarnessWebhookSpec issueCommentHarnessWebhookSpec = (IssueCommentHarnessWebhookSpec) spec;
+      case ISSUE_COMMENT:
         return HarnessIssueCommentSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .repoName(spec.getRepoName())
-            .actions(issueCommentHarnessWebhookSpec.getActions()
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(spec.fetchGitAware()
+                         .fetchActions()
                          .stream()
                          .map(this::toHarnessIssueCommentAction)
                          .collect(Collectors.toList()))
             .build();
-      case PULLREQUEST:
-        PullRequestHarnessWebhookSpec pullRequestHarnessWebhookSpec = (PullRequestHarnessWebhookSpec) spec;
+      case PULL_REQUEST:
         return HarnessPRSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .repoName(spec.getRepoName())
-            .actions(pullRequestHarnessWebhookSpec.getActions()
-                         .stream()
-                         .map(this::toHarnessPRAction)
-                         .collect(Collectors.toList()))
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(
+                spec.fetchGitAware().fetchActions().stream().map(this::toHarnessPRAction).collect(Collectors.toList()))
             .build();
       case PUSH:
         return HarnessPushSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .repoName(spec.getRepoName())
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
             .build();
       default:
         throw new InvalidRequestException("Harness Webhook Trigger Event Type " + spec.getType() + " is invalid");
     }
   }
 
-  GitlabEventSpec toGitlabEventSpec(GitlabWebhookTriggerSpec spec) {
+  GitlabEventSpec toGitlabEventSpec(io.harness.ngtriggers.beans.source.v1.webhook.gitlab.GitlabSpec spec) {
     switch (spec.getType()) {
       case PUSH:
         return GitlabPushSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .repoName(spec.getRepoName())
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
             .build();
-      case MRCOMMENT:
-        MRCommentGitlabWebhookSpec mrCommentGitlabWebhookSpec = (MRCommentGitlabWebhookSpec) spec;
+      case MR_COMMENT:
         return GitlabMRCommentSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .repoName(spec.getRepoName())
-            .actions(mrCommentGitlabWebhookSpec.getActions()
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(spec.fetchGitAware()
+                         .fetchActions()
                          .stream()
                          .map(this::toGitlabMRCommentAction)
                          .collect(Collectors.toList()))
             .build();
-      case MERGEREQUEST:
-        MergeRequestGitlabWebhookSpec mergeRequestGitlabWebhookSpec = (MergeRequestGitlabWebhookSpec) spec;
+      case MERGE_REQUEST:
         return GitlabPRSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .repoName(spec.getRepoName())
-            .actions(mergeRequestGitlabWebhookSpec.getActions()
-                         .stream()
-                         .map(this::toGitlabPRAction)
-                         .collect(Collectors.toList()))
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(
+                spec.fetchGitAware().fetchActions().stream().map(this::toGitlabPRAction).collect(Collectors.toList()))
             .build();
       default:
         throw new InvalidRequestException("Gitlab Webhook Trigger Event Type " + spec.getType() + " is invalid");
     }
   }
 
-  GithubEventSpec toGithubEventSpec(GithubWebhookTriggerSpec spec) {
+  GithubEventSpec toGithubEventSpec(io.harness.ngtriggers.beans.source.v1.webhook.github.GithubSpec spec) {
     switch (spec.getType()) {
-      case PULLREQUEST:
-        PullRequestGithubWebhookSpec pullRequestGithubWebhookSpec = (PullRequestGithubWebhookSpec) spec;
+      case PULL_REQUEST:
         return GithubPRSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .repoName(spec.getRepoName())
-            .actions(pullRequestGithubWebhookSpec.getActions()
-                         .stream()
-                         .map(this::toGithubPRAction)
-                         .collect(Collectors.toList()))
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(
+                spec.fetchGitAware().fetchActions().stream().map(this::toGithubPRAction).collect(Collectors.toList()))
             .build();
       case PUSH:
+
         return GithubPushSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .repoName(spec.getRepoName())
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
             .build();
       case RELEASE:
-        ReleaseGithubWebhookSpec releaseGithubWebhookSpec = (ReleaseGithubWebhookSpec) spec;
         return GithubReleaseSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .repoName(spec.getRepoName())
-            .actions(releaseGithubWebhookSpec.getActions()
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(spec.fetchGitAware()
+                         .fetchActions()
                          .stream()
                          .map(this::toGithubReleaseAction)
                          .collect(Collectors.toList()))
             .build();
-      case ISSUECOMMENT:
-        IssueCommentGithubWebhookSpec issueCommentGithubWebhookSpec = (IssueCommentGithubWebhookSpec) spec;
+      case ISSUE_COMMENT:
         return GithubIssueCommentSpec.builder()
-            .autoAbortPreviousExecutions(unboxBoolean(spec.isAutoAbortPreviousExecutions()))
-            .connectorRef(spec.getConnectorRef())
-            .headerConditions(
-                spec.getHeaderConditions().stream().map(this::toTriggerEventDataCondition).collect(Collectors.toList()))
-            .jexlCondition(spec.getJexlCondition())
-            .payloadConditions(spec.getPayloadConditions()
-                                   .stream()
-                                   .map(this::toTriggerEventDataCondition)
-                                   .collect(Collectors.toList()))
-            .actions(issueCommentGithubWebhookSpec.getActions()
+            .autoAbortPreviousExecutions(spec.fetchGitAware().fetchAutoAbortPreviousExecutions())
+            .connectorRef(spec.fetchGitAware().fetchConnectorRef())
+            .headerConditions(spec.fetchPayloadAware().fetchHeaderConditions())
+            .payloadConditions(spec.fetchPayloadAware().fetchPayloadConditions())
+            .jexlCondition(spec.fetchPayloadAware().fetchJexlCondition())
+            .repoName(spec.fetchGitAware().fetchRepoName())
+            .actions(spec.fetchGitAware()
+                         .fetchActions()
                          .stream()
                          .map(this::toGithubIssueCommentAction)
                          .collect(Collectors.toList()))
-            .repoName(spec.getRepoName())
             .build();
       default:
         throw new InvalidRequestException("Github Webhook Trigger Event Type " + spec.getType() + " is invalid");
     }
   }
 
-  GitlabPRAction toGitlabPRAction(MergeRequestGitlabWebhookSpec.ActionsEnum actionsEnum) {
+  GitlabPRAction toGitlabPRAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.gitlab.action.GitlabPRAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.gitlab.action.GitlabPRAction) action;
     switch (actionsEnum) {
       case REOPEN:
         return GitlabPRAction.REOPEN;
@@ -516,7 +447,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  BitbucketPRCommentAction toBitbucketPRCommentAction(PRCommentBitbucketWebhookSpec.ActionsEnum actionsEnum) {
+  BitbucketPRCommentAction toBitbucketPRCommentAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.bitbucket.action.BitbucketPRCommentAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.bitbucket.action.BitbucketPRCommentAction) action;
     switch (actionsEnum) {
       case CREATE:
         return BitbucketPRCommentAction.CREATE;
@@ -529,7 +462,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  BitbucketPRAction toBitbucketPRAction(PullRequestBitbucketWebhookSpec.ActionsEnum actionsEnum) {
+  BitbucketPRAction toBitbucketPRAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.bitbucket.action.BitbucketPRAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.bitbucket.action.BitbucketPRAction) action;
     switch (actionsEnum) {
       case CREATE:
         return BitbucketPRAction.CREATE;
@@ -544,7 +479,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  AzureRepoPRAction toAzureRepoPRAction(PullRequestAzureRepoWebhookSpec.ActionsEnum actionsEnum) {
+  AzureRepoPRAction toAzureRepoPRAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.action.AzureRepoPRAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.action.AzureRepoPRAction) action;
     switch (actionsEnum) {
       case CREATE:
         return AzureRepoPRAction.CREATE;
@@ -557,7 +494,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  AzureRepoIssueCommentAction toAzureRepoIssueCommentAction(IssueCommentAzureRepoWebhookSpec.ActionsEnum actionsEnum) {
+  AzureRepoIssueCommentAction toAzureRepoIssueCommentAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.action.AzureRepoIssueCommentAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.action.AzureRepoIssueCommentAction) action;
     switch (actionsEnum) {
       case CREATE:
         return AzureRepoIssueCommentAction.CREATE;
@@ -570,7 +509,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  HarnessIssueCommentAction toHarnessIssueCommentAction(IssueCommentHarnessWebhookSpec.ActionsEnum actionsEnum) {
+  HarnessIssueCommentAction toHarnessIssueCommentAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.harness.action.HarnessIssueCommentAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.harness.action.HarnessIssueCommentAction) action;
     switch (actionsEnum) {
       case CREATE:
         return HarnessIssueCommentAction.CREATE;
@@ -583,7 +524,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  HarnessPRAction toHarnessPRAction(PullRequestHarnessWebhookSpec.ActionsEnum actionsEnum) {
+  HarnessPRAction toHarnessPRAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.harness.action.HarnessPRAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.harness.action.HarnessPRAction) action;
     switch (actionsEnum) {
       case EDIT:
         return HarnessPRAction.EDIT;
@@ -604,7 +547,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  GitlabMRCommentAction toGitlabMRCommentAction(MRCommentGitlabWebhookSpec.ActionsEnum actionsEnum) {
+  GitlabMRCommentAction toGitlabMRCommentAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.gitlab.action.GitlabMRCommentAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.gitlab.action.GitlabMRCommentAction) action;
     switch (actionsEnum) {
       case CREATE:
         return GitlabMRCommentAction.CREATE;
@@ -613,7 +558,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  GithubPRAction toGithubPRAction(PullRequestGithubWebhookSpec.ActionsEnum actionsEnum) {
+  GithubPRAction toGithubPRAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.github.action.GithubPRAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.github.action.GithubPRAction) action;
     switch (actionsEnum) {
       case EDIT:
         return GithubPRAction.EDIT;
@@ -629,14 +576,16 @@ public class NGWebhookTriggerApiUtils {
         return GithubPRAction.UNLABEL;
       case SYNCHRONIZE:
         return GithubPRAction.SYNCHRONIZE;
-      case READYFORREVIEW:
+      case REVIEWREADY:
         return GithubPRAction.REVIEWREADY;
       default:
         throw new InvalidRequestException("Github PR Action " + actionsEnum + " is invalid");
     }
   }
 
-  GithubReleaseAction toGithubReleaseAction(ReleaseGithubWebhookSpec.ActionsEnum actionsEnum) {
+  GithubReleaseAction toGithubReleaseAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.github.action.GithubReleaseAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.github.action.GithubReleaseAction) action;
     switch (actionsEnum) {
       case RELEASE:
         return GithubReleaseAction.RELEASE;
@@ -657,7 +606,9 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  GithubIssueCommentAction toGithubIssueCommentAction(IssueCommentGithubWebhookSpec.ActionsEnum actionsEnum) {
+  GithubIssueCommentAction toGithubIssueCommentAction(GitAction action) {
+    io.harness.ngtriggers.beans.source.v1.webhook.github.action.GithubIssueCommentAction actionsEnum =
+        (io.harness.ngtriggers.beans.source.v1.webhook.github.action.GithubIssueCommentAction) action;
     switch (actionsEnum) {
       case DELETE:
         return GithubIssueCommentAction.DELETE;
@@ -703,26 +654,28 @@ public class NGWebhookTriggerApiUtils {
         .build();
   }
 
-  GithubTriggerEvent toGithubTriggerEvent(GithubWebhookTriggerSpec.TypeEnum typeEnum) {
+  GithubTriggerEvent toGithubTriggerEvent(
+      io.harness.ngtriggers.beans.source.v1.webhook.github.event.GithubTriggerEvent typeEnum) {
     switch (typeEnum) {
-      case PULLREQUEST:
+      case PULL_REQUEST:
         return GithubTriggerEvent.PULL_REQUEST;
       case PUSH:
         return GithubTriggerEvent.PUSH;
       case RELEASE:
         return GithubTriggerEvent.RELEASE;
-      case ISSUECOMMENT:
+      case ISSUE_COMMENT:
         return GithubTriggerEvent.ISSUE_COMMENT;
       default:
         throw new InvalidRequestException("Github Webhook Trigger Event Type " + typeEnum + " is invalid");
     }
   }
 
-  GitlabTriggerEvent toGitlabTriggerEvent(GitlabWebhookTriggerSpec.TypeEnum typeEnum) {
+  GitlabTriggerEvent toGitlabTriggerEvent(
+      io.harness.ngtriggers.beans.source.v1.webhook.gitlab.event.GitlabTriggerEvent typeEnum) {
     switch (typeEnum) {
-      case MERGEREQUEST:
+      case MERGE_REQUEST:
         return GitlabTriggerEvent.MERGE_REQUEST;
-      case MRCOMMENT:
+      case MR_COMMENT:
         return GitlabTriggerEvent.MR_COMMENT;
       case PUSH:
         return GitlabTriggerEvent.PUSH;
@@ -731,33 +684,36 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  HarnessTriggerEvent toHarnessTriggerEvent(HarnessWebhookTriggerSpec.TypeEnum typeEnum) {
+  HarnessTriggerEvent toHarnessTriggerEvent(
+      io.harness.ngtriggers.beans.source.v1.webhook.harness.event.HarnessTriggerEvent typeEnum) {
     switch (typeEnum) {
       case PUSH:
         return HarnessTriggerEvent.PUSH;
-      case PULLREQUEST:
+      case PULL_REQUEST:
         return HarnessTriggerEvent.PULL_REQUEST;
-      case ISSUECOMMENT:
+      case ISSUE_COMMENT:
         return HarnessTriggerEvent.ISSUE_COMMENT;
       default:
         throw new InvalidRequestException("Harness Webhook Trigger Event Type " + typeEnum + " is invalid");
     }
   }
 
-  BitbucketTriggerEvent toBitbucketTriggerEvent(BitbucketWebhookTriggerSpec.TypeEnum typeEnum) {
+  BitbucketTriggerEvent toBitbucketTriggerEvent(
+      io.harness.ngtriggers.beans.source.v1.webhook.bitbucket.event.BitbucketTriggerEvent typeEnum) {
     switch (typeEnum) {
       case PUSH:
         return BitbucketTriggerEvent.PUSH;
-      case PULLREQUEST:
+      case PULL_REQUEST:
         return BitbucketTriggerEvent.PULL_REQUEST;
-      case PRCOMMENT:
+      case PR_COMMENT:
         return BitbucketTriggerEvent.PR_COMMENT;
       default:
         throw new InvalidRequestException("Bitbucket Webhook Trigger Event Type " + typeEnum + " is invalid");
     }
   }
 
-  AwsCodeCommitTriggerEvent toAwsCodeCommitTriggerEvent(AwsCodeCommitWebhookTriggerSpec.TypeEnum typeEnum) {
+  AwsCodeCommitTriggerEvent toAwsCodeCommitTriggerEvent(
+      io.harness.ngtriggers.beans.source.v1.webhook.awscodecommit.event.AwsCodeCommitTriggerEvent typeEnum) {
     switch (typeEnum) {
       case PUSH:
         return AwsCodeCommitTriggerEvent.PUSH;
@@ -766,13 +722,14 @@ public class NGWebhookTriggerApiUtils {
     }
   }
 
-  AzureRepoTriggerEvent toAzureRepoTriggerEvent(AzureRepoWebhookTriggerSpec.TypeEnum typeEnum) {
+  AzureRepoTriggerEvent toAzureRepoTriggerEvent(
+      io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.event.AzureRepoTriggerEvent typeEnum) {
     switch (typeEnum) {
-      case PULLREQUEST:
+      case PULL_REQUEST:
         return AzureRepoTriggerEvent.PULL_REQUEST;
       case PUSH:
         return AzureRepoTriggerEvent.PUSH;
-      case ISSUECOMMENT:
+      case ISSUE_COMMENT:
         return AzureRepoTriggerEvent.ISSUE_COMMENT;
       default:
         throw new InvalidRequestException("Azure Repo Webhook Trigger Event Type " + typeEnum + " is invalid");

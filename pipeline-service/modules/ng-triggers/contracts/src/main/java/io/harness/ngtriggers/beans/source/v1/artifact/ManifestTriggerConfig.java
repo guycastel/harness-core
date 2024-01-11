@@ -15,14 +15,16 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.ngtriggers.beans.source.NGTriggerSpecV2;
+import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplSpec;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Builder;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @OwnedBy(PIPELINE)
-public class ManifestTriggerConfig implements NGTriggerSpecV2, BuildAware {
+@Value
+public class ManifestTriggerConfig implements NGTriggerYamlSimplSpec, BuildAware {
   ManifestType type;
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = EXTERNAL_PROPERTY, property = "type", visible = true)

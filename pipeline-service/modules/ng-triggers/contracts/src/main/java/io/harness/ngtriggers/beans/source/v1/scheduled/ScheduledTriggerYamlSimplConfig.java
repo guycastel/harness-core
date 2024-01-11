@@ -19,9 +19,11 @@ import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplSpec;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Builder;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @OwnedBy(PIPELINE)
+@Value
 public class ScheduledTriggerYamlSimplConfig implements NGTriggerYamlSimplSpec {
   String type;
 

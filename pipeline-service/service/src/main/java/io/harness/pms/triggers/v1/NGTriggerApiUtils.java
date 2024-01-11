@@ -8,13 +8,12 @@
 package io.harness.pms.triggers.v1;
 
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
+import static io.harness.common.NGExpressionUtils.EMPTY;
 import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.ARTIFACT;
 import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.MANIFEST;
 import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.MULTIREGIONARTIFACT;
 import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.SCHEDULED;
 import static io.harness.spec.server.pipeline.v1.model.TriggerSource.TypeEnum.WEBHOOK;
-
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
@@ -26,7 +25,6 @@ import io.harness.ngtriggers.beans.config.NGTriggerConfigV2;
 import io.harness.ngtriggers.beans.dto.TriggerDetails;
 import io.harness.ngtriggers.beans.entity.NGTriggerEntity;
 import io.harness.ngtriggers.beans.entity.NGTriggerEntity.NGTriggerEntityBuilder;
-import io.harness.ngtriggers.beans.entity.TriggerConfigWrapper;
 import io.harness.ngtriggers.beans.source.NGTriggerSourceV2;
 import io.harness.ngtriggers.beans.source.NGTriggerSpecV2;
 import io.harness.ngtriggers.beans.source.NGTriggerType;
@@ -36,18 +34,20 @@ import io.harness.ngtriggers.beans.source.artifact.ManifestTriggerConfig;
 import io.harness.ngtriggers.beans.source.artifact.MultiRegionArtifactTriggerConfig;
 import io.harness.ngtriggers.beans.source.scheduled.CronTriggerSpec;
 import io.harness.ngtriggers.beans.source.scheduled.ScheduledTriggerConfig;
+import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplSource;
+import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplType;
+import io.harness.ngtriggers.beans.source.v1.artifact.ArtifactType;
+import io.harness.ngtriggers.beans.source.v1.scheduled.ScheduledTriggerYamlSimplConfig;
+import io.harness.ngtriggers.beans.source.v1.webhook.WebhookTriggerYamlSimplConfig;
 import io.harness.ngtriggers.beans.source.webhook.v2.TriggerEventDataCondition;
 import io.harness.ngtriggers.beans.source.webhook.v2.WebhookTriggerConfigV2;
 import io.harness.ngtriggers.beans.target.TargetType;
 import io.harness.ngtriggers.conditionchecker.ConditionOperator;
 import io.harness.pms.yaml.HarnessYamlVersion;
 import io.harness.spec.server.pipeline.v1.model.ArtifactTriggerSource;
-import io.harness.spec.server.pipeline.v1.model.ArtifactTriggerSpec;
 import io.harness.spec.server.pipeline.v1.model.CronScheduledTriggerSpec;
 import io.harness.spec.server.pipeline.v1.model.ManifestTriggerSource;
-import io.harness.spec.server.pipeline.v1.model.ManifestTriggerSpec;
 import io.harness.spec.server.pipeline.v1.model.MultiRegionArtifactTriggerSource;
-import io.harness.spec.server.pipeline.v1.model.MultiRegionArtifactTriggerSpec;
 import io.harness.spec.server.pipeline.v1.model.ScheduledTriggerSource;
 import io.harness.spec.server.pipeline.v1.model.ScheduledTriggerSpec;
 import io.harness.spec.server.pipeline.v1.model.TriggerBody;
@@ -57,7 +57,6 @@ import io.harness.spec.server.pipeline.v1.model.TriggerRequestBody;
 import io.harness.spec.server.pipeline.v1.model.TriggerResponseBody;
 import io.harness.spec.server.pipeline.v1.model.TriggerSource;
 import io.harness.spec.server.pipeline.v1.model.WebhookTriggerSource;
-import io.harness.spec.server.pipeline.v1.model.WebhookTriggerSpec;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -80,9 +79,8 @@ public class NGTriggerApiUtils {
 
   public TriggerDetails toTriggerDetails(String accountIdentifier, String orgIdentifier, String projectIdentifier,
       TriggerRequestBody body, String pipeline) {
-    TriggerConfigWrapper triggerConfigWrapper = toTriggerConfigWrapper(body);
     NGTriggerEntity ngTriggerEntity =
-        toTriggerEntity(accountIdentifier, orgIdentifier, projectIdentifier, body, triggerConfigWrapper, pipeline);
+        toTriggerEntity(accountIdentifier, orgIdentifier, projectIdentifier, body, pipeline);
     return TriggerDetails.builder()
         .ngTriggerConfigV2(toNGTriggerConfigV2(pipeline, orgIdentifier, projectIdentifier, body))
         .ngTriggerEntity(ngTriggerEntity)
@@ -90,21 +88,19 @@ public class NGTriggerApiUtils {
   }
 
   public NGTriggerEntity toTriggerEntity(String accountIdentifier, String orgIdentifier, String projectIdentifier,
-      TriggerRequestBody body, TriggerConfigWrapper triggerConfigWrapper, String pipeline) {
+      TriggerRequestBody body, String pipeline) {
+    // TODO(Shalini): set type, yaml, and metadata
     NGTriggerEntityBuilder entityBuilder =
         NGTriggerEntity.builder()
             .name(body.getName())
             .identifier(body.getIdentifier())
             .description(body.getDescription())
             .harnessVersion(HarnessYamlVersion.V1)
-            .type(toNGTriggerType(body.getSource().getType()))
             .accountId(accountIdentifier)
             .orgIdentifier(orgIdentifier)
             .projectIdentifier(projectIdentifier)
             .targetIdentifier(pipeline)
-            .triggerConfigWrapper(triggerConfigWrapper)
             .targetType(TargetType.PIPELINE)
-            .metadata(ngTriggerElementMapper.toMetadata(toNGTriggerSourceV2(body.getSource()), accountIdentifier))
             .enabled(body.isEnabled())
             .pollInterval(body.getSource().getPollInterval() != null ? body.getSource().getPollInterval() : EMPTY)
             .webhookId(body.getSource().getWebhookId())
@@ -127,7 +123,7 @@ public class NGTriggerApiUtils {
     return entity;
   }
 
-  NGTriggerType toNGTriggerType(TriggerSource.TypeEnum typeEnum) {
+  NGTriggerType toNGTriggerType(NGTriggerYamlSimplType typeEnum) {
     switch (typeEnum) {
       case WEBHOOK:
         return NGTriggerType.WEBHOOK;
@@ -137,7 +133,7 @@ public class NGTriggerApiUtils {
         return NGTriggerType.SCHEDULED;
       case ARTIFACT:
         return NGTriggerType.ARTIFACT;
-      case MULTIREGIONARTIFACT:
+      case MULTI_REGION_ARTIFACT:
         return NGTriggerType.MULTI_REGION_ARTIFACT;
       default:
         throw new InvalidRequestException(String.format("NGTrigger not supported for type: %s", typeEnum));
@@ -145,6 +141,7 @@ public class NGTriggerApiUtils {
   }
 
   NGTriggerConfigV2 toNGTriggerConfigV2(String pipeline, String org, String project, TriggerRequestBody body) {
+    // TODO(Shalini): set source
     return NGTriggerConfigV2.builder()
         .pipelineIdentifier(pipeline)
         .identifier(body.getIdentifier())
@@ -158,75 +155,66 @@ public class NGTriggerApiUtils {
         .name(body.getName())
         .pipelineBranchName(body.getPipelineBranchName())
         .tags(body.getTags())
-        .source(toNGTriggerSourceV2(body.getSource()))
         .stagesToExecute(body.getStagesToExecute())
         .build();
   }
 
-  TriggerConfigWrapper toTriggerConfigWrapper(TriggerRequestBody body) {
-    return TriggerConfigWrapper.builder()
-        .inputYaml(body.getInputs())
-        .inputSetRefs(body.getInputSetRefs())
-        .source(toNGTriggerSourceV2(body.getSource()))
-        .pipelineBranchName(body.getPipelineBranchName())
-        .build();
-  }
-
-  NGTriggerSourceV2 toNGTriggerSourceV2(TriggerSource source) {
+  public NGTriggerSourceV2 toNGTriggerSourceV2(NGTriggerYamlSimplSource source) {
     return NGTriggerSourceV2.builder()
-        .pollInterval(source.getPollInterval())
-        .webhookId(source.getWebhookId())
+        .pollInterval(source.getInterval())
+        .webhookId(source.getWebhook())
         .type(toNGTriggerType(source.getType()))
         .spec(toNGTriggerSpecV2(source))
         .build();
   }
 
-  NGTriggerSpecV2 toNGTriggerSpecV2(TriggerSource source) {
+  NGTriggerSpecV2 toNGTriggerSpecV2(NGTriggerYamlSimplSource source) {
     switch (source.getType()) {
       case SCHEDULED:
-        ScheduledTriggerSpec spec = ((ScheduledTriggerSource) source).getSpec();
+        ScheduledTriggerYamlSimplConfig spec = (ScheduledTriggerYamlSimplConfig) source.getSpec();
+        io.harness.ngtriggers.beans.source.v1.scheduled.CronTriggerSpec cronTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.scheduled.CronTriggerSpec) spec.getSpec();
         return ScheduledTriggerConfig.builder()
-            .type(spec.getType().toString())
+            .type(spec.getType())
             .spec(CronTriggerSpec.builder()
-                      .type(spec.getSpec().getType())
-                      .expression(spec.getSpec().getExpression())
+                      .type(cronTriggerSpec.getType())
+                      .expression(cronTriggerSpec.getExpression())
                       .build())
             .build();
       case WEBHOOK:
-        WebhookTriggerSpec webhookSpec = ((WebhookTriggerSource) source).getSpec();
+        WebhookTriggerYamlSimplConfig webhookSpec = (WebhookTriggerYamlSimplConfig) source.getSpec();
         return WebhookTriggerConfigV2.builder()
             .type(ngWebhookTriggerApiUtils.toWebhookTriggerType(webhookSpec.getType()))
             .spec(ngWebhookTriggerApiUtils.toWebhookTriggerSpec(webhookSpec))
             .build();
       case ARTIFACT:
-        ArtifactTriggerSpec artifactTriggerSpec = ((ArtifactTriggerSource) source).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.ArtifactTriggerConfig artifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.ArtifactTriggerConfig) source.getSpec();
         return ArtifactTriggerConfig.builder()
             .type(ngArtifactTriggerApiUtils.toArtifactTriggerType(artifactTriggerSpec.getType()))
-            .spec(ngArtifactTriggerApiUtils.toArtifactTypeSpec(artifactTriggerSpec))
+            .spec(ngArtifactTriggerApiUtils.toArtifactTypeSpec(
+                artifactTriggerSpec.getSpec(), artifactTriggerSpec.getType()))
             .build();
       case MANIFEST:
-        ManifestTriggerSpec manifestTriggerSpec = ((ManifestTriggerSource) source).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.ManifestTriggerConfig manifestTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.ManifestTriggerConfig) source.getSpec();
         return ManifestTriggerConfig.builder()
             .type(ngManifestTriggerApiUtils.toManifestTriggerType(manifestTriggerSpec.getType()))
             .spec(ngManifestTriggerApiUtils.toManifestTypeSpec(manifestTriggerSpec))
             .build();
-      case MULTIREGIONARTIFACT:
-        MultiRegionArtifactTriggerSpec multiRegionArtifactTriggerSpec =
-            ((MultiRegionArtifactTriggerSource) source).getSpec();
+      case MULTI_REGION_ARTIFACT:
+        io.harness.ngtriggers.beans.source.v1.artifact.MultiRegionArtifactTriggerConfig multiRegionArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.MultiRegionArtifactTriggerConfig) source.getSpec();
         return MultiRegionArtifactTriggerConfig.builder()
-            .eventConditions(multiRegionArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .sources(multiRegionArtifactTriggerSpec.getSources()
-                         .stream()
-                         .map(this::toArtifactTypeSpecWrapper)
-                         .collect(Collectors.toList()))
-            .jexlCondition(multiRegionArtifactTriggerSpec.getJexlCondition())
-            .metaDataConditions(multiRegionArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
+            .eventConditions(multiRegionArtifactTriggerSpec.getConditions().getEvent())
+            .sources(
+                multiRegionArtifactTriggerSpec.getSources()
+                    .stream()
+                    .map(artifactTypeSpecWrapper
+                        -> toArtifactTypeSpecWrapper(artifactTypeSpecWrapper, multiRegionArtifactTriggerSpec.getType()))
+                    .collect(Collectors.toList()))
+            .jexlCondition(multiRegionArtifactTriggerSpec.getConditions().getJexl())
+            .metaDataConditions(multiRegionArtifactTriggerSpec.getConditions().getMetadata())
             .type(ngArtifactTriggerApiUtils.toArtifactTriggerType(multiRegionArtifactTriggerSpec.getType()))
             .build();
       default:
@@ -235,9 +223,10 @@ public class NGTriggerApiUtils {
   }
 
   ArtifactTypeSpecWrapper toArtifactTypeSpecWrapper(
-      io.harness.spec.server.pipeline.v1.model.ArtifactTypeSpecWrapper artifactTypeSpecWrapper) {
+      io.harness.ngtriggers.beans.source.v1.artifact.ArtifactTypeSpecWrapper artifactTypeSpecWrapper,
+      ArtifactType artifactType) {
     return ArtifactTypeSpecWrapper.builder()
-        .spec(ngArtifactTriggerApiUtils.toArtifactTypeSpec(artifactTypeSpecWrapper.getSpec()))
+        .spec(ngArtifactTriggerApiUtils.toArtifactTypeSpec(artifactTypeSpecWrapper.getSpec(), artifactType))
         .build();
   }
 

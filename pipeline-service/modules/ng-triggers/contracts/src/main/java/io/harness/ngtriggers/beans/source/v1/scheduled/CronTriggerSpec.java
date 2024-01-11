@@ -12,9 +12,11 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Value
 public class CronTriggerSpec implements ScheduledTriggerYamlSimplSpec {
   String type;
   String expression;

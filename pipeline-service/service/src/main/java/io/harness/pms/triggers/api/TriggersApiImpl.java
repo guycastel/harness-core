@@ -115,6 +115,7 @@ public class TriggersApiImpl implements TriggersApi {
         updatedEntity = ngTriggerService.update(triggerDetails.getNgTriggerEntity(), ngTriggerEntity.get());
       }
       return Response.ok().entity(ngTriggerApiUtils.toResponseDTO(updatedEntity)).build();
+
     } catch (Exception e) {
       throw new InvalidRequestException("Failed while updating Trigger: " + e.getMessage());
     }

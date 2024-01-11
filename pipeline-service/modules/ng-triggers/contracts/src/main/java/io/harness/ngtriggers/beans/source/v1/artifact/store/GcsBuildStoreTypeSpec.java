@@ -16,11 +16,13 @@ import io.harness.annotations.dev.ProductModule;
 import io.harness.ngtriggers.beans.source.v1.artifact.BuildStoreTypeSpec;
 
 import lombok.AccessLevel;
+import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @OwnedBy(PIPELINE)
+@Value
 public class GcsBuildStoreTypeSpec implements BuildStoreTypeSpec {
   String connector;
   String location;

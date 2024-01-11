@@ -22,10 +22,12 @@ import io.harness.ngtriggers.beans.source.v1.artifact.BuildStoreTypeSpec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Builder;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OwnedBy(PIPELINE)
+@Value
 public class BuildStore {
   BuildStoreType type;
   @JsonTypeInfo(use = NAME, property = "type", include = EXTERNAL_PROPERTY, visible = true) BuildStoreTypeSpec spec;

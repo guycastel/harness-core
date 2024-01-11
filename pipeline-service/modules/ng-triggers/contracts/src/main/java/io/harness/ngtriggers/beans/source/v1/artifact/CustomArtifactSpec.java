@@ -15,15 +15,17 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 import io.harness.ngtriggers.beans.source.webhook.v2.TriggerEventDataCondition;
-import io.harness.yaml.core.variables.NGVariableV1;
+import io.harness.yaml.core.variables.v1.NGVariableV1Wrapper;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = false, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OwnedBy(CDC)
+@Value
 public class CustomArtifactSpec implements ArtifactTypeSpec {
   Conditions conditions;
   String version;
@@ -31,7 +33,7 @@ public class CustomArtifactSpec implements ArtifactTypeSpec {
   String script;
   String version_path;
   Map<String, String> metadata;
-  List<NGVariableV1> inputs;
+  NGVariableV1Wrapper inputs;
 
   @Override
   public String fetchConnectorRef() {

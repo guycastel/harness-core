@@ -18,14 +18,12 @@ import io.harness.ngtriggers.beans.source.webhook.v2.TriggerEventDataCondition;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = false, components = {HarnessModuleComponent.CDS_TRIGGERS})
-@Data
-@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OwnedBy(PIPELINE)
+@Value
 public class EcrSpec implements ArtifactTypeSpec {
   String connector;
   Conditions conditions;

@@ -7,6 +7,7 @@
 
 package io.harness.pms.triggers.v1;
 
+import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.ngtriggers.Constants.ACR;
 import static io.harness.ngtriggers.Constants.AMAZON_S3;
 import static io.harness.ngtriggers.Constants.AMI;
@@ -29,7 +30,6 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.delegate.task.artifacts.ami.AMITag;
 import io.harness.exception.InvalidRequestException;
 import io.harness.ngtriggers.beans.source.NGTriggerSpecV2;
 import io.harness.ngtriggers.beans.source.artifact.AMIRegistrySpec;
@@ -53,7 +53,6 @@ import io.harness.ngtriggers.beans.source.artifact.Nexus2RegistrySpec;
 import io.harness.ngtriggers.beans.source.artifact.NexusRegistrySpec;
 import io.harness.ngtriggers.beans.source.webhook.v2.TriggerEventDataCondition;
 import io.harness.ngtriggers.conditionchecker.ConditionOperator;
-import io.harness.pms.yaml.ParameterField;
 import io.harness.spec.server.pipeline.v1.model.AMIFilter;
 import io.harness.spec.server.pipeline.v1.model.AcrArtifactSpec;
 import io.harness.spec.server.pipeline.v1.model.AcrArtifactTriggerSpec;
@@ -91,16 +90,25 @@ import io.harness.spec.server.pipeline.v1.model.Nexus3RegistryArtifactSpec;
 import io.harness.spec.server.pipeline.v1.model.Nexus3RegistryArtifactTriggerSpec;
 import io.harness.spec.server.pipeline.v1.model.TriggerConditions;
 import io.harness.yaml.core.variables.NGVariable;
-import io.harness.yaml.core.variables.NGVariableType;
+import io.harness.yaml.core.variables.NGVariableV1;
 import io.harness.yaml.core.variables.NumberNGVariable;
+import io.harness.yaml.core.variables.SecretNGVariable;
 import io.harness.yaml.core.variables.StringNGVariable;
+import io.harness.yaml.core.variables.v1.NGVariableV1Wrapper;
+import io.harness.yaml.core.variables.v1.NumberNGVariableV1;
+import io.harness.yaml.core.variables.v1.SecretNGVariableV1;
+import io.harness.yaml.core.variables.v1.StringNGVariableV1;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @OwnedBy(HarnessTeam.PIPELINE)
 public class NGArtifactTriggerApiUtils {
-  ArtifactType toArtifactTriggerType(io.harness.spec.server.pipeline.v1.model.ArtifactType typeEnum) {
+  ArtifactType toArtifactTriggerType(io.harness.ngtriggers.beans.source.v1.artifact.ArtifactType typeEnum) {
     switch (typeEnum) {
       case ACR:
         return ArtifactType.ACR;
@@ -112,427 +120,308 @@ public class NGArtifactTriggerApiUtils {
         return ArtifactType.BAMBOO;
       case JENKINS:
         return ArtifactType.JENKINS;
-      case AMAZONS3:
+      case AMAZON_S3:
         return ArtifactType.AMAZON_S3;
-      case AZUREARTIFACTS:
+      case AZURE_ARTIFACTS:
         return ArtifactType.AZURE_ARTIFACTS;
-      case CUSTOMARTIFACT:
+      case CUSTOM_ARTIFACT:
         return ArtifactType.CUSTOM_ARTIFACT;
-      case DOCKERREGISTRY:
+      case DOCKER_REGISTRY:
         return ArtifactType.DOCKER_REGISTRY;
-      case NEXUS2REGISTRY:
+      case NEXUS2_REGISTRY:
         return ArtifactType.NEXUS2_REGISTRY;
-      case NEXUS3REGISTRY:
+      case NEXUS3_REGISTRY:
         return ArtifactType.NEXUS3_REGISTRY;
-      case AMAZONMACHINEIMAGE:
+      case AMI:
         return ArtifactType.AMI;
-      case GOOGLECLOUDSTORAGE:
+      case GOOGLE_CLOUD_STORAGE:
         return ArtifactType.GOOGLE_CLOUD_STORAGE;
-      case ARTIFACTORYREGISTRY:
+      case ARTIFACTORY_REGISTRY:
         return ArtifactType.ARTIFACTORY_REGISTRY;
-      case GITHUBPACKAGEREGISTRY:
+      case GITHUB_PACKAGES:
         return ArtifactType.GITHUB_PACKAGES;
-      case GOOGLEARTIFACTREGISTRY:
+      case GoogleArtifactRegistry:
         return ArtifactType.GoogleArtifactRegistry;
       default:
         throw new InvalidRequestException("Artifact Trigger Type " + typeEnum + " is invalid");
     }
   }
-  ArtifactTypeSpec toArtifactTypeSpec(ArtifactTriggerSpec spec) {
-    switch (spec.getType()) {
+
+  Pair<String, String> getImageAndTagFromLocation(String location) {
+    String[] strings = location.split(":");
+    return Pair.of(strings[0], strings[1]);
+  }
+
+  ArtifactTypeSpec toArtifactTypeSpec(io.harness.ngtriggers.beans.source.v1.artifact.ArtifactTypeSpec spec,
+      io.harness.ngtriggers.beans.source.v1.artifact.ArtifactType artifactType) {
+    switch (artifactType) {
       case GCR:
-        GcrArtifactTriggerSpec gcrArtifactSpec = ((GcrArtifactSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.GcrSpec gcrArtifactSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.GcrSpec) spec;
         return GcrSpec.builder()
-            .connectorRef(gcrArtifactSpec.getConnectorRef())
-            .eventConditions(gcrArtifactSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .imagePath(gcrArtifactSpec.getImagePath())
-            .jexlCondition(gcrArtifactSpec.getJexlCondition())
-            .metaDataConditions(gcrArtifactSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .registryHostname(gcrArtifactSpec.getRegistryHostname())
-            .tag(gcrArtifactSpec.getTag())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .imagePath(getImageAndTagFromLocation(gcrArtifactSpec.getLocation()).getLeft())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .registryHostname(gcrArtifactSpec.getHost())
+            .tag(getImageAndTagFromLocation(gcrArtifactSpec.getLocation()).getRight())
             .build();
-      case GOOGLEARTIFACTREGISTRY:
-        GoogleArtifactRegistryArtifactTriggerSpec garArtifactSpec =
-            ((GoogleArtifactRegistryArtifactSpec) spec).getSpec();
+      case GoogleArtifactRegistry:
+        io.harness.ngtriggers.beans.source.v1.artifact.GarSpec garArtifactSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.GarSpec) spec;
         return GarSpec.builder()
-            .connectorRef(garArtifactSpec.getConnectorRef())
-            .eventConditions(garArtifactSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .jexlCondition(garArtifactSpec.getJexlCondition())
-            .metaDataConditions(garArtifactSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
             .pkg(garArtifactSpec.getPkg())
             .project(garArtifactSpec.getProject())
             .region(garArtifactSpec.getRegion())
             .version(garArtifactSpec.getVersion())
-            .repositoryName(garArtifactSpec.getRepositoryName())
+            .repositoryName(garArtifactSpec.getRepo())
             .build();
-      case GITHUBPACKAGEREGISTRY:
-        GithubPackageRegistryArtifactTriggerSpec gprArtifactSpec = ((GithubPackageRegistryArtifactSpec) spec).getSpec();
+      case GITHUB_PACKAGES:
+        io.harness.ngtriggers.beans.source.v1.artifact.GithubPackagesSpec gprArtifactSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.GithubPackagesSpec) spec;
         return GithubPackagesSpec.builder()
-            .connectorRef(gprArtifactSpec.getConnectorRef())
-            .eventConditions(gprArtifactSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .jexlCondition(gprArtifactSpec.getJexlCondition())
-            .metaDataConditions(gprArtifactSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
             .org(gprArtifactSpec.getOrg())
-            .packageType(gprArtifactSpec.getPackageType())
-            .packageName(gprArtifactSpec.getPackageName())
+            .packageType(gprArtifactSpec.getPkg().getType())
+            .packageName(gprArtifactSpec.getPkg().getName())
             .build();
-      case ARTIFACTORYREGISTRY:
-        ArtifactoryRegistryArtifactTriggerSpec artifactoryRegistryArtifactTriggerSpec =
-            ((ArtifactoryRegistryArtifactSpec) spec).getSpec();
+      case ARTIFACTORY_REGISTRY:
+        io.harness.ngtriggers.beans.source.v1.artifact.ArtifactoryRegistrySpec artifactoryRegistryArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.ArtifactoryRegistrySpec) spec;
         return ArtifactoryRegistrySpec.builder()
-            .connectorRef(artifactoryRegistryArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(artifactoryRegistryArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(artifactoryRegistryArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(artifactoryRegistryArtifactTriggerSpec.getJexlCondition())
-            .artifactDirectory(artifactoryRegistryArtifactTriggerSpec.getArtifactDirectory())
-            .artifactFilter(artifactoryRegistryArtifactTriggerSpec.getArtifactFilter())
-            .artifactPath(artifactoryRegistryArtifactTriggerSpec.getArtifactPath())
-            .repository(artifactoryRegistryArtifactTriggerSpec.getRepository())
-            .repositoryFormat(artifactoryRegistryArtifactTriggerSpec.getRepositoryFormat())
-            .repositoryUrl(artifactoryRegistryArtifactTriggerSpec.getRepositoryUrl())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .artifactDirectory(artifactoryRegistryArtifactTriggerSpec.getDir())
+            .artifactFilter(artifactoryRegistryArtifactTriggerSpec.getFilter())
+            .artifactPath(artifactoryRegistryArtifactTriggerSpec.getPath())
+            .repository(artifactoryRegistryArtifactTriggerSpec.getRepo().getName())
+            .repositoryFormat(artifactoryRegistryArtifactTriggerSpec.getRepo().getFormat())
+            .repositoryUrl(artifactoryRegistryArtifactTriggerSpec.getRepo().getUrl())
             .build();
-      case GOOGLECLOUDSTORAGE:
-        GoogleCloudStorageArtifactTriggerSpec gcsArtifactTriggerSpec =
-            ((GoogleCloudStorageArtifactSpec) spec).getSpec();
+      case GOOGLE_CLOUD_STORAGE:
+        io.harness.ngtriggers.beans.source.v1.artifact.GoolgeCloudStorageRegistrySpec gcsArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.GoolgeCloudStorageRegistrySpec) spec;
         return GoolgeCloudStorageRegistrySpec.builder()
-            .connectorRef(gcsArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(gcsArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(gcsArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(gcsArtifactTriggerSpec.getJexlCondition())
-            .artifactPath(gcsArtifactTriggerSpec.getArtifactPath())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .artifactPath(gcsArtifactTriggerSpec.getPath())
             .bucket(gcsArtifactTriggerSpec.getBucket())
             .project(gcsArtifactTriggerSpec.getProject())
             .build();
-      case AMAZONMACHINEIMAGE:
-        AmazonMachineImageArtifactTriggerSpec amiArtifactTriggerSpec =
-            ((AmazonMachineImageArtifactSpec) spec).getSpec();
+      case AMI:
+        io.harness.ngtriggers.beans.source.v1.artifact.AMIRegistrySpec amiArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.AMIRegistrySpec) spec;
         return AMIRegistrySpec.builder()
-            .connectorRef(amiArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(amiArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(amiArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(amiArtifactTriggerSpec.getJexlCondition())
-            .filters(amiArtifactTriggerSpec.getFilters().stream().map(this::toAMIFilter).collect(Collectors.toList()))
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .filters(amiArtifactTriggerSpec.getFilters())
             .region(amiArtifactTriggerSpec.getRegion())
-            .tags(amiArtifactTriggerSpec.getTags().stream().map(this::toAMITag).collect(Collectors.toList()))
+            .tags(amiArtifactTriggerSpec.getTags())
             .version(amiArtifactTriggerSpec.getVersion())
-            .versionRegex(amiArtifactTriggerSpec.getVersionRegex())
+            .versionRegex(amiArtifactTriggerSpec.getVersion_regex())
             .build();
-      case NEXUS3REGISTRY:
-        Nexus3RegistryArtifactTriggerSpec nexus3ArtifactTriggerSpec = ((Nexus3RegistryArtifactSpec) spec).getSpec();
+      case NEXUS3_REGISTRY:
+        io.harness.ngtriggers.beans.source.v1.artifact.NexusRegistrySpec nexus3ArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.NexusRegistrySpec) spec;
         return NexusRegistrySpec.builder()
-            .connectorRef(nexus3ArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(nexus3ArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(nexus3ArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(nexus3ArtifactTriggerSpec.getJexlCondition())
-            .artifactId(nexus3ArtifactTriggerSpec.getArtifactId())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .artifactId(nexus3ArtifactTriggerSpec.getArtifact())
             .classifier(nexus3ArtifactTriggerSpec.getClassifier())
             .extension(nexus3ArtifactTriggerSpec.getExtension())
             .group(nexus3ArtifactTriggerSpec.getGroup())
-            .groupId(nexus3ArtifactTriggerSpec.getGroupId())
-            .imagePath(nexus3ArtifactTriggerSpec.getImagePath())
-            .packageName(nexus3ArtifactTriggerSpec.getPackageName())
-            .repository(nexus3ArtifactTriggerSpec.getRepository())
-            .repositoryFormat(nexus3ArtifactTriggerSpec.getRepositoryFormat())
-            .repositoryUrl(nexus3ArtifactTriggerSpec.getRepositoryUrl())
-            .tag(nexus3ArtifactTriggerSpec.getTag())
+            .groupId(nexus3ArtifactTriggerSpec.getGroup_id())
+            .imagePath(getImageAndTagFromLocation(nexus3ArtifactTriggerSpec.getLocation()).getLeft())
+            .packageName(nexus3ArtifactTriggerSpec.getPkg())
+            .repository(nexus3ArtifactTriggerSpec.getRepo().getName())
+            .repositoryFormat(nexus3ArtifactTriggerSpec.getRepo().getFormat())
+            .repositoryUrl(nexus3ArtifactTriggerSpec.getRepo().getUrl())
+            .tag(getImageAndTagFromLocation(nexus3ArtifactTriggerSpec.getLocation()).getRight())
             .build();
-      case DOCKERREGISTRY:
-        DockerRegistryArtifactTriggerSpec dockerRegistryArtifactTriggerSpec =
-            ((DockerRegistryArtifactSpec) spec).getSpec();
+      case DOCKER_REGISTRY:
+        io.harness.ngtriggers.beans.source.v1.artifact.DockerRegistrySpec dockerRegistryArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.DockerRegistrySpec) spec;
         return DockerRegistrySpec.builder()
-            .connectorRef(dockerRegistryArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(dockerRegistryArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(dockerRegistryArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(dockerRegistryArtifactTriggerSpec.getJexlCondition())
-            .imagePath(dockerRegistryArtifactTriggerSpec.getImagePath())
-            .tag(dockerRegistryArtifactTriggerSpec.getTag())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .imagePath(getImageAndTagFromLocation(dockerRegistryArtifactTriggerSpec.getLocation()).getLeft())
+            .tag(getImageAndTagFromLocation(dockerRegistryArtifactTriggerSpec.getLocation()).getRight())
             .build();
-      case CUSTOMARTIFACT:
-        CustomArtifactTriggerSpec customArtifactTriggerSpec = ((CustomArtifactSpec) spec).getSpec();
+      case CUSTOM_ARTIFACT:
+        io.harness.ngtriggers.beans.source.v1.artifact.CustomArtifactSpec customArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.CustomArtifactSpec) spec;
         return io.harness.ngtriggers.beans.source.artifact.CustomArtifactSpec.builder()
-            .eventConditions(customArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(customArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(customArtifactTriggerSpec.getJexlCondition())
-            .artifactsArrayPath(customArtifactTriggerSpec.getArtifactsArrayPath())
-            .versionPath(customArtifactTriggerSpec.getVersionPath())
-            .inputs(customArtifactTriggerSpec.getInputs().stream().map(this::toNGVariable).collect(Collectors.toList()))
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .artifactsArrayPath(customArtifactTriggerSpec.getPath())
+            .versionPath(customArtifactTriggerSpec.getVersion_path())
+            .inputs(toNGVariableList(customArtifactTriggerSpec.getInputs()))
             .version(customArtifactTriggerSpec.getVersion())
             .metadata(customArtifactTriggerSpec.getMetadata())
             .script(customArtifactTriggerSpec.getScript())
             .build();
-      case NEXUS2REGISTRY:
-        Nexus2RegistryArtifactTriggerSpec nexus2ArtifactTriggerSpec = ((Nexus2RegistryArtifactSpec) spec).getSpec();
+      case NEXUS2_REGISTRY:
+        io.harness.ngtriggers.beans.source.v1.artifact.Nexus2RegistrySpec nexus2ArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.Nexus2RegistrySpec) spec;
         return Nexus2RegistrySpec.builder()
-            .connectorRef(nexus2ArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(nexus2ArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(nexus2ArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(nexus2ArtifactTriggerSpec.getJexlCondition())
-            .artifactId(nexus2ArtifactTriggerSpec.getArtifactId())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .artifactId(nexus2ArtifactTriggerSpec.getArtifact())
             .classifier(nexus2ArtifactTriggerSpec.getClassifier())
             .extension(nexus2ArtifactTriggerSpec.getExtension())
-            .groupId(nexus2ArtifactTriggerSpec.getGroupId())
-            .packageName(nexus2ArtifactTriggerSpec.getPackageName())
-            .repositoryFormat(nexus2ArtifactTriggerSpec.getRepositoryFormat())
-            .repositoryUrl(nexus2ArtifactTriggerSpec.getRepositoryUrl())
+            .groupId(nexus2ArtifactTriggerSpec.getGroup_id())
+            .packageName(nexus2ArtifactTriggerSpec.getPkg())
+            .repositoryFormat(nexus2ArtifactTriggerSpec.getRepo().getFormat())
+            .repositoryUrl(nexus2ArtifactTriggerSpec.getRepo().getUrl())
             .tag(nexus2ArtifactTriggerSpec.getTag())
-            .repositoryName(nexus2ArtifactTriggerSpec.getRepositoryName())
+            .repositoryName(nexus2ArtifactTriggerSpec.getRepo().getName())
             .build();
-      case AZUREARTIFACTS:
-        AzureArtifactsArtifactTriggerSpec azureArtifactTriggerSpec = ((AzureArtifactsArtifactSpec) spec).getSpec();
+      case AZURE_ARTIFACTS:
+        io.harness.ngtriggers.beans.source.v1.artifact.AzureArtifactsRegistrySpec azureArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.AzureArtifactsRegistrySpec) spec;
         return AzureArtifactsRegistrySpec.builder()
-            .connectorRef(azureArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(azureArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(azureArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(azureArtifactTriggerSpec.getJexlCondition())
-            .packageName(azureArtifactTriggerSpec.getPackageName())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .packageName(azureArtifactTriggerSpec.getPkg().getName())
             .feed(azureArtifactTriggerSpec.getFeed())
-            .packageType(azureArtifactTriggerSpec.getPackageType())
+            .packageType(azureArtifactTriggerSpec.getPkg().getType())
             .project(azureArtifactTriggerSpec.getProject())
             .version(azureArtifactTriggerSpec.getVersion())
-            .versionRegex(azureArtifactTriggerSpec.getVersionRegex())
+            .versionRegex(azureArtifactTriggerSpec.getVersion_regex())
             .build();
-      case AMAZONS3:
-        AmazonS3ArtifactTriggerSpec amazonS3ArtifactTriggerSpec = ((AmazonS3ArtifactSpec) spec).getSpec();
+      case AMAZON_S3:
+        io.harness.ngtriggers.beans.source.v1.artifact.AmazonS3RegistrySpec amazonS3ArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.AmazonS3RegistrySpec) spec;
         return AmazonS3RegistrySpec.builder()
-            .connectorRef(amazonS3ArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(amazonS3ArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(amazonS3ArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(amazonS3ArtifactTriggerSpec.getJexlCondition())
-            .bucketName(amazonS3ArtifactTriggerSpec.getBucketName())
-            .filePathRegex(amazonS3ArtifactTriggerSpec.getFilePathRegex())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .bucketName(amazonS3ArtifactTriggerSpec.getBucket())
+            .filePathRegex(amazonS3ArtifactTriggerSpec.getPath_regex())
             .region(amazonS3ArtifactTriggerSpec.getRegion())
             .build();
       case JENKINS:
-        JenkinsArtifactTriggerSpec jenkinsArtifactTriggerSpec = ((JenkinsArtifactSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.JenkinsRegistrySpec jenkinsArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.JenkinsRegistrySpec) spec;
         return JenkinsRegistrySpec.builder()
-            .connectorRef(jenkinsArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(jenkinsArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(jenkinsArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(jenkinsArtifactTriggerSpec.getJexlCondition())
-            .artifactPath(jenkinsArtifactTriggerSpec.getArtifactPath())
-            .jobName(jenkinsArtifactTriggerSpec.getJobName())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .artifactPath(jenkinsArtifactTriggerSpec.getPath())
+            .jobName(jenkinsArtifactTriggerSpec.getJob())
             .build(jenkinsArtifactTriggerSpec.getBuild())
             .build();
       case BAMBOO:
-        BambooArtifactTriggerSpec bambooArtifactTriggerSpec = ((BambooArtifactSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.BambooRegistrySpec bambooArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.BambooRegistrySpec) spec;
         return BambooRegistrySpec.builder()
-            .connectorRef(bambooArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(bambooArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(bambooArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(bambooArtifactTriggerSpec.getJexlCondition())
-            .planKey(bambooArtifactTriggerSpec.getPlanKey())
-            .artifactPaths(bambooArtifactTriggerSpec.getArtifactPaths())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .planKey(bambooArtifactTriggerSpec.getPlan_key())
+            .artifactPaths(bambooArtifactTriggerSpec.getPaths())
             .build(bambooArtifactTriggerSpec.getBuild())
             .build();
       case ECR:
-        EcrArtifactTriggerSpec ecrArtifactTriggerSpec = ((EcrArtifactSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.EcrSpec ecrArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.EcrSpec) spec;
         return EcrSpec.builder()
-            .connectorRef(ecrArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(ecrArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(ecrArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(ecrArtifactTriggerSpec.getJexlCondition())
-            .imagePath(ecrArtifactTriggerSpec.getImagePath())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
+            .imagePath(getImageAndTagFromLocation(ecrArtifactTriggerSpec.getLocation()).getLeft())
             .region(ecrArtifactTriggerSpec.getRegion())
-            .tag(ecrArtifactTriggerSpec.getTag())
-            .registryId(ecrArtifactTriggerSpec.getRegistryId())
+            .tag(getImageAndTagFromLocation(ecrArtifactTriggerSpec.getLocation()).getRight())
+            .registryId(ecrArtifactTriggerSpec.getRegistry())
             .build();
       case ACR:
-        AcrArtifactTriggerSpec acrArtifactTriggerSpec = ((AcrArtifactSpec) spec).getSpec();
+        io.harness.ngtriggers.beans.source.v1.artifact.AcrSpec acrArtifactTriggerSpec =
+            (io.harness.ngtriggers.beans.source.v1.artifact.AcrSpec) spec;
         return AcrSpec.builder()
-            .connectorRef(acrArtifactTriggerSpec.getConnectorRef())
-            .eventConditions(acrArtifactTriggerSpec.getEventConditions()
-                                 .stream()
-                                 .map(this::toTriggerEventDataCondition)
-                                 .collect(Collectors.toList()))
-            .metaDataConditions(acrArtifactTriggerSpec.getMetaDataConditions()
-                                    .stream()
-                                    .map(this::toTriggerEventDataCondition)
-                                    .collect(Collectors.toList()))
-            .jexlCondition(acrArtifactTriggerSpec.getJexlCondition())
+            .connectorRef(spec.fetchConnectorRef())
+            .eventConditions(spec.fetchEventDataConditions())
+            .jexlCondition(spec.fetchJexlArtifactConditions())
+            .metaDataConditions(spec.fetchMetaDataConditions())
             .tag(acrArtifactTriggerSpec.getTag())
             .registry(acrArtifactTriggerSpec.getRegistry())
-            .repository(acrArtifactTriggerSpec.getRepository())
-            .subscriptionId(acrArtifactTriggerSpec.getSubscriptionId())
+            .repository(acrArtifactTriggerSpec.getRepo())
+            .subscriptionId(acrArtifactTriggerSpec.getSubscription())
             .build();
       default:
-        throw new InvalidRequestException("Artifact Trigger Type " + spec.getType() + " is invalid");
+        throw new InvalidRequestException("Artifact Trigger Type " + artifactType + " is invalid");
     }
   }
 
-  NGVariable toNGVariable(io.harness.spec.server.pipeline.v1.model.NGVariable ngVariable) {
-    switch (ngVariable.getType()) {
-      case STRING:
-        io.harness.spec.server.pipeline.v1.model.StringNGVariable stringNGVariable =
-            (io.harness.spec.server.pipeline.v1.model.StringNGVariable) ngVariable;
-        return StringNGVariable.builder()
-            .metadata(ngVariable.getMetadata())
-            .description(ngVariable.getDescription())
-            .name(ngVariable.getName())
-            .required(ngVariable.isRequired())
-            .type(toNGVariableType(ngVariable.getType()))
-            .value(ParameterField.createValueField(stringNGVariable.getValue()))
-            .defaultValue(stringNGVariable.getDefaultValue())
-            .build();
-      case NUMBER:
-        io.harness.spec.server.pipeline.v1.model.NumberNGVariable numberNGVariable =
-            (io.harness.spec.server.pipeline.v1.model.NumberNGVariable) ngVariable;
-        return NumberNGVariable.builder()
-            .metadata(ngVariable.getMetadata())
-            .description(ngVariable.getDescription())
-            .name(ngVariable.getName())
-            .required(ngVariable.isRequired())
-            .type(toNGVariableType(ngVariable.getType()))
-            .value(ParameterField.createValueField(numberNGVariable.getValue()))
-            .defaultValue(numberNGVariable.getDefaultValue())
-            .build();
-      default:
-        throw new InvalidRequestException("Variable Type " + ngVariable.getType() + " is invalid");
+  List<NGVariable> toNGVariableList(NGVariableV1Wrapper ngVariableV1Wrapper) {
+    List<NGVariable> variablesList = new ArrayList<>();
+    if (ngVariableV1Wrapper == null || isEmpty(ngVariableV1Wrapper.getMap())) {
+      return variablesList;
     }
-  }
-
-  NGVariableType toNGVariableType(io.harness.spec.server.pipeline.v1.model.NGVariable.TypeEnum typeEnum) {
-    switch (typeEnum) {
-      case STRING:
-        return NGVariableType.STRING;
-      case NUMBER:
-        return NGVariableType.NUMBER;
-      default:
-        throw new InvalidRequestException("Variable Type " + typeEnum + " is invalid");
+    Map<String, NGVariableV1> variables = ngVariableV1Wrapper.getMap();
+    for (Map.Entry<String, NGVariableV1> entry : variables.entrySet()) {
+      switch (entry.getValue().getType()) {
+        case STRING:
+          StringNGVariableV1 stringNGVariableV1 = (StringNGVariableV1) entry.getValue();
+          variablesList.add(StringNGVariable.builder()
+                                .defaultValue(stringNGVariableV1.getDefaultValue())
+                                .value(stringNGVariableV1.getValue())
+                                .name(entry.getKey())
+                                .required(stringNGVariableV1.isRequired())
+                                .description(stringNGVariableV1.getDesc())
+                                .build());
+          break;
+        case NUMBER:
+          NumberNGVariableV1 numberNGVariableV1 = (NumberNGVariableV1) entry.getValue();
+          variablesList.add(NumberNGVariable.builder()
+                                .defaultValue(numberNGVariableV1.getDefaultValue())
+                                .value(numberNGVariableV1.getValue())
+                                .name(entry.getKey())
+                                .required(numberNGVariableV1.isRequired())
+                                .description(numberNGVariableV1.getDesc())
+                                .build());
+          break;
+        case SECRET:
+          SecretNGVariableV1 secretNGVariableV1 = (SecretNGVariableV1) entry.getValue();
+          variablesList.add(SecretNGVariable.builder()
+                                .defaultValue(secretNGVariableV1.getDefaultValue())
+                                .value(secretNGVariableV1.getValue())
+                                .name(entry.getKey())
+                                .required(secretNGVariableV1.isRequired())
+                                .description(secretNGVariableV1.getDesc())
+                                .build());
+          break;
+        default:
+          throw new InvalidRequestException("Variable type " + entry.getValue().getType() + "is invalid");
+      }
     }
-  }
-
-  TriggerEventDataCondition toTriggerEventDataCondition(TriggerConditions triggerConditions) {
-    return TriggerEventDataCondition.builder()
-        .key(triggerConditions.getKey())
-        .operator(toConditionOperator(triggerConditions.getOperator()))
-        .value(triggerConditions.getValue())
-        .build();
-  }
-
-  ConditionOperator toConditionOperator(TriggerConditions.OperatorEnum operatorEnum) {
-    switch (operatorEnum) {
-      case IN:
-        return ConditionOperator.IN;
-      case NOTIN:
-        return ConditionOperator.NOT_IN;
-      case EQUALS:
-        return ConditionOperator.EQUALS;
-      case NOTEQUALS:
-        return ConditionOperator.NOT_EQUALS;
-      case REGEX:
-        return ConditionOperator.REGEX;
-      case CONTAINS:
-        return ConditionOperator.CONTAINS;
-      case DOESNOTCONTAIN:
-        return ConditionOperator.DOES_NOT_CONTAIN;
-      case ENDSWITH:
-        return ConditionOperator.ENDS_WITH;
-      case STARTSWITH:
-        return ConditionOperator.STARTS_WITH;
-      default:
-        throw new InvalidRequestException("Conditional Operator " + operatorEnum + " is invalid");
-    }
-  }
-
-  io.harness.delegate.task.artifacts.ami.AMIFilter toAMIFilter(AMIFilter amiFilter) {
-    return io.harness.delegate.task.artifacts.ami.AMIFilter.builder()
-        .name(amiFilter.getName())
-        .value(amiFilter.getValue())
-        .build();
-  }
-
-  AMITag toAMITag(AMIFilter amiFilter) {
-    return AMITag.builder().name(amiFilter.getName()).value(amiFilter.getValue()).build();
+    return variablesList;
   }
 
   MultiRegionArtifactTriggerSpec toMultiRegionArtifactTriggerSpec(NGTriggerSpecV2 spec) {

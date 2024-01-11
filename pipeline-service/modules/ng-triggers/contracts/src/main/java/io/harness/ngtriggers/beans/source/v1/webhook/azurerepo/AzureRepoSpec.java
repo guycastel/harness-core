@@ -16,20 +16,22 @@ import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.ngtriggers.beans.source.v1.webhook.WebhookTriggerYamlSimplSpec;
 import io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.event.AzureRepoEventSpec;
 import io.harness.ngtriggers.beans.source.v1.webhook.azurerepo.event.AzureRepoTriggerEvent;
-import io.harness.ngtriggers.beans.source.webhook.v2.WebhookTriggerSpecV2;
 import io.harness.ngtriggers.beans.source.webhook.v2.git.GitAware;
 import io.harness.ngtriggers.beans.source.webhook.v2.git.PayloadAware;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AccessLevel;
+import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @OwnedBy(CI)
-public class AzureRepoSpec implements WebhookTriggerSpecV2 {
+@Value
+public class AzureRepoSpec implements WebhookTriggerYamlSimplSpec {
   AzureRepoTriggerEvent type;
 
   @JsonTypeInfo(use = NAME, property = "type", include = EXTERNAL_PROPERTY, visible = true) AzureRepoEventSpec spec;

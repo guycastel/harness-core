@@ -93,6 +93,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -204,10 +205,14 @@ public class PMSPipelineServiceHelper {
   public static void populateFilter(
       List<Criteria> criteriaList, Criteria criteria, @NotNull PipelineFilterPropertiesDto pipelineFilter) {
     if (EmptyPredicate.isNotEmpty(pipelineFilter.getName())) {
-      criteria.and(PipelineEntityKeys.name).is(pipelineFilter.getName());
+      String regex = pipelineFilter.getName();
+      Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+      criteria.and(PipelineEntityKeys.name).regex(pattern);
     }
     if (EmptyPredicate.isNotEmpty(pipelineFilter.getDescription())) {
-      criteria.and(PipelineEntityKeys.description).is(pipelineFilter.getDescription());
+      String regex = pipelineFilter.getDescription();
+      Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+      criteria.and(PipelineEntityKeys.description).regex(pattern);
     }
     if (EmptyPredicate.isNotEmpty(pipelineFilter.getPipelineTags())) {
       addPipelineTagsCriteria(criteriaList, pipelineFilter.getPipelineTags());

@@ -229,7 +229,7 @@ public class PMSPipelineServiceHelperTest extends PipelineServiceTestBase {
     pmsPipelineServiceHelper.populateFilterUsingIdentifier(
         criteriaList, criteria, accountIdentifier, orgIdentifier, projectIdentifier, filterIdentifier);
     Document criteriaObject = criteria.getCriteriaObject();
-    assertThat(criteriaObject.get(PipelineEntityKeys.name)).isEqualTo(pipelineIdentifier);
+    assertThat(criteriaObject.get(PipelineEntityKeys.name).toString()).isEqualTo(pipelineIdentifier);
     assertThat(((List<?>) ((Map<?, ?>) criteriaObject.get(PipelineEntityKeys.identifier)).get("$in")).size())
         .isEqualTo(1);
     assertThat(((List<?>) ((Map<?, ?>) criteriaObject.get(PipelineEntityKeys.identifier)).get("$in"))
@@ -271,7 +271,7 @@ public class PMSPipelineServiceHelperTest extends PipelineServiceTestBase {
             .build();
     PMSPipelineServiceHelper.populateFilter(criteriaList, criteria, pipelineFilter);
     Document criteriaObject = criteria.getCriteriaObject();
-    assertThat(criteriaObject.get(PipelineEntityKeys.name)).isEqualTo(pipelineIdentifier);
+    assertThat(criteriaObject.get(PipelineEntityKeys.name).toString()).isEqualTo(pipelineIdentifier);
     assertThat(((List<?>) ((Map<?, ?>) criteriaObject.get(PipelineEntityKeys.identifier)).get("$in")).size())
         .isEqualTo(1);
     assertThat(((List<?>) ((Map<?, ?>) criteriaObject.get(PipelineEntityKeys.identifier)).get("$in"))

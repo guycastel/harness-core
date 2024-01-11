@@ -34,6 +34,7 @@ import io.harness.ng.core.api.UserGroupService;
 import io.harness.ng.core.dto.RoleAssignmentMetadataDTO;
 import io.harness.ng.core.dto.ScopeSelector;
 import io.harness.ng.core.dto.UserGroupAggregateDTO;
+import io.harness.ng.core.dto.UserGroupFilterDTO;
 import io.harness.ng.core.user.entities.UserGroup;
 import io.harness.ng.core.user.remote.dto.UserMetadataDTO;
 import io.harness.ng.core.user.service.NgUserService;
@@ -78,6 +79,23 @@ public class AggregateUserGroupServiceImpl implements AggregateUserGroupService 
     Page<UserGroup> userGroupPageResponse = userGroupService.list(
         accountIdentifier, orgIdentifier, projectIdentifier, searchTerm, filterType, getPageRequest(pageRequest));
 
+    return getUserGroupAggregateDTOPageResponse(
+        accountIdentifier, orgIdentifier, projectIdentifier, userSize, userGroupPageResponse);
+  }
+
+  @Override
+  public PageResponse<UserGroupAggregateDTO> listAggregateUserGroupsByFilter(
+      PageRequest pageRequest, int userSize, UserGroupFilterDTO userGroupFilterDTO) {
+    Page<UserGroup> userGroupPageResponse =
+        userGroupService.listByViewPermission(userGroupFilterDTO, getPageRequest(pageRequest));
+
+    return getUserGroupAggregateDTOPageResponse(userGroupFilterDTO.getAccountIdentifier(),
+        userGroupFilterDTO.getOrgIdentifier(), userGroupFilterDTO.getProjectIdentifier(), userSize,
+        userGroupPageResponse);
+  }
+
+  private PageResponse<UserGroupAggregateDTO> getUserGroupAggregateDTOPageResponse(String accountIdentifier,
+      String orgIdentifier, String projectIdentifier, int userSize, Page<UserGroup> userGroupPageResponse) {
     List<String> userIdentifiers = getUsersInUserGroup(userGroupPageResponse, userSize);
     Map<String, UserMetadataDTO> userMetadataMap =
         ngUserService.getUserMetadata(userIdentifiers)

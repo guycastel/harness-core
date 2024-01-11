@@ -380,6 +380,25 @@ public class UserGroupServiceImpl implements UserGroupService {
   }
 
   @Override
+  public Page<UserGroup> listByViewPermission(UserGroupFilterDTO userGroupFilterDTO, Pageable pageable) {
+    validateFilter(userGroupFilterDTO);
+    Criteria criteria = createCriteriaWithFilterDTOWithInheritedUG(userGroupFilterDTO);
+    if (!accessControlClient.hasAccess(
+            ResourceScope.of(userGroupFilterDTO.getAccountIdentifier(), userGroupFilterDTO.getOrgIdentifier(),
+                userGroupFilterDTO.getProjectIdentifier()),
+            Resource.of(USERGROUP, null), VIEW_USERGROUP_PERMISSION)) {
+      List<UserGroup> userGroups = userGroupRepository.findAll(criteria, Pageable.unpaged()).getContent();
+      userGroups = getPermittedUserGroups(userGroups);
+      if (isEmpty(userGroups)) {
+        return Page.empty();
+      }
+      criteria.and(UserGroupKeys.identifier)
+          .in(userGroups.stream().map(UserGroup::getIdentifier).collect(Collectors.toList()));
+    }
+    return userGroupRepository.findAll(criteria, pageable);
+  }
+
+  @Override
   public Long countUserGroups(String accountIdentifier) {
     return userGroupRepository.countByAccountIdentifierAndDeletedIsFalse(accountIdentifier);
   }

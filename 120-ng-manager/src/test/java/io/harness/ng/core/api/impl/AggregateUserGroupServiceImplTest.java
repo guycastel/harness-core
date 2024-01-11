@@ -11,6 +11,7 @@ import static io.harness.accesscontrol.principals.PrincipalType.USER_GROUP;
 import static io.harness.annotations.dev.HarnessTeam.PL;
 import static io.harness.rule.OwnerRule.ARVIND;
 import static io.harness.rule.OwnerRule.NAMANG;
+import static io.harness.rule.OwnerRule.RISHABH;
 import static io.harness.rule.OwnerRule.SATHISH;
 import static io.harness.utils.PageUtils.getPageRequest;
 
@@ -40,6 +41,7 @@ import io.harness.ng.beans.PageResponse;
 import io.harness.ng.core.api.UserGroupService;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.ng.core.dto.UserGroupAggregateDTO;
+import io.harness.ng.core.dto.UserGroupFilterDTO;
 import io.harness.ng.core.entities.NotificationSettingConfig;
 import io.harness.ng.core.user.entities.UserGroup;
 import io.harness.ng.core.user.remote.dto.UserMetadataDTO;
@@ -162,6 +164,108 @@ public class AggregateUserGroupServiceImplTest extends CategoryTest {
 
     PageResponse<UserGroupAggregateDTO> response = aggregateUserGroupService.listAggregateUserGroups(pageRequest,
         ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER, null, 2, UserGroupFilterType.EXCLUDE_INHERITED_GROUPS);
+    assertThat(response.getContent()).hasSize(4);
+
+    assertThat(response.getContent().get(0).getUsers().size()).isEqualTo(2);
+    assertThat(
+        response.getContent().get(0).getUsers().stream().map(UserMetadataDTO::getUuid).collect(Collectors.toList()))
+        .containsExactly("u7", "u6");
+    assertThat(response.getContent().get(1).getUsers().size()).isEqualTo(2);
+    assertThat(
+        response.getContent().get(1).getUsers().stream().map(UserMetadataDTO::getUuid).collect(Collectors.toList()))
+        .containsExactly("u8", "u7");
+    assertThat(response.getContent().get(2).getUsers().size()).isEqualTo(1);
+    assertThat(
+        response.getContent().get(2).getUsers().stream().map(UserMetadataDTO::getUuid).collect(Collectors.toList()))
+        .containsExactly("u2");
+    assertThat(response.getContent().get(3).getUsers().size()).isEqualTo(0);
+  }
+
+  @Test
+  @Owner(developers = RISHABH)
+  @Category(UnitTests.class)
+  public void testListAggregateUserGroupsByFilter() throws IOException {
+    UserGroupFilterDTO userGroupFilterDTO = UserGroupFilterDTO.builder()
+                                                .accountIdentifier(ACCOUNT_IDENTIFIER)
+                                                .orgIdentifier(ORG_IDENTIFIER)
+                                                .projectIdentifier(PROJECT_IDENTIFIER)
+                                                .filterType(UserGroupFilterType.EXCLUDE_INHERITED_GROUPS)
+                                                .build();
+
+    PageRequest pageRequest = PageRequest.builder().pageIndex(0).pageSize(2).build();
+    List<NotificationSettingConfig> notificationConfigs = new ArrayList<>();
+    List<String> users1 = Lists.newArrayList("u1", "u2", "u3", "u4", "u5", "u6", "u7");
+    List<String> users2 = Lists.newArrayList("u3", "u4", "u5", "u6", "u7", "u8");
+    List<String> users3 = Lists.newArrayList("u2");
+    List<String> users4 = Lists.newArrayList();
+    List<UserMetadataDTO> users =
+        Lists.newArrayList(getUserMetadata("u1"), getUserMetadata("u2"), getUserMetadata("u3"), getUserMetadata("u4"),
+            getUserMetadata("u5"), getUserMetadata("u6"), getUserMetadata("u7"), getUserMetadata("u8"));
+    // normal usergroups
+    UserGroup ug1 = UserGroup.builder()
+                        .identifier("UG1")
+                        .accountIdentifier(ACCOUNT_IDENTIFIER)
+                        .orgIdentifier(ORG_IDENTIFIER)
+                        .projectIdentifier(PROJECT_IDENTIFIER)
+                        .users(users1)
+                        .notificationConfigs(notificationConfigs)
+                        .build();
+    UserGroup ug2 = UserGroup.builder()
+                        .identifier("UG2")
+                        .accountIdentifier(ACCOUNT_IDENTIFIER)
+                        .orgIdentifier(ORG_IDENTIFIER)
+                        .projectIdentifier(PROJECT_IDENTIFIER)
+                        .users(users2)
+                        .notificationConfigs(notificationConfigs)
+                        .build();
+    // inherited usergroups
+    UserGroup ug3 = UserGroup.builder()
+                        .identifier("UG3")
+                        .accountIdentifier(ACCOUNT_IDENTIFIER)
+                        .orgIdentifier(ORG_IDENTIFIER)
+                        .users(users3)
+                        .notificationConfigs(notificationConfigs)
+                        .build();
+    UserGroup ug4 = UserGroup.builder()
+                        .identifier("UG4")
+                        .accountIdentifier(ACCOUNT_IDENTIFIER)
+                        .users(users4)
+                        .notificationConfigs(notificationConfigs)
+                        .build();
+    List<UserGroup> userGroups = Lists.newArrayList(ug1, ug2, ug3, ug4);
+
+    doReturn(new PageImpl<>(userGroups))
+        .when(userGroupService)
+        .listByViewPermission(userGroupFilterDTO, getPageRequest(pageRequest));
+    Set<PrincipalDTO> principalDTOSet =
+        userGroups.stream()
+            .map(userGroup
+                -> PrincipalDTO.builder()
+                       .identifier(userGroup.getIdentifier())
+                       .type(USER_GROUP)
+                       .scopeLevel(ScopeLevel
+                                       .of(userGroup.getAccountIdentifier(), userGroup.getOrgIdentifier(),
+                                           userGroup.getProjectIdentifier())
+                                       .toString()
+                                       .toLowerCase())
+                       .build())
+            .collect(Collectors.toSet());
+    doReturn(users).when(ngUserService).getUserMetadata(anyList());
+
+    Call<ResponseDTO<RoleAssignmentAggregateResponseDTO>> request = mock(Call.class);
+    doReturn(request)
+        .when(accessControlAdminClient)
+        .getAggregatedFilteredRoleAssignments(ACCOUNT_IDENTIFIER, ORG_IDENTIFIER, PROJECT_IDENTIFIER,
+            RoleAssignmentFilterDTO.builder().principalFilter(principalDTOSet).build());
+    doReturn(Response.success(ResponseDTO.newResponse(RoleAssignmentAggregateResponseDTO.builder()
+                                                          .roles(new ArrayList<>())
+                                                          .resourceGroups(new ArrayList<>())
+                                                          .roleAssignments(new ArrayList<>())
+                                                          .build())))
+        .when(request)
+        .execute();
+    PageResponse<UserGroupAggregateDTO> response =
+        aggregateUserGroupService.listAggregateUserGroupsByFilter(pageRequest, 2, userGroupFilterDTO);
     assertThat(response.getContent()).hasSize(4);
 
     assertThat(response.getContent().get(0).getUsers().size()).isEqualTo(2);

@@ -57,6 +57,7 @@ import io.harness.ng.core.dto.ProjectFilterDTO;
 import io.harness.ng.core.dto.ResponseDTO;
 import io.harness.ng.core.dto.UserGroupAggregateDTO;
 import io.harness.ng.core.dto.UserGroupAggregateFilter;
+import io.harness.ng.core.dto.UserGroupFilterDTO;
 import io.harness.ng.core.entities.Organization.OrganizationKeys;
 import io.harness.ng.core.entities.Project.ProjectKeys;
 import io.harness.ng.core.services.OrganizationService;
@@ -72,6 +73,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import java.util.Optional;
 import java.util.Set;
 import javax.validation.constraints.Max;
@@ -210,6 +212,23 @@ public class NGAggregateResource {
     }
     return ResponseDTO.newResponse(aggregateUserGroupService.listAggregateUserGroups(
         pageRequest, accountIdentifier, orgIdentifier, projectIdentifier, searchTerm, userSize, filterType));
+  }
+
+  @POST
+  @Path("acl/usergroups")
+  @ApiOperation(value = "Get Aggregated Filtered User Group list", nickname = "getFilteredUserGroupAggregateList")
+  public ResponseDTO<PageResponse<UserGroupAggregateDTO>> getFilteredUserGroups(
+      @NotNull @QueryParam(NGCommonEntityConstants.ACCOUNT_KEY) String accountIdentifier,
+      @BeanParam PageRequest pageRequest, @QueryParam("userSize") @DefaultValue("6") @Max(20) int userSize,
+      @RequestBody(
+          description = "User Group Filter", required = true) @Body @NotNull UserGroupFilterDTO userGroupFilterDTO) {
+    if (isEmpty(pageRequest.getSortOrders())) {
+      SortOrder order =
+          SortOrder.Builder.aSortOrder().withField(ProjectKeys.lastModifiedAt, SortOrder.OrderType.DESC).build();
+      pageRequest.setSortOrders(ImmutableList.of(order));
+    }
+    return ResponseDTO.newResponse(
+        aggregateUserGroupService.listAggregateUserGroupsByFilter(pageRequest, userSize, userGroupFilterDTO));
   }
 
   @POST

@@ -15,6 +15,7 @@ import io.harness.ng.beans.PageRequest;
 import io.harness.ng.beans.PageResponse;
 import io.harness.ng.core.dto.ScopeSelector;
 import io.harness.ng.core.dto.UserGroupAggregateDTO;
+import io.harness.ng.core.dto.UserGroupFilterDTO;
 import io.harness.ng.core.usergroups.filter.UserGroupFilterType;
 
 import java.util.List;
@@ -26,6 +27,10 @@ public interface AggregateUserGroupService {
   PageResponse<UserGroupAggregateDTO> listAggregateUserGroups(@NotNull PageRequest pageRequest,
       @NotEmpty String accountIdentifier, String orgIdentifier, String projectIdentifier, String searchTerm,
       int userSize, UserGroupFilterType filterType);
+
+  PageResponse<UserGroupAggregateDTO> listAggregateUserGroupsByFilter(
+      PageRequest pageRequest, int userSize, UserGroupFilterDTO userGroupFilterDTO);
+
   PageResponse<UserGroupAggregateDTO> listAggregateUserGroupsForUser(@NotNull PageRequest pageRequest,
       @NotEmpty String accountIdentifier, String orgIdentifier, String projectIdentifier,
       List<ScopeSelector> scopeFilter, String userIdentifier, String searchTerm, int userCount);

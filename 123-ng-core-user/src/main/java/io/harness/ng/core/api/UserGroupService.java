@@ -143,6 +143,8 @@ public interface UserGroupService {
    */
   List<UserGroup> getPermittedUserGroups(List<UserGroup> userGroups);
 
+  Page<UserGroup> listByViewPermission(UserGroupFilterDTO userGroupFilterDTO, Pageable pageable);
+
   Long countUserGroups(String accountIdentifier);
 
   List<UserGroup> getUserGroupsForUser(String accountIdentifier, String userId);

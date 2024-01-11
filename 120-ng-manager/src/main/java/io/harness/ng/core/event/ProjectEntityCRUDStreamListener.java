@@ -20,6 +20,7 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 import io.harness.beans.ScopeInfo;
+import io.harness.beans.ScopeLevel;
 import io.harness.cdng.envGroup.services.EnvironmentGroupService;
 import io.harness.cdng.gitops.service.ClusterService;
 import io.harness.eventsframework.consumer.Message;
@@ -211,20 +212,26 @@ public class ProjectEntityCRUDStreamListener implements MessageListener {
   private boolean processOrganizationDeleteEvent(OrganizationEntityChangeDTO organizationEntityChangeDTO) {
     String accountIdentifier = organizationEntityChangeDTO.getAccountIdentifier();
     String orgIdentifier = organizationEntityChangeDTO.getIdentifier();
+    String orgUniqueId = organizationEntityChangeDTO.getUniqueId();
     Criteria criteria = Criteria.where(ProjectKeys.accountIdentifier)
                             .is(accountIdentifier)
-                            .and(ProjectKeys.orgIdentifier)
-                            .is(orgIdentifier)
+                            .and(ProjectKeys.parentUniqueId)
+                            .is(orgUniqueId)
                             .and(ProjectKeys.deleted)
                             .ne(Boolean.TRUE);
     List<Project> projects = projectService.list(criteria);
     AtomicBoolean success = new AtomicBoolean(true);
+    ScopeInfo scopeInfo = ScopeInfo.builder()
+                              .accountIdentifier(accountIdentifier)
+                              .orgIdentifier(orgIdentifier)
+                              .uniqueId(orgUniqueId)
+                              .scopeType(ScopeLevel.ORGANIZATION)
+                              .build();
     projects.forEach(project -> {
-      if (!projectService.delete(
-              project.getAccountIdentifier(), project.getOrgIdentifier(), project.getIdentifier(), null)) {
+      if (!projectService.delete(project.getAccountIdentifier(), scopeInfo, project.getIdentifier(), null)) {
         log.error(String.format(
             "Delete operation failed for project with accountIdentifier %s, orgIdentifier %s and identifier %s",
-            project.getAccountIdentifier(), project.getOrgIdentifier(), project.getIdentifier()));
+            project.getAccountIdentifier(), scopeInfo.getOrgIdentifier(), project.getIdentifier()));
         success.set(false);
       }
     });
@@ -264,8 +271,7 @@ public class ProjectEntityCRUDStreamListener implements MessageListener {
     List<Project> projects = projectService.list(criteria);
     AtomicBoolean success = new AtomicBoolean(true);
     projects.forEach(project -> {
-      if (!projectService.restore(project.getAccountIdentifier(), scopeInfo.orElseThrow(), project.getOrgIdentifier(),
-              project.getIdentifier())) {
+      if (!projectService.restore(project.getAccountIdentifier(), scopeInfo.orElseThrow(), project.getIdentifier())) {
         log.error(String.format(
             "Restore operation failed for project with accountIdentifier %s, orgIdentifier %s and identifier %s",
             project.getAccountIdentifier(), project.getOrgIdentifier(), project.getIdentifier()));

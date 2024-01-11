@@ -42,6 +42,7 @@ import io.harness.accesscontrol.clients.AccessControlClient;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.ScopeInfo;
 import io.harness.beans.ScopeInfoResolutionExemptedApi;
+import io.harness.beans.ScopeLevel;
 import io.harness.beans.SortOrder;
 import io.harness.exception.EntityNotFoundException;
 import io.harness.favorites.ResourceType;
@@ -267,6 +268,7 @@ public class ProjectResource {
         @io.swagger.v3.oas.annotations.responses.
         ApiResponse(responseCode = "default", description = "Paginated list of Projects")
       })
+  @ScopeInfoResolutionExemptedApi
   @Timed
   @ResponseMetered
   public ResponseDTO<PageResponse<ProjectResponse>>
@@ -367,8 +369,8 @@ public class ProjectResource {
         ResourceScope.of(accountIdentifier, orgIdentifier, moveProjectRequest.getDestinationOrgIdentifier()),
         Resource.of(ORGANIZATION, moveProjectRequest.getDestinationOrgIdentifier()), CREATE_PROJECT_PERMISSION);
     Optional<ScopeInfo> scopeInfo = scopeResolverService.getScopeInfo(accountIdentifier, orgIdentifier, null);
-    return ResponseDTO.newResponse(projectService.moveProject(accountIdentifier, scopeInfo.orElseThrow(), orgIdentifier,
-        identifier, moveProjectRequest.getDestinationOrgIdentifier()));
+    return ResponseDTO.newResponse(projectService.moveProject(
+        accountIdentifier, scopeInfo.orElseThrow(), identifier, moveProjectRequest.getDestinationOrgIdentifier()));
   }
 
   @DELETE
@@ -426,8 +428,13 @@ public class ProjectResource {
           NGResourceFilterConstants.MODULE_TYPE_KEY) ModuleType moduleType,
       @Parameter(description = "Search Term") @QueryParam(NGResourceFilterConstants.SEARCH_TERM_KEY) String searchTerm,
       @Context ScopeInfo scopeInfo) {
+    ScopeInfo accountScopeInfo = ScopeInfo.builder()
+                                     .accountIdentifier(accountIdentifier)
+                                     .scopeType(ScopeLevel.ACCOUNT)
+                                     .uniqueId(accountIdentifier)
+                                     .build();
     Set<String> permittedOrgIds =
-        organizationService.getPermittedOrganizations(accountIdentifier, scopeInfo, orgIdentifier);
+        organizationService.getPermittedOrganizations(accountIdentifier, accountScopeInfo, orgIdentifier);
     ProjectFilterDTO projectFilterDTO = getProjectFilterDTO(searchTerm, permittedOrgIds, hasModule, moduleType);
     return ResponseDTO.newResponse(projectService.listPermittedProjects(accountIdentifier, projectFilterDTO));
   }
@@ -460,8 +467,13 @@ public class ProjectResource {
           NGResourceFilterConstants.START_TIME) long startInterval,
       @Parameter(description = "End time") @NotNull @QueryParam(NGResourceFilterConstants.END_TIME) long endInterval,
       @Context ScopeInfo scopeInfo) {
+    ScopeInfo accountScopeInfo = ScopeInfo.builder()
+                                     .accountIdentifier(accountIdentifier)
+                                     .scopeType(ScopeLevel.ACCOUNT)
+                                     .uniqueId(accountIdentifier)
+                                     .build();
     Set<String> permittedOrgIds =
-        organizationService.getPermittedOrganizations(accountIdentifier, scopeInfo, orgIdentifier);
+        organizationService.getPermittedOrganizations(accountIdentifier, accountScopeInfo, orgIdentifier);
     ProjectFilterDTO projectFilterDTO = getProjectFilterDTO(searchTerm, permittedOrgIds, hasModule, moduleType);
     return ResponseDTO.newResponse(
         projectService.permittedProjectsCount(accountIdentifier, projectFilterDTO, startInterval, endInterval));

@@ -61,8 +61,6 @@ import io.harness.gitsync.common.service.YamlGitConfigService;
 import io.harness.logging.AutoLogContext;
 import io.harness.ng.beans.PageRequest;
 import io.harness.ng.beans.PageResponse;
-import io.harness.ng.core.OrgIdentifier;
-import io.harness.ng.core.ProjectIdentifier;
 import io.harness.ng.core.api.DefaultUserGroupService;
 import io.harness.ng.core.beans.ProjectsPerOrganizationCount;
 import io.harness.ng.core.beans.ProjectsPerOrganizationCount.ProjectsPerOrganizationCountKeys;
@@ -86,6 +84,7 @@ import io.harness.ng.core.remote.ProjectMapper;
 import io.harness.ng.core.remote.utils.ScopeAccessHelper;
 import io.harness.ng.core.services.OrganizationService;
 import io.harness.ng.core.services.ProjectService;
+import io.harness.ng.core.services.ScopeInfoService;
 import io.harness.ng.core.user.entities.UserMembership;
 import io.harness.ng.core.user.entities.UserMembership.UserMembershipKeys;
 import io.harness.ng.core.user.service.NgUserService;
@@ -156,6 +155,7 @@ public class ProjectServiceImpl implements ProjectService {
   private final Cache<String, ScopeInfo> scopeInfoCache;
   private final ScopeInfoHelper scopeInfoHelper;
   private final HarnessSMManager harnessSMManager;
+  private final ScopeInfoService scopeResolverService;
 
   @Inject
   public ProjectServiceImpl(ProjectRepository projectRepository, OrganizationService organizationService,
@@ -165,7 +165,7 @@ public class ProjectServiceImpl implements ProjectService {
       FeatureFlagService featureFlagService, DefaultUserGroupService defaultUserGroupService,
       FavoritesService favoritesService, UserHelperService userHelperService,
       @Named(ProjectService.PROJECT_SCOPE_INFO_DATA_CACHE_KEY) Cache<String, ScopeInfo> scopeInfoCache,
-      ScopeInfoHelper scopeInfoHelper, HarnessSMManager harnessSMManager) {
+      ScopeInfoHelper scopeInfoHelper, HarnessSMManager harnessSMManager, ScopeInfoService scopeResolverService) {
     this.projectRepository = projectRepository;
     this.organizationService = organizationService;
     this.transactionTemplate = transactionTemplate;
@@ -182,6 +182,7 @@ public class ProjectServiceImpl implements ProjectService {
     this.scopeInfoCache = scopeInfoCache;
     this.scopeInfoHelper = scopeInfoHelper;
     this.harnessSMManager = harnessSMManager;
+    this.scopeResolverService = scopeResolverService;
   }
 
   @Override
@@ -348,8 +349,9 @@ public class ProjectServiceImpl implements ProjectService {
       while (iterator.hasNext()) {
         UserMembership userMembership = iterator.next();
         Scope scope = userMembership.getScope();
-        criteriaList.add(Criteria.where(ProjectKeys.orgIdentifier)
-                             .is(scope.getOrgIdentifier())
+        Optional<ScopeInfo> scopeInfo = scopeResolverService.getScopeInfo(accountId, scope.getOrgIdentifier(), null);
+        criteriaList.add(Criteria.where(ProjectKeys.parentUniqueId)
+                             .is(scopeInfo.map(ScopeInfo::getUniqueId).orElseThrow())
                              .and(ProjectKeys.identifier)
                              .is(scope.getProjectIdentifier())
                              .and(ProjectKeys.deleted)
@@ -382,8 +384,9 @@ public class ProjectServiceImpl implements ProjectService {
       while (iterator.hasNext()) {
         UserMembership userMembership = iterator.next();
         Scope scope = userMembership.getScope();
-        criteriaList.add(Criteria.where(ProjectKeys.orgIdentifier)
-                             .is(scope.getOrgIdentifier())
+        Optional<ScopeInfo> scopeInfo = scopeResolverService.getScopeInfo(accountId, scope.getOrgIdentifier(), null);
+        criteriaList.add(Criteria.where(ProjectKeys.parentUniqueId)
+                             .is(scopeInfo.map(ScopeInfo::getUniqueId).orElseThrow())
                              .and(ProjectKeys.identifier)
                              .is(scope.getProjectIdentifier())
                              .and(ProjectKeys.deleted)
@@ -416,8 +419,9 @@ public class ProjectServiceImpl implements ProjectService {
       while (iterator.hasNext()) {
         UserMembership userMembership = iterator.next();
         Scope scope = userMembership.getScope();
-        criteriaList.add(Criteria.where(ProjectKeys.orgIdentifier)
-                             .is(scope.getOrgIdentifier())
+        Optional<ScopeInfo> scopeInfo = scopeResolverService.getScopeInfo(accountId, scope.getOrgIdentifier(), null);
+        criteriaList.add(Criteria.where(ProjectKeys.parentUniqueId)
+                             .is(scopeInfo.map(ScopeInfo::getUniqueId).orElseThrow())
                              .and(ProjectKeys.identifier)
                              .is(scope.getProjectIdentifier()));
       }
@@ -482,14 +486,21 @@ public class ProjectServiceImpl implements ProjectService {
         USER);
   }
 
-  public boolean moveProject(String accountIdentifier, ScopeInfo scopeInfo, @OrgIdentifier String orgIdentifier,
-      @ProjectIdentifier String identifier, String destinationOrgIdentifier) {
+  public boolean moveProject(
+      String accountIdentifier, ScopeInfo scopeInfo, String identifier, String destinationOrgIdentifier) {
     Optional<Organization> destinationOrgOptional =
         organizationService.get(accountIdentifier, destinationOrgIdentifier);
     if (destinationOrgOptional.isEmpty()) {
-      throw new EntityNotFoundException(String.format("Organization with identifier [%s] not found", orgIdentifier));
+      throw new EntityNotFoundException(
+          String.format("Organization with identifier [%s] not found", destinationOrgIdentifier));
     }
-    Optional<Project> duplicateProjectCheck = get(accountIdentifier, destinationOrgIdentifier, identifier);
+    ScopeInfo orgScopeInfo = ScopeInfo.builder()
+                                 .accountIdentifier(accountIdentifier)
+                                 .orgIdentifier(destinationOrgOptional.get().getIdentifier())
+                                 .uniqueId(destinationOrgOptional.get().getUniqueId())
+                                 .scopeType(ScopeLevel.ORGANIZATION)
+                                 .build();
+    Optional<Project> duplicateProjectCheck = get(accountIdentifier, orgScopeInfo, identifier);
     if (duplicateProjectCheck.isPresent()) {
       throw new DuplicateFieldException(
           String.format("A project with identifier [%s] and orgIdentifier [%s] is already present",
@@ -528,8 +539,8 @@ public class ProjectServiceImpl implements ProjectService {
         return updatedProject.getParentUniqueId().equals(destinationOrgOptional.get().getUniqueId());
       }));
     }
-    throw new InvalidRequestException(
-        String.format("Project with identifier [%s] and orgIdentifier [%s] not found", identifier, orgIdentifier),
+    throw new InvalidRequestException(String.format("Project with identifier [%s] and orgIdentifier [%s] not found",
+                                          identifier, scopeInfo.getOrgIdentifier()),
         USER);
   }
 
@@ -613,7 +624,7 @@ public class ProjectServiceImpl implements ProjectService {
   }
 
   private Criteria getCriteriaForPermittedProjects(String accountIdentifier, ProjectFilterDTO projectFilterDTO) {
-    Criteria criteria = createProjectFilterCriteria(
+    Criteria criteria = createProjectFilterCriteria(accountIdentifier,
         Criteria.where(ProjectKeys.accountIdentifier).is(accountIdentifier).and(ProjectKeys.deleted).is(FALSE),
         projectFilterDTO);
     List<Project> projects = projectRepository.findAll(criteria);
@@ -634,7 +645,7 @@ public class ProjectServiceImpl implements ProjectService {
 
   public ActiveProjectsCountDTO permittedProjectsCount(
       String accountIdentifier, ProjectFilterDTO projectFilterDTO, long startInterval, long endInterval) {
-    Criteria criteria = createProjectFilterCriteria(
+    Criteria criteria = createProjectFilterCriteria(accountIdentifier,
         Criteria.where(ProjectKeys.accountIdentifier).is(accountIdentifier).and(ProjectKeys.deleted).is(FALSE),
         projectFilterDTO);
     List<Scope> projects = projectRepository.findAllProjects(criteria);
@@ -646,11 +657,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     criteria = Criteria.where(ProjectKeys.accountIdentifier).is(accountIdentifier);
     Criteria[] subCriteria = permittedProjects.stream()
-                                 .map(project
-                                     -> Criteria.where(ProjectKeys.orgIdentifier)
-                                            .is(project.getOrgIdentifier())
-                                            .and(ProjectKeys.identifier)
-                                            .is(project.getProjectIdentifier()))
+                                 .map(project -> {
+                                   Optional<ScopeInfo> scopeInfo = scopeResolverService.getScopeInfo(
+                                       accountIdentifier, project.getOrgIdentifier(), null);
+                                   return Criteria.where(ProjectKeys.parentUniqueId)
+                                       .is(scopeInfo.map(ScopeInfo::getUniqueId).orElseThrow())
+                                       .and(ProjectKeys.identifier)
+                                       .is(project.getProjectIdentifier());
+                                 })
                                  .toArray(Criteria[] ::new);
     Criteria accessibleProjectCriteria = criteria.orOperator(subCriteria);
     Criteria deletedFalseCriteria = Criteria.where(ProjectKeys.createdAt)
@@ -678,13 +692,21 @@ public class ProjectServiceImpl implements ProjectService {
     return projectRepository.findAll(criteria);
   }
 
-  private Criteria createProjectFilterCriteria(Criteria criteria, ProjectFilterDTO projectFilterDTO) {
+  private Criteria createProjectFilterCriteria(
+      String accountIdentifier, Criteria criteria, ProjectFilterDTO projectFilterDTO) {
     if (projectFilterDTO == null) {
       return criteria;
     }
 
     if (projectFilterDTO.getOrgIdentifiers() != null && isNotEmpty(projectFilterDTO.getOrgIdentifiers())) {
-      criteria.and(ProjectKeys.orgIdentifier).in(projectFilterDTO.getOrgIdentifiers());
+      Set<String> parentUniqueIds = projectFilterDTO.getOrgIdentifiers()
+                                        .stream()
+                                        .map(orgIdentifier
+                                            -> scopeResolverService.getScopeInfo(accountIdentifier, orgIdentifier, null)
+                                                   .map(ScopeInfo::getUniqueId)
+                                                   .orElseThrow())
+                                        .collect(Collectors.toSet());
+      criteria.and(ProjectKeys.parentUniqueId).in(parentUniqueIds);
     }
 
     if (projectFilterDTO.getModuleType() != null) {
@@ -704,35 +726,6 @@ public class ProjectServiceImpl implements ProjectService {
       criteria.and(ProjectKeys.identifier).in(projectFilterDTO.getIdentifiers());
     }
     return criteria;
-  }
-
-  @Override
-  public boolean delete(String accountIdentifier, String orgIdentifier, String projectIdentifier, Long version) {
-    try (AutoLogContext ignore1 =
-             new NgAutoLogContext(projectIdentifier, orgIdentifier, accountIdentifier, OVERRIDE_ERROR)) {
-      return Failsafe.with(DEFAULT_RETRY_POLICY).get(() -> transactionTemplate.execute(status -> {
-        Project deletedProject =
-            projectRepository.hardDelete(accountIdentifier, orgIdentifier, projectIdentifier, version);
-        scopeInfoCache.remove(
-            scopeInfoHelper.getScopeInfoCacheKey(accountIdentifier, orgIdentifier, projectIdentifier));
-        if (isNull(deletedProject)) {
-          log.error(String.format("Project with identifier [%s] could not be deleted as it does not exist",
-              projectIdentifier, orgIdentifier));
-          throw new EntityNotFoundException(
-              String.format("Project with identifier [%s] does not exist in the specified scope", projectIdentifier));
-        }
-
-        log.info(String.format("Project with identifier [%s] and orgIdentifier [%s] was successfully deleted",
-            projectIdentifier, orgIdentifier));
-        yamlGitConfigService.deleteAll(accountIdentifier, orgIdentifier, projectIdentifier);
-        outboxService.save(
-            new ProjectDeleteEvent(deletedProject.getAccountIdentifier(), ProjectMapper.writeDTO(deletedProject)));
-        instrumentationHelper.sendProjectDeleteEvent(deletedProject, accountIdentifier);
-        favoritesService.deleteFavorites(
-            accountIdentifier, orgIdentifier, null, ResourceType.PROJECT.toString(), projectIdentifier);
-        return true;
-      }));
-    }
   }
 
   @Override
@@ -764,7 +757,7 @@ public class ProjectServiceImpl implements ProjectService {
   }
 
   @Override
-  public boolean restore(String accountIdentifier, ScopeInfo scopeInfo, String orgIdentifier, String identifier) {
+  public boolean restore(String accountIdentifier, ScopeInfo scopeInfo, String identifier) {
     validateParentOrgExists(accountIdentifier, scopeInfo.getOrgIdentifier());
     return Failsafe.with(DEFAULT_RETRY_POLICY).get(() -> transactionTemplate.execute(status -> {
       Project restoredProject = projectRepository.restore(accountIdentifier, scopeInfo.getUniqueId(), identifier);

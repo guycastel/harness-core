@@ -19,8 +19,6 @@ import static io.harness.rule.OwnerRule.KARAN;
 import static io.harness.rule.OwnerRule.MEENAKSHI;
 import static io.harness.rule.OwnerRule.MEET;
 import static io.harness.rule.OwnerRule.NISHANT;
-import static io.harness.rule.OwnerRule.TEJAS;
-import static io.harness.rule.OwnerRule.VIKAS_M;
 import static io.harness.rule.OwnerRule.VINICIUS;
 import static io.harness.utils.PageTestUtils.getPage;
 
@@ -34,7 +32,6 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -74,6 +71,7 @@ import io.harness.ng.core.event.HarnessSMManager;
 import io.harness.ng.core.remote.ProjectMapper;
 import io.harness.ng.core.remote.utils.ScopeAccessHelper;
 import io.harness.ng.core.services.OrganizationService;
+import io.harness.ng.core.services.ScopeInfoService;
 import io.harness.ng.core.user.entities.UserMembership;
 import io.harness.ng.core.user.service.NgUserService;
 import io.harness.outbox.api.OutboxService;
@@ -88,6 +86,7 @@ import io.harness.springdata.HTransactionTemplate;
 import io.harness.telemetry.helpers.ProjectInstrumentationHelper;
 import io.harness.utils.UserHelperService;
 
+import com.mongodb.BasicDBList;
 import io.dropwizard.jersey.validation.JerseyViolationException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,6 +145,7 @@ public class ProjectServiceImplTest extends CategoryTest {
   @Mock private ScopeInfoHelper scopeInfoHelper;
   @Mock private HarnessSMManager harnessSMManager;
   @Rule public ExpectedException exceptionRule = ExpectedException.none();
+  @Mock private ScopeInfoService scopeResolverService;
 
   @Before
   public void setup() {
@@ -154,7 +154,7 @@ public class ProjectServiceImplTest extends CategoryTest {
     projectService = spy(new ProjectServiceImpl(projectRepository, organizationService, transactionTemplate,
         outboxService, ngUserService, accessControlClient, scopeAccessHelper, instrumentationHelper,
         yamlGitConfigService, featureFlagService, defaultUserGroupService, favoritesService, userHelperService,
-        scopeInfoCache, scopeInfoHelper, harnessSMManager));
+        scopeInfoCache, scopeInfoHelper, harnessSMManager, scopeResolverService));
     when(scopeAccessHelper.getPermittedScopes(any())).then(returnsFirstArg());
   }
 
@@ -574,10 +574,19 @@ public class ProjectServiceImplTest extends CategoryTest {
   public void testListProject() {
     String accountIdentifier = randomAlphabetic(10);
     String orgIdentifier = randomAlphabetic(10);
+    String orgUniqueId = randomAlphabetic(10);
     String searchTerm = randomAlphabetic(5);
     ArgumentCaptor<Criteria> criteriaArgumentCaptor = ArgumentCaptor.forClass(Criteria.class);
     when(projectRepository.findAll(any(Criteria.class))).thenReturn(Collections.emptyList());
     when(projectRepository.findAll(any(Criteria.class), any(Pageable.class))).thenReturn(getPage(emptyList(), 0));
+
+    ScopeInfo scopeInfo = ScopeInfo.builder()
+                              .accountIdentifier(accountIdentifier)
+                              .scopeType(ScopeLevel.ORGANIZATION)
+                              .orgIdentifier(orgIdentifier)
+                              .uniqueId(orgUniqueId)
+                              .build();
+    when(scopeResolverService.getScopeInfo(accountIdentifier, orgIdentifier, null)).thenReturn(Optional.of(scopeInfo));
 
     Set<String> orgIdentifiers = Collections.singleton(orgIdentifier);
     Page<Project> projectPage = projectService.listPermittedProjects(accountIdentifier, unpaged(),
@@ -591,7 +600,7 @@ public class ProjectServiceImplTest extends CategoryTest {
     System.out.println(criteriaObject);
     assertEquals(5, criteriaObject.size());
     assertEquals(accountIdentifier, criteriaObject.get(ProjectKeys.accountIdentifier));
-    assertTrue(criteriaObject.containsKey(ProjectKeys.orgIdentifier));
+    assertTrue(criteriaObject.containsKey(ProjectKeys.parentUniqueId));
     assertTrue(criteriaObject.containsKey(ProjectKeys.deleted));
     assertTrue(criteriaObject.containsKey(ProjectKeys.modules));
 
@@ -604,6 +613,7 @@ public class ProjectServiceImplTest extends CategoryTest {
   public void testlistPermittedProjects() {
     String accountIdentifier = randomAlphabetic(10);
     String orgIdentifier = randomAlphabetic(10);
+    String orgUniqueId = randomAlphabetic(10);
     String searchTerm = randomAlphabetic(5);
     Project project = Project.builder()
                           .id(randomAlphabetic(10))
@@ -621,13 +631,23 @@ public class ProjectServiceImplTest extends CategoryTest {
     when(projectRepository.findAllWithCollation(any(Criteria.class), any(Pageable.class)))
         .thenReturn(getPage(List.of(project), 1));
     when(scopeAccessHelper.getPermittedScopes(any())).thenReturn(List.of(scope));
-
+    ScopeInfo scopeInfo = ScopeInfo.builder()
+                              .accountIdentifier(accountIdentifier)
+                              .scopeType(ScopeLevel.ORGANIZATION)
+                              .orgIdentifier(orgIdentifier)
+                              .uniqueId(orgUniqueId)
+                              .build();
+    when(scopeResolverService.getScopeInfo(accountIdentifier, orgIdentifier, null)).thenReturn(Optional.of(scopeInfo));
     Set<String> orgIdentifiers = Collections.singleton(orgIdentifier);
     Page<Project> projectPage = projectService.listPermittedProjects(accountIdentifier, unpaged(),
         ProjectFilterDTO.builder().orgIdentifiers(orgIdentifiers).searchTerm(searchTerm).moduleType(CD).build(),
         Boolean.FALSE);
 
-    verify(projectRepository, times(1)).findAll(any(Criteria.class));
+    ArgumentCaptor<Criteria> finaAllCriteriaArgumentCaptor = ArgumentCaptor.forClass(Criteria.class);
+    verify(projectRepository, times(1)).findAll(finaAllCriteriaArgumentCaptor.capture());
+    Criteria finaAllCriteriaArgumentCaptorValue = finaAllCriteriaArgumentCaptor.getValue();
+    assertThat(finaAllCriteriaArgumentCaptorValue.getCriteriaObject()).containsKey(ProjectKeys.parentUniqueId);
+
     verify(projectRepository, times(1)).findAllWithCollation(criteriaArgumentCaptor.capture(), any(Pageable.class));
 
     Criteria criteria = criteriaArgumentCaptor.getValue();
@@ -646,6 +666,7 @@ public class ProjectServiceImplTest extends CategoryTest {
   public void testListFavoriteProjects() {
     String accountIdentifier = randomAlphabetic(10);
     String orgIdentifier = randomAlphabetic(10);
+    String orgUniqueId = randomAlphabetic(10);
     String searchTerm = randomAlphabetic(5);
     Project project = Project.builder()
                           .id(randomAlphabetic(10))
@@ -674,11 +695,24 @@ public class ProjectServiceImplTest extends CategoryTest {
                                 .resourceType(ResourceType.PROJECT)
                                 .resourceIdentifier(project2.getIdentifier())
                                 .build()));
+
+    ScopeInfo scopeInfo = ScopeInfo.builder()
+                              .accountIdentifier(accountIdentifier)
+                              .scopeType(ScopeLevel.ORGANIZATION)
+                              .orgIdentifier(orgIdentifier)
+                              .uniqueId(orgUniqueId)
+                              .build();
+    when(scopeResolverService.getScopeInfo(accountIdentifier, orgIdentifier, null)).thenReturn(Optional.of(scopeInfo));
     Set<String> orgIdentifiers = Collections.singleton(orgIdentifier);
     Page<Project> projectPage = projectService.listPermittedProjects(accountIdentifier, unpaged(),
         ProjectFilterDTO.builder().orgIdentifiers(orgIdentifiers).searchTerm(searchTerm).moduleType(CD).build(),
         Boolean.TRUE);
-    verify(projectRepository, times(1)).findAll(any(Criteria.class));
+
+    ArgumentCaptor<Criteria> finaAllCriteriaArgumentCaptor = ArgumentCaptor.forClass(Criteria.class);
+    verify(projectRepository, times(1)).findAll(finaAllCriteriaArgumentCaptor.capture());
+    Criteria finaAllCriteriaArgumentCaptorValue = finaAllCriteriaArgumentCaptor.getValue();
+    assertThat(finaAllCriteriaArgumentCaptorValue.getCriteriaObject()).containsKey(ProjectKeys.parentUniqueId);
+
     verify(projectRepository, times(1)).findAllWithCollation(criteriaArgumentCaptor.capture(), any(Pageable.class));
 
     Criteria criteria = criteriaArgumentCaptor.getValue();
@@ -720,33 +754,54 @@ public class ProjectServiceImplTest extends CategoryTest {
   @Owner(developers = ARVIND)
   @Category(UnitTests.class)
   public void testListProjects() {
+    String accId1 = "accId1";
+    String orgId1 = "orgId1";
+    String orgUniqueId1 = "orgUniqueId1";
+    String orgId2 = "orgId2";
+    String orgUniqueId2 = "orgUniqueId2";
     String user = generateUuid();
     Principal principal = mock(Principal.class);
     when(principal.getType()).thenReturn(PrincipalType.USER);
     when(principal.getName()).thenReturn(user);
     SourcePrincipalContextBuilder.setSourcePrincipal(principal);
     Project proj1 =
-        Project.builder().name("P1").accountIdentifier("accId1").orgIdentifier("orgId1").identifier("id1").build();
+        Project.builder().name("P1").accountIdentifier(accId1).orgIdentifier(orgId1).identifier("id1").build();
     Project proj2 =
-        Project.builder().name("P2").accountIdentifier("accId1").orgIdentifier("orgId2").identifier("id2").build();
+        Project.builder().name("P2").accountIdentifier(accId1).orgIdentifier(orgId2).identifier("id2").build();
     List<Project> projects = Arrays.asList(proj1, proj2);
     UserMembership userMembership1 =
         UserMembership.builder()
             .userId(user)
-            .scope(Scope.builder().accountIdentifier("accId1").orgIdentifier("orgId1").projectIdentifier("id1").build())
+            .scope(Scope.builder().accountIdentifier(accId1).orgIdentifier(orgId1).projectIdentifier("id1").build())
             .build();
     UserMembership userMembership2 =
         UserMembership.builder()
             .userId(user)
-            .scope(Scope.builder().accountIdentifier("accId1").orgIdentifier("orgId2").projectIdentifier("id2").build())
+            .scope(Scope.builder().accountIdentifier(accId1).orgIdentifier(orgId2).projectIdentifier("id2").build())
             .build();
     doReturn(createCloseableIterator(Arrays.asList(userMembership1, userMembership2).iterator()))
         .when(ngUserService)
         .streamUserMemberships(any());
     doReturn(projects).when(projectService).list(any());
     doReturn(new PageImpl<>(projects, Pageable.unpaged(), 100)).when(projectRepository).findAll(any(), any());
+
+    ScopeInfo scopeInfo1 = ScopeInfo.builder()
+                               .accountIdentifier(accId1)
+                               .scopeType(ScopeLevel.ORGANIZATION)
+                               .orgIdentifier(orgId1)
+                               .uniqueId(orgUniqueId1)
+                               .build();
+    when(scopeResolverService.getScopeInfo(accId1, orgId1, null)).thenReturn(Optional.of(scopeInfo1));
+    ScopeInfo scopeInfo2 = ScopeInfo.builder()
+                               .accountIdentifier(accId1)
+                               .scopeType(ScopeLevel.ORGANIZATION)
+                               .orgIdentifier(orgId2)
+                               .uniqueId(orgUniqueId2)
+                               .build();
+    when(scopeResolverService.getScopeInfo(accId1, orgId2, null)).thenReturn(Optional.of(scopeInfo2));
+
     PageResponse<ProjectDTO> projectsResponse =
-        projectService.listProjectsForUser(user, "account", PageRequest.builder().pageSize(2).pageIndex(0).build());
+        projectService.listProjectsForUser(user, accId1, PageRequest.builder().pageSize(2).pageIndex(0).build());
     assertNotNull(projectsResponse);
     assertEquals(
         projectsResponse.getContent(), projects.stream().map(ProjectMapper::writeDTO).collect(Collectors.toList()));
@@ -756,77 +811,63 @@ public class ProjectServiceImplTest extends CategoryTest {
   @Owner(developers = MEET)
   @Category(UnitTests.class)
   public void testListAllProjectsForUser() {
+    String accId1 = "accId1";
+    String orgId1 = "orgId1";
+    String orgUniqueId1 = "orgUniqueId1";
+    String orgId2 = "orgId2";
+    String orgUniqueId2 = "orgUniqueId2";
     String user = generateUuid();
     Principal principal = mock(Principal.class);
     when(principal.getType()).thenReturn(PrincipalType.USER);
     when(principal.getName()).thenReturn(user);
     SourcePrincipalContextBuilder.setSourcePrincipal(principal);
     Project proj1 =
-        Project.builder().name("P1").accountIdentifier("accId1").orgIdentifier("orgId1").identifier("id1").build();
+        Project.builder().name("P1").accountIdentifier(accId1).orgIdentifier(orgId1).identifier("id1").build();
     Project proj2 =
-        Project.builder().name("P2").accountIdentifier("accId1").orgIdentifier("orgId2").identifier("id2").build();
+        Project.builder().name("P2").accountIdentifier(accId1).orgIdentifier(orgId2).identifier("id2").build();
     List<Project> projects = Arrays.asList(proj1, proj2);
     UserMembership userMembership1 =
         UserMembership.builder()
             .userId(user)
-            .scope(Scope.builder().accountIdentifier("accId1").orgIdentifier("orgId1").projectIdentifier("id1").build())
+            .scope(Scope.builder().accountIdentifier(accId1).orgIdentifier(orgId1).projectIdentifier("id1").build())
             .build();
     UserMembership userMembership2 =
         UserMembership.builder()
             .userId(user)
-            .scope(Scope.builder().accountIdentifier("accId1").orgIdentifier("orgId2").projectIdentifier("id2").build())
+            .scope(Scope.builder().accountIdentifier(accId1).orgIdentifier(orgId2).projectIdentifier("id2").build())
             .build();
     doReturn(createCloseableIterator(Arrays.asList(userMembership1, userMembership2).iterator()))
         .when(ngUserService)
         .streamUserMemberships(any());
+
+    ScopeInfo scopeInfo1 = ScopeInfo.builder()
+                               .accountIdentifier(accId1)
+                               .scopeType(ScopeLevel.ORGANIZATION)
+                               .orgIdentifier(orgId1)
+                               .uniqueId(orgUniqueId1)
+                               .build();
+    when(scopeResolverService.getScopeInfo(accId1, orgId1, null)).thenReturn(Optional.of(scopeInfo1));
+    ScopeInfo scopeInfo2 = ScopeInfo.builder()
+                               .accountIdentifier(accId1)
+                               .scopeType(ScopeLevel.ORGANIZATION)
+                               .orgIdentifier(orgId2)
+                               .uniqueId(orgUniqueId2)
+                               .build();
+    when(scopeResolverService.getScopeInfo(accId1, orgId2, null)).thenReturn(Optional.of(scopeInfo2));
     doReturn(projects).when(projectService).list(any());
     doReturn(projects).when(projectRepository).findAll((Criteria) any());
-    List<ProjectDTO> projectsResponse = projectService.listProjectsForUser(user, "account");
+    List<ProjectDTO> projectsResponse = projectService.listProjectsForUser(user, accId1);
+
+    ArgumentCaptor<Criteria> finaAllCriteriaArgumentCaptor = ArgumentCaptor.forClass(Criteria.class);
+    verify(projectRepository, times(1)).findAll(finaAllCriteriaArgumentCaptor.capture());
+    Criteria finaAllCriteriaArgumentCaptorValue = finaAllCriteriaArgumentCaptor.getValue();
+
+    BasicDBList orList = (BasicDBList) finaAllCriteriaArgumentCaptorValue.getCriteriaObject().get("$or");
+    assertEquals(2, orList.size());
+    assertThat((Document) orList.get(0)).containsKey(ProjectKeys.parentUniqueId);
+
     assertNotNull(projectsResponse);
     assertEquals(projectsResponse, projects.stream().map(ProjectMapper::writeDTO).collect(Collectors.toList()));
-  }
-
-  @Test
-  @Owner(developers = VIKAS_M)
-  @Category(UnitTests.class)
-  public void testHardDelete() {
-    String accountIdentifier = randomAlphabetic(10);
-    String orgIdentifier = randomAlphabetic(10);
-    String orgUniqueIdentifier = randomAlphabetic(10);
-    String projectIdentifier = randomAlphabetic(10);
-    Long version = 0L;
-    Project project = Project.builder()
-                          .name("name")
-                          .accountIdentifier(accountIdentifier)
-                          .orgIdentifier(orgIdentifier)
-                          .identifier(projectIdentifier)
-                          .build();
-
-    when(yamlGitConfigService.deleteAll(any(), any(), any())).thenReturn(true);
-    when(projectRepository.hardDelete(any(), anyString(), any(), any())).thenReturn(project);
-
-    projectService.delete(accountIdentifier, orgIdentifier, projectIdentifier, version);
-
-    verify(projectRepository, times(1))
-        .hardDelete(eq(accountIdentifier), eq(orgIdentifier), eq(projectIdentifier), any());
-    verify(outboxService, times(1)).save(any());
-    verify(favoritesService, times(1))
-        .deleteFavorites(accountIdentifier, orgIdentifier, null, ResourceType.PROJECT.toString(), projectIdentifier);
-  }
-
-  @Test(expected = EntityNotFoundException.class)
-  @Owner(developers = TEJAS)
-  @Category(UnitTests.class)
-  public void testHardDeleteInvalidIdentifier() {
-    String accountIdentifier = randomAlphabetic(10);
-    String orgIdentifier = randomAlphabetic(10);
-    String orgUniqueIdentifier = randomAlphabetic(10);
-    String projectIdentifier = randomAlphabetic(10);
-    Long version = 0L;
-
-    when(projectRepository.hardDelete(any(), anyString(), any(), any())).thenReturn(null);
-
-    projectService.delete(accountIdentifier, orgIdentifier, projectIdentifier, version);
   }
 
   @Test

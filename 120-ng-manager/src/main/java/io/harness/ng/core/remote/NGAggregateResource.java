@@ -39,6 +39,7 @@ import io.harness.accesscontrol.scopes.ScopeDTO;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.ScopeInfo;
 import io.harness.beans.ScopeInfoResolutionExemptedApi;
+import io.harness.beans.ScopeLevel;
 import io.harness.beans.SortOrder;
 import io.harness.exception.InvalidRequestException;
 import io.harness.ng.beans.PageRequest;
@@ -146,8 +147,13 @@ public class NGAggregateResource {
           SortOrder.Builder.aSortOrder().withField(ProjectKeys.lastModifiedAt, SortOrder.OrderType.DESC).build();
       pageRequest.setSortOrders(ImmutableList.of(order));
     }
+    ScopeInfo accountScopeInfo = ScopeInfo.builder()
+                                     .accountIdentifier(accountIdentifier)
+                                     .scopeType(ScopeLevel.ACCOUNT)
+                                     .uniqueId(accountIdentifier)
+                                     .build();
     Set<String> permittedOrgIds =
-        organizationService.getPermittedOrganizations(accountIdentifier, scopeInfo, orgIdentifier);
+        organizationService.getPermittedOrganizations(accountIdentifier, accountScopeInfo, orgIdentifier);
     ProjectFilterDTO projectFilterDTO = getProjectFilterDTO(searchTerm, permittedOrgIds, hasModule, moduleType);
     return ResponseDTO.newResponse(getNGPageResponse(aggregateProjectService.listProjectAggregateDTO(
         accountIdentifier, getPageRequest(pageRequest), projectFilterDTO, onlyFavorites)));

@@ -133,7 +133,7 @@ public class CustomApprovalHelperServiceImpl implements CustomApprovalHelperServ
       validateField(projectIdentifier, "projectIdentifier");
 
       TaskParameters scriptTaskParametersNG = buildShellScriptTaskParametersNG(ambiance, instance);
-      log.info("Queuing Custom Approval delegate task");
+      log.debug("Queuing Custom Approval delegate task");
       String taskId = queueTask(ambiance, instance, scriptTaskParametersNG);
 
       updateTaskId(instanceId, taskId, approvalInstanceService);

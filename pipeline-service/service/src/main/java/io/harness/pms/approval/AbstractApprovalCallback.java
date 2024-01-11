@@ -66,7 +66,7 @@ public abstract class AbstractApprovalCallback {
       throw new InvalidRequestException("Approval criteria can't be empty");
     }
 
-    log.info("Evaluating approval criteria for instance id - {}", instance.getId());
+    log.debug("Evaluating approval criteria for instance id - {}", instance.getId());
     logCallback.saveExecutionLog("Evaluating approval criteria...");
     CriteriaSpecDTO approvalCriteriaSpec = approvalCriteria.getCriteriaSpecDTO();
     boolean approvalEvaluationResult = evaluateCriteria(ticket, approvalCriteriaSpec);
@@ -92,7 +92,7 @@ public abstract class AbstractApprovalCallback {
       return;
     }
 
-    log.info("Evaluating rejection criteria for instance id - {}", instance.getId());
+    log.debug("Evaluating rejection criteria for instance id - {}", instance.getId());
     logCallback.saveExecutionLog("Evaluating rejection criteria...");
     CriteriaSpecDTO rejectionCriteriaSpec = rejectionCriteria.getCriteriaSpecDTO();
     boolean rejectionEvaluationResult = evaluateCriteria(ticket, rejectionCriteriaSpec);

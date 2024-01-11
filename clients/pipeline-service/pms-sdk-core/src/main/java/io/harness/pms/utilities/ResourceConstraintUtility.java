@@ -28,11 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ResourceConstraintUtility {
   public JsonNode getResourceConstraintJsonNode(String resourceUnit, String whenCondition) {
+    return getResourceConstraintJsonNode(resourceUnit, whenCondition, "ResourceConstraint");
+  }
+  public JsonNode getResourceConstraintJsonNode(String resourceUnit, String whenCondition, String type) {
     String yamlField = "---\n"
         + "name: \"Resource Constraint\"\n"
         + "identifier: \"rc-" + generateUuid() + "\"\n"
         + "timeout: \"1w\"\n"
-        + "type: \"ResourceConstraint\"\n"
+        + "type: \"" + type + "\"\n"
         + "spec:\n"
         + "  name: \"" + PmsConstants.QUEUING_RC_NAME + "\"\n"
         + "  resourceUnit: \"" + resourceUnit + "\"\n"

@@ -141,4 +141,6 @@ public class YAMLFieldNameConstants {
   public final String DEPLOYMENT_STAGE_V1 = "deployment";
   public final String ROLLBACK_STEPS_V1 = "rollback_steps";
   public final String DELEGATES = "delegates";
+
+  public final String RESOURCE_CONSTRAINT_V1 = "resource-constraint";
 }

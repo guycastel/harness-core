@@ -10,6 +10,7 @@ package io.harness.plancreator.steps.resourceconstraint;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.plancreator.steps.internal.PMSStepPlanCreator;
+import io.harness.pms.yaml.HarnessYamlVersion;
 import io.harness.pms.yaml.YamlField;
 import io.harness.steps.StepSpecTypeConstants;
 
@@ -26,5 +27,10 @@ public class ResourceConstraintStepPlanCreator extends PMSStepPlanCreator {
   @Override
   protected YamlField obtainNextSiblingField(YamlField currentField) {
     return currentField.getNode().nextSiblingNodeFromParentObject("execution");
+  }
+
+  @Override
+  public Set<String> getSupportedYamlVersions() {
+    return Set.of(HarnessYamlVersion.V0);
   }
 }

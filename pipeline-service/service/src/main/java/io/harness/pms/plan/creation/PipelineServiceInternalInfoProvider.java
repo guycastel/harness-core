@@ -97,6 +97,8 @@ import io.harness.steps.pipelinestage.PipelineStageVariableCreator;
 import io.harness.steps.policy.step.PolicyStepPlanCreator;
 import io.harness.steps.policy.variables.PolicyStepVariableCreator;
 import io.harness.steps.resourcerestraint.QueueStepVariableCreator;
+import io.harness.steps.resourcerestraint.v1.ResourceConstraintStepFilterCreator;
+import io.harness.steps.resourcerestraint.v1.ResourceConstraintStepVariableCreator;
 import io.harness.steps.servicenow.ServiceNowCreateStepVariableCreator;
 import io.harness.steps.servicenow.ServiceNowImportSetStepVariableCreator;
 import io.harness.steps.servicenow.ServiceNowUpdateStepVariableCreator;
@@ -139,6 +141,7 @@ public class PipelineServiceInternalInfoProvider implements PipelineServiceInfoP
     planCreators.add(new ShellScriptStepPlanCreator());
     planCreators.add(new ApprovalStagePlanCreatorV2());
     planCreators.add(new ResourceConstraintStepPlanCreator());
+    planCreators.add(new io.harness.steps.resourcerestraint.v1.ResourceConstraintStepPlanCreator());
     planCreators.add(new QueueStepPlanCreator());
     planCreators.add(new FeatureFlagStagePlanCreator());
     planCreators.add(new CfExecutionPMSPlanCreator());
@@ -191,6 +194,7 @@ public class PipelineServiceInternalInfoProvider implements PipelineServiceInfoP
     filterJsonCreators.add(new HarnessApprovalStepFilterJsonCreatorV2());
     filterJsonCreators.add(new CdSscaStepFilterJsonCreator());
     filterJsonCreators.add(new ApprovalStageFilterCreator());
+    filterJsonCreators.add(new ResourceConstraintStepFilterCreator());
 
     if (!disableCustomStageInPipelineService) {
       filterJsonCreators.add(new CustomStageFilterCreator());
@@ -232,6 +236,7 @@ public class PipelineServiceInternalInfoProvider implements PipelineServiceInfoP
     variableCreators.add(new BarrierStepVariableCreator());
     variableCreators.add(new CdSscaStepVariableCreator());
     variableCreators.add(new EmptyVariableCreatorV1());
+    variableCreators.add(new ResourceConstraintStepVariableCreator());
 
     if (!disableCustomStageInPipelineService) {
       variableCreators.add(new CustomStageVariableCreator());

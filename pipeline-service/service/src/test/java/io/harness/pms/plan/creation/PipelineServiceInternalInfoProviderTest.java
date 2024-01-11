@@ -81,6 +81,8 @@ import io.harness.steps.pipelinestage.PipelineStageVariableCreator;
 import io.harness.steps.policy.step.PolicyStepPlanCreator;
 import io.harness.steps.policy.variables.PolicyStepVariableCreator;
 import io.harness.steps.resourcerestraint.QueueStepVariableCreator;
+import io.harness.steps.resourcerestraint.v1.ResourceConstraintStepFilterCreator;
+import io.harness.steps.resourcerestraint.v1.ResourceConstraintStepVariableCreator;
 import io.harness.steps.servicenow.ServiceNowCreateStepVariableCreator;
 import io.harness.steps.servicenow.ServiceNowImportSetStepVariableCreator;
 import io.harness.steps.servicenow.ServiceNowUpdateStepVariableCreator;
@@ -104,9 +106,9 @@ import org.mockito.MockitoAnnotations;
 
 @OwnedBy(PIPELINE)
 public class PipelineServiceInternalInfoProviderTest extends CategoryTest {
-  public static final int PLAN_CREATOR_NUMBER = 40;
-  public static final int FILTER_JSON_CREATOR_NUMBER = 15;
-  public static final int VARIABLE_CREATOR_NUMBER = 27;
+  public static final int PLAN_CREATOR_NUMBER = 41;
+  public static final int FILTER_JSON_CREATOR_NUMBER = 16;
+  public static final int VARIABLE_CREATOR_NUMBER = 28;
 
   @InjectMocks PipelineServiceInternalInfoProvider pipelineServiceInternalInfoProvider;
   @InjectMocks PipelineServiceInfoDecoratorImpl serviceInfoDecorator;
@@ -169,6 +171,7 @@ public class PipelineServiceInternalInfoProviderTest extends CategoryTest {
     assertThat(planCreatorClasses.contains(io.harness.steps.wait.v1.WaitStepPlanCreator.class)).isTrue();
     assertThat(planCreatorClasses.contains(io.harness.steps.approval.step.jira.v1.JiraApprovalStepPlanCreator.class))
         .isTrue();
+    assertThat(planCreatorClasses.contains(ResourceConstraintStepPlanCreator.class)).isTrue();
   }
 
   @Test
@@ -194,6 +197,7 @@ public class PipelineServiceInternalInfoProviderTest extends CategoryTest {
     assertThat(filterCreatorClasses.contains(HarnessApprovalStepFilterJsonCreatorV2.class)).isTrue();
     assertThat(filterCreatorClasses.contains(CdSscaStepFilterJsonCreator.class)).isTrue();
     assertThat(filterCreatorClasses.contains(ApprovalStageFilterCreator.class)).isTrue();
+    assertThat(filterCreatorClasses.contains(ResourceConstraintStepFilterCreator.class)).isTrue();
   }
 
   @Test
@@ -230,6 +234,7 @@ public class PipelineServiceInternalInfoProviderTest extends CategoryTest {
     assertThat(variableCreatorClasses.contains(WaitStepVariableCreator.class)).isTrue();
     assertThat(variableCreatorClasses.contains(BarrierStepVariableCreator.class)).isTrue();
     assertThat(variableCreatorClasses.contains(CdSscaStepVariableCreator.class)).isTrue();
+    assertThat(variableCreatorClasses.contains(ResourceConstraintStepVariableCreator.class)).isTrue();
   }
 
   @Test

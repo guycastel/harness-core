@@ -13,7 +13,6 @@ import static io.harness.cdng.creator.plan.CDPlanCreationConstants.SERVICES;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.cdng.creator.plan.infrastructure.InfrastructurePmsPlanCreator;
 import io.harness.cdng.creator.plan.stage.StagePlanCreatorHelper;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.exception.InvalidRequestException;
@@ -34,12 +33,16 @@ import io.harness.pms.sdk.core.plan.creation.beans.PlanCreationContext;
 import io.harness.pms.sdk.core.plan.creation.beans.PlanCreationResponse;
 import io.harness.pms.sdk.core.plan.creation.creators.ChildrenPlanCreator;
 import io.harness.pms.sdk.core.steps.io.StepParameters;
+import io.harness.pms.utilities.ResourceConstraintUtility;
+import io.harness.pms.yaml.HarnessYamlVersion;
 import io.harness.pms.yaml.YAMLFieldNameConstants;
 import io.harness.pms.yaml.YamlField;
+import io.harness.pms.yaml.YamlNode;
 import io.harness.pms.yaml.YamlUtils;
 import io.harness.steps.common.NGSectionStep;
 import io.harness.steps.common.NGSectionStepParameters;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.Collections;
@@ -114,9 +117,8 @@ public class CDStageSpecPlanCreator extends ChildrenPlanCreator<DeploymentStageC
 
     final boolean isProjectScopedResourceConstraintQueue =
         stagePlanCreatorHelper.isProjectScopedResourceConstraintQueueByFFOrSetting(ctx);
-    YamlField rcField =
-        InfrastructurePmsPlanCreator.constructResourceConstraintYamlField(ctx.getCurrentField().getNode(), null, ctx,
-            isProjectScopedResourceConstraintQueue, YAMLFieldNameConstants.STEP, YAMLFieldNameConstants.STEP);
+    YamlField rcField = constructResourceConstraintYamlField(
+        ctx.getCurrentField().getNode(), ctx, isProjectScopedResourceConstraintQueue);
 
     // Adding environments dependency.
     Dependency envDependency =
@@ -189,5 +191,28 @@ public class CDStageSpecPlanCreator extends ChildrenPlanCreator<DeploymentStageC
                 .build())
         .skipGraphType(SkipType.SKIP_NODE)
         .build();
+  }
+
+  @Override
+  public Set<String> getSupportedYamlVersions() {
+    return Set.of(HarnessYamlVersion.V1);
+  }
+
+  private YamlField constructResourceConstraintYamlField(
+      YamlNode specNode, PlanCreationContext context, boolean isProjectScopedResourceConstraintQueue) {
+    String resourceUnit = "<+INFRA_KEY>";
+
+    if (isProjectScopedResourceConstraintQueue && context != null) {
+      String accountIdentifier = context.getAccountIdentifier();
+      String orgIdentifier = context.getOrgIdentifier();
+      String projectIdentifier = context.getProjectIdentifier();
+      resourceUnit = String.join("_", resourceUnit,
+          String.valueOf(String.join("_", accountIdentifier, orgIdentifier, projectIdentifier).hashCode()));
+    }
+
+    JsonNode resourceConstraintJsonNode = ResourceConstraintUtility.getResourceConstraintJsonNode(
+        resourceUnit, null, YAMLFieldNameConstants.RESOURCE_CONSTRAINT_V1);
+    return new YamlField(YAMLFieldNameConstants.RESOURCE_CONSTRAINT_V1,
+        new YamlNode(YAMLFieldNameConstants.RESOURCE_CONSTRAINT_V1, resourceConstraintJsonNode, specNode));
   }
 }

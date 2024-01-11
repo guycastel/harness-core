@@ -27,7 +27,9 @@ import io.harness.ngsettings.NgSettingsPersistenceTestModule;
 import io.harness.ngsettings.services.SettingEnforcementValidator;
 import io.harness.ngsettings.services.SettingValidator;
 import io.harness.ngsettings.services.SettingsService;
+import io.harness.ngsettings.services.UserSettingsService;
 import io.harness.ngsettings.services.impl.SettingsServiceImpl;
+import io.harness.ngsettings.services.impl.UserSettingsServiceImpl;
 import io.harness.outbox.api.OutboxService;
 import io.harness.outbox.api.impl.OutboxServiceImpl;
 import io.harness.rule.InjectorRuleMixin;
@@ -92,6 +94,7 @@ public class NgSettingRule implements MethodRule, InjectorRuleMixin, MongoRuleMi
         bind(Producer.class).annotatedWith(Names.named(ENTITY_CRUD)).toInstance(NoOpProducer.of(DUMMY_TOPIC_NAME));
         MapBinder.newMapBinder(binder(), String.class, SettingValidator.class);
         MapBinder.newMapBinder(binder(), String.class, SettingEnforcementValidator.class);
+        bind(UserSettingsService.class).to(UserSettingsServiceImpl.class);
       }
     });
 

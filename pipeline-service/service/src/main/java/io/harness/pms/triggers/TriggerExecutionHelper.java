@@ -212,7 +212,7 @@ public class TriggerExecutionHelper {
       execArgs.getPlanExecutionMetadata().setTriggerJsonPayload(payload);
       execArgs.getPlanExecutionMetadata().setTriggerHeader(header);
       NGTriggerEntity ngTriggerEntity = triggerDetails.getNgTriggerEntity();
-      if (triggerWebhookEvent != null) {
+      if (triggerWebhookEvent != null && triggerWebhookEvent.getCreatedAt() != null) {
         metricService.recordMetric(
             WEBHOOK_EVENT_PROCESS_TIME, (double) (System.currentTimeMillis() - triggerWebhookEvent.getCreatedAt()));
       }

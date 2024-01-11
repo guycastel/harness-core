@@ -822,6 +822,15 @@ public class TriggerExecutionHelperTest extends CategoryTest {
     Principal expectedPrincipal = new ServicePrincipal(AuthorizationServiceHeader.PIPELINE_SERVICE.getServiceId());
     assertThat(SecurityContextBuilder.getPrincipal()).isEqualToComparingFieldByField(expectedPrincipal);
     assertThat(SourcePrincipalContextBuilder.getSourcePrincipal()).isEqualToComparingFieldByField(expectedPrincipal);
+    verify(metricService, times(1)).recordMetric(any(), anyDouble());
+
+    triggerExecutionHelper.createPlanExecution(triggerDetails, null, null, null, null, null,
+        TriggerWebhookEvent.builder().build(), triggerDetails.getNgTriggerConfigV2().getInputYaml());
+    verify(metricService, times(1)).recordMetric(any(), anyDouble());
+
+    triggerExecutionHelper.createPlanExecution(
+        triggerDetails, null, null, null, null, null, null, triggerDetails.getNgTriggerConfigV2().getInputYaml());
+    verify(metricService, times(1)).recordMetric(any(), anyDouble());
   }
 
   @Test

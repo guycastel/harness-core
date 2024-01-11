@@ -18,6 +18,7 @@ import io.harness.pms.contracts.steps.StepCategory;
 import io.harness.pms.contracts.steps.StepType;
 import io.harness.pms.execution.OrchestrationFacilitatorType;
 import io.harness.pms.sdk.core.plan.PlanNode;
+import io.harness.pms.sdk.core.plan.PlanNode.PlanNodeBuilder;
 import io.harness.pms.sdk.core.plan.creation.yaml.StepOutcomeGroup;
 import io.harness.pms.sdk.core.steps.io.StepParameters;
 import io.harness.steps.plugin.ContainerCommandUnitConstants;
@@ -29,7 +30,7 @@ import lombok.experimental.UtilityClass;
 public class InitContainerV2StepPlanCreator {
   public PlanNode createPlanForField(String runStepNodeId, StepParameters stepElementParameters,
       AdviserObtainment adviserObtainment, String stepType) {
-    PlanNode.PlanNodeBuilder planNodeBuilder =
+    PlanNodeBuilder planNodeBuilder =
         PlanNode.builder()
             .uuid(runStepNodeId)
             .name(ContainerCommandUnitConstants.InitContainer)

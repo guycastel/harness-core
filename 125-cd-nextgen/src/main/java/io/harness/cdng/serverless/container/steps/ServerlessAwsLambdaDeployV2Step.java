@@ -26,6 +26,8 @@ import io.harness.delegate.task.stepstatus.StepMapOutput;
 import io.harness.delegate.task.stepstatus.StepOutput;
 import io.harness.delegate.task.stepstatus.StepStatusTaskResponseData;
 import io.harness.executions.steps.ExecutionNodeType;
+import io.harness.plancreator.steps.TaskSelectorYaml;
+import io.harness.plancreator.steps.common.SpecParameters;
 import io.harness.plancreator.steps.common.StepElementParameters;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -35,6 +37,7 @@ import io.harness.pms.sdk.core.plugin.ContainerStepExecutionResponseHelper;
 import io.harness.pms.sdk.core.plugin.ContainerUnitStepUtils;
 import io.harness.pms.sdk.core.resolver.outputs.ExecutionSweepingOutputService;
 import io.harness.pms.sdk.core.steps.io.StepResponse;
+import io.harness.pms.yaml.ParameterField;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.tasks.ResponseData;
 import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
@@ -180,5 +183,11 @@ public class ServerlessAwsLambdaDeployV2Step extends AbstractContainerStepV2<Ste
   public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
       Ambiance ambiance, StepElementParameters stepElementParameters) {
     return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
+  }
+  @Override
+  public ParameterField<List<TaskSelectorYaml>> getStepDelegateSelectors(SpecParameters stepElementParameters) {
+    ServerlessAwsLambdaDeployV2StepParameters deployV2StepParameters =
+        (ServerlessAwsLambdaDeployV2StepParameters) stepElementParameters;
+    return deployV2StepParameters.getDelegateSelectors();
   }
 }

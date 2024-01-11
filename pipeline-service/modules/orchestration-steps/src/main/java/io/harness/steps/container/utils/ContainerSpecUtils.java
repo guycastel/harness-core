@@ -46,7 +46,7 @@ public class ContainerSpecUtils {
   }
 
   @NotNull
-  private List<TaskSelector> getConnectorDelegateSelectors(ConnectorDetails k8sConnector) {
+  public List<TaskSelector> getConnectorDelegateSelectors(ConnectorDetails k8sConnector) {
     if (k8sConnector != null && k8sConnector.getConnectorConfig() instanceof KubernetesClusterConfigDTO) {
       Set<String> delegateSelectorSet =
           ((KubernetesClusterConfigDTO) k8sConnector.getConnectorConfig()).getDelegateSelectors();

@@ -13,6 +13,7 @@ import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.callback.DelegateCallbackToken;
 import io.harness.data.structure.CollectionUtils;
+import io.harness.delegate.TaskSelector;
 import io.harness.delegate.beans.ErrorNotifyResponseData;
 import io.harness.delegate.beans.TaskData;
 import io.harness.delegate.beans.ci.k8s.K8sTaskExecutionResponse;
@@ -20,6 +21,9 @@ import io.harness.execution.CIDelegateTaskExecutor;
 import io.harness.helper.SerializedResponseDataHelper;
 import io.harness.logging.CommandExecutionStatus;
 import io.harness.logstreaming.LogStreamingStepClientFactory;
+import io.harness.plancreator.steps.TaskSelectorYaml;
+import io.harness.plancreator.steps.common.SpecParameters;
+import io.harness.plancreator.steps.common.StepElementParameters;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.execution.AsyncExecutableResponse;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -30,6 +34,7 @@ import io.harness.pms.sdk.core.resolver.outputs.ExecutionSweepingOutputService;
 import io.harness.pms.sdk.core.steps.io.StepInputPackage;
 import io.harness.pms.sdk.core.steps.io.StepParameters;
 import io.harness.pms.sdk.core.steps.io.StepResponse;
+import io.harness.pms.yaml.ParameterField;
 import io.harness.product.ci.engine.proto.UnitStep;
 import io.harness.serializer.KryoSerializer;
 import io.harness.steps.container.execution.ContainerExecutionConfig;
@@ -85,10 +90,10 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
     timeout = Math.max(timeout, 100);
 
     String parkedTaskId = taskExecutor.queueParkedDelegateTask(ambiance, timeout, accountId, List.of());
-
+    List<TaskSelector> stepDelegateSelectors = getDelegateSelectors(stepElementParameters);
     TaskData runStepTaskData = getStepTask(ambiance, stepElementParameters, AmbianceUtils.getAccountId(ambiance),
         getLogPrefix(ambiance), timeout, parkedTaskId);
-    String liteEngineTaskId = taskExecutor.queueTask(ambiance, runStepTaskData, accountId, new ArrayList<>());
+    String liteEngineTaskId = taskExecutor.queueTask(ambiance, runStepTaskData, accountId, stepDelegateSelectors);
     log.info("Created parked task {} and lite engine task {}", parkedTaskId, liteEngineTaskId);
 
     return AsyncExecutableResponse.newBuilder()
@@ -97,6 +102,18 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
         .addAllLogKeys(CollectionUtils.emptyIfNull(Collections.singletonList(getLogPrefix(ambiance))))
         .build();
   }
+
+  private List<TaskSelector> getDelegateSelectors(T elementParameters) {
+    StepElementParameters stepElementParameters = (StepElementParameters) elementParameters;
+    ParameterField<List<TaskSelectorYaml>> stepDelegateSelectors =
+        getStepDelegateSelectors(stepElementParameters.getSpec());
+    if (ParameterField.isNull(stepDelegateSelectors) || stepDelegateSelectors.isExpression()) {
+      log.error("Delegate selector expression {} could not be resolved", stepDelegateSelectors.getExpressionValue());
+      return new ArrayList<>();
+    }
+    return TaskSelectorYaml.toTaskSelector(stepDelegateSelectors.getValue());
+  }
+  public abstract ParameterField<List<TaskSelectorYaml>> getStepDelegateSelectors(SpecParameters specParameters);
 
   @Override
   public void handleAbort(

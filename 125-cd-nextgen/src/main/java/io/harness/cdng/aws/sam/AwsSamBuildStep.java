@@ -31,6 +31,8 @@ import io.harness.delegate.beans.connector.docker.DockerUserNamePasswordDTO;
 import io.harness.exception.InvalidRequestException;
 import io.harness.executions.steps.ExecutionNodeType;
 import io.harness.ng.core.NGAccess;
+import io.harness.plancreator.steps.TaskSelectorYaml;
+import io.harness.plancreator.steps.common.SpecParameters;
 import io.harness.plancreator.steps.common.StepElementParameters;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -224,5 +226,10 @@ public class AwsSamBuildStep extends AbstractContainerStepV2<StepElementParamete
   public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
       Ambiance ambiance, StepElementParameters stepElementParameters) {
     return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
+  }
+  @Override
+  public ParameterField<List<TaskSelectorYaml>> getStepDelegateSelectors(SpecParameters stepElementParameters) {
+    AwsSamBuildStepParameters awsSamBuildStepParameters = (AwsSamBuildStepParameters) stepElementParameters;
+    return awsSamBuildStepParameters.getDelegateSelectors();
   }
 }

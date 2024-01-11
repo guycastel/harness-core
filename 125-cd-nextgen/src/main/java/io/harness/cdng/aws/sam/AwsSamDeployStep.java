@@ -36,6 +36,8 @@ import io.harness.exception.InvalidRequestException;
 import io.harness.executions.steps.ExecutionNodeType;
 import io.harness.helper.SerializedResponseDataHelper;
 import io.harness.ng.core.NGAccess;
+import io.harness.plancreator.steps.TaskSelectorYaml;
+import io.harness.plancreator.steps.common.SpecParameters;
 import io.harness.plancreator.steps.common.StepElementParameters;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -288,5 +290,10 @@ public class AwsSamDeployStep extends AbstractContainerStepV2<StepElementParamet
   public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
       Ambiance ambiance, StepElementParameters stepElementParameters) {
     return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
+  }
+  @Override
+  public ParameterField<List<TaskSelectorYaml>> getStepDelegateSelectors(SpecParameters stepElementParameters) {
+    AwsSamDeployStepParameters awsSamDeployStepParameters = (AwsSamDeployStepParameters) stepElementParameters;
+    return awsSamDeployStepParameters.getDelegateSelectors();
   }
 }

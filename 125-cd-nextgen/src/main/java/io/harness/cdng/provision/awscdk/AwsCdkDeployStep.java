@@ -29,6 +29,8 @@ import io.harness.delegate.task.stepstatus.StepExecutionStatus;
 import io.harness.delegate.task.stepstatus.StepMapOutput;
 import io.harness.delegate.task.stepstatus.StepStatusTaskResponseData;
 import io.harness.executions.steps.ExecutionNodeType;
+import io.harness.plancreator.steps.TaskSelectorYaml;
+import io.harness.plancreator.steps.common.SpecParameters;
 import io.harness.plancreator.steps.common.StepElementParameters;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.contracts.steps.StepCategory;
@@ -191,5 +193,10 @@ public class AwsCdkDeployStep extends AbstractContainerStepV2<StepElementParamet
   public StepExecutionTelemetryEventDTO getStepExecutionTelemetryEventDTO(
       Ambiance ambiance, StepElementParameters stepElementParameters) {
     return StepExecutionTelemetryEventDTO.builder().stepType(STEP_TYPE.getType()).build();
+  }
+  @Override
+  public ParameterField<List<TaskSelectorYaml>> getStepDelegateSelectors(SpecParameters specParameters) {
+    AwsCdkDeployStepParameters cdkDeployStepParameters = (AwsCdkDeployStepParameters) specParameters;
+    return cdkDeployStepParameters.getDelegateSelectors();
   }
 }

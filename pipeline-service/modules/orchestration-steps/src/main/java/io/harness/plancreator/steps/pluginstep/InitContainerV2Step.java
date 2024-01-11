@@ -6,6 +6,7 @@
  */
 
 package io.harness.plancreator.steps.pluginstep;
+
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
@@ -14,6 +15,7 @@ import io.harness.delegate.TaskSelector;
 import io.harness.delegate.beans.TaskData;
 import io.harness.delegate.beans.ci.CIInitializeTaskParams;
 import io.harness.delegate.beans.ci.k8s.K8sTaskExecutionResponse;
+import io.harness.delegate.beans.ci.pod.ConnectorDetails;
 import io.harness.encryption.Scope;
 import io.harness.plancreator.execution.ExecutionWrapperConfig;
 import io.harness.plancreator.execution.StepsExecutionConfig;
@@ -22,6 +24,7 @@ import io.harness.pms.contracts.execution.tasks.TaskCategory;
 import io.harness.pms.contracts.execution.tasks.TaskRequest;
 import io.harness.pms.contracts.plan.PluginCreationResponseList;
 import io.harness.pms.contracts.steps.StepCategory;
+import io.harness.pms.execution.utils.AmbianceUtils;
 import io.harness.pms.sdk.core.plan.creation.yaml.StepOutcomeGroup;
 import io.harness.pms.sdk.core.resolver.outputs.ExecutionSweepingOutputService;
 import io.harness.pms.sdk.core.steps.io.StepInputPackage;
@@ -31,6 +34,8 @@ import io.harness.steps.TaskRequestsUtils;
 import io.harness.steps.container.ContainerStepInitHelper;
 import io.harness.steps.container.execution.ContainerExecutionConfig;
 import io.harness.steps.container.execution.ContainerStepRbacHelper;
+import io.harness.steps.container.utils.ConnectorUtils;
+import io.harness.steps.container.utils.ContainerSpecUtils;
 import io.harness.steps.executable.TaskExecutableWithRbac;
 import io.harness.steps.matrix.ExpandedExecutionWrapperInfo;
 import io.harness.steps.matrix.StrategyExpansionData;
@@ -38,6 +43,7 @@ import io.harness.steps.matrix.StrategyHelper;
 import io.harness.steps.plugin.ContainerStepConstants;
 import io.harness.steps.plugin.InitContainerV2StepInfo;
 import io.harness.steps.plugin.StepInfo;
+import io.harness.steps.plugin.infrastructure.ContainerK8sInfra;
 import io.harness.supplier.ThrowingSupplier;
 import io.harness.utils.InitialiseTaskUtils;
 
@@ -50,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_ECS})
 public class InitContainerV2Step implements TaskExecutableWithRbac<InitContainerV2StepInfo, K8sTaskExecutionResponse> {
@@ -63,6 +70,7 @@ public class InitContainerV2Step implements TaskExecutableWithRbac<InitContainer
   @Inject InitialiseTaskUtils initialiseTaskUtils;
 
   @Inject StrategyHelper strategyHelper;
+  @Inject private ConnectorUtils connectorUtils;
 
   @Override
   public Class<InitContainerV2StepInfo> getStepParametersClass() {
@@ -104,15 +112,25 @@ public class InitContainerV2Step implements TaskExecutableWithRbac<InitContainer
         stepParameters, ambiance, logPrefix, stepParameters.getStepGroupIdentifier());
 
     String stageId = ambiance.getStageExecutionId();
-    List<TaskSelector> taskSelectors = new ArrayList<>();
     consumeExecutionConfig(ambiance);
     initialiseTaskUtils.constructStageDetails(
         ambiance, stepParameters.getIdentifier(), stepParameters.getName(), StepOutcomeGroup.STEP_GROUP.name());
 
     TaskData taskData = initialiseTaskUtils.getTaskData(buildSetupTaskParams);
+    List<TaskSelector> taskSelectors = getTaskSelectors(ambiance, stepParameters);
     return TaskRequestsUtils.prepareTaskRequest(ambiance, taskData, referenceFalseKryoSerializer,
         TaskCategory.DELEGATE_TASK_V2, null, true, TaskType.valueOf(taskData.getTaskType()).getDisplayName(),
         taskSelectors, Scope.PROJECT, EnvironmentType.ALL, false, new ArrayList<>(), false, stageId);
+  }
+
+  @NotNull
+  private ArrayList<TaskSelector> getTaskSelectors(Ambiance ambiance, InitContainerV2StepInfo stepParameters) {
+    ContainerK8sInfra containerK8sInfra = (ContainerK8sInfra) stepParameters.getInfrastructure();
+    String connectorName = containerK8sInfra.getSpec().getConnectorRef().getValue();
+    ConnectorDetails k8sConnector =
+        connectorUtils.getConnectorDetails(AmbianceUtils.getNgAccess(ambiance), connectorName);
+    List<TaskSelector> connectorDelegateSelectors = ContainerSpecUtils.getConnectorDelegateSelectors(k8sConnector);
+    return new ArrayList<>(connectorDelegateSelectors);
   }
   private void consumeExecutionConfig(Ambiance ambiance) {
     executionSweepingOutputService.consume(ambiance, ContainerStepConstants.CONTAINER_EXECUTION_CONFIG,

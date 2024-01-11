@@ -126,6 +126,8 @@ public class TriggerTelemetryHelper extends InstrumentationHelper {
           ScheduledTriggerConfig scheduledTriggerConfig = (ScheduledTriggerConfig) sourceV2.getSpec();
           CronTriggerSpec spec = (CronTriggerSpec) scheduledTriggerConfig.getSpec();
           return spec.getType();
+        default:
+          return null;
       }
     }
     return null;

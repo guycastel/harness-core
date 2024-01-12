@@ -858,6 +858,7 @@ public class ExecutionHelperTest extends CategoryTest {
 
     PlanExecution planExecution = PlanExecution.builder().build();
     Plan plan = PlanExecutionUtils.extractPlan(planCreationBlobResponse);
+    plan = plan.withAccountIdentifier(accountId);
     MockedStatic<PlanExecutionUtils> aStatic = Mockito.mockStatic(PlanExecutionUtils.class);
     aStatic.when(() -> PlanExecutionUtils.extractPlan(planCreationBlobResponse)).thenReturn(plan);
     ImmutableMap<String, String> abstractions = ImmutableMap.<String, String>builder()
@@ -900,6 +901,7 @@ public class ExecutionHelperTest extends CategoryTest {
 
     PlanExecution planExecution = PlanExecution.builder().build();
     Plan plan = PlanExecutionUtils.extractPlan(planCreationBlobResponse);
+    plan = plan.withAccountIdentifier(accountId);
     MockedStatic<PlanExecutionUtils> aStatic = Mockito.mockStatic(PlanExecutionUtils.class);
     aStatic.when(() -> PlanExecutionUtils.extractPlan(planCreationBlobResponse)).thenReturn(plan);
     ImmutableMap<String, String> abstractions = ImmutableMap.<String, String>builder()

@@ -87,6 +87,7 @@ public class Plan implements PersistentEntity, Node {
   @Builder.Default boolean valid = true;
   ErrorResponse errorResponse;
   List<String> preservedNodesInRollbackMode;
+  @Wither String accountIdentifier;
 
   public boolean isEmpty() {
     return EmptyPredicate.isEmpty(nodes);

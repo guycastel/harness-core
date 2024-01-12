@@ -74,6 +74,7 @@ public class OrchestrationServiceImplTest extends OrchestrationTestBase {
                                   .serviceName("PIPELINE_SERVICE")
                                   .build())
                     .startingNodeId(DUMMY_NODE_1_ID)
+                    .accountIdentifier(ACCOUNT_ID)
                     .build();
     Map<String, String> setupAbstractions = ImmutableMap.of("accountId", ACCOUNT_ID, "appId", APP_ID);
     ExecutionMetadata metadata = ExecutionMetadata.newBuilder().setExecutionUuid(PLAN_EXECUTION_ID).build();

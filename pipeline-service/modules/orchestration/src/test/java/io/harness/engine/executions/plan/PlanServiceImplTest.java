@@ -169,6 +169,7 @@ public class PlanServiceImplTest extends OrchestrationTestBase {
                                                              .setIdentifier("dummy3")
                                                              .build()))
                     .startingNodeId(DUMMY_NODE_1_ID)
+                    .accountIdentifier("ACCOUNT_ID")
                     .build();
     return planService.save(plan);
   }

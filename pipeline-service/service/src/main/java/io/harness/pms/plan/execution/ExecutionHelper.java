@@ -184,8 +184,8 @@ public class ExecutionHelper {
   // Add all FFs to this list that we want to use during pipeline execution
   public final List<FeatureName> featureNames =
       List.of(PIE_EXPRESSION_CONCATENATION, PIE_EXPRESSION_DISABLE_COMPLEX_JSON_SUPPORT, PIE_SIMPLIFY_LOG_BASE_KEY,
-          CDS_REMOVE_RESUME_EVENT_FOR_ASYNC_AND_ASYNCCHAIN_MODE,
-          PIE_SECRETS_OBSERVER, CDS_DIVIDE_SDK_RESPONSE_EVENTS_IN_DIFF_STREAMS, CDS_INPUT_YAML_IN_WEBHOOK_NOTIFICATION,
+          CDS_REMOVE_RESUME_EVENT_FOR_ASYNC_AND_ASYNCCHAIN_MODE, PIE_SECRETS_OBSERVER,
+          CDS_DIVIDE_SDK_RESPONSE_EVENTS_IN_DIFF_STREAMS, CDS_INPUT_YAML_IN_WEBHOOK_NOTIFICATION,
           CDS_NG_STRATEGY_IDENTIFIER_POSTFIX_TRUNCATION_REFACTOR, CDS_BLOCK_SENSITIVE_EXPRESSIONS);
   public static final String PMS_EXECUTION_SETTINGS_GROUP_IDENTIFIER = "pms_execution_settings";
   public static final String PLAN_CREATION_TIME_METRIC_NAME = "plan_creation_time";
@@ -610,6 +610,7 @@ public class ExecutionHelper {
         resp = planCreatorMergeService.createPlanVersioned(
             accountId, orgIdentifier, projectIdentifier, version, executionMetadata, planExecutionMetadata);
         plan = PlanExecutionUtils.extractPlan(resp);
+        plan = plan.withAccountIdentifier(accountId);
       } catch (IOException e) {
         log.error(format("Invalid yaml in node [%s]", YamlUtils.getErrorNodePartialFQN(e)), e);
         throw new InvalidYamlException(format("Invalid yaml in node [%s]", YamlUtils.getErrorNodePartialFQN(e)), e);

@@ -63,7 +63,7 @@ public class PartialPlanResponseCallback extends AsyncResponseCallback<PartialPl
     PartialPlanResponse.Builder finalResponseBuilder = finalResponse.toBuilder();
     finalResponseBuilder.setErrorResponse(
         ErrorResponse.newBuilder().addMessages("Unable to resolve all dependencies").build());
-    Plan plan = Plan.builder().valid(false).errorResponse(finalResponseBuilder.getErrorResponse()).build();
+    Plan plan = Plan.builder().valid(false).errorResponse(finalResponseBuilder.getErrorResponse()).accountIdentifier(accountId).build();
     planService.save(plan);
   }
 
@@ -155,6 +155,7 @@ public class PartialPlanResponseCallback extends AsyncResponseCallback<PartialPl
   @Override
   public void finalizeCreation() {
     Plan plan = PlanExecutionUtils.extractPlan(planUuid, finalResponse.getBlobResponse());
+    plan = plan.withAccountIdentifier(accountId);
     planService.save(plan);
   }
 
@@ -168,7 +169,7 @@ public class PartialPlanResponseCallback extends AsyncResponseCallback<PartialPl
     PartialPlanResponse.Builder finalResponseBuilder = finalResponse.toBuilder();
     finalResponseBuilder.setErrorResponse(
         ErrorResponse.newBuilder().addMessages("Unable to resolve all dependencies").build());
-    Plan plan = Plan.builder().valid(false).errorResponse(finalResponseBuilder.getErrorResponse()).build();
+    Plan plan = Plan.builder().valid(false).errorResponse(finalResponseBuilder.getErrorResponse()).accountIdentifier(accountId).build();
     planService.save(plan);
     return true;
   }
@@ -198,7 +199,7 @@ public class PartialPlanResponseCallback extends AsyncResponseCallback<PartialPl
                 .build());
       }
     }
-    Plan plan = Plan.builder().valid(true).errorResponse(finalResponseBuilder.getErrorResponse()).build();
+    Plan plan = Plan.builder().valid(true).errorResponse(finalResponseBuilder.getErrorResponse()).accountIdentifier(accountId).build();
     planService.save(plan);
   }
 
@@ -207,7 +208,7 @@ public class PartialPlanResponseCallback extends AsyncResponseCallback<PartialPl
     PartialPlanResponse.Builder finalResponseBuilder = finalResponse.toBuilder();
     finalResponseBuilder.setErrorResponse(
         ErrorResponse.newBuilder().addMessages("Plan Creation timed out. Please try again").build());
-    Plan plan = Plan.builder().valid(false).errorResponse(finalResponseBuilder.getErrorResponse()).build();
+    Plan plan = Plan.builder().valid(false).errorResponse(finalResponseBuilder.getErrorResponse()).accountIdentifier(accountId).build();
     planService.save(plan);
   }
 }

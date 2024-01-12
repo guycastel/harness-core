@@ -217,10 +217,14 @@ serviceAccount:
 nodeSelector: {}
 tolerations: []
 affinity: {}
-lifecycleHooks:
-  preStop:
-    exec:
-      command: []
+lifecycleHooks: {}
+# lifecycleHooks:
+#   postStart:
+#     exec:
+#       command:
+#   preStop:
+#     exec:
+#       command:
 
 # security
 podSecurityContext:

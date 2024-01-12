@@ -34,6 +34,7 @@ import io.harness.cdng.artifact.outcome.GcrArtifactOutcome;
 import io.harness.cdng.artifact.outcome.GithubPackagesArtifactOutcome;
 import io.harness.cdng.artifact.outcome.NexusArtifactOutcome;
 import io.harness.cdng.azure.AzureHelperService;
+import io.harness.cdng.oidc.OidcHelperUtility;
 import io.harness.connector.ConnectorDTO;
 import io.harness.connector.ConnectorInfoDTO;
 import io.harness.connector.ConnectorResponseDTO;
@@ -108,6 +109,7 @@ public class ImagePullSecretUtilsTest extends CategoryTest {
   @Mock private ConnectorService connectorService;
   @InjectMocks private ImagePullSecretUtils imagePullSecretUtils;
   @Mock private AzureHelperService azureHelperService;
+  @Mock OidcHelperUtility oidcHelperUtility;
 
   private final String ACCOUNT_ID_KEY = "accountId";
   private final String ACCOUNT_ID_VALUE = "accountId";

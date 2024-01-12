@@ -6,6 +6,7 @@
  */
 
 package io.harness.cdng.common.resources;
+
 import static io.harness.connector.ConnectorModule.DEFAULT_CONNECTOR_SERVICE;
 
 import io.harness.annotations.dev.CodePulse;
@@ -22,7 +23,6 @@ import io.harness.connector.services.ConnectorService;
 import io.harness.delegate.beans.DelegateResponseData;
 import io.harness.delegate.beans.connector.ConnectorType;
 import io.harness.delegate.beans.connector.awsconnector.AwsConnectorDTO;
-import io.harness.delegate.beans.connector.awsconnector.AwsManualConfigSpecDTO;
 import io.harness.delegate.beans.connector.awsconnector.AwsTaskParams;
 import io.harness.delegate.task.TaskParameters;
 import io.harness.delegate.task.artifacts.ecr.EcrArtifactDelegateRequest;
@@ -97,8 +97,7 @@ public class AwsResourceServiceHelper {
   public List<EncryptedDataDetail> getAwsEncryptionDetails(
       @Nonnull AwsConnectorDTO awsConnectorDTO, @Nonnull NGAccess ngAccess) {
     if (awsConnectorDTO.getCredential() != null && awsConnectorDTO.getCredential().getConfig() != null) {
-      return secretManagerClientService.getEncryptionDetails(
-          ngAccess, (AwsManualConfigSpecDTO) awsConnectorDTO.getCredential().getConfig());
+      return secretManagerClientService.getEncryptionDetails(ngAccess, awsConnectorDTO.getCredential().getConfig());
     }
     return Collections.emptyList();
   }

@@ -6,6 +6,7 @@
  */
 
 package io.harness.artifacts.ami.service;
+
 import static io.harness.annotations.dev.HarnessTeam.CDC;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 
@@ -45,6 +46,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import com.amazonaws.auth.WebIdentityFederationSessionCredentialsProvider;
 import com.amazonaws.auth.WebIdentityTokenCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.retry.RetryPolicy;
@@ -361,6 +363,9 @@ public class AMIRegistryServiceImpl implements AMIRegistryService {
 
       credentialsProvider = providerBuilder.build();
 
+    } else if (awsConfig.isUseOidc()) {
+      return new WebIdentityFederationSessionCredentialsProvider(
+          awsConfig.getOidcAttributes().getOidcToken(), null, awsConfig.getOidcAttributes().getIamRoleArn());
     } else {
       credentialsProvider = new AWSStaticCredentialsProvider(
           new BasicAWSCredentials(new String(awsConfig.getAccessKey()), new String(awsConfig.getSecretKey())));

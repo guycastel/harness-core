@@ -63,6 +63,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import com.amazonaws.auth.WebIdentityFederationSessionCredentialsProvider;
 import com.amazonaws.auth.WebIdentityTokenCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.retry.PredefinedBackoffStrategies;
@@ -645,6 +646,9 @@ public class AwsApiHelperService {
       providerBuilder.roleSessionName(awsConfig.getAccountId() + UUIDGenerator.generateUuid());
 
       credentialsProvider = providerBuilder.build();
+    } else if (awsConfig.isUseOidc()) {
+      return new WebIdentityFederationSessionCredentialsProvider(
+          awsConfig.getOidcAttributes().getOidcToken(), null, awsConfig.getOidcAttributes().getIamRoleArn());
     } else {
       credentialsProvider = new AWSStaticCredentialsProvider(
           new BasicAWSCredentials(new String(awsConfig.getAccessKey()), new String(awsConfig.getSecretKey())));

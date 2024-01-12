@@ -6,6 +6,7 @@
  */
 
 package io.harness.pms.expressions.utils;
+
 import static io.harness.annotations.dev.HarnessTeam.CDP;
 import static io.harness.authorization.AuthorizationServiceHeader.NG_MANAGER;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
@@ -34,6 +35,7 @@ import io.harness.cdng.artifact.outcome.JenkinsArtifactOutcome;
 import io.harness.cdng.artifact.outcome.NexusArtifactOutcome;
 import io.harness.cdng.artifact.outcome.S3ArtifactOutcome;
 import io.harness.cdng.azure.AzureHelperService;
+import io.harness.cdng.oidc.OidcHelperUtility;
 import io.harness.connector.ConnectorInfoDTO;
 import io.harness.connector.ConnectorResponseDTO;
 import io.harness.connector.services.ConnectorService;
@@ -120,6 +122,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ImagePullSecretUtils {
   @Inject private EcrImagePullSecretHelper ecrImagePullSecretHelper;
   @Inject private AzureHelperService azureHelperService;
+  @Inject private OidcHelperUtility oidcHelperUtility;
   @Inject @Named(NextGenModule.CONNECTOR_DECORATOR_SERVICE) private ConnectorService connectorService;
   private static final String ACR_DUMMY_DOCKER_USERNAME = "00000000-0000-0000-0000-000000000000";
 
@@ -405,9 +408,12 @@ public class ImagePullSecretUtils {
     AwsConnectorDTO connectorDTO = (AwsConnectorDTO) connectorIntoDTO.getConnectorConfig();
     List<EncryptedDataDetail> encryptionDetails =
         ecrImagePullSecretHelper.getEncryptionDetails(connectorDTO, baseNGAccess);
-    EcrArtifactDelegateRequest ecrRequest = ArtifactDelegateRequestUtils.getEcrDelegateRequest(
-        ecrArtifactOutcome.getRegistryId(), ecrArtifactOutcome.getImagePath(), ecrArtifactOutcome.getTag(), null, null,
-        ecrArtifactOutcome.getRegion(), connectorRef, connectorDTO, encryptionDetails, ArtifactSourceType.ECR);
+    Optional<String> oidcToken =
+        oidcHelperUtility.getOidcTokenForAwsConnector(connectorDTO, baseNGAccess.getAccountIdentifier());
+    EcrArtifactDelegateRequest ecrRequest =
+        ArtifactDelegateRequestUtils.getEcrDelegateRequest(ecrArtifactOutcome.getRegistryId(),
+            ecrArtifactOutcome.getImagePath(), ecrArtifactOutcome.getTag(), null, null, ecrArtifactOutcome.getRegion(),
+            connectorRef, connectorDTO, encryptionDetails, ArtifactSourceType.ECR, oidcToken.orElse(null));
     ArtifactTaskExecutionResponse artifactTaskExecutionResponseForImageUrl = ecrImagePullSecretHelper.executeSyncTask(
         ecrRequest, ArtifactTaskType.GET_IMAGE_URL, baseNGAccess, "Ecr Get image URL failure due to error");
     String imageUrl =

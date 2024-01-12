@@ -28,6 +28,7 @@ import io.harness.cdng.artifact.resources.ecr.dtos.EcrRequestDTO;
 import io.harness.cdng.artifact.resources.ecr.dtos.EcrResponseDTO;
 import io.harness.cdng.artifact.resources.ecr.service.EcrResourceServiceImpl;
 import io.harness.cdng.common.resources.AwsResourceServiceHelper;
+import io.harness.cdng.oidc.OidcHelperUtility;
 import io.harness.connector.ConnectorInfoDTO;
 import io.harness.connector.ConnectorResponseDTO;
 import io.harness.connector.services.ConnectorService;
@@ -95,6 +96,7 @@ public class EcrResourceServiceImplTest extends CategoryTest {
   @Mock SecretManagerClientService secretManagerClientService;
   @Mock DelegateGrpcClientWrapper delegateGrpcClientWrapper;
   @Mock ExceptionManager exceptionManager;
+  @Mock OidcHelperUtility oidcHelperUtility;
   @InjectMocks EcrResourceServiceImpl ecrResourceService;
   private ConnectorResponseDTO getConnector() {
     AwsConnectorDTO awsConnectorDTO =

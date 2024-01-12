@@ -6,6 +6,7 @@
  */
 
 package io.harness.delegate.task.artifacts.ecr;
+
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
 
 import static software.wings.helpers.ext.ecr.EcrService.MAX_NO_OF_IMAGES;
@@ -19,7 +20,6 @@ import io.harness.artifacts.comparator.BuildDetailsInternalComparatorDateDescend
 import io.harness.aws.beans.AwsInternalConfig;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.delegate.beans.connector.awsconnector.AwsConnectorDTO;
-import io.harness.delegate.beans.connector.awsconnector.AwsManualConfigSpecDTO;
 import io.harness.delegate.task.artifacts.DelegateArtifactTaskHandler;
 import io.harness.delegate.task.artifacts.mappers.EcrRequestResponseMapper;
 import io.harness.delegate.task.artifacts.response.ArtifactTaskExecutionResponse;
@@ -73,8 +73,7 @@ public class EcrArtifactTaskHandler extends DelegateArtifactTaskHandler<EcrArtif
     if (ecrRequest.getAwsConnectorDTO().getCredential() != null
         && ecrRequest.getAwsConnectorDTO().getCredential().getConfig() != null) {
       secretDecryptionService.decrypt(
-          (AwsManualConfigSpecDTO) ecrRequest.getAwsConnectorDTO().getCredential().getConfig(),
-          ecrRequest.getEncryptedDataDetails());
+          ecrRequest.getAwsConnectorDTO().getCredential().getConfig(), ecrRequest.getEncryptedDataDetails());
     }
   }
 
@@ -168,6 +167,7 @@ public class EcrArtifactTaskHandler extends DelegateArtifactTaskHandler<EcrArtif
     AwsConnectorDTO awsConnectorDTO = attributesRequest.getAwsConnectorDTO();
     AwsInternalConfig awsInternalConfig = awsNgConfigMapper.createAwsInternalConfig(awsConnectorDTO);
     awsInternalConfig.setDefaultRegion(attributesRequest.getRegion());
+    awsNgConfigMapper.setAwsOidcToken(awsInternalConfig, attributesRequest.getOidcToken());
     return awsInternalConfig;
   }
 }

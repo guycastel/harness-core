@@ -140,6 +140,13 @@ public class AwsNgConfigMapper {
     return awsInternalConfig;
   }
 
+  public void setAwsOidcToken(AwsInternalConfig awsInternalConfig, String oidcToken) {
+    AwsOidcAttributes awsOidcAttributes = awsInternalConfig.getOidcAttributes();
+    if (awsOidcAttributes != null) {
+      awsOidcAttributes.setOidcToken(oidcToken);
+    }
+  }
+
   private AwsSdkClientBackoffStrategyOverride getAwsSdkClientBackoffStrategyOverride(
       AwsSdkClientBackoffStrategyDTO awsSdkClientBackoffStrategyDTO) {
     AwsSdkClientBackoffStrategySpecDTO awsSdkClientBackoffStrategy =

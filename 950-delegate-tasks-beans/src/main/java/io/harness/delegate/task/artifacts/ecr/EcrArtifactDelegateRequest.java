@@ -66,6 +66,8 @@ public class EcrArtifactDelegateRequest implements ArtifactSourceDelegateRequest
   /** Artifact Source type.*/
   ArtifactSourceType sourceType;
 
+  String oidcToken;
+
   @Override
   public List<ExecutionCapability> fetchRequiredExecutionCapabilities(ExpressionEvaluator maskingEvaluator) {
     List<ExecutionCapability> capabilities =
@@ -74,7 +76,8 @@ public class EcrArtifactDelegateRequest implements ArtifactSourceDelegateRequest
     if (awsConnectorDTO.getCredential() != null) {
       if (awsConnectorDTO.getCredential().getAwsCredentialType() == AwsCredentialType.INHERIT_FROM_DELEGATE
           || awsConnectorDTO.getCredential().getAwsCredentialType() == AwsCredentialType.MANUAL_CREDENTIALS
-          || awsConnectorDTO.getCredential().getAwsCredentialType() == AwsCredentialType.IRSA) {
+          || awsConnectorDTO.getCredential().getAwsCredentialType() == AwsCredentialType.IRSA
+          || awsConnectorDTO.getCredential().getAwsCredentialType() == AwsCredentialType.OIDC_AUTHENTICATION) {
         populateDelegateSelectorCapability(capabilities, awsConnectorDTO.getDelegateSelectors());
         if (awsConnectorDTO.getCredential().getAwsCredentialType() == AwsCredentialType.MANUAL_CREDENTIALS) {
           capabilities.add(HttpConnectionExecutionCapabilityGenerator.buildHttpConnectionExecutionCapability(

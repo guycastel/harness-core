@@ -6,6 +6,7 @@
  */
 
 package io.harness.delegate.task.artifacts;
+
 import static software.wings.utils.RepositoryType.generic;
 
 import static java.util.Objects.isNull;
@@ -87,7 +88,7 @@ public class ArtifactDelegateRequestUtils {
 
   public EcrArtifactDelegateRequest getEcrDelegateRequest(String registryId, String imagePath, String tag,
       String tagRegex, List<String> tagsList, String region, String connectorRef, AwsConnectorDTO awsConnectorDTO,
-      List<EncryptedDataDetail> encryptedDataDetails, ArtifactSourceType sourceType) {
+      List<EncryptedDataDetail> encryptedDataDetails, ArtifactSourceType sourceType, String oidcToken) {
     return EcrArtifactDelegateRequest.builder()
         .registryId(registryId)
         .imagePath(trim(imagePath))
@@ -99,6 +100,7 @@ public class ArtifactDelegateRequestUtils {
         .awsConnectorDTO(awsConnectorDTO)
         .encryptedDataDetails(encryptedDataDetails)
         .sourceType(sourceType)
+        .oidcToken(oidcToken)
         .build();
   }
   public GarDelegateRequest getGoogleArtifactDelegateRequest(String region, String repositoryName, String project,

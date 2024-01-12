@@ -105,6 +105,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_ARTIFACTS})
@@ -667,10 +668,13 @@ public class ArtifactConfigToDelegateReqMapper {
       registryId = (String) ecrArtifactConfig.getRegistryId().fetchFinalValue();
     }
 
+    Optional<String> oidcToken =
+        oidcHelperUtility.getOidcTokenForAwsConnector(awsConnectorDTO, AmbianceUtils.getAccountId(ambiance));
+
     return ArtifactDelegateRequestUtils.getEcrDelegateRequest(registryId,
         (String) ecrArtifactConfig.getImagePath().fetchFinalValue(), tag, tagRegex, null,
         (String) ecrArtifactConfig.getRegion().fetchFinalValue(), connectorRef, awsConnectorDTO, encryptedDataDetails,
-        ArtifactSourceType.ECR);
+        ArtifactSourceType.ECR, oidcToken.orElse(null));
   }
 
   public NexusArtifactDelegateRequest getNexusArtifactDelegateRequest(NexusRegistryArtifactConfig artifactConfig,

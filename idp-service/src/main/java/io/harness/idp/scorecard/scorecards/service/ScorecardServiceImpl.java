@@ -110,10 +110,8 @@ public class ScorecardServiceImpl implements ScorecardService {
       uniqueCheckIds.addAll(checkIds);
     }
 
-    List<String> scorecardIdentifiers = scorecardEntities.stream()
-                                            .filter(ScorecardEntity::isPublished)
-                                            .map(ScorecardEntity::getIdentifier)
-                                            .collect(Collectors.toList());
+    List<String> scorecardIdentifiers =
+        scorecardEntities.stream().map(ScorecardEntity::getIdentifier).collect(Collectors.toList());
     Map<String, ScorecardIdentifierAndScore> scorecardIdScoreMap =
         scorecardStatsRepository.computeScoresPercentageByScorecard(accountIdentifier, scorecardIdentifiers)
             .stream()

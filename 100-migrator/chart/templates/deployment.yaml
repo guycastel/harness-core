@@ -77,6 +77,9 @@ spec:
             - configMapRef:
                 name: migrator-config
           env:
+            {{- include "harnesscommon.dbv3.sslEnv" (dict "context" $ "dbType" "redis" "dbName" "events" "variableNames" ( dict "sslEnabled" "EVENTS_FRAMEWORK_REDIS_SSL_ENABLED" "sslCATrustStorePath" "EVENTS_FRAMEWORK_REDIS_SSL_CA_TRUST_STORE_PATH" "sslCATrustStorePassword" "EVENTS_FRAMEWORK_REDIS_SSL_CA_TRUST_STORE_PASSWORD")) | indent 12 }}
+            {{- include "harnesscommon.dbv3.sslEnv" (dict "context" $ "dbType" "redis" "dbName" "lock" "variableNames" ( dict "sslEnabled" "REDIS_SSL_ENABLED" "sslCATrustStorePath" "REDIS_SSL_CA_TRUST_STORE_PATH" "sslCATrustStorePassword" "REDIS_SSL_CA_TRUST_STORE_PASSWORD" )) | indent 12 }}
+            {{- include "harnesscommon.dbv3.sslEnv" (dict "context" $ "dbType" "redis" "dbName" "cache" "variableNames" ( dict "sslCATrustStorePath" "REDIS_SSL_CA_TRUST_STORE_PATH" "sslCATrustStorePassword" "REDIS_SSL_CA_TRUST_STORE_PASSWORD" )) | indent 12 }}
             {{- include "harnesscommon.secrets.manageSMTPEnv" (dict "ctx" $) | indent 12 }}
             {{- $globalLicenseESOSecretIdentifier := include "harnesscommon.secrets.globalESOSecretCtxIdentifier" (dict "ctx" $  "ctxIdentifier" "license") }}
             {{- include "harnesscommon.secrets.manageEnv" (dict "ctx" $ "variableName" "CG_LICENSE" "overrideEnvName" "LICENSE_INFO" "providedSecretValues" (list "global.license.cg") "extKubernetesSecretCtxs" (list .Values.global.license.secrets.kubernetesSecrets) "esoSecretCtxs" (list (dict "secretCtxIdentifier" $globalLicenseESOSecretIdentifier "secretCtx" .Values.global.license.secrets.secretManagement.externalSecretsOperator))) | indent 12 }}
@@ -145,6 +148,9 @@ spec:
           {{- if .Values.extraVolumeMounts }}
           {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
+          {{- include "harnesscommon.dbv3.sslVolumeMount" (dict "context" $ "dbType" "redis" "dbName" "events") | nindent 12 }}
+          {{- include "harnesscommon.dbv3.sslVolumeMount" (dict "context" $ "dbType" "redis" "dbName" "lock") | nindent 12 }}
+          {{- include "harnesscommon.dbv3.sslVolumeMount" (dict "context" $ "dbType" "redis" "dbName" "cache") | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -162,6 +168,9 @@ spec:
       {{- if .Values.extraVolumes }}
       {{- include "harnesscommon.tplvalues.render" ( dict "value" .Values.extraVolumes "context" $ ) | nindent 8 }}
       {{- end }}
+      {{- include "harnesscommon.dbv3.sslVolume" (dict "context" $ "dbType" "redis" "dbName" "events") | indent 8 }}
+      {{- include "harnesscommon.dbv3.sslVolume" (dict "context" $ "dbType" "redis" "dbName" "lock") | indent 8 }}
+      {{- include "harnesscommon.dbv3.sslVolume" (dict "context" $ "dbType" "redis" "dbName" "cache") | indent 8 }}
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

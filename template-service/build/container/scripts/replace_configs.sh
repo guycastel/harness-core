@@ -177,12 +177,18 @@ fi
 
 if [[ "" != "$CACHE_CONFIG_REDIS_USERNAME" ]]; then
   export CACHE_CONFIG_REDIS_USERNAME; yq -i '.singleServerConfig.username=env(CACHE_CONFIG_REDIS_USERNAME)' $REDISSON_CACHE_FILE
-  export CACHE_CONFIG_REDIS_USERNAME; yq -i '.singleServerConfig.username=env(CACHE_CONFIG_REDIS_USERNAME)' $ENTERPRISE_REDISSON_CACHE_FILE
 fi
 
 if [[ "" != "$CACHE_CONFIG_REDIS_PASSWORD" ]]; then
   export CACHE_CONFIG_REDIS_PASSWORD; yq -i '.singleServerConfig.password=env(CACHE_CONFIG_REDIS_PASSWORD)' $REDISSON_CACHE_FILE
-  export CACHE_CONFIG_REDIS_PASSWORD; yq -i '.singleServerConfig.password=env(CACHE_CONFIG_REDIS_PASSWORD)' $ENTERPRISE_REDISSON_CACHE_FILE
+fi
+
+if [[ "" != "$CACHE_CONFIG_REDIS_SSL_CA_TRUST_STORE_PATH" ]]; then
+  export FILE_VAR="file:$CACHE_CONFIG_REDIS_SSL_CA_TRUST_STORE_PATH"; yq -i '.singleServerConfig.sslTruststore=env(FILE_VAR)' $REDISSON_CACHE_FILE
+fi
+
+if [[ "" != "$CACHE_CONFIG_REDIS_SSL_CA_TRUST_STORE_PASSWORD" ]]; then
+  export CACHE_CONFIG_REDIS_SSL_CA_TRUST_STORE_PASSWORD; yq -i '.singleServerConfig.sslTruststorePassword=env(CACHE_CONFIG_REDIS_SSL_CA_TRUST_STORE_PASSWORD)' $REDISSON_CACHE_FILE
 fi
 
 if [[ "" != "$REDIS_NETTY_THREADS" ]]; then
@@ -268,7 +274,9 @@ replace_key_value redisLockConfig.retryInterval $REDIS_RETRY_INTERVAL
 replace_key_value redisLockConfig.retryAttempts $REDIS_RETRY_ATTEMPTS
 replace_key_value redisLockConfig.timeout $REDIS_TIMEOUT
 replace_key_value redisLockConfig.useScriptCache $REDIS_LOCK_CONFIG_REDIS_USE_SCRIPT_CACHE
-
 #Changes to use internal connection urls for PMS client gRPC
 replace_key_value pmsGrpcClientConfig.target $INTERNAL_PMS_GRPC_TARGET
 replace_key_value pmsGrpcClientConfig.authority $INTERNAL_PMS_GRPC_AUTHORITY
+replace_key_value redisLockConfig.sslConfig.enabled $LOCK_CONFIG_REDIS_SSL_ENABLED
+replace_key_value redisLockConfig.sslConfig.CATrustStorePath $LOCK_CONFIG_REDIS_SSL_CA_TRUST_STORE_PATH
+replace_key_value redisLockConfig.sslConfig.CATrustStorePassword $LOCK_CONFIG_REDIS_SSL_CA_TRUST_STORE_PASSWORD

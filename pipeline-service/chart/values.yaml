@@ -102,6 +102,12 @@ global:
       userKey: ""
       passwordKey: ""
       extraArgs: ""
+      ssl:
+        enabled: false
+        secret: ""
+        caFileKey: ""
+        trustStoreKey: ""
+        trustStorePasswordKey: ""
       secrets:
         kubernetesSecrets:
           - secretName: ""
@@ -152,6 +158,9 @@ redis:
   protocol: ""
   hosts: []
   extraArgs: ""
+  events: {}
+  cache: {}
+  lock: {}
   secrets:
     kubernetesSecrets:
       - secretName: ""

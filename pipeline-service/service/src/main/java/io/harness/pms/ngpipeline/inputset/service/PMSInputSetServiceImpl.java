@@ -12,6 +12,11 @@ import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.exception.HintException.HINT_INPUT_SET_ACCOUNT_SETTING;
 import static io.harness.exception.WingsException.USER_SRE;
+import static io.harness.pms.instrumentaion.PipelineInstrumentationConstants.INPUT_SET_NAME;
+import static io.harness.pms.instrumentaion.PipelineInstrumentationConstants.INPUT_SET_SAVE;
+import static io.harness.pms.instrumentaion.PipelineInstrumentationConstants.INPUT_SET_SAVE_ACTION;
+import static io.harness.pms.instrumentaion.PipelineInstrumentationConstants.ORG_ID;
+import static io.harness.pms.instrumentaion.PipelineInstrumentationConstants.PROJECT_ID;
 import static io.harness.pms.pipeline.MoveConfigOperationType.INLINE_TO_REMOTE;
 import static io.harness.pms.pipeline.MoveConfigOperationType.REMOTE_TO_INLINE;
 
@@ -55,6 +60,7 @@ import io.harness.grpc.utils.StringValueUtils;
 import io.harness.pms.gitsync.PmsGitSyncBranchContextGuard;
 import io.harness.pms.inputset.InputSetMoveConfigOperationDTO;
 import io.harness.pms.inputset.gitsync.InputSetYamlDTOMapper;
+import io.harness.pms.instrumentaion.PipelineTelemetryHelper;
 import io.harness.pms.ngpipeline.inputset.api.InputSetsApiUtils;
 import io.harness.pms.ngpipeline.inputset.beans.entity.InputSetEntity;
 import io.harness.pms.ngpipeline.inputset.beans.entity.InputSetEntity.InputSetEntityKeys;
@@ -112,6 +118,7 @@ public class PMSInputSetServiceImpl implements PMSInputSetService {
   @Inject private InputSetsApiUtils inputSetsApiUtils;
   @Inject GitXSettingsHelper gitXSettingsHelper;
   @Inject private PmsFeatureFlagHelper pmsFeatureFlagHelper;
+  @Inject private PipelineTelemetryHelper pipelineTelemetryHelper;
 
   private static final String DUP_KEY_EXP_FORMAT_STRING =
       "Input set [%s] under Project[%s], Organization [%s] for Pipeline [%s] already exists";
@@ -140,11 +147,15 @@ public class PMSInputSetServiceImpl implements PMSInputSetService {
     }
 
     try {
+      InputSetEntity savedInputSetEntity;
       if (isOldGitSync) {
-        return inputSetRepository.saveForOldGitSync(inputSetEntity, InputSetYamlDTOMapper.toDTO(inputSetEntity));
+        savedInputSetEntity =
+            inputSetRepository.saveForOldGitSync(inputSetEntity, InputSetYamlDTOMapper.toDTO(inputSetEntity));
       } else {
-        return inputSetRepository.save(inputSetEntity);
+        savedInputSetEntity = inputSetRepository.save(inputSetEntity);
       }
+      sendInputSetSaveTelemetryEvent(inputSetEntity, "create");
+      return savedInputSetEntity;
     } catch (DuplicateKeyException ex) {
       throw new DuplicateFieldException(
           format(DUP_KEY_EXP_FORMAT_STRING, inputSetEntity.getIdentifier(), inputSetEntity.getProjectIdentifier(),
@@ -814,5 +825,14 @@ public class PMSInputSetServiceImpl implements PMSInputSetService {
         accountIdentifier, orgIdentifier, projIdentifier, EntityType.INPUT_SETS);
     gitXSettingsHelper.setConnectorRefForRemoteEntity(accountIdentifier, orgIdentifier, projIdentifier);
     gitXSettingsHelper.setDefaultRepoForRemoteEntity(accountIdentifier, orgIdentifier, projIdentifier);
+  }
+
+  private void sendInputSetSaveTelemetryEvent(InputSetEntity entity, String actionType) {
+    HashMap<String, Object> properties = new HashMap<>();
+    properties.put(INPUT_SET_NAME, entity.getName());
+    properties.put(ORG_ID, entity.getOrgIdentifier());
+    properties.put(PROJECT_ID, entity.getProjectIdentifier());
+    properties.put(INPUT_SET_SAVE_ACTION, actionType);
+    pipelineTelemetryHelper.sendTelemetryEventWithAccountName(INPUT_SET_SAVE, entity.getAccountId(), properties);
   }
 }

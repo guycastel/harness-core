@@ -8,6 +8,7 @@
 package io.harness.pms.ngpipeline.inputset.service;
 
 import static io.harness.annotations.dev.HarnessTeam.PIPELINE;
+import static io.harness.pms.instrumentaion.PipelineInstrumentationConstants.INPUT_SET_SAVE;
 import static io.harness.pms.pipeline.MoveConfigOperationType.INLINE_TO_REMOTE;
 import static io.harness.pms.pipeline.MoveConfigOperationType.REMOTE_TO_INLINE;
 import static io.harness.rule.OwnerRule.ADITHYA;
@@ -16,6 +17,7 @@ import static io.harness.rule.OwnerRule.NAMAN;
 import static io.harness.rule.OwnerRule.RAGHAV_GUPTA;
 import static io.harness.rule.OwnerRule.SAMARTH;
 import static io.harness.rule.OwnerRule.SANDESH_SALUNKHE;
+import static io.harness.rule.OwnerRule.TMACARI;
 import static io.harness.rule.OwnerRule.VIVEK_DIXIT;
 
 import static java.lang.String.format;
@@ -27,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -66,6 +69,7 @@ import io.harness.manage.GlobalContextManager;
 import io.harness.pms.inputset.InputSetMoveConfigOperationDTO;
 import io.harness.pms.inputset.gitsync.InputSetYamlDTO;
 import io.harness.pms.inputset.gitsync.InputSetYamlDTOMapper;
+import io.harness.pms.instrumentaion.PipelineTelemetryHelper;
 import io.harness.pms.ngpipeline.inputset.api.InputSetsApiUtils;
 import io.harness.pms.ngpipeline.inputset.beans.entity.InputSetEntity;
 import io.harness.pms.ngpipeline.inputset.beans.entity.InputSetEntity.InputSetEntityKeys;
@@ -127,6 +131,7 @@ public class PMSInputSetServiceImplTest extends PipelineServiceTestBase {
   @Mock private PMSPipelineService pipelineService;
   @Mock private InputSetsApiUtils inputSetsApiUtils;
   @Mock PmsFeatureFlagHelper pmsFeatureFlagHelper;
+  @Mock PipelineTelemetryHelper pipelineTelemetryHelper;
 
   String ACCOUNT_ID = "account_id";
   String ORG_IDENTIFIER = "orgId";
@@ -259,6 +264,7 @@ public class PMSInputSetServiceImplTest extends PipelineServiceTestBase {
     doReturn(false).when(gitSyncSdkService).isGitSyncEnabled(ACCOUNT_ID, ORG_IDENTIFIER, PROJ_IDENTIFIER);
     on(pmsInputSetService).set("inputSetsApiUtils", inputSetsApiUtils);
     on(pmsInputSetService).set("gitXSettingsHelper", gitXSettingsHelper);
+    on(pmsInputSetService).set("pipelineTelemetryHelper", pipelineTelemetryHelper);
   }
 
   @Test
@@ -1447,5 +1453,21 @@ public class PMSInputSetServiceImplTest extends PipelineServiceTestBase {
     inOrder.verify(gitXSettingsHelper).setDefaultStoreTypeForEntities(any(), any(), any(), any());
     inOrder.verify(gitXSettingsHelper).setConnectorRefForRemoteEntity(any(), any(), any());
     inOrder.verify(gitXSettingsHelper).setDefaultRepoForRemoteEntity(any(), any(), any());
+  }
+
+  @Test
+  @Owner(developers = TMACARI)
+  @Category(UnitTests.class)
+  public void testTelemetryEventSent() {
+    doReturn(false).when(gitSyncSdkService).isGitSyncEnabled(ACCOUNT_ID, ORG_IDENTIFIER, PROJ_IDENTIFIER);
+    MockedStatic<InputSetValidationHelper> mockSettings = mockStatic(InputSetValidationHelper.class);
+    doReturn(inputSetEntityV1).when(inputSetRepository).save(inputSetEntityV1);
+    doReturn(false).when(pmsFeatureFlagHelper).isEnabled(ACCOUNT_ID, FeatureName.CDS_VALIDATE_INPUT_SET_IDENTIFIER);
+    InputSetEntity inputSetEntity = pmsInputSetServiceMock.create(inputSetEntityV1, false);
+    assertThat(inputSetEntity).isNotNull();
+    assertThat(inputSetEntityV1.getYaml()).isEqualTo(YAMLV1);
+    assertThat(inputSetEntityV1.getHarnessVersion()).isEqualTo(HarnessYamlVersion.V1);
+    verify(pipelineTelemetryHelper).sendTelemetryEventWithAccountName(eq(INPUT_SET_SAVE), any(), any());
+    mockSettings.close();
   }
 }

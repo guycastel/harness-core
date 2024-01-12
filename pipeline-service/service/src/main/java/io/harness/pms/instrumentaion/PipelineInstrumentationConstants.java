@@ -38,4 +38,9 @@ public class PipelineInstrumentationConstants {
   public static String ERROR_MESSAGES = "error_messages";
   public static String EXCEPTION_MESSAGE = "exception_message";
   public static String ACCOUNT_NAME = "account_name";
+  public static String INPUT_SET_SAVE = "input_set_save";
+  public static String INPUT_SET_NAME = "input_set_name";
+  public static String ORG_ID = "orgId";
+  public static String PROJECT_ID = "projectId";
+  public static String INPUT_SET_SAVE_ACTION = "action";
 }

@@ -60,12 +60,16 @@ import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.compute.fluent.VirtualMachineSizesClient;
 import com.azure.resourcemanager.compute.fluent.models.VirtualMachineSizeInner;
 import com.azure.resourcemanager.resources.models.Location;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -329,14 +333,22 @@ public class AzureHelperServiceImpl implements AzureHelperService {
         .build();
   }
 
+  private final Cache<AzureHelperServiceImpl.CacheKey, Double> vmPriceCache =
+      Caffeine.newBuilder().maximumSize(2000).expireAfterWrite(60, TimeUnit.MINUTES).build();
+
   private double getSkuPotentialCost(String skuName, String regionName) {
+    final AzureHelperServiceImpl.CacheKey cacheKey = new AzureHelperServiceImpl.CacheKey(skuName, regionName);
+    Double priceFromCache = vmPriceCache.getIfPresent(cacheKey);
+    if (priceFromCache != null) {
+      return priceFromCache;
+    }
     double price = 0.0;
     try {
       String filter = String.format(PRICING_FILTER, skuName, regionName);
       Call<AzureVmPricingResponseDTO> azurePricingCall = azureVmPricingClient.getAzureVmPrice(filter);
       Response<AzureVmPricingResponseDTO> pricingInfo = azurePricingCall.execute();
       if (null != pricingInfo.body() && null != pricingInfo.body().getItems()) {
-        // This API return list of potential prices for the VM, we get average of it
+        // This API return list of potential prices for the VM, we get max of it
         price = pricingInfo.body()
                     .getItems()
                     .stream()
@@ -344,10 +356,11 @@ public class AzureHelperServiceImpl implements AzureHelperService {
                         -> !(azureVmItemDTO.getSkuName().contains("Spot")
                             || azureVmItemDTO.getSkuName().contains("Low Priority")))
                     .mapToDouble(AzureVmItemDTO::getRetailPrice)
-                    .average()
+                    .max()
                     .orElse(0.0);
         // Multiply with 730.5 since API returns price of 1 hour, and we need price for a month
         price *= 730.5;
+        vmPriceCache.put(cacheKey, price);
       }
     } catch (Exception e) {
       log.info(
@@ -372,5 +385,11 @@ public class AzureHelperServiceImpl implements AzureHelperService {
       return String.format(AZURE_VM_ID_FORMAT, splitResourceId[2], splitResourceId[4], splitResourceId[8]);
     }
     return "";
+  }
+
+  @Value
+  private static class CacheKey {
+    String skuName;
+    String regionName;
   }
 }

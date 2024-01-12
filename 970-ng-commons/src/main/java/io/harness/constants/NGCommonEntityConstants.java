@@ -36,6 +36,7 @@ public class NGCommonEntityConstants {
   public static final String PROJECTS = "projects";
 
   public static final String UUID = "uuid";
+  public static final String ENTITY_ID_FIELD_NAME = "id";
   public static final String SEARCH_KEY = "searchKey";
   public static final String SORT_TYPE = "sortType";
   public static final String SORT_ORDER = "sortOrder";

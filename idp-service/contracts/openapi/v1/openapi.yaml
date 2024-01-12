@@ -4765,47 +4765,64 @@ components:
 tags:
   - name: AccountInfo
     description: Account Information
+    x-displayName: Account Information
   - name: AllowList
     description: Backstage Allow List
+    x-displayName: Backstage Allow List
   - name: AppConfig
     description: Backstage App Configurations
+    x-displayName: Backstage App Configurations
   - name: AuthInfo
-    description: Auth Information
+    description: Backstage Auth Information
+    x-displayName: Backstage Auth Information
   - name: BackstageEnvVariable
     description: Backstage Environment Variable
+    x-displayName: Backstage Environment Variable
   - name: BackstagePermissions
     description: Backstage Permissions
+    x-displayName: Backstage Permissions
   - name: ConnectorInfo
     description: Connector Information
-  - name: CustomPlugin
-    description: Custom Plugin Information
-  - name: DataPointsData
-    description: DataPointData Information
+    x-displayName: Connector Information
   - name: DataSource
     description: DataSource Information
+    x-displayName: Backstage Allow List
   - name: HarnessDataPoints
     description: Harness DataPoints Information
+    x-displayName: Harness DataPoints Information
   - name: KubernetesDataPoints
     description: Kubernetes DataPoints Information
+    x-displayName: Kubernetes DataPoints Information
   - name: LayoutProxy
     description: Layout Proxy
+    x-displayName: Layout Proxy
   - name: LicenseUsageResource
     description: License Usage Resource
+    x-displayName: License Usage Resource
   - name: MergedPluginsConfig
     description: Merged Plugins Configurations
+    x-displayName: Merged Plugins Configurations
   - name: Namespace
     description: Backstage Namespace
+    x-displayName: Backstage Namespace
   - name: OnboardingResource
     description: Onboarding
+    x-displayName: Onboarding
   - name: PluginInfo
     description: Plugin Information
+    x-displayName: Plugin Information
   - name: Provision
     description: Provision
+    x-displayName: Provision
   - name: Scores
     description: Scores Information
+    x-displayName: Scores Information
   - name: ScoresV2
     description: Scores Information V2
+    x-displayName: Scores Information V2
   - name: StatusInfo
     description: Status Information
+    x-displayName: Status Information
   - name: BackstageHarness
     description: Backstage Harness
+    x-displayName: Backstage Harness

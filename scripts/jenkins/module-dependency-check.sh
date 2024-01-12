@@ -59,7 +59,11 @@ function check_for_module() {
   ##############################
   # Read PR diff into temp file
   ##############################
-  resp=$(curl -L -s "https://patch-diff.githubusercontent.com/raw/harness/harness-core/pull/$1.diff" --write-out '%{http_code}' --output pr.diff)
+  if [[ "$GHTOK" == "" ]]; then
+    resp=$(curl -L -H "Accept: application/vnd.github.v3.diff" -s "https://api.github.com/repos/harness/harness-core/pulls/$1" --write-out '%{http_code}' --output pr.diff)
+  else
+    resp=$(curl -L -H "Authorization: Bearer $GHTOK" -H "Accept: application/vnd.github.v3.diff" -s "https://api.github.com/repos/harness/harness-core/pulls/$1" --write-out '%{http_code}' --output pr.diff)
+  fi
   if [ $? -eq 0 ];
   then
     if [ $resp -ne 200 ];

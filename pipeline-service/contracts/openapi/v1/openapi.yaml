@@ -175,6 +175,7 @@ paths:
           $ref: '#/components/responses/TriggerResponseBody'
       x-stoplight:
         id: jzt6irms1mrij
+      x-internal: true
   '/v1/orgs/{org}/projects/{project}/pipelines/{pipeline}/triggers/{trigger}':
     parameters:
       - $ref: '#/components/parameters/OrgParam'
@@ -194,6 +195,7 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/TriggerGetResponseBody'
+      x-internal: true
     put:
       summary: Update a Trigger
       operationId: update-trigger
@@ -210,6 +212,7 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/TriggerResponseBody'
+      x-internal: true
     delete:
       summary: Delete a Trigger
       operationId: delete-trigger
@@ -241,6 +244,7 @@ paths:
                 example-resp:
                   value: |
                     {}
+      x-internal: true
   '/v1/orgs/{org}/projects/{project}/pipelines/{pipeline}':
     parameters:
       - $ref: '#/components/parameters/OrgParam'

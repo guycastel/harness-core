@@ -30,7 +30,7 @@ import java.util.Set;
 public class EmptyVariableCreatorV1 extends ChildrenVariableCreatorV1<DummyNodeV1> {
   public Set<String> getSupportedStepTypes() {
     return Set.of(StepSpecTypeConstantsV1.HTTP, StepSpecTypeConstantsV1.SHELL_SCRIPT, StepSpecTypeConstantsV1.WAIT_STEP,
-        StepSpecTypeConstantsV1.JIRA_APPROVAL);
+        StepSpecTypeConstantsV1.JIRA_APPROVAL, StepSpecTypeConstantsV1.HARNESS_APPROVAL);
   }
 
   public Set<String> getSupportedStageTypes() {

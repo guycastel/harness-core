@@ -106,7 +106,7 @@ import org.mockito.MockitoAnnotations;
 
 @OwnedBy(PIPELINE)
 public class PipelineServiceInternalInfoProviderTest extends CategoryTest {
-  public static final int PLAN_CREATOR_NUMBER = 41;
+  public static final int PLAN_CREATOR_NUMBER = 42;
   public static final int FILTER_JSON_CREATOR_NUMBER = 16;
   public static final int VARIABLE_CREATOR_NUMBER = 28;
 
@@ -170,6 +170,8 @@ public class PipelineServiceInternalInfoProviderTest extends CategoryTest {
     assertThat(planCreatorClasses.contains(ApprovalStagePlanCreator.class)).isTrue();
     assertThat(planCreatorClasses.contains(io.harness.steps.wait.v1.WaitStepPlanCreator.class)).isTrue();
     assertThat(planCreatorClasses.contains(io.harness.steps.approval.step.jira.v1.JiraApprovalStepPlanCreator.class))
+        .isTrue();
+    assertThat(planCreatorClasses.contains(io.harness.steps.approval.step.harness.v1.HarnessApprovalStepPlanCreator.class))
         .isTrue();
     assertThat(planCreatorClasses.contains(ResourceConstraintStepPlanCreator.class)).isTrue();
   }

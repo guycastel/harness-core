@@ -7,29 +7,18 @@
 
 package io.harness.steps.approval.step.harness.v1;
 
-import static io.harness.yaml.schema.beans.SupportedPossibleFieldTypes.string;
-
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
-import io.harness.beans.SwaggerConstants;
 import io.harness.plancreator.steps.internal.PMSStepInfo;
 import io.harness.pms.contracts.steps.StepType;
 import io.harness.pms.yaml.ParameterField;
-import io.harness.pms.yaml.YamlNode;
 import io.harness.steps.StepSpecTypeConstants;
 import io.harness.steps.StepSpecTypeConstantsV1;
-import io.harness.yaml.YamlSchemaTypes;
-import io.harness.yaml.core.VariableExpression;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
-import javax.validation.constraints.NotNull;
-import lombok.Getter;
 import lombok.Value;
-import org.hibernate.validator.constraints.NotEmpty;
 
 @CodePulse(
     module = ProductModule.CDS, unitCoverageRequired = false, components = {HarnessModuleComponent.CDS_COMMON_STEPS})

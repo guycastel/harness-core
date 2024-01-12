@@ -12,8 +12,6 @@ import static io.harness.annotations.dev.HarnessTeam.CDC;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.harness.annotations.dev.ProductModule;
 
 @OwnedBy(CDC)

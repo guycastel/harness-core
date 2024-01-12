@@ -15,7 +15,6 @@ import io.harness.plancreator.steps.internal.v1.PmsAbstractStepNodeV1;
 import io.harness.steps.StepSpecTypeConstantsV1;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import lombok.Builder;
 import lombok.Value;
 
 @CodePulse(
@@ -35,6 +34,7 @@ public class HarnessApprovalStepNodeV1 extends PmsAbstractStepNodeV1 {
         .auto_approval(spec.getAuto_approval())
         .reject_previous(spec.getAuto_reject())
         .callback_id(spec.getCallback_id())
+        // TODO: Handle the case for exclude history [CDS-86934]
         .exclude_history(spec.getInclude_execution_history())
         .inputs(spec.getInputs())
         .build();

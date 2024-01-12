@@ -18,6 +18,11 @@ import lombok.Data;
 @OwnedBy(HarnessTeam.SSCA)
 public class EnforcementStepEnvVariables {
   String sbomSource;
+  String sbomSourceType;
+  String repoUrl;
+  String repoPath;
+  String repoVariant;
+  String repoVariantType;
   String harnessPolicyFileId;
   String stepExecutionId;
   boolean sscaManagerEnabled;

@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum SbomDriftBase {
   @JsonProperty(SbomDriftConstants.BASELINE) BASELINE(SbomDriftConstants.BASELINE),
-  @JsonProperty(SbomDriftConstants.LAST_GENERATED_SBOM) LAST_GENERATED_SBOM(SbomDriftConstants.LAST_GENERATED_SBOM);
+  @JsonProperty(SbomDriftConstants.LAST_GENERATED_SBOM) LAST_GENERATED_SBOM(SbomDriftConstants.LAST_GENERATED_SBOM),
+  @JsonProperty(SbomDriftConstants.REPOSITORY) REPOSITORY(SbomDriftConstants.REPOSITORY);
   private String name;
 
   SbomDriftBase(String name) {

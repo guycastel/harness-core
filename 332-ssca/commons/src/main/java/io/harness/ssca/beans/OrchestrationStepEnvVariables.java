@@ -20,6 +20,12 @@ public class OrchestrationStepEnvVariables {
   String sbomGenerationTool;
   String sbomGenerationFormat;
   String sbomSource;
+  String sbomSourceType;
+  String repoUrl;
+  String repoPath;
+  String repoVariant;
+  String repoVariantType;
+  String repoClonedCodebasePath;
   String sbomMode;
   String sbomDestination;
   String stepExecutionId;
@@ -27,6 +33,8 @@ public class OrchestrationStepEnvVariables {
   String sscaCoreUrl;
   boolean sscaManagerEnabled;
   String sbomDrift;
+  String sbomDriftVariant;
+  String sbomDriftVariantType;
   boolean base64SecretAttestation;
   boolean airgapEnabled;
 }

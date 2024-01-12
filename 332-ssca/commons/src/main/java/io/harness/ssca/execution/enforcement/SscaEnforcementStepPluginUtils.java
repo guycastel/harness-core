@@ -25,6 +25,12 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class SscaEnforcementStepPluginUtils {
   public static final String PLUGIN_SBOMSOURCE = "PLUGIN_SBOMSOURCE";
+  public static final String PLUGIN_SBOMSOURCE_TYPE = "PLUGIN_SBOMSOURCE_TYPE";
+
+  public static final String PLUGIN_REPO_SBOMSOURCE_URL = "PLUGIN_REPO_SBOMSOURCE_URL";
+  public static final String PLUGIN_REPO_SBOMSOURCE_PATH = "PLUGIN_REPO_SBOMSOURCE_PATH";
+  public static final String PLUGIN_REPO_SBOMSOURCE_VARIANT = "PLUGIN_REPO_SBOMSOURCE_VARIANT";
+  public static final String PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE = "PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE";
   public static final String PLUGIN_TYPE = "PLUGIN_TYPE";
   public static final String STEP_EXECUTION_ID = "STEP_EXECUTION_ID";
   public static final String POLICY_FILE_IDENTIFIER = "POLICY_FILE_IDENTIFIER";
@@ -38,7 +44,12 @@ public class SscaEnforcementStepPluginUtils {
   public Map<String, String> getSscaEnforcementStepEnvVariables(EnforcementStepEnvVariables envVariables) {
     Map<String, String> envMap = new HashMap<>();
     envMap.put(STEP_EXECUTION_ID, envVariables.getStepExecutionId());
+    envMap.put(PLUGIN_SBOMSOURCE_TYPE, envVariables.getSbomSourceType());
     envMap.put(PLUGIN_SBOMSOURCE, envVariables.getSbomSource());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_URL, envVariables.getRepoUrl());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_PATH, envVariables.getRepoPath());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_VARIANT, envVariables.getRepoVariant());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE, envVariables.getRepoVariantType());
     envMap.put(PLUGIN_TYPE, "Enforce");
     envMap.put(SSCA_MANAGER_ENABLED, String.valueOf(envVariables.isSscaManagerEnabled()));
     if (envVariables.getHarnessPolicyFileId() != null) {

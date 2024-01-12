@@ -28,7 +28,15 @@ import lombok.experimental.UtilityClass;
 public class SscaOrchestrationStepPluginUtils {
   public static final String PLUGIN_TOOL = "PLUGIN_TOOL";
   public static final String PLUGIN_FORMAT = "PLUGIN_FORMAT";
+  public static final String PLUGIN_REPO_SBOMSOURCE_URL = "PLUGIN_REPO_SBOMSOURCE_URL";
+  public static final String PLUGIN_REPO_SBOMSOURCE_PATH = "PLUGIN_REPO_SBOMSOURCE_PATH";
+  public static final String PLUGIN_REPO_SBOMSOURCE_VARIANT = "PLUGIN_REPO_SBOMSOURCE_VARIANT";
+  public static final String PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE = "PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE";
+  public static final String PLUGIN_REPO_SBOMSOURCE_CLONED_CODEBASE = "PLUGIN_REPO_SBOMSOURCE_CLONED_CODEBASE";
+
   public static final String PLUGIN_SBOMSOURCE = "PLUGIN_SBOMSOURCE";
+
+  public static final String PLUGIN_SBOMSOURCE_TYPE = "PLUGIN_SBOMSOURCE_TYPE";
   public static final String PLUGIN_TYPE = "PLUGIN_TYPE";
   public static final String PLUGIN_MODE = "PLUGIN_MODE";
   public static final String PLUGIN_SBOMDESTINATION = "PLUGIN_SBOMDESTINATION";
@@ -43,6 +51,9 @@ public class SscaOrchestrationStepPluginUtils {
   public static final String COSIGN_PRIVATE_KEY = "COSIGN_PRIVATE_KEY";
   public static final String SSCA_MANAGER_ENABLED = "SSCA_MANAGER_ENABLED";
   public static final String PLUGIN_SBOM_DRIFT = "PLUGIN_SBOM_DRIFT";
+  public static final String PLUGIN_SBOM_DRIFT_VARIANT = "PLUGIN_SBOM_DRIFT_VARIANT";
+  public static final String PLUGIN_SBOM_DRIFT_VARIANT_TYPE = "PLUGIN_SBOM_DRIFT_VARIANT_TYPE";
+
   public static final String PLUGIN_BASE64_SECRET = "PLUGIN_BASE64_SECRET";
   public static final String ENABLE_SSCA_AIRGAP = "ENABLE_SSCA_AIRGAP";
 
@@ -50,7 +61,13 @@ public class SscaOrchestrationStepPluginUtils {
     Map<String, String> envMap = new HashMap<>();
     envMap.put(PLUGIN_TOOL, envVariables.getSbomGenerationTool());
     envMap.put(PLUGIN_FORMAT, envVariables.getSbomGenerationFormat());
+    envMap.put(PLUGIN_SBOMSOURCE_TYPE, envVariables.getSbomSourceType());
     envMap.put(PLUGIN_SBOMSOURCE, envVariables.getSbomSource());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_URL, envVariables.getRepoUrl());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_PATH, envVariables.getRepoPath());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_VARIANT, envVariables.getRepoVariant());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE, envVariables.getRepoVariantType());
+    envMap.put(PLUGIN_REPO_SBOMSOURCE_CLONED_CODEBASE, envVariables.getRepoClonedCodebasePath());
     envMap.put(PLUGIN_TYPE, "Orchestrate");
     String SbomMode = envVariables.getSbomMode();
     envMap.put(PLUGIN_MODE, SbomMode == null ? "generation" : SbomMode);
@@ -63,6 +80,8 @@ public class SscaOrchestrationStepPluginUtils {
     envMap.put(STEP_EXECUTION_ID, envVariables.getStepExecutionId());
     envMap.put(STEP_ID, envVariables.getStepIdentifier());
     envMap.put(PLUGIN_SBOM_DRIFT, envVariables.getSbomDrift());
+    envMap.put(PLUGIN_SBOM_DRIFT_VARIANT, envVariables.getSbomDriftVariant());
+    envMap.put(PLUGIN_SBOM_DRIFT_VARIANT_TYPE, envVariables.getSbomDriftVariantType());
     envMap.put(PLUGIN_BASE64_SECRET, String.valueOf(envVariables.isBase64SecretAttestation()));
     envMap.put(ENABLE_SSCA_AIRGAP, String.valueOf(envVariables.isAirgapEnabled()));
     envMap.values().removeAll(Collections.singleton(null));

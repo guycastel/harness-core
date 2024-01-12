@@ -14,7 +14,6 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.sweepingoutputs.StageInfraDetails.Type;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.exception.ngexception.CIStageExecutionUserException;
-import io.harness.ngsettings.client.remote.NGSettingsClient;
 import io.harness.pms.contracts.ambiance.Ambiance;
 import io.harness.pms.execution.utils.AmbianceUtils;
 import io.harness.ssca.beans.OrchestrationStepEnvVariables;
@@ -22,7 +21,10 @@ import io.harness.ssca.beans.OrchestrationStepSecretVariables;
 import io.harness.ssca.beans.SscaConstants;
 import io.harness.ssca.beans.attestation.AttestationType;
 import io.harness.ssca.beans.attestation.CosignAttestation;
+import io.harness.ssca.beans.sbomDrift.RepositorySbomDrift;
+import io.harness.ssca.beans.sbomDrift.SbomDriftBase;
 import io.harness.ssca.beans.source.ImageSbomSource;
+import io.harness.ssca.beans.source.RepositorySbomSource;
 import io.harness.ssca.beans.source.SbomSourceType;
 import io.harness.ssca.beans.stepinfo.SscaOrchestrationStepInfo;
 import io.harness.ssca.beans.tools.SbomOrchestrationToolType;
@@ -65,16 +67,42 @@ public class SscaOrchestrationPluginUtils {
     if (stepInfo.getIngestion() != null && stepInfo.getIngestion().getFile() != null) {
       ingestion = stepInfo.getIngestion().getFile().getValue();
     }
-
+    String sbomSourceType = stepInfo.getSource().getType().toString();
     String sbomSource = null;
-    if (stepInfo.getSource().getType().equals(SbomSourceType.IMAGE)) {
+    if (SbomSourceType.IMAGE.equals(stepInfo.getSource().getType())) {
       sbomSource = resolveStringParameter("source", SscaConstants.SSCA_ORCHESTRATION_STEP, identifier,
           ((ImageSbomSource) stepInfo.getSource().getSbomSourceSpec()).getImage(), true);
     }
 
+    String repoUrl = null;
+    String repoPath = null;
+    String repoVariant = null;
+    String repoVariantType = null;
+    String repoClonedCodebasePath = null;
+    if (SbomSourceType.REPOSITORY.equals(stepInfo.getSource().getType())) {
+      repoUrl = resolveStringParameter("source", SscaConstants.SSCA_ORCHESTRATION_STEP, identifier,
+          ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getUrl(), true);
+      repoPath = resolveStringParameter("source", SscaConstants.SSCA_ORCHESTRATION_STEP, identifier,
+          ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getPath(), true);
+      repoVariant = resolveStringParameter("source", SscaConstants.SSCA_ORCHESTRATION_STEP, identifier,
+          ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getVariant(), true);
+      repoVariantType = ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getVariantType().toString();
+      repoClonedCodebasePath = resolveStringParameter("source", SscaConstants.SSCA_ORCHESTRATION_STEP, identifier,
+          ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getClonedCodebase(), true);
+    }
+
     String sbomDrift = null;
+    String sbomDriftVariant = null;
+    String sbomDriftVariantType = null;
     if (stepInfo.getSbomDrift() != null && stepInfo.getSbomDrift().getBase() != null) {
       sbomDrift = stepInfo.getSbomDrift().getBase().toString();
+      if (stepInfo.getSbomDrift().getBase().equals(SbomDriftBase.REPOSITORY)
+          && stepInfo.getSbomDrift().getSbomDriftSpec() != null) {
+        sbomDriftVariant = resolveStringParameter("source", SscaConstants.SSCA_ORCHESTRATION_STEP, identifier,
+            ((RepositorySbomDrift) stepInfo.getSbomDrift().getSbomDriftSpec()).getVariant(), true);
+        sbomDriftVariantType =
+            ((RepositorySbomDrift) stepInfo.getSbomDrift().getSbomDriftSpec()).getVariantType().toString();
+      }
     }
 
     boolean useBase64SecretForAttestation = ngSettingsUtils.getBaseEncodingEnabled(AmbianceUtils.getAccountId(ambiance),
@@ -88,7 +116,13 @@ public class SscaOrchestrationPluginUtils {
         OrchestrationStepEnvVariables.builder()
             .sbomGenerationTool(tool)
             .sbomGenerationFormat(format)
+            .sbomSourceType(sbomSourceType)
             .sbomSource(sbomSource)
+            .repoUrl(repoUrl)
+            .repoPath(repoPath)
+            .repoVariant(repoVariant)
+            .repoVariantType(repoVariantType)
+            .repoClonedCodebasePath(repoClonedCodebasePath != null ? repoClonedCodebasePath : "/harness")
             .sscaCoreUrl(sscaServiceUtils.getSscaServiceConfig().getHttpClientConfig().getBaseUrl())
             .sbomMode(mode)
             .sbomDestination(ingestion)
@@ -96,6 +130,8 @@ public class SscaOrchestrationPluginUtils {
             .stepIdentifier(identifier)
             .sscaManagerEnabled(sscaServiceUtils.getSscaServiceConfig().isSscaManagerEnabled())
             .sbomDrift(sbomDrift)
+            .sbomDriftVariant(sbomDriftVariant)
+            .sbomDriftVariantType(sbomDriftVariantType)
             .base64SecretAttestation(useBase64SecretForAttestation)
             .airgapEnabled(airgapEnabled)
             .build();

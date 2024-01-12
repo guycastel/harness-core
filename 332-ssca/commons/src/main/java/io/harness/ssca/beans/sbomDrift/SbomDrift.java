@@ -7,6 +7,11 @@
 
 package io.harness.ssca.beans.sbomDrift;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.EXTERNAL_PROPERTY;
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
@@ -15,4 +20,8 @@ import lombok.Data;
 @Builder
 public class SbomDrift {
   @NotNull private SbomDriftBase base;
+
+  @JsonProperty("spec")
+  @JsonTypeInfo(use = NAME, property = "base", include = EXTERNAL_PROPERTY, visible = true)
+  SbomDriftSpec sbomDriftSpec;
 }

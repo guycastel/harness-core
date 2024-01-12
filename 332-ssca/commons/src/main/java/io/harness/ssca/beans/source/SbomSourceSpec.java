@@ -9,5 +9,8 @@ package io.harness.ssca.beans.source;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 
-@JsonSubTypes({ @JsonSubTypes.Type(value = ImageSbomSource.class, name = SbomSourceConstants.IMAGE) })
+@JsonSubTypes({
+  @JsonSubTypes.Type(value = ImageSbomSource.class, name = SbomSourceConstants.IMAGE)
+  , @JsonSubTypes.Type(value = RepositorySbomSource.class, name = SbomSourceConstants.REPOSITORY)
+})
 public interface SbomSourceSpec {}

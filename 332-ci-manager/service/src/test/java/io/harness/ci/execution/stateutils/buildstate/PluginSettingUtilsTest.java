@@ -24,6 +24,7 @@ import static io.harness.ci.commonconstants.CIExecutionConstants.STEP_MOUNT_PATH
 import static io.harness.ci.execution.buildstate.PluginSettingUtils.TAG_BUILD_EVENT;
 import static io.harness.ci.execution.buildstate.PluginSettingUtils.getRepoNameFromRepoUrl;
 import static io.harness.rule.OwnerRule.ALEKSANDAR;
+import static io.harness.rule.OwnerRule.ARPITJ;
 import static io.harness.rule.OwnerRule.INDER;
 import static io.harness.rule.OwnerRule.JAMES_RICKS;
 import static io.harness.rule.OwnerRule.RAGHAV_GUPTA;
@@ -81,6 +82,8 @@ import io.harness.ssca.beans.attestation.verify.CosignVerifyAttestation;
 import io.harness.ssca.beans.attestation.verify.VerifyAttestation;
 import io.harness.ssca.beans.policy.EnforcementPolicy;
 import io.harness.ssca.beans.source.ImageSbomSource;
+import io.harness.ssca.beans.source.RepoSbomVariantType;
+import io.harness.ssca.beans.source.RepositorySbomSource;
 import io.harness.ssca.beans.source.SbomSource;
 import io.harness.ssca.beans.source.SbomSourceType;
 import io.harness.ssca.beans.stepinfo.SlsaVerificationStepInfo;
@@ -1121,6 +1124,37 @@ public class PluginSettingUtilsTest extends CIExecutionTestBase {
     Map<String, String> expected = new HashMap<>();
     expected.put("STEP_EXECUTION_ID", null);
     expected.put("PLUGIN_SBOMSOURCE", "image:tag");
+    expected.put("PLUGIN_SBOMSOURCE_TYPE", "image");
+    expected.put("PLUGIN_REPO_SBOMSOURCE_VARIANT", null);
+    expected.put("PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE", null);
+    expected.put("PLUGIN_REPO_SBOMSOURCE_PATH", null);
+    expected.put("PLUGIN_REPO_SBOMSOURCE_URL", null);
+    expected.put("PLUGIN_TYPE", "Enforce");
+    expected.put("POLICY_FILE_IDENTIFIER", "file");
+    expected.put("SSCA_MANAGER_ENABLED", "false");
+    expected.put("POLICY_SET_REF", "policySet1,policySet2");
+    expected.put("PLUGIN_BASE64_SECRET", "false");
+    expected.put("ENABLE_SSCA_AIRGAP", "false");
+    Ambiance ambiance = Ambiance.newBuilder().build();
+    Map<String, String> actual = pluginSettingUtils.getPluginCompatibleEnvVariables(
+        sscaEnforcementStepInfo, "identifier", 100, ambiance, Type.K8, false, true);
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  @Owner(developers = ARPITJ)
+  @Category(UnitTests.class)
+  public void testSscaEnforcementStepEnvVariables_RepoSource() {
+    SscaEnforcementStepInfo sscaEnforcementStepInfo = getSscaEnforcementStep_repoSource();
+
+    Map<String, String> expected = new HashMap<>();
+    expected.put("STEP_EXECUTION_ID", null);
+    expected.put("PLUGIN_SBOMSOURCE", null);
+    expected.put("PLUGIN_SBOMSOURCE_TYPE", "repository");
+    expected.put("PLUGIN_REPO_SBOMSOURCE_VARIANT", "develop");
+    expected.put("PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE", RepoSbomVariantType.BRANCH.toString());
+    expected.put("PLUGIN_REPO_SBOMSOURCE_PATH", "/path");
+    expected.put("PLUGIN_REPO_SBOMSOURCE_URL", "url");
     expected.put("PLUGIN_TYPE", "Enforce");
     expected.put("POLICY_FILE_IDENTIFIER", "file");
     expected.put("SSCA_MANAGER_ENABLED", "false");
@@ -1143,6 +1177,11 @@ public class PluginSettingUtilsTest extends CIExecutionTestBase {
     Map<String, String> expected = new HashMap<>();
     expected.put("STEP_EXECUTION_ID", null);
     expected.put("PLUGIN_SBOMSOURCE", "image:tag");
+    expected.put("PLUGIN_SBOMSOURCE_TYPE", "image");
+    expected.put("PLUGIN_REPO_SBOMSOURCE_VARIANT", null);
+    expected.put("PLUGIN_REPO_SBOMSOURCE_VARIANT_TYPE", null);
+    expected.put("PLUGIN_REPO_SBOMSOURCE_PATH", null);
+    expected.put("PLUGIN_REPO_SBOMSOURCE_URL", null);
     expected.put("PLUGIN_TYPE", "Enforce");
     expected.put("POLICY_FILE_IDENTIFIER", "file");
     expected.put("SSCA_MANAGER_ENABLED", "false");
@@ -1197,6 +1236,27 @@ public class PluginSettingUtilsTest extends CIExecutionTestBase {
                 .verifyAttestationSpec(
                     CosignVerifyAttestation.builder().publicKey(ParameterField.createValueField("publicKey")).build())
                 .build())
+        .build();
+  }
+
+  private SscaEnforcementStepInfo getSscaEnforcementStep_repoSource() {
+    return SscaEnforcementStepInfo.builder()
+        .source(SbomSource.builder()
+                    .type(SbomSourceType.REPOSITORY)
+                    .sbomSourceSpec(RepositorySbomSource.builder()
+                                        .url(ParameterField.createValueField("url"))
+                                        .path(ParameterField.createValueField("/path"))
+                                        .variant(ParameterField.createValueField("develop"))
+                                        .variantType(RepoSbomVariantType.BRANCH)
+                                        .build())
+                    .build())
+        .policy(EnforcementPolicy.builder()
+                    .policySets(ParameterField.createValueField(List.of("policySet1", "policySet2")))
+                    .store(PolicyStore.builder()
+                               .type(StoreType.HARNESS)
+                               .storeSpec(HarnessStore.builder().file(ParameterField.createValueField("file")).build())
+                               .build())
+                    .build())
         .build();
   }
 

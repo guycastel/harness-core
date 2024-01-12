@@ -21,6 +21,7 @@ import io.harness.ssca.beans.attestation.verify.CosignVerifyAttestation;
 import io.harness.ssca.beans.enforcement.EnforcementStepEnvVariables;
 import io.harness.ssca.beans.enforcement.EnforcementStepSecretVariables;
 import io.harness.ssca.beans.source.ImageSbomSource;
+import io.harness.ssca.beans.source.RepositorySbomSource;
 import io.harness.ssca.beans.source.SbomSourceType;
 import io.harness.ssca.beans.stepinfo.SscaEnforcementStepInfo;
 import io.harness.ssca.beans.store.HarnessStore;
@@ -44,10 +45,25 @@ public class SscaEnforcementPluginHelper {
 
   public Map<String, String> getSscaEnforcementStepEnvVariables(
       SscaEnforcementStepInfo stepInfo, String identifier, Ambiance ambiance, Type infraType) {
+    String sbomSourceType = stepInfo.getSource().getType().toString();
     String sbomSource = null;
     if (SbomSourceType.IMAGE.equals(stepInfo.getSource().getType())) {
       sbomSource = resolveStringParameter("source", SscaConstants.SSCA_ENFORCEMENT, identifier,
           ((ImageSbomSource) stepInfo.getSource().getSbomSourceSpec()).getImage(), true);
+    }
+
+    String repoUrl = null;
+    String repoPath = null;
+    String repoVariant = null;
+    String repoVariantType = null;
+    if (SbomSourceType.REPOSITORY.equals(stepInfo.getSource().getType())) {
+      repoUrl = resolveStringParameter("source", SscaConstants.SSCA_ENFORCEMENT, identifier,
+          ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getUrl(), true);
+      repoPath = resolveStringParameter("source", SscaConstants.SSCA_ENFORCEMENT, identifier,
+          ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getPath(), true);
+      repoVariant = resolveStringParameter("source", SscaConstants.SSCA_ENFORCEMENT, identifier,
+          ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getVariant(), true);
+      repoVariantType = ((RepositorySbomSource) stepInfo.getSource().getSbomSourceSpec()).getVariantType().toString();
     }
 
     String policyFile = null;
@@ -76,7 +92,12 @@ public class SscaEnforcementPluginHelper {
     Map<String, String> envMap = SscaEnforcementStepPluginUtils.getSscaEnforcementStepEnvVariables(
         EnforcementStepEnvVariables.builder()
             .stepExecutionId(runtimeId)
+            .sbomSourceType(sbomSourceType)
             .sbomSource(sbomSource)
+            .repoUrl(repoUrl)
+            .repoPath(repoPath)
+            .repoVariant(repoVariant)
+            .repoVariantType(repoVariantType)
             .harnessPolicyFileId(policyFile)
             .sscaManagerEnabled(sscaServiceUtils.isSSCAManagerEnabled())
             .policySetRef(policySetRef)

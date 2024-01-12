@@ -9,4 +9,8 @@ package io.harness.ssca.beans.source;
 
 public interface SbomSourceConstants {
   String IMAGE = "image";
+  String REPOSITORY = "repository";
+  String BRANCH = "branch";
+  String GIT_TAG = "gitTag";
+  String COMMIT = "commit";
 }

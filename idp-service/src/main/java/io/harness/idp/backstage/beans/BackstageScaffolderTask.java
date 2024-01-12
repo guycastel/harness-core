@@ -63,7 +63,7 @@ public class BackstageScaffolderTask {
       backstageScaffolderTaskEntity.setLastHeartbeatAt(
           DateUtils.parseTimestamp(backstageScaffolderTask.getLastHeartbeatAt(), TIMESTAMP_WITH_TIMEZONE));
       backstageScaffolderTaskEntity.setSecrets(backstageScaffolderTask.getSecrets());
-      backstageScaffolderTaskEntity.setTaskCreatedBy(backstageScaffolderTaskEntity.getTaskCreatedBy());
+      backstageScaffolderTaskEntity.setTaskCreatedBy(backstageScaffolderTask.getCreatedBy());
       backstageScaffolderTasksEntities.add(backstageScaffolderTaskEntity);
     });
     return backstageScaffolderTasksEntities;

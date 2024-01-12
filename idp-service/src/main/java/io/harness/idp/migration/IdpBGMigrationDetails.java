@@ -90,6 +90,7 @@ public class IdpBGMigrationDetails implements MigrationDetails {
         .add(Pair.of(56, IdpCatalogEntitiesAsHarnessEntitiesMigration.class))
         .add(Pair.of(57, ScorecardMigration.class))
         .add(Pair.of(58, IdpRbacGlobalToGranularResourcesPermissionsMigration.class))
+        .add(Pair.of(59, ScaffolderTasksCreatedByMigration.class))
         .build();
   }
 }

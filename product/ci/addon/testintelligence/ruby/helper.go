@@ -36,13 +36,26 @@ func WriteHelperFile(repoPath string) error {
 		return errors.New("cannot find rspec helper file. Please make change manually to enable TI")
 	}
 
-	f, err := os.OpenFile(findRootMostPath(matches), os.O_APPEND|os.O_WRONLY, 0644)
+	fileName := findRootMostPath(matches)
+	scriptPath := filepath.Join(repoPath, "test_intelligence.rb")
+	lineToAdd := fmt.Sprintf("require '%s'", scriptPath)
+
+	err = prepend(lineToAdd, fileName)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	scriptPath := filepath.Join(repoPath, "test_intelligence.rb")
-	_, err = f.WriteString(fmt.Sprintf("\nrequire '%s'", scriptPath))
+	return nil
+}
+
+// prepend adds line in front of a file
+func prepend(lineToAdd, fileName string) error {
+	fileData, err := os.ReadFile(fileName)
+	if err != nil {
+		return err
+	}
+
+	newContent := []byte(lineToAdd + "\n" + string(fileData))
+	err = os.WriteFile(fileName, newContent, os.ModePerm)
 	if err != nil {
 		return err
 	}

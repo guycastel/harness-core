@@ -27,6 +27,7 @@ import (
 	pb "github.com/harness/harness-core/product/ci/engine/proto"
 	stutils "github.com/harness/harness-core/product/ci/split_tests/utils"
 	"github.com/harness/ti-client/types"
+	zglob "github.com/mattn/go-zglob"
 	"go.uber.org/zap"
 )
 
@@ -397,6 +398,7 @@ func (r *runTestsTask) getTestSelection(ctx context.Context, runner testintellig
 	var err error
 	testGlobSlice := strings.Split(r.testGlobs, ",")
 	resp, err = selectTestsFn(ctx, files, r.runOnlySelectedTests, r.id, r.log, r.fs, r.language, testGlobSlice)
+	resp = filterTestsAfterSelection(resp, r.testGlobs)
 	if err != nil {
 		log.Errorw("There was some issue in trying to intelligently figure out tests to run, running all the tests", "error", zap.Error(err))
 		r.runOnlySelectedTests = false
@@ -410,6 +412,25 @@ func (r *runTestsTask) getTestSelection(ctx context.Context, runner testintellig
 		r.log.Infow(fmt.Sprintf("Running tests selected by Test Intelligence: %s", resp.Tests))
 	}
 	return resp
+}
+
+func filterTestsAfterSelection(selection types.SelectTestsResp, testGlobs string) types.SelectTestsResp {
+	if selection.SelectAll || testGlobs == "" {
+		return selection
+	}
+	testGlobSlice := strings.Split(testGlobs, ",")
+	filteredTests := []types.RunnableTest{}
+	for _, test := range selection.Tests {
+		for _, glob := range testGlobSlice {
+			if matched, _ := zglob.Match(glob, test.Class); matched {
+				filteredTests = append(filteredTests, test)
+				break
+			}
+		}
+	}
+	selection.SelectedTests = len(filteredTests)
+	selection.Tests = filteredTests
+	return selection
 }
 
 // getSplitTests takes a list of tests as input and returns the slice of tests to run depending on
@@ -739,6 +760,7 @@ func (r *runTestsTask) execute(ctx context.Context) ([]*pb.OutputVariable, error
 }
 
 func (r *runTestsTask) getTiRunner(agentPath string) (runner testintelligence.TestRunner, err error) {
+	testGlobs := sanitizeTestGlob(r.testGlobs)
 	switch r.language {
 	case "scala", "java", "kotlin":
 		switch r.buildTool {
@@ -777,12 +799,19 @@ func (r *runTestsTask) getTiRunner(agentPath string) (runner testintelligence.Te
 	case "ruby":
 		switch r.buildTool {
 		case "rspec":
-			runner = ruby.NewRspecRunner(r.log, r.fs, r.cmdContextFactory, agentPath)
+			runner = ruby.NewRspecRunner(r.log, r.fs, r.cmdContextFactory, agentPath, testGlobs)
 		default:
-			return runner, fmt.Errorf("build tool: %s is not supported for python", r.buildTool)
+			return runner, fmt.Errorf("build tool: %s is not supported for ruby", r.buildTool)
 		}
 	default:
 		return runner, fmt.Errorf("language %s is not suported", r.language)
 	}
 	return runner, nil
+}
+
+func sanitizeTestGlob(globString string) []string {
+	if globString == "" {
+		return make([]string, 0)
+	}
+	return strings.Split(globString, ",")
 }

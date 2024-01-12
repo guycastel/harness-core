@@ -12,7 +12,6 @@ package csharp
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -40,7 +39,7 @@ func NewNunitConsoleRunner(log *zap.SugaredLogger, fs filesystem.FileSystem, fac
 }
 
 func (_ *nunitConsoleRunner) AutoDetectPackages() ([]string, error) {
-	return []string{}, errors.New("not implemented")
+	return []string{}, nil
 }
 
 func (b *nunitConsoleRunner) AutoDetectTests(ctx context.Context, testGlobs []string) ([]types.RunnableTest, error) {

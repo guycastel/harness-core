@@ -15,7 +15,6 @@ package python
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -50,7 +49,7 @@ func NewPytestRunner(log *zap.SugaredLogger, fs filesystem.FileSystem, factory e
 }
 
 func (b *pytestRunner) AutoDetectPackages() ([]string, error) {
-	return []string{}, errors.New("not implemented")
+	return []string{}, nil
 }
 
 func (b *pytestRunner) AutoDetectTests(ctx context.Context, testGlobs []string) ([]types.RunnableTest, error) {

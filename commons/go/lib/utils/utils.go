@@ -52,8 +52,8 @@ var (
 	javaTestRegex       = fmt.Sprintf("^.*%s", JAVA_TEST_PATH)
 	scalaTestRegex      = fmt.Sprintf("^.*%s", SCALA_TEST_PATH)
 	kotlinTestRegex     = fmt.Sprintf("^.*%s", KOTLIN_TEST_PATH)
-	PYTHON_TEST_PATTERN = []string{"test_*.py", "*_test.py"}
-	RUBY_TEST_PATTERN   = []string{"*_spec.rb"}
+	PYTHON_TEST_PATTERN = []string{"**/test_*.py", "**/*_test.py"}
+	RUBY_TEST_PATTERN   = []string{"spec/**{,/*/**}/*_spec.rb"}
 	extensionMapping    = map[string]LangTypeAndTestPattern{
 		".py": LangTypeAndTestPattern{
 			LangType:    LangType_PYTHON,
@@ -171,6 +171,9 @@ func ParsePathBasedNode(file types.File, testGlobs []string, langType LangType) 
 	filename := strings.TrimSpace(file.Name)
 
 	for _, glob := range testGlobs {
+		if !strings.HasPrefix(glob, "/") {
+			glob = filepath.Join("**", glob)
+		}
 		if matched, _ := zglob.Match(glob, filename); !matched {
 			continue
 		}

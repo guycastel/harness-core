@@ -15,7 +15,6 @@ package ruby
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -36,19 +35,21 @@ type rspecRunner struct {
 	log               *zap.SugaredLogger
 	cmdContextFactory exec.CmdContextFactory
 	agentPath         string
+	testGlobs         []string
 }
 
-func NewRspecRunner(log *zap.SugaredLogger, fs filesystem.FileSystem, factory exec.CmdContextFactory, agentPath string) *rspecRunner {
+func NewRspecRunner(log *zap.SugaredLogger, fs filesystem.FileSystem, factory exec.CmdContextFactory, agentPath string, testGlobs []string) *rspecRunner {
 	return &rspecRunner{
 		fs:                fs,
 		log:               log,
 		cmdContextFactory: factory,
 		agentPath:         agentPath,
+		testGlobs:         testGlobs,
 	}
 }
 
 func (b *rspecRunner) AutoDetectPackages() ([]string, error) {
-	return []string{}, errors.New("not implemented")
+	return []string{}, nil
 }
 
 func (b *rspecRunner) AutoDetectTests(ctx context.Context, testGlobs []string) ([]types.RunnableTest, error) {
@@ -65,27 +66,33 @@ func (b *rspecRunner) ReadPackages(files []types.File) []types.File {
 func (b *rspecRunner) GetCmd(ctx context.Context, tests []types.RunnableTest, userArgs, agentConfigPath string, ignoreInstr, runAll bool) (string, error) {
 	testCmd := ""
 	tiFlag := "TI=1"
-	if userArgs == "" {
-		userArgs = fmt.Sprintf("--format RspecJunitFormatter --out %s${HARNESS_NODE_INDEX}", utils.HarnessDefaultReportPath)
-	}
+	installReportCmd := ""
+	installAgentCmd := ""
+
 	repoPath := filepath.Join(b.agentPath, "harness", "ruby-agent")
 	if !ignoreInstr {
-		err := WriteGemFile(repoPath)
-		if err != nil {
-			return testCmd, err
-		}
-		err = WriteHelperFile(repoPath)
+		installAgentCmd = fmt.Sprintf("bundle add harness_ruby_agent --path %q --version %q || true;", repoPath, "0.0.1")
+		err := WriteHelperFile(repoPath)
 		if err != nil {
 			b.log.Errorw("Unable to write rspec helper file automatically", err)
 		}
 	}
+
+	if userArgs == "" {
+		installReportCmd = "bundle add rspec_junit_formatter || true;"
+		userArgs = fmt.Sprintf("--format RspecJunitFormatter --out %s${HARNESS_NODE_INDEX}", utils.HarnessDefaultReportPath)
+	}
 	// Run all the tests
 	if runAll {
-		if ignoreInstr {
-			return strings.TrimSpace(fmt.Sprintf("%s %s", rspecCmd, userArgs)), nil
+		rspecGlob := ""
+		if len(b.testGlobs) > 0 {
+			rspecGlob = strings.Join(b.testGlobs, " ")
 		}
-		testCmd = strings.TrimSpace(fmt.Sprintf("%s %s %s ",
-			tiFlag, rspecCmd, userArgs))
+		if ignoreInstr {
+			return strings.TrimSpace(fmt.Sprintf("%s %s %s %s", installReportCmd, rspecCmd, userArgs, rspecGlob)), nil
+		}
+		testCmd = strings.TrimSpace(fmt.Sprintf("%s %s %s %s %s %s",
+			installReportCmd, installAgentCmd, tiFlag, rspecCmd, userArgs, rspecGlob))
 		return testCmd, nil
 	}
 
@@ -97,10 +104,10 @@ func (b *rspecRunner) GetCmd(ctx context.Context, tests []types.RunnableTest, us
 	testStr := strings.Join(ut, " ")
 
 	if ignoreInstr {
-		return strings.TrimSpace(fmt.Sprintf("%s %s %s", rspecCmd, userArgs, testStr)), nil
+		return strings.TrimSpace(fmt.Sprintf("%s %s %s %s", installAgentCmd, rspecCmd, userArgs, testStr)), nil
 	}
 
-	testCmd = fmt.Sprintf("%s %s %s %s",
-		tiFlag, rspecCmd, userArgs, testStr)
+	testCmd = fmt.Sprintf("%s %s %s %s %s %s",
+		installReportCmd, installAgentCmd, tiFlag, rspecCmd, userArgs, testStr)
 	return testCmd, nil
 }

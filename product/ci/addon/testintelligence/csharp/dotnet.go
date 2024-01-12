@@ -14,7 +14,6 @@ package csharp
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path"
 	"strings"
@@ -46,7 +45,7 @@ func NewDotnetRunner(log *zap.SugaredLogger, fs filesystem.FileSystem, factory e
 }
 
 func (b *dotnetRunner) AutoDetectPackages() ([]string, error) {
-	return []string{}, errors.New("not implemented")
+	return []string{}, nil
 }
 
 func (b *dotnetRunner) AutoDetectTests(ctx context.Context, testGlobs []string) ([]types.RunnableTest, error) {

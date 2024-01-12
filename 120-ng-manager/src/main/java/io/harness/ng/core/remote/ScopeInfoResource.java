@@ -25,7 +25,10 @@ import com.google.inject.Inject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Hidden;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -35,6 +38,7 @@ import javax.ws.rs.QueryParam;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import retrofit2.http.Body;
 
 @OwnedBy(PL)
 @Api(value = "scope-info", hidden = true)
@@ -59,5 +63,18 @@ public class ScopeInfoResource {
       @QueryParam(ORG_KEY) String orgIdentifier, @QueryParam(PROJECT_KEY) String projectIdentifier) {
     return ResponseDTO.newResponse(
         scopeResolverService.getScopeInfo(accountIdentifier, orgIdentifier, projectIdentifier));
+  }
+
+  @GET
+  @Path("/multi")
+  @Timed
+  @ApiOperation(
+      hidden = true, value = "Get map of scope info for given identifiers", nickname = "getScopeInfoMapForIdentifiers")
+  @InternalApi
+  @ExceptionMetered
+  @Hidden
+  public ResponseDTO<Map<String, Optional<ScopeInfo>>>
+  getScopeInfo(@NotNull @QueryParam(ACCOUNT_KEY) String accountIdentifier, @NotEmpty @Body Set<String> uniqueIds) {
+    return ResponseDTO.newResponse(scopeResolverService.getScopeInfo(accountIdentifier, uniqueIds));
   }
 }

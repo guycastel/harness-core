@@ -52,4 +52,8 @@ public class ScopeInfoHelper {
     }
     return sb.toString();
   }
+
+  String getScopeInfoUniqueIdCacheKey(final String uniqueId) {
+    return uniqueId;
+  }
 }

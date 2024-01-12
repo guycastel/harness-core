@@ -55,6 +55,7 @@ import static io.harness.lock.DistributedLockImplementation.REDIS;
 import static io.harness.ng.core.api.utils.JWTTokenFlowAuthFilterUtils.JWT_TOKEN_PUBLIC_KEYS_JSON_DATA_CACHE_KEY;
 import static io.harness.ng.core.api.utils.JWTTokenFlowAuthFilterUtils.JWT_TOKEN_SCIM_SETTINGS_DATA_CACHE_KEY;
 import static io.harness.ng.core.api.utils.JWTTokenFlowAuthFilterUtils.JWT_TOKEN_SERVICE_ACCOUNT_DATA_CACHE_KEY;
+import static io.harness.ng.core.services.ScopeInfoService.SCOPE_INFO_UNIQUE_ID_CACHE_KEY;
 import static io.harness.pms.listener.NgOrchestrationNotifyEventListener.NG_ORCHESTRATION;
 
 import static java.lang.Boolean.TRUE;
@@ -1384,5 +1385,13 @@ public class NextGenModule extends AbstractModule {
     return harnessCacheManager.getCache(ProjectService.PROJECT_SCOPE_INFO_DATA_CACHE_KEY, String.class, ScopeInfo.class,
         CreatedExpiryPolicy.factoryOf(new Duration(TimeUnit.HOURS, 1)),
         versionInfoManager.getVersionInfo().getBuildNo());
+  }
+
+  @Provides
+  @Singleton
+  @Named(SCOPE_INFO_UNIQUE_ID_CACHE_KEY)
+  Cache<String, ScopeInfo> getScopeInfoUniqueIdCache(HarnessCacheManager harnessCacheManager) {
+    return harnessCacheManager.getCache(SCOPE_INFO_UNIQUE_ID_CACHE_KEY, String.class, ScopeInfo.class,
+        CreatedExpiryPolicy.factoryOf(new Duration(TimeUnit.HOURS, 1)));
   }
 }

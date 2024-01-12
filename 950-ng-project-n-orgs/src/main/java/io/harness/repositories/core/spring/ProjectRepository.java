@@ -28,5 +28,8 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, S
 
   Optional<Project> findByAccountIdentifierAndOrgIdentifierAndIdentifierAndDeletedNot(
       String accountIdentifier, String orgIdentifier, String identifier, boolean notDeleted);
+
+  Optional<Project> findByUniqueIdAndDeletedNot(String uniqueId, boolean notDeleted);
+
   Long countByAccountIdentifierAndDeletedIsFalse(String accountIdentifier);
 }

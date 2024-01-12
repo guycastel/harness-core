@@ -326,6 +326,11 @@ public class ProjectServiceImpl implements ProjectService {
   }
 
   @Override
+  public Optional<Project> get(String uniqueId) {
+    return projectRepository.findByUniqueIdAndDeletedNot(uniqueId, true);
+  }
+
+  @Override
   public Optional<Project> getConsideringCase(
       String accountIdentifier, String orgIdentifier, String projectIdentifier) {
     return projectRepository.findByAccountIdentifierAndOrgIdentifierAndIdentifierAndDeletedNot(
@@ -742,7 +747,7 @@ public class ProjectServiceImpl implements ProjectService {
           throw new EntityNotFoundException(
               String.format("Project with identifier [%s] does not exist in the specified scope", projectIdentifier));
         }
-
+        scopeInfoCache.remove(scopeInfoHelper.getScopeInfoUniqueIdCacheKey(deletedProject.getUniqueId()));
         log.info(String.format("Project with identifier [%s] and orgIdentifier [%s] was successfully deleted",
             projectIdentifier, scopeInfo.getOrgIdentifier()));
         yamlGitConfigService.deleteAll(accountIdentifier, scopeInfo.getOrgIdentifier(), projectIdentifier);

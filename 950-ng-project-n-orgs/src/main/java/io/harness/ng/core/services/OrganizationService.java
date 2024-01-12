@@ -32,7 +32,10 @@ public interface OrganizationService {
   List<String> getDistinctAccounts();
 
   Optional<Organization> get(String accountIdentifier, String identifier);
+
   Optional<Organization> get(String accountIdentifier, ScopeInfo scopeInfo, String identifier);
+
+  Optional<Organization> get(String uniqueId);
 
   Optional<Organization> getConsideringCase(String accountIdentifier, String identifier);
 

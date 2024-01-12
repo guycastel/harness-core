@@ -16,9 +16,12 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.ScopeInfo;
 import io.harness.ng.core.dto.ResponseDTO;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.validation.constraints.NotNull;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -29,4 +32,8 @@ public interface ScopeInfoClient {
   @GET(SCOPE_INFO)
   Call<ResponseDTO<Optional<ScopeInfo>>> getScopeInfo(@NotNull @Query(value = ACCOUNT_KEY) String accountIdentifier,
       @Query(value = ORG_KEY) String orgIdentifier, @Query(value = PROJECT_KEY) String projectIdentifier);
+
+  @GET(SCOPE_INFO + "/multi")
+  Call<ResponseDTO<Map<String, Optional<ScopeInfo>>>> getScopeInfos(
+      @NotNull @Query(value = ACCOUNT_KEY) String accountIdentifier, @Body Set<String> uniqueIds);
 }

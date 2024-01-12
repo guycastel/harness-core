@@ -284,6 +284,11 @@ public class OrganizationServiceImpl implements OrganizationService {
   }
 
   @Override
+  public Optional<Organization> get(String uniqueId) {
+    return organizationRepository.findByUniqueIdAndDeletedNot(uniqueId, true);
+  }
+
+  @Override
   public Optional<Organization> getConsideringCase(String accountIdentifier, String organizationIdentifier) {
     return organizationRepository.findByAccountIdentifierAndIdentifierAndDeletedNot(
         accountIdentifier, organizationIdentifier, true);
@@ -409,6 +414,7 @@ public class OrganizationServiceImpl implements OrganizationService {
           throw new EntityNotFoundException(
               String.format("Organization with identifier [%s] does not exist in the specified scope", identifier));
         }
+        scopeInfoCache.remove(scopeInfoHelper.getScopeInfoUniqueIdCacheKey(organization.getUniqueId()));
         log.info(String.format(
             "Organization with identifier [%s] in account [%s] successfully deleted", identifier, accountIdentifier));
         outboxService.save(new OrganizationDeleteEvent(accountIdentifier, OrganizationMapper.writeDto(organization)));

@@ -12,10 +12,15 @@ import static io.harness.annotations.dev.HarnessTeam.PL;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.beans.ScopeInfo;
 
+import java.util.Map;
 import java.util.Optional;
-import org.hibernate.validator.constraints.NotEmpty;
+import java.util.Set;
+import javax.validation.constraints.NotEmpty;
 
 @OwnedBy(PL)
 public interface ScopeInfoService {
+  String SCOPE_INFO_UNIQUE_ID_CACHE_KEY = "scopeInfoUniqueIdCache";
+
   Optional<ScopeInfo> getScopeInfo(@NotEmpty String accountIdentifier, String orgIdentifier, String projectIdentifier);
+  Map<String, Optional<ScopeInfo>> getScopeInfo(@NotEmpty String accountIdentifier, @NotEmpty Set<String> uniqueId);
 }

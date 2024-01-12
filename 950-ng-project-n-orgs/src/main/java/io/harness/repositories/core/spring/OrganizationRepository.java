@@ -30,5 +30,7 @@ public interface OrganizationRepository
   Optional<Organization> findByAccountIdentifierAndIdentifierAndDeletedNot(
       String accountIdentifier, String identifier, boolean notDeleted);
 
+  Optional<Organization> findByUniqueIdAndDeletedNot(String uniqueId, boolean notDeleted);
+
   Long countByAccountIdentifier(String accountIdentifier);
 }

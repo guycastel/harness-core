@@ -10,6 +10,7 @@ package io.harness.plancreator.steps.http.v1;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.exception.InvalidYamlException;
 import io.harness.plancreator.steps.internal.v1.PmsStepPlanCreator;
 import io.harness.pms.sdk.core.plan.creation.beans.PlanCreationContext;
 import io.harness.pms.sdk.core.plan.creation.beans.PlanCreationResponse;
@@ -30,7 +31,7 @@ public class HttpStepPlanCreator extends PmsStepPlanCreator<HttpStepNodeV1> {
     try {
       return YamlUtils.read(field.getNode().toString(), HttpStepNodeV1.class);
     } catch (IOException e) {
-      return null;
+      throw new InvalidYamlException("Unable to parse http step yaml. Please ensure that it is in correct format", e);
     }
   }
 

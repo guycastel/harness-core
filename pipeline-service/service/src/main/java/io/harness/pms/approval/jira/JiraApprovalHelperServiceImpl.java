@@ -51,6 +51,8 @@ import io.harness.pms.contracts.execution.tasks.TaskRequest;
 import io.harness.pms.execution.utils.AmbianceUtils;
 import io.harness.pms.gitsync.PmsGitSyncBranchContextGuard;
 import io.harness.pms.gitsync.PmsGitSyncHelper;
+import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
+import io.harness.pms.yaml.HarnessYamlVersion;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.remote.client.NGRestUtils;
 import io.harness.secrets.remote.SecretNGManagerClient;
@@ -62,8 +64,10 @@ import io.harness.steps.approval.step.ApprovalInstanceService;
 import io.harness.steps.approval.step.entities.ApprovalInstance;
 import io.harness.steps.approval.step.entities.ApprovalInstance.ApprovalInstanceKeys;
 import io.harness.steps.approval.step.jira.JiraApprovalHelperService;
+import io.harness.steps.approval.step.jira.JiraApprovalSpecParameters;
 import io.harness.steps.approval.step.jira.entities.JiraApprovalInstance;
 import io.harness.steps.approval.step.jira.entities.JiraApprovalInstance.JiraApprovalInstanceKeys;
+import io.harness.steps.approval.step.jira.v1.JiraApprovalStepParameters;
 import io.harness.steps.jira.JiraStepHelperService;
 import io.harness.utils.IdentifierRefHelper;
 import io.harness.utils.PmsFeatureFlagHelper;
@@ -281,6 +285,19 @@ public class JiraApprovalHelperServiceImpl implements JiraApprovalHelperService 
     } catch (Exception e) {
       throw new HarnessJiraException(
           format("Error while getting connector information : [%s]", connectorIdentifierRef), e, null);
+    }
+  }
+
+  @Override
+  public JiraApprovalSpecParameters getJiraApprovalStepParameters(StepBaseParameters stepParameters) {
+    String version = stepParameters.getSpec().getVersion();
+    switch (version) {
+      case HarnessYamlVersion.V0:
+        return (JiraApprovalSpecParameters) stepParameters.getSpec();
+      case HarnessYamlVersion.V1:
+        return ((JiraApprovalStepParameters) stepParameters.getSpec()).toJiraApprovalStepParameterV0();
+      default:
+        throw new InvalidRequestException(String.format("Version %s not supported", version));
     }
   }
 

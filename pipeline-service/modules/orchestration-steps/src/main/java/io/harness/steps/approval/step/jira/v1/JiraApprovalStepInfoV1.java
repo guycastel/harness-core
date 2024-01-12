@@ -21,6 +21,7 @@ import io.harness.pms.yaml.YAMLFieldNameConstants;
 import io.harness.steps.StepSpecTypeConstants;
 import io.harness.steps.StepSpecTypeConstantsV1;
 import io.harness.steps.approval.step.jira.beans.v1.CriteriaSpecWrapper;
+import io.harness.yaml.core.timeout.Timeout;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class JiraApprovalStepInfoV1 implements PMSStepInfo, WithConnectorRef, Wi
   String project;
   CriteriaSpecWrapper approval_criteria;
   CriteriaSpecWrapper rejection_criteria;
-  ParameterField<String> retry;
+  ParameterField<Timeout> retry;
   ParameterField<List<TaskSelectorYaml>> delegates;
 
   @Override

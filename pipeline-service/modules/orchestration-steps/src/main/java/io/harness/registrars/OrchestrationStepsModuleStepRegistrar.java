@@ -74,6 +74,8 @@ public class OrchestrationStepsModuleStepRegistrar {
     engineSteps.put(HarnessApprovalStep.STEP_TYPE, HarnessApprovalStep.class);
     engineSteps.put(CustomApprovalStep.STEP_TYPE, CustomApprovalStep.class);
     engineSteps.put(JiraApprovalStep.STEP_TYPE, JiraApprovalStep.class);
+    engineSteps.put(io.harness.steps.approval.step.jira.v1.JiraApprovalStep.STEP_TYPE,
+        io.harness.steps.approval.step.jira.v1.JiraApprovalStep.class);
     engineSteps.put(JiraCreateStep.STEP_TYPE, JiraCreateStep.class);
     engineSteps.put(JiraUpdateStep.STEP_TYPE, JiraUpdateStep.class);
 

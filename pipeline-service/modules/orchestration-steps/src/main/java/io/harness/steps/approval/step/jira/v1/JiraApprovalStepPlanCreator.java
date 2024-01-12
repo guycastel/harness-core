@@ -10,6 +10,7 @@ package io.harness.steps.approval.step.jira.v1;
 import io.harness.annotations.dev.CodePulse;
 import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.ProductModule;
+import io.harness.exception.InvalidYamlException;
 import io.harness.plancreator.steps.internal.v1.PmsStepPlanCreator;
 import io.harness.pms.sdk.core.plan.creation.beans.PlanCreationContext;
 import io.harness.pms.sdk.core.plan.creation.beans.PlanCreationResponse;
@@ -33,7 +34,8 @@ public class JiraApprovalStepPlanCreator extends PmsStepPlanCreator<JiraApproval
     try {
       return YamlUtils.read(field.getNode().toString(), JiraApprovalStepNodeV1.class);
     } catch (IOException e) {
-      return null;
+      throw new InvalidYamlException(
+          "Unable to parse jira approval step yaml. Please ensure that it is in correct format", e);
     }
   }
 

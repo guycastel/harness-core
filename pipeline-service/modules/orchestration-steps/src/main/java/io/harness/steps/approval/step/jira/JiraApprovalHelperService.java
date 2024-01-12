@@ -12,6 +12,7 @@ import static io.harness.annotations.dev.HarnessTeam.CDC;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.delegate.beans.connector.jira.JiraConnectorDTO;
 import io.harness.iterator.PersistenceIterator;
+import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
 import io.harness.steps.approval.step.entities.ApprovalInstance;
 import io.harness.steps.approval.step.jira.entities.JiraApprovalInstance;
 
@@ -20,4 +21,5 @@ public interface JiraApprovalHelperService {
   void handlePollingEvent(PersistenceIterator<ApprovalInstance> iterator, JiraApprovalInstance entity);
   JiraConnectorDTO getJiraConnector(
       String accountIdentifier, String orgIdentifier, String projectIdentifier, String connectorIdentifierRef);
+  JiraApprovalSpecParameters getJiraApprovalStepParameters(StepBaseParameters stepParameters);
 }

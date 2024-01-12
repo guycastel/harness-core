@@ -26,6 +26,7 @@ import io.harness.pms.sdk.core.steps.io.v1.StepBaseParameters;
 import io.harness.pms.yaml.ParameterField;
 import io.harness.steps.approval.step.beans.CriteriaSpecWrapperDTO;
 import io.harness.steps.approval.step.entities.ApprovalInstance;
+import io.harness.steps.approval.step.jira.JiraApprovalHelperService;
 import io.harness.steps.approval.step.jira.JiraApprovalOutcome;
 import io.harness.steps.approval.step.jira.JiraApprovalSpecParameters;
 import io.harness.yaml.core.timeout.Timeout;
@@ -74,12 +75,13 @@ public class JiraApprovalInstance extends ApprovalInstance implements Persistent
   // this field if populated will be used to optimize Jira Approvals by filtering fields
   String keyListInKeyValueCriteria;
 
-  public static JiraApprovalInstance fromStepParameters(Ambiance ambiance, StepBaseParameters stepParameters) {
+  public static JiraApprovalInstance fromStepParameters(
+      Ambiance ambiance, StepBaseParameters stepParameters, JiraApprovalHelperService jiraApprovalHelperService) {
     if (stepParameters == null) {
       return null;
     }
 
-    JiraApprovalSpecParameters specParameters = (JiraApprovalSpecParameters) stepParameters.getSpec();
+    JiraApprovalSpecParameters specParameters = jiraApprovalHelperService.getJiraApprovalStepParameters(stepParameters);
     String issueKey = specParameters.getIssueKey().getValue();
     String connectorRef = specParameters.getConnectorRef().getValue();
 

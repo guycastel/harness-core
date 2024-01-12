@@ -12,6 +12,7 @@ import static io.harness.annotations.dev.HarnessTeam.CDC;
 import io.harness.EntitySubtype;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.steps.StepSpecTypeConstants;
+import io.harness.steps.StepSpecTypeConstantsV1;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -43,12 +44,16 @@ public enum ApprovalType implements EntitySubtype {
   public static ApprovalType fromName(String name) {
     switch (name) {
       case StepSpecTypeConstants.HARNESS_APPROVAL:
+      case StepSpecTypeConstantsV1.HARNESS_APPROVAL:
         return HARNESS_APPROVAL;
       case StepSpecTypeConstants.JIRA_APPROVAL:
+      case StepSpecTypeConstantsV1.JIRA_APPROVAL:
         return JIRA_APPROVAL;
       case StepSpecTypeConstants.SERVICENOW_APPROVAL:
+      case StepSpecTypeConstantsV1.SERVICENOW_APPROVAL:
         return SERVICENOW_APPROVAL;
       case StepSpecTypeConstants.CUSTOM_APPROVAL:
+      case StepSpecTypeConstantsV1.CUSTOM_APPROVAL:
         return CUSTOM_APPROVAL;
       default:
         return null;

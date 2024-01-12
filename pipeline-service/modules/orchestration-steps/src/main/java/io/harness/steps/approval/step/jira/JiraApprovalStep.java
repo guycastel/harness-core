@@ -73,7 +73,8 @@ public class JiraApprovalStep extends PipelineAsyncExecutable {
       Ambiance ambiance, StepBaseParameters stepParameters, StepInputPackage inputPackage) {
     ILogStreamingStepClient logStreamingStepClient = logStreamingStepClientFactory.getLogStreamingStepClient(ambiance);
     logStreamingStepClient.openStream(ShellScriptTaskNG.COMMAND_UNIT);
-    JiraApprovalInstance approvalInstance = JiraApprovalInstance.fromStepParameters(ambiance, stepParameters);
+    JiraApprovalInstance approvalInstance =
+        JiraApprovalInstance.fromStepParameters(ambiance, stepParameters, jiraApprovalHelperService);
     instrumentationHelper.sendApprovalEvent(approvalInstance);
     jiraApprovalHelperService.getJiraConnector(AmbianceUtils.getAccountId(ambiance),
         AmbianceUtils.getOrgIdentifier(ambiance), AmbianceUtils.getProjectIdentifier(ambiance),

@@ -104,6 +104,8 @@ public class JiraApprovalStepTest extends CategoryTest {
     })
         .when(approvalInstanceService)
         .save(any());
+    when(jiraApprovalHelperService.getJiraApprovalStepParameters(parameters))
+        .thenReturn((JiraApprovalSpecParameters) parameters.getSpec());
     assertThat(jiraApprovalStep.executeAsync(ambiance, parameters, null, null).getCallbackIds(0))
         .isEqualTo(INSTANCE_ID);
     ArgumentCaptor<ApprovalInstance> approvalInstanceArgumentCaptor = ArgumentCaptor.forClass(ApprovalInstance.class);
@@ -129,6 +131,8 @@ public class JiraApprovalStepTest extends CategoryTest {
     })
         .when(approvalInstanceService)
         .save(any());
+    when(jiraApprovalHelperService.getJiraApprovalStepParameters(parameters))
+        .thenReturn((JiraApprovalSpecParameters) parameters.getSpec());
     assertThat(jiraApprovalStep.executeAsync(ambiance, parameters, null, null).getCallbackIds(0))
         .isEqualTo(INSTANCE_ID);
     ArgumentCaptor<ApprovalInstance> approvalInstanceArgumentCaptor = ArgumentCaptor.forClass(ApprovalInstance.class);
@@ -151,6 +155,8 @@ public class JiraApprovalStepTest extends CategoryTest {
         .thenThrow(
             new InvalidRequestException(String.format("Connector not found for identifier : [%s]", "connectorReg")));
     StepElementParameters parameters = getStepElementParameters();
+    when(jiraApprovalHelperService.getJiraApprovalStepParameters(parameters))
+        .thenReturn((JiraApprovalSpecParameters) parameters.getSpec());
     assertThatThrownBy(() -> jiraApprovalStep.executeAsync(ambiance, parameters, null, null))
         .isInstanceOf(InvalidRequestException.class)
         .hasMessage(String.format("Connector not found for identifier : [%s]", "connectorReg"));
@@ -242,7 +248,9 @@ public class JiraApprovalStepTest extends CategoryTest {
   @Category(UnitTests.class)
   public void testgetJiraRetryIntervalInstance() {
     StepElementParameters stepElementParameters = getStepElementParametersWithRetryInterval();
-    assertThat(jiraApprovalInstance.fromStepParameters(ambiance, stepElementParameters)
+    when(jiraApprovalHelperService.getJiraApprovalStepParameters(stepElementParameters))
+        .thenReturn((JiraApprovalSpecParameters) stepElementParameters.getSpec());
+    assertThat(jiraApprovalInstance.fromStepParameters(ambiance, stepElementParameters, jiraApprovalHelperService)
                    .getRetryInterval()
                    .getValue()
                    .getTimeoutInMillis())
@@ -262,11 +270,14 @@ public class JiraApprovalStepTest extends CategoryTest {
                       .retryInterval(ParameterField.createValueField(Timeout.fromString("5s")))
                       .build())
             .build();
-    assertThatThrownBy(()
-                           -> jiraApprovalInstance.fromStepParameters(ambiance, stepElementParameters)
-                                  .getRetryInterval()
-                                  .getValue()
-                                  .getTimeoutInMillis())
+    when(jiraApprovalHelperService.getJiraApprovalStepParameters(stepElementParameters))
+        .thenReturn((JiraApprovalSpecParameters) stepElementParameters.getSpec());
+    assertThatThrownBy(
+        ()
+            -> jiraApprovalInstance.fromStepParameters(ambiance, stepElementParameters, jiraApprovalHelperService)
+                   .getRetryInterval()
+                   .getValue()
+                   .getTimeoutInMillis())
         .isInstanceOf(InvalidRequestException.class)
         .hasMessage("retry interval field for Jira approval cannot be less than 10s");
   }

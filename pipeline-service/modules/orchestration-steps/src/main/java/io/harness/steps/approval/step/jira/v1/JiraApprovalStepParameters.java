@@ -18,7 +18,10 @@ import io.harness.plancreator.steps.TaskSelectorYaml;
 import io.harness.plancreator.steps.common.SpecParameters;
 import io.harness.pms.yaml.HarnessYamlVersion;
 import io.harness.pms.yaml.ParameterField;
+import io.harness.steps.approval.step.beans.JexlCriteriaSpec;
+import io.harness.steps.approval.step.jira.JiraApprovalSpecParameters;
 import io.harness.steps.approval.step.jira.beans.v1.CriteriaSpecWrapper;
+import io.harness.yaml.core.timeout.Timeout;
 
 import java.util.List;
 import lombok.Builder;
@@ -36,12 +39,12 @@ public class JiraApprovalStepParameters implements SpecParameters {
   CriteriaSpecWrapper approval_criteria;
   CriteriaSpecWrapper rejection_criteria;
   ParameterField<List<TaskSelectorYaml>> delegates;
-  ParameterField<String> retry;
+  ParameterField<Timeout> retry;
 
   @Builder(builderMethodName = "infoBuilder")
   public JiraApprovalStepParameters(ParameterField<String> connector, ParameterField<String> key, String type,
       String project, CriteriaSpecWrapper approval_criteria, CriteriaSpecWrapper rejection_criteria,
-      ParameterField<List<TaskSelectorYaml>> delegates, ParameterField<String> retry) {
+      ParameterField<List<TaskSelectorYaml>> delegates, ParameterField<Timeout> retry) {
     this.connector = connector;
     this.key = key;
     this.type = type;
@@ -55,5 +58,24 @@ public class JiraApprovalStepParameters implements SpecParameters {
   @Override
   public String getVersion() {
     return HarnessYamlVersion.V1;
+  }
+
+  public JiraApprovalSpecParameters toJiraApprovalStepParameterV0() {
+    return JiraApprovalSpecParameters.builder()
+        .connectorRef(getConnector())
+        .projectKey(getProject())
+        .issueKey(getKey())
+        .issueType(getType())
+        .approvalCriteria(toCriteria(getApproval_criteria()))
+        .rejectionCriteria(toCriteria(getRejection_criteria()))
+        .delegateSelectors(getDelegates())
+        .retryInterval(getRetry())
+        .build();
+  }
+
+  private io.harness.steps.approval.step.beans.CriteriaSpecWrapper toCriteria(CriteriaSpecWrapper approvalCriteria) {
+    return io.harness.steps.approval.step.beans.CriteriaSpecWrapper.builder()
+        .criteriaSpec(JexlCriteriaSpec.builder().expression(approvalCriteria.getExpression()).build())
+        .build();
   }
 }

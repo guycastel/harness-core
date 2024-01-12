@@ -24,9 +24,11 @@ import static io.harness.helm.HelmConstants.HELM_INSTANCE_LABEL;
 import static io.harness.helm.HelmConstants.HELM_PATH_PLACEHOLDER;
 import static io.harness.helm.HelmConstants.HELM_RELEASE_LABEL;
 import static io.harness.k8s.K8sConstants.KUBERNETES_CHANGE_CAUSE_ANNOTATION;
+import static io.harness.k8s.K8sConstants.NG_EXPRESSION_PATTERN;
 import static io.harness.k8s.K8sConstants.RELEASE_NAME_CONFLICTS_WITH_SECRETS_OR_CONFIG_MAPS;
 import static io.harness.k8s.K8sConstants.SKIP_FILE_FOR_DEPLOY_PLACEHOLDER_TEXT;
 import static io.harness.k8s.KubernetesConvention.ReleaseHistoryKeyName;
+import static io.harness.k8s.exception.KubernetesExceptionHints.EXPRESSION_FOUND_IN_MANIFEST;
 import static io.harness.k8s.kubectl.AbstractExecutable.getPrintableCommand;
 import static io.harness.k8s.kubectl.Utils.encloseWithQuotesIfNeeded;
 import static io.harness.k8s.kubectl.Utils.parseLatestRevisionNumberFromRolloutHistory;
@@ -248,6 +250,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -1711,6 +1714,7 @@ public class K8sTaskHelperBase {
     for (FileData manifestFile : manifestFiles) {
       if (isValidManifestFile(manifestFile.getFileName())) {
         try {
+          warnIfContainsExpression(manifestFile.getFileName(), manifestFile.getFileContent(), executionLogCallback);
           result.addAll(ManifestHelper.processYaml(manifestFile.getFileContent()));
         } catch (Exception e) {
           executionLogCallback.saveExecutionLog("Exception while processing " + manifestFile.getFileName(), ERROR);
@@ -3348,5 +3352,12 @@ public class K8sTaskHelperBase {
 
   private boolean filterByWorkloadName(K8sPod pod, String workloadName) {
     return pod.getName().startsWith(workloadName);
+  }
+
+  private void warnIfContainsExpression(String fileName, String fileContent, LogCallback executionLogCallback) {
+    if (NG_EXPRESSION_PATTERN.matcher(fileContent).find()) {
+      executionLogCallback.saveExecutionLog(
+          format("Manifest file: %s contains expression. %s", fileName, EXPRESSION_FOUND_IN_MANIFEST), WARN);
+    }
   }
 }

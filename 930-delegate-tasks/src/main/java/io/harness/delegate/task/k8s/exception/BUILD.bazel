@@ -18,6 +18,7 @@ java_library(
     visibility = ["//visibility:public"],
     deps = [
         "//:lombok",
+        "//970-api-services-beans/src/main/java/io/harness/k8s:module",
         "//970-api-services-beans/src/main/java/io/harness/k8s/exception:module",
         "//980-commons/src/main/java/io/harness/data/structure:module",
         "//980-commons/src/main/java/io/harness/eraro:module",

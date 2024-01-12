@@ -93,6 +93,7 @@ public class KubernetesExceptionExplanation {
   public final String MISSING_RESOURCE = "Manifests may contain references to some missing resource(s).";
   public final String UNSUPPORTED_VALUE = "Manifests may contain some unsupported value(s).";
   public final String FORBIDDEN_MESSAGE = "User might be missing roles/permissions to create/update resources.";
+  public final String EXPRESSION_FOUND_IN_MANIFEST = "Manifests may contain expressions";
   public final String MISSING_REQUIRED_FIELD = "Some required field(s) is/are missing from the manifest.";
   public final String MISSING_OBJECT_ERROR = "The resource may be deleted from the server.";
   public final String INVALID_VALUES_YAML = "Values yaml file(s) are not valid.";

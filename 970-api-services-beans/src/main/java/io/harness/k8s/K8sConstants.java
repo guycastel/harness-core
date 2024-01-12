@@ -13,6 +13,8 @@ import io.harness.annotations.dev.HarnessModuleComponent;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 
+import java.util.regex.Pattern;
+
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_FIRST_GEN})
 @OwnedBy(CDP)
 public interface K8sConstants {
@@ -242,4 +244,5 @@ public interface K8sConstants {
       + "aws-iam-authenticator version";
   String RELEASE_NAME_CONFLICTS_WITH_SECRETS_OR_CONFIG_MAPS =
       "\nRelease Name conflicts with a Secret/ConfigMap resource. Please make sure that such conflicts are resolved for proper deployments";
+  Pattern NG_EXPRESSION_PATTERN = Pattern.compile("<\\+[\\w-.\"()\\\\]+>");
 }

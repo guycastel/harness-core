@@ -9,6 +9,7 @@ package io.harness.delegate.task.k8s.exception;
 import static io.harness.annotations.dev.HarnessTeam.CDP;
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
+import static io.harness.k8s.K8sConstants.NG_EXPRESSION_PATTERN;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -50,6 +51,7 @@ public class KubernetesCliRuntimeExceptionHandler implements ExceptionHandler {
   private static final String NOT_FOUND_MESSAGE = "(NotFound)";
   private static final String UNSUPPORTED_VALUE_MESSAGE = "Unsupported value";
   private static final String FORBIDDEN_MESSAGE = "(Forbidden)";
+  private static final String INVALID_VALUE = "Invalid value:";
   private static final String REQUIRED_FIELD_MISSING_MESSAGE = "missing required field";
   private static final String UNRESOLVED_VALUE = "<no value>";
   private static final String UNKNOWN_FIELD_MESSAGE = "unknown field";
@@ -142,6 +144,11 @@ public class KubernetesCliRuntimeExceptionHandler implements ExceptionHandler {
     if (cliErrorMessage.contains(FORBIDDEN_MESSAGE)) {
       return getExplanationExceptionWithCommand(KubernetesExceptionHints.K8S_API_FORBIDDEN_EXCEPTION,
           KubernetesExceptionExplanation.FORBIDDEN_MESSAGE,
+          getExecutedCommandWithOutputWithExitCode(kubernetesTaskException), consolidatedError);
+    }
+    if (cliErrorMessage.contains(INVALID_VALUE) && NG_EXPRESSION_PATTERN.matcher(cliErrorMessage).find()) {
+      return getExplanationExceptionWithCommand(KubernetesExceptionHints.EXPRESSION_FOUND_IN_MANIFEST,
+          KubernetesExceptionExplanation.EXPRESSION_FOUND_IN_MANIFEST,
           getExecutedCommandWithOutputWithExitCode(kubernetesTaskException), consolidatedError);
     }
 

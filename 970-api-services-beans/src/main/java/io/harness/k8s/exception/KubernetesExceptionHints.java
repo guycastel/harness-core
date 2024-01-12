@@ -30,6 +30,8 @@ public class KubernetesExceptionHints {
       "Check authentication to cluster with kubectl cli directly via Shell Script step by using ${HARNESS_KUBE_CONFIG_PATH} \n For more details please refer to: \nhttps://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access and \nhttps://developer.harness.io/docs/continuous-delivery/x-platform-cd-features/cd-steps/utilities/shell-script-step/#running-kubernetes-commands-in-the-shell-script";
   public final String K8S_API_FORBIDDEN_EXCEPTION =
       "Check configured Kubernetes user permissions and authorization policies. \nTo know more about Roles, ClusterRoles and ClusterRoleBindings, refer: https://kubernetes.io/docs/reference/access-authn-authz/rbac/";
+  public final String EXPRESSION_FOUND_IN_MANIFEST =
+      "Harness variables can't be used in Kubernetes manifests. You can only use Harness variables in Values YAML files. Please refer to Harness Docs: https://developer.harness.io/docs/continuous-delivery/deploy-srv-diff-platforms/kubernetes/cd-kubernetes-category/define-kubernetes-manifests/#use-harness-variables-in-values-yaml ";
   public final String K8S_API_UNAUTHORIZED_EXCEPTION = "Check Kubernetes connector credentials.";
   public final String K8S_API_VALIDATION_ERROR = "Validate Kubernetes infrastructure configuration";
   public final String K8S_API_SSL_VALIDATOR = "Check if provided CA certificate is valid for this kubernetes cluster";

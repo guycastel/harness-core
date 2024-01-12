@@ -47,8 +47,9 @@ public class DownloadAwsS3StepParameters
   public DownloadAwsS3StepParameters(ParameterField<List<TaskSelectorYaml>> delegateSelectors,
       ParameterField<String> connectorRef, ContainerResource resources, ParameterField<List<String>> paths,
       ParameterField<Integer> runAsUser, ParameterField<String> downloadPath, ParameterField<String> bucketName,
-      ParameterField<String> region, ParameterField<List<String>> outputFilePathsContent) {
-    super(delegateSelectors, runAsUser, resources);
+      ParameterField<String> region, ParameterField<List<String>> outputFilePathsContent,
+      ParameterField<Boolean> privileged) {
+    super(delegateSelectors, runAsUser, resources, privileged);
     this.connectorRef = connectorRef;
     this.downloadPath = downloadPath;
     this.bucketName = bucketName;

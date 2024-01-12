@@ -107,7 +107,6 @@ public abstract class AbstractContainerStepV2<T extends StepParameters> implemen
     ParameterField<List<TaskSelectorYaml>> stepDelegateSelectors =
         getStepDelegateSelectors(stepElementParameters.getSpec());
     if (ParameterField.isNull(stepDelegateSelectors) || stepDelegateSelectors.isExpression()) {
-      log.error("Delegate selector expression {} could not be resolved", stepDelegateSelectors.getExpressionValue());
       return new ArrayList<>();
     }
     return TaskSelectorYaml.toTaskSelector(stepDelegateSelectors.getValue());

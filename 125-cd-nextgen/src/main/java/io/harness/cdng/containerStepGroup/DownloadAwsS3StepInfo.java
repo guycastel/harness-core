@@ -74,8 +74,9 @@ public class DownloadAwsS3StepInfo extends StepGroupContainerBaseStepInfo implem
   public DownloadAwsS3StepInfo(ParameterField<List<TaskSelectorYaml>> delegateSelectors,
       ParameterField<String> connectorRef, ContainerResource resources, ParameterField<List<String>> paths,
       ParameterField<Integer> runAsUser, ParameterField<String> downloadPath, ParameterField<String> bucketName,
-      ParameterField<String> region, ParameterField<List<String>> outputFilePathsContent) {
-    super(delegateSelectors, runAsUser, resources);
+      ParameterField<String> region, ParameterField<List<String>> outputFilePathsContent,
+      ParameterField<Boolean> privileged) {
+    super(delegateSelectors, runAsUser, resources, privileged);
     this.connectorRef = connectorRef;
     this.downloadPath = downloadPath;
     this.bucketName = bucketName;
@@ -97,6 +98,7 @@ public class DownloadAwsS3StepInfo extends StepGroupContainerBaseStepInfo implem
   @Override
   public SpecParameters getSpecParameters() {
     return DownloadAwsS3StepParameters.infoBuilder()
+        .privileged(this.getPrivileged())
         .delegateSelectors(this.getDelegateSelectors())
         .connectorRef(this.getConnectorRef())
         .resources(this.getResources())

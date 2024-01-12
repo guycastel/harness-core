@@ -55,8 +55,9 @@ public class DownloadHarnessStorePluginInfoProvider implements CDPluginInfoProvi
     DownloadHarnessStoreStepInfo downloadHarnessStoreStepInfo =
         (DownloadHarnessStoreStepInfo) cdAbstractStepNode.getStepSpecType();
 
-    PluginDetails.Builder pluginDetailsBuilder = PluginInfoProviderHelper.buildPluginDetails(
-        downloadHarnessStoreStepInfo.getResources(), downloadHarnessStoreStepInfo.getRunAsUser(), usedPorts, true);
+    PluginDetails.Builder pluginDetailsBuilder =
+        PluginInfoProviderHelper.buildPluginDetails(downloadHarnessStoreStepInfo.getResources(),
+            downloadHarnessStoreStepInfo.getRunAsUser(), usedPorts, true, downloadHarnessStoreStepInfo.getPrivileged());
 
     ImageDetails imageDetails = PluginInfoProviderHelper.getImageDetails(ParameterField.ofNull(),
         ParameterField.createValueField(pluginExecutionConfig.getDownloadHarnessStoreConfig().getImage()),

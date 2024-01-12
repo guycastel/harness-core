@@ -8,6 +8,7 @@
 package io.harness.cdng.plugininfoproviders;
 
 import static io.harness.ci.commonconstants.ContainerExecutionConstants.PORT_STARTING_RANGE;
+import static io.harness.common.ParameterFieldHelper.getParameterFieldValue;
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
 
 import io.harness.annotations.dev.CodePulse;
@@ -91,6 +92,16 @@ public class PluginInfoProviderHelper {
     // Set used port and available port information
     PluginInfoProviderHelper.setPortDetails(usedPorts, pluginDetailsBuilder);
 
+    return pluginDetailsBuilder;
+  }
+
+  public PluginDetails.Builder buildPluginDetails(ContainerResource resources, ParameterField<Integer> runAsUser,
+      Set<Integer> usedPorts, boolean isHarnessManaged, ParameterField<Boolean> privileged) {
+    PluginDetails.Builder pluginDetailsBuilder =
+        PluginInfoProviderHelper.buildPluginDetails(resources, runAsUser, usedPorts, isHarnessManaged);
+    if (getParameterFieldValue(privileged) != null) {
+      pluginDetailsBuilder.setPrivileged(getParameterFieldValue(privileged));
+    }
     return pluginDetailsBuilder;
   }
 

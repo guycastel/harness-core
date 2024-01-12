@@ -111,7 +111,7 @@ public class DownloadAwsS3PluginInfoProviderTest extends CategoryTest {
     PluginDetails.Builder pluginDetailsBuilder = PluginDetails.newBuilder();
     ImageDetails imageDetails = mock(ImageDetails.class);
     Mockito.mockStatic(PluginInfoProviderHelper.class);
-    when(PluginInfoProviderHelper.buildPluginDetails(any(), any(), any(), anyBoolean()))
+    when(PluginInfoProviderHelper.buildPluginDetails(any(), any(), any(), anyBoolean(), any()))
         .thenReturn(pluginDetailsBuilder);
     when(PluginInfoProviderHelper.getImageDetails(any(), any(), any())).thenReturn(imageDetails);
 

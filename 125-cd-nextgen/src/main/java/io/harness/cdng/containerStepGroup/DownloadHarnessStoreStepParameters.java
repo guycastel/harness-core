@@ -40,8 +40,9 @@ public class DownloadHarnessStoreStepParameters
   @Builder(builderMethodName = "infoBuilder")
   public DownloadHarnessStoreStepParameters(ParameterField<List<TaskSelectorYaml>> delegateSelectors,
       ContainerResource resources, ParameterField<List<String>> files, ParameterField<Integer> runAsUser,
-      ParameterField<String> downloadPath, ParameterField<List<String>> outputFilePathsContent) {
-    super(delegateSelectors, runAsUser, resources);
+      ParameterField<String> downloadPath, ParameterField<List<String>> outputFilePathsContent,
+      ParameterField<Boolean> privileged) {
+    super(delegateSelectors, runAsUser, resources, privileged);
     this.downloadPath = downloadPath;
     this.files = files;
     this.outputFilePathsContent = outputFilePathsContent;

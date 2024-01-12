@@ -7,8 +7,10 @@
 
 package io.harness.cdng.containerStepGroup;
 
+import static io.harness.beans.SwaggerConstants.BOOLEAN_CLASSPATH;
 import static io.harness.beans.SwaggerConstants.INTEGER_CLASSPATH;
 import static io.harness.yaml.schema.beans.SupportedPossibleFieldTypes.expression;
+import static io.harness.yaml.schema.beans.SupportedPossibleFieldTypes.runtime;
 import static io.harness.yaml.schema.beans.SupportedPossibleFieldTypes.string;
 
 import io.harness.annotations.dev.HarnessTeam;
@@ -41,4 +43,8 @@ public class StepGroupContainerBaseStepInfo {
   @YamlSchemaTypes({string}) @ApiModelProperty(dataType = INTEGER_CLASSPATH) private ParameterField<Integer> runAsUser;
 
   private ContainerResource resources;
+
+  @YamlSchemaTypes({runtime})
+  @ApiModelProperty(dataType = BOOLEAN_CLASSPATH)
+  private ParameterField<Boolean> privileged;
 }

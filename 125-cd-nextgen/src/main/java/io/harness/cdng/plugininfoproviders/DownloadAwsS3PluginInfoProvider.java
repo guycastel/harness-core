@@ -56,8 +56,9 @@ public class DownloadAwsS3PluginInfoProvider implements CDPluginInfoProvider {
 
     DownloadAwsS3StepInfo downloadAwsS3StepInfo = (DownloadAwsS3StepInfo) cdAbstractStepNode.getStepSpecType();
 
-    PluginDetails.Builder pluginDetailsBuilder = PluginInfoProviderHelper.buildPluginDetails(
-        downloadAwsS3StepInfo.getResources(), downloadAwsS3StepInfo.getRunAsUser(), usedPorts, true);
+    PluginDetails.Builder pluginDetailsBuilder =
+        PluginInfoProviderHelper.buildPluginDetails(downloadAwsS3StepInfo.getResources(),
+            downloadAwsS3StepInfo.getRunAsUser(), usedPorts, true, downloadAwsS3StepInfo.getPrivileged());
 
     ImageDetails imageDetails = PluginInfoProviderHelper.getImageDetails(ParameterField.ofNull(),
         ParameterField.createValueField(pluginExecutionConfig.getDownloadAwsS3Config().getImage()),

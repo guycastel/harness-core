@@ -68,8 +68,9 @@ public class DownloadHarnessStoreStepInfo
   @Builder(builderMethodName = "infoBuilder")
   public DownloadHarnessStoreStepInfo(ParameterField<List<TaskSelectorYaml>> delegateSelectors,
       ContainerResource resources, ParameterField<List<String>> files, ParameterField<Integer> runAsUser,
-      ParameterField<String> downloadPath, ParameterField<List<String>> outputFilePathsContent) {
-    super(delegateSelectors, runAsUser, resources);
+      ParameterField<String> downloadPath, ParameterField<List<String>> outputFilePathsContent,
+      ParameterField<Boolean> privileged) {
+    super(delegateSelectors, runAsUser, resources, privileged);
     this.downloadPath = downloadPath;
     this.files = files;
     this.outputFilePathsContent = outputFilePathsContent;
@@ -88,6 +89,7 @@ public class DownloadHarnessStoreStepInfo
   @Override
   public SpecParameters getSpecParameters() {
     return DownloadHarnessStoreStepParameters.infoBuilder()
+        .privileged(this.getPrivileged())
         .delegateSelectors(this.getDelegateSelectors())
         .resources(this.getResources())
         .runAsUser(this.getRunAsUser())

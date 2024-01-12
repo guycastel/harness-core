@@ -102,6 +102,7 @@ public class NGTemplateServiceHelper {
   public static String ORG_ID = "orgId";
   public static String PROJECT_ID = "projectId";
   public static String MODULE_NAME = "moduleName";
+  public static String TEMPLATE_TYPE = "type";
 
   @Inject
   public NGTemplateServiceHelper(FilterService filterService, NGTemplateRepository templateRepository,
@@ -127,6 +128,7 @@ public class NGTemplateServiceHelper {
         properties.put(PROJECT_ID, entity.getProjectIdentifier());
         properties.put(TEMPLATE_SAVE_ACTION_TYPE, actionType);
         properties.put(MODULE_NAME, "cd");
+        properties.put(TEMPLATE_TYPE, entity.getTemplateEntityType().getRootYamlName());
         telemetryReporter.sendTrackEvent(TEMPLATE_SAVE, null, entity.getAccountId(), properties,
             Collections.singletonMap(AMPLITUDE, true), io.harness.telemetry.Category.GLOBAL);
       } catch (Exception ex) {

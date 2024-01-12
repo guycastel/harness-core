@@ -328,7 +328,9 @@ public class GraphGenerationServiceImpl implements GraphGenerationService {
     try {
       log.warn(String.format(
           "[GRAPH_ERROR]: Trying to build orchestration graph from scratch for planExecutionId [%s]", planExecutionId));
-      PlanExecution planExecution = planExecutionService.getPlanExecutionMetadata(planExecutionId);
+      PlanExecution planExecution = planExecutionService.getWithFieldsIncluded(planExecutionId,
+          Set.of(PlanExecution.PlanExecutionKeys.ambiance, PlanExecution.PlanExecutionKeys.startTs,
+              PlanExecution.PlanExecutionKeys.endTs, PlanExecution.PlanExecutionKeys.status));
       if (planExecution == null) {
         throw NestedExceptionUtils.hintWithExplanationException("Pipeline Execution with given plan execution id: ["
                 + planExecutionId + "] not found or unable to generate a graph for it",

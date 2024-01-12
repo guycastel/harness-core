@@ -82,7 +82,7 @@ import org.mockito.Spy;
  */
 public class GraphGenerationServiceImplTest extends OrchestrationVisualizationTestBase {
   @Inject @Spy private PlanExecutionRepository planExecutionRepository;
-  @Inject @InjectMocks private PlanExecutionService planExecutionService;
+  @Mock private PlanExecutionService planExecutionService;
   @Inject @InjectMocks private NodeExecutionService nodeExecutionService;
   @Inject @InjectMocks private SpringMongoStore mongoStore;
   @Mock private OrchestrationEventLogRepository orchestrationEventLogRepository;
@@ -93,6 +93,8 @@ public class GraphGenerationServiceImplTest extends OrchestrationVisualizationTe
   @Mock private PlanExecutionModuleInfoUpdateEventHandler planExecutionModuleInfoUpdateEventHandler;
   @Mock private PmsExecutionSummaryService pmsExecutionSummaryService;
   @Inject @InjectMocks GraphGenerationServiceImpl graphGenerationServiceImpl;
+
+  private static String planExecutionUuid = "planExecutionUuid";
 
   @Before
   public void setup() {
@@ -107,19 +109,19 @@ public class GraphGenerationServiceImplTest extends OrchestrationVisualizationTe
   public void shouldReturnOrchestrationGraphWithoutCache() {
     doReturn(
         PlanExecution.builder()
+            .uuid("planExecutionUuid")
             .ambiance(
                 Ambiance.newBuilder().putSetupAbstractions(SetupAbstractionKeys.accountId, "accountIdentifier").build())
             .build())
-        .when(planExecutionRepository)
-        .getPlanExecutionWithProjections(any(), any());
-    PlanExecution planExecution = planExecutionService.save(PlanExecution.builder().build());
+        .when(planExecutionService)
+        .getWithFieldsIncluded(any(), any());
     NodeExecution dummyStart =
         NodeExecution.builder()
             .uuid(generateUuid())
             .status(Status.SUCCEEDED)
             .ambiance(
                 Ambiance.newBuilder()
-                    .setPlanExecutionId(planExecution.getUuid())
+                    .setPlanExecutionId(planExecutionUuid)
                     .addAllLevels(Collections.singletonList(
                         Level.newBuilder().setSetupId("node1_plan").setNodeType(NodeType.PLAN_NODE.name()).build()))
                     .setMetadata(ExecutionMetadata.newBuilder()
@@ -137,7 +139,7 @@ public class GraphGenerationServiceImplTest extends OrchestrationVisualizationTe
             .build();
     nodeExecutionService.save(dummyStart);
 
-    OrchestrationGraphDTO graphResponse = graphGenerationService.generateOrchestrationGraphV2(planExecution.getUuid());
+    OrchestrationGraphDTO graphResponse = graphGenerationService.generateOrchestrationGraphV2(planExecutionUuid);
     assertThat(graphResponse).isNotNull();
     assertThat(graphResponse.getAdjacencyList()).isNotNull();
     assertThat(graphResponse.getAdjacencyList().getGraphVertexMap()).isNotEmpty();
@@ -210,8 +212,6 @@ public class GraphGenerationServiceImplTest extends OrchestrationVisualizationTe
   }
 
   private OrchestrationGraph constructOrchestrationGraphForPartialTest(List<GraphVertex> graphVertices) {
-    PlanExecution planExecution = planExecutionService.save(PlanExecution.builder().build());
-
     Map<String, GraphVertex> graphVertexMap =
         graphVertices.stream().collect(Collectors.toMap(GraphVertex::getUuid, Function.identity()));
     Map<String, EdgeListInternal> adjacencyMap = new HashMap<>();
@@ -233,13 +233,13 @@ public class GraphGenerationServiceImplTest extends OrchestrationVisualizationTe
         OrchestrationAdjacencyListInternal.builder().graphVertexMap(graphVertexMap).adjacencyMap(adjacencyMap).build();
 
     return OrchestrationGraph.builder()
-        .cacheKey(planExecution.getUuid())
+        .cacheKey(planExecutionUuid)
         .cacheContextOrder(System.currentTimeMillis())
         .cacheParams(null)
         .startTs(System.currentTimeMillis())
         .endTs(System.currentTimeMillis())
         .rootNodeIds(Collections.singletonList(graphVertices.get(0).getUuid()))
-        .planExecutionId(planExecution.getUuid())
+        .planExecutionId(planExecutionUuid)
         .status(Status.SUCCEEDED)
         .adjacencyList(listInternal)
         .build();
@@ -398,7 +398,6 @@ public class GraphGenerationServiceImplTest extends OrchestrationVisualizationTe
   @Category(UnitTests.class)
   public void testUpdateGraphUnderLockWithOrchestrationGraphForPipelineInfoUpdate() {
     String planExecutionId = generateUuid();
-    String nodeExecutionId = generateUuid();
     List<OrchestrationEventLog> logs = new ArrayList<>();
     logs.add(OrchestrationEventLog.builder()
                  .planExecutionId(planExecutionId)

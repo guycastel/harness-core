@@ -158,7 +158,8 @@ public class AmbianceExpressionEvaluator extends EngineExpressionEvaluator {
       } else {
         addToContext(SECRETS,
             new SecretFunctor(ambiance,
-                expressionsObserverFactory.getSubjectForSecretsRuntimeUsages(ExpressionsObserverFactory.SECRET)));
+                expressionsObserverFactory.getSubjectForSecretsRuntimeUsages(ExpressionsObserverFactory.SECRET),
+                pipelineRbacHelper));
       }
     }
 

@@ -38,7 +38,7 @@ import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2Deployment;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2Orchestration;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2PolicyEnforcement;
 import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2Scorecard;
-import io.harness.spec.server.ssca.v1.model.ArtifactListingResponseV2Variant;
+import io.harness.spec.server.ssca.v1.model.ArtifactVariant;
 import io.harness.spec.server.ssca.v1.model.ComponentFilter;
 import io.harness.spec.server.ssca.v1.model.LicenseFilter;
 import io.harness.spec.server.ssca.v1.model.OneOfArtifactMetadata;
@@ -660,7 +660,8 @@ public class ArtifactServiceImpl implements ArtifactService {
               .id(artifact.getArtifactId())
               .name(artifact.getName())
               .url(artifact.getUrl())
-              .variant(new ArtifactListingResponseV2Variant().type(getVariantType(artifact)).value(artifact.getTag()))
+              .type(ArtifactListingResponseV2.TypeEnum.fromValue(artifact.getType()))
+              .variant(new ArtifactVariant().type(getVariantType(artifact)).value(artifact.getTag()))
               .componentsCount(artifact.getComponentsCount().intValue())
               .policyEnforcement(
                   new ArtifactListingResponseV2PolicyEnforcement()
@@ -801,19 +802,19 @@ public class ArtifactServiceImpl implements ArtifactService {
     return new HashSet<>(artifactRepository.findDistinctArtifactIds(criteria));
   }
 
-  private String getVariantType(ArtifactEntity artifact) {
+  private ArtifactVariant.TypeEnum getVariantType(ArtifactEntity artifact) {
     if (artifact.getType().equals("image")) {
-      return "tag";
+      return ArtifactVariant.TypeEnum.TAG;
     } else if (artifact.getType().equals("repository")) {
       RepositoryArtifactSpec spec = (RepositoryArtifactSpec) artifact.getSpec();
       if (spec.getBranch() != null) {
-        return "branch";
+        return ArtifactVariant.TypeEnum.BRANCH;
       }
       if (spec.getGitTag() != null) {
-        return "gitTag";
+        return ArtifactVariant.TypeEnum.GITTAG;
       }
       if (spec.getCommitSha() != null) {
-        return "commit";
+        return ArtifactVariant.TypeEnum.COMMIT;
       }
     }
     throw new IllegalStateException(

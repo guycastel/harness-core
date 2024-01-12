@@ -165,6 +165,8 @@ public class CodeBaseTaskStepTest extends CategoryTest {
     assertThat(codebaseSweepingOutput.getCommitSha()).isEqualTo("commitId");
     assertThat(codebaseSweepingOutput.getShortCommitSha()).isEqualTo("commitI");
     assertThat(codebaseSweepingOutput.getBranch()).isEqualTo("main");
+    assertThat(codebaseSweepingOutput.getSourceBranch()).isEqualTo("main");
+    assertThat(codebaseSweepingOutput.getTargetBranch()).isEqualTo("main");
     assertThat(codebaseSweepingOutput.getRepoUrl()).isEqualTo("http://github.com/octocat/hello-world");
     assertThat(codebaseSweepingOutput.getGitUserId()).isEqualTo("login");
     assertThat(codebaseSweepingOutput.getGitUser()).isEqualTo("name");
@@ -321,6 +323,8 @@ public class CodeBaseTaskStepTest extends CategoryTest {
     CodebaseSweepingOutput codebaseSweepingOutput =
         codeBaseTaskStep.buildManualCodebaseSweepingOutput(manualExecutionSource, "url");
     assertThat(codebaseSweepingOutput.getBranch()).isEqualTo("main");
+    assertThat(codebaseSweepingOutput.getSourceBranch()).isEqualTo("main");
+    assertThat(codebaseSweepingOutput.getTargetBranch()).isEqualTo("main");
   }
 
   @Test
@@ -426,6 +430,7 @@ public class CodeBaseTaskStepTest extends CategoryTest {
     CodebaseSweepingOutput codebaseSweepingOutput =
         codeBaseTaskStep.buildWebhookCodebaseSweepingOutput(webhookExecutionSource);
     assertThat(codebaseSweepingOutput.getBranch()).isEqualTo("main");
+    assertThat(codebaseSweepingOutput.getSourceBranch()).isEqualTo("main");
     assertThat(codebaseSweepingOutput.getTargetBranch()).isEqualTo("main");
     assertThat(codebaseSweepingOutput.getCommitSha()).isEqualTo("commitId");
     assertThat(codebaseSweepingOutput.getShortCommitSha()).isEqualTo("commitI");

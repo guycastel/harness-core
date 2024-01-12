@@ -306,7 +306,8 @@ public class CodeBaseTaskStep implements TaskExecutable<CodeBaseTaskStepParamete
       return null;
     }
 
-    String ref = String.format("refs/heads/%s", scmGitRefTaskResponseData.getBranch());
+    String branch = getPropertyFromCommitOrDefault(scmGitRefTaskResponseData.getBranch(), "");
+    String ref = String.format("refs/heads/%s", branch);
 
     Build build = new Build("branch");
     if (isNotEmpty(tag)) {
@@ -318,7 +319,9 @@ public class CodeBaseTaskStep implements TaskExecutable<CodeBaseTaskStepParamete
     String shortCommitSha = WebhookTriggerProcessorUtils.getShortCommitSha(commitSha);
 
     return CodebaseSweepingOutput.builder()
-        .branch(scmGitRefTaskResponseData.getBranch())
+        .branch(branch)
+        .sourceBranch(branch)
+        .targetBranch(branch)
         .tag(tag)
         .build(build)
         .commits(asList(CodeBaseCommit.builder()
@@ -415,12 +418,14 @@ public class CodeBaseTaskStep implements TaskExecutable<CodeBaseTaskStepParamete
 
       String commitSha = branchWebhookEvent.getBaseAttributes().getAfter();
       String shortCommitSha = WebhookTriggerProcessorUtils.getShortCommitSha(commitSha);
+      String branch = getPropertyFromCommitOrDefault(branchWebhookEvent.getBranchName(), "");
 
       return CodebaseSweepingOutput.builder()
-          .branch(branchWebhookEvent.getBranchName())
+          .branch(branch)
           .commits(codeBaseCommits)
           .build(new Build("branch"))
-          .targetBranch(branchWebhookEvent.getBranchName())
+          .sourceBranch(branch)
+          .targetBranch(branch)
           .commitSha(commitSha)
           .shortCommitSha(shortCommitSha)
           .repoUrl(branchWebhookEvent.getRepository().getLink())
@@ -460,10 +465,13 @@ public class CodeBaseTaskStep implements TaskExecutable<CodeBaseTaskStepParamete
 
     String commitSha = manualExecutionSource.getCommitSha();
     String shortCommitSha = WebhookTriggerProcessorUtils.getShortCommitSha(commitSha);
+    String branch = getPropertyFromCommitOrDefault(manualExecutionSource.getBranch(), "");
 
     return CodebaseSweepingOutput.builder()
         .build(build)
-        .branch(manualExecutionSource.getBranch())
+        .branch(branch)
+        .sourceBranch(branch)
+        .targetBranch(branch)
         .tag(manualExecutionSource.getTag())
         .commitSha(commitSha)
         .shortCommitSha(shortCommitSha)

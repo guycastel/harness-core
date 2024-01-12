@@ -989,6 +989,7 @@ public class NextGenModule extends AbstractModule {
     install(new NgVariableModule(appConfig));
     install(new NGIpAllowlistModule(appConfig));
     install(new NGFavoriteModule(appConfig));
+    install(new NgCertificateModule());
     install(new EulaModule(appConfig));
     install(new GitXWebhookModule(appConfig));
     install(EntitySetupUsageModule.getInstance());

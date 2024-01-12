@@ -18,7 +18,9 @@ java_library(
     visibility = ["//visibility:public"],
     deps = [
         "//:lombok",
+        "//970-ng-commons/src/main/java/io/harness/beans/scope:module",
         "//970-ng-commons/src/main/java/io/harness/ng/core/dto:module",
+        "//980-commons/src/main/java/io/harness/data/structure:module",
         "//980-commons/src/main/java/io/harness/exception:module",
         "@maven//:com_google_inject_guice",
         "@maven//:org_apache_commons_commons_lang3",

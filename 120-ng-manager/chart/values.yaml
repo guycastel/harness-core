@@ -245,6 +245,15 @@ global:
     stsEndPointUrl: https://sts.us-east-2.amazonaws.com
     ecsEndPointUrl: https://ecs.us-east-2.amazonaws.com
     cloudwatchEndPointUrl: https://monitoring.us-east-2.amazonaws.com
+  waitForInitContainer:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: harness/helm-init-container
+      pullPolicy: Always
+      tag: "latest"
+      digest: ""
+      imagePullSecrets: []
 redis:
   protocol: ""
   hosts: []
@@ -387,14 +396,6 @@ initContainer:
     registry: docker.io
     repository: busybox
     tag: "1.35.0"
-    digest: ""
-    imagePullSecrets: []
-waitForInitContainer:
-  image:
-    registry: docker.io
-    repository: harness/helm-init-container
-    pullPolicy: IfNotPresent
-    tag: "latest"
     digest: ""
     imagePullSecrets: []
 mongoSecrets:

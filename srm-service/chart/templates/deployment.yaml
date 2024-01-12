@@ -47,12 +47,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
-      - name: wait-for-harness-manager
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=harness-manager"
+        {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "appName" "harness-manager") | nindent 8}}
       containers:
         - name: cv-nextgen
           image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
@@ -65,7 +60,7 @@ spec:
             {{- include "harnesscommon.secrets.manageAppEnv" (dict "ctx" $ "variableName" "VERIFICATION_SERVICE_SECRET" "defaultKubernetesSecretName" "cv-nextgen" "defaultKubernetesSecretKey" "VERIFICATION_SERVICE_SECRET") | indent 12 }}
             {{- include "harnesscommon.dbconnectionv2.timescaleEnv" (dict "ctx" $ "passwordVariableName" "TIMESCALE_PASSWORD") | indent 12 }}
             - name: TIMESCALE_URI
-              value: {{ include "harnesscommon.dbconnectionv2.timescaleConnection" (dict "protocol" "jdbc:postgresql" "database" "harness" "context" $) }}            
+              value: {{ include "harnesscommon.dbconnectionv2.timescaleConnection" (dict "protocol" "jdbc:postgresql" "database" "harness" "context" $) }}
             {{- include "harnesscommon.dbv3.mongoEnv" (dict "ctx" $ "database" "cvng-harness") | indent 12 }}
             {{- include "harnesscommon.dbv3.mongoConnectionEnv" (dict "ctx" $ "database" "cvng-harness" "connectionURIVariableName" "MONGO_URI") | indent 12 }}
             {{- include "harnesscommon.dbv3.mongoEnv" (dict "ctx" $ "database" "notifications") | indent 12 }}

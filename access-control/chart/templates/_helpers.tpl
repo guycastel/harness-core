@@ -78,15 +78,19 @@ IDENTITY_SERVICE_SECRET: '{{ .ctx.Values.secrets.default.IDENTITY_SERVICE_SECRET
     {{- if not $hasAtleastOneSecret }}
 {}
     {{- end }}
-{{- end }}    
+{{- end }}
 {{/*
 Helper function for pullSecrets at chart level or global level.
 */}}
 {{- define "access-control.pullSecrets" -}}
-{{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.waitForInitContainer.image) "global" .Values.global ) }}
+{{- if .Values.waitForInitContainer }}
+    {{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.waitForInitContainer.image) "global" .Values.global ) }}
+{{- else }}
+    {{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.global.waitForInitContainer.image) "global" .Values.global ) }}
+{{- end }}
 {{- end -}}
 
-{{/* 
+{{/*
 Generates comma separated list of Mongo Protocol
 */}}
 {{- define "access-control.mongoProtocol" }}
@@ -118,8 +122,8 @@ Generates comma separated list of Mongo Protocol
     {{- end }}
 {{- end }}
 
-{{/* 
-Generates comma separated list of Mongo Host names based off environment 
+{{/*
+Generates comma separated list of Mongo Host names based off environment
 */}}
 {{- define "access-control.mongohosts" }}
     {{- $ := .ctx }}

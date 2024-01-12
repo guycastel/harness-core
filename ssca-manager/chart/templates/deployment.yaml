@@ -50,22 +50,12 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
-      {{- if .Values.global.database.mongo.installed }}
-      - name: wait-for-mongo
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=mongodb-replicaset"
-      {{- end }}
-      {{- if .Values.global.database.redis.installed }}
-      - name: wait-for-redis
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=redis-sentinel"
-      {{- end }}
+        {{- if .Values.global.database.mongo.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-mongo" "appName" "mongodb-replicaset") | nindent 8}}
+        {{- end }}
+        {{- if .Values.global.database.redis.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-redis" "appName" "redis-sentinel") | nindent 8}}
+        {{- end }}
       containers:
         - name: ssca-manager
           image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}

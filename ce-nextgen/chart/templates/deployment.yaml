@@ -50,31 +50,15 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
-    #waits only for mongo & timescale to start
-      {{- if .Values.global.database.mongo.installed }}
-      - name: wait-for-mongo
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=mongodb-replicaset"
-      {{- end }}
-      {{- if .Values.global.database.timescaledb.installed }}
-      - name: wait-for-timescale
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=timescaledb-single-chart"
-      {{- end }}
-      {{- if .Values.global.database.clickhouse.enabled }}
-      - name: wait-for-clickhouse
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=clickhouse"
-      {{- end }}
+        {{- if .Values.global.database.mongo.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-mongo" "appName" "mongodb-replicaset") | nindent 8}}
+        {{- end }}
+        {{- if .Values.global.database.timescaledb.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-timescale" "appName" "timescaledb-single-chart") | nindent 8}}
+        {{- end }}
+        {{- if .Values.global.database.clickhouse.enabled }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "appName" "clickhouse") | nindent 8}}
+        {{- end }}
       containers:
         {{- include "harnesscommon.monitoring.containerPort" . | nindent 8 }}
         - name: nextgen-ce

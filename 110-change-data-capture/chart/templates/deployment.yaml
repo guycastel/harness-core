@@ -51,48 +51,15 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       initContainers:
-      {{- if .Values.global.database.mongo.installed }}
-      - name: wait-for-mongo
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        {{- if .Values.waitForInitContainer.resources }}
-        resources:
-          {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.waitForInitContainer.resources "context" $) | nindent 12 }}
+        {{- if .Values.global.database.mongo.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-mongo" "appName" "mongodb-replicaset") | nindent 8}}
         {{- end }}
-        securityContext:
-          {{- toYaml .Values.waitForInitContainer.containerSecurityContext | nindent 12 }}
-        imagePullPolicy: {{ .Values.waitForInitContainer.imagePullPolicy }}
-        args:
-          - "pod"
-          - "-lapp=mongodb-replicaset"
-      {{- end }}
-      {{- if .Values.global.database.timescaledb.installed }}  
-      - name: wait-for-timescale
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        {{- if .Values.waitForInitContainer.resources }}
-        resources:
-          {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.waitForInitContainer.resources "context" $) | nindent 12 }}
+        {{- if .Values.global.database.timescaledb.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-timescale" "appName" "timescaledb-single-chart") | nindent 8}}
         {{- end }}
-        securityContext:
-          {{- toYaml .Values.waitForInitContainer.containerSecurityContext | nindent 12 }}
-        imagePullPolicy: {{ .Values.waitForInitContainer.imagePullPolicy }}
-        args:
-          - "pod"
-          - "-lapp=timescaledb-single-chart"
-        {{- end }}
-      - name: wait-for-ng-manager
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        {{- if .Values.waitForInitContainer.resources }}
-        resources:
-          {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.waitForInitContainer.resources "context" $) | nindent 12 }}
-        {{- end }}
-        securityContext:
-          {{- toYaml .Values.waitForInitContainer.containerSecurityContext | nindent 12 }}
-        imagePullPolicy: {{ .Values.waitForInitContainer.imagePullPolicy }}
-        args:
-          - "pod"
-          - "-lapp=ng-manager"
+        {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "appName" "ng-manager") | nindent 8}}
         {{- if .Values.initContainers }}
-        {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
+          {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
       containers:
         - name: change-data-capture

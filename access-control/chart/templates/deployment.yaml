@@ -56,35 +56,13 @@ spec:
       {{- end }}
       initContainers:
         {{- if .Values.global.database.mongo.installed }}
-        - name: wait-for-mongo
-          image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-          {{- if .Values.waitForInitContainer.resources }}
-          resources:
-            {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.waitForInitContainer.resources "context" $) | nindent 12 }}
-          {{- end }}
-          securityContext:
-            {{- toYaml .Values.waitForInitContainer.containerSecurityContext | nindent 12 }}
-          imagePullPolicy: {{ .Values.waitForInitContainer.imagePullPolicy }}
-          args:
-            - "pod"
-            - "-lapp=mongodb-replicaset"
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-mongo" "appName" "mongodb-replicaset") | nindent 8}}
         {{- end }}
         {{- if .Values.global.database.redis.installed }}
-        - name: wait-for-redis
-          image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-          {{- if .Values.waitForInitContainer.resources }}
-          resources:
-            {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.waitForInitContainer.resources "context" $) | nindent 12 }}
-          {{- end }}
-          securityContext:
-            {{- toYaml .Values.waitForInitContainer.containerSecurityContext | nindent 12 }}
-          imagePullPolicy: {{ .Values.waitForInitContainer.imagePullPolicy }}
-          args:
-            - "pod"
-            - "-lapp=redis-sentinel"
-        {{- if .Values.initContainers }}
-        {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-redis" "appName" "redis-sentinel") | nindent 8}}
         {{- end }}
+        {{- if .Values.initContainers }}
+          {{- include "harnesscommon.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
       containers:
         - name: access-control

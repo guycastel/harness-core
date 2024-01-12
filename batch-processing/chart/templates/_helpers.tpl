@@ -149,5 +149,9 @@ HMAC_SECRET_KEY: {{ include "harnesscommon.secrets.passwords.manage" (dict "secr
 {{- end }}
 
 {{- define "batch-processing.pullSecrets" -}}
-{{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.waitForInitContainer.image) "global" .Values.global ) }}
+{{- if .Values.waitForInitContainer }}
+    {{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.waitForInitContainer.image) "global" .Values.global ) }}
+{{- else }}
+    {{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.global.waitForInitContainer.image) "global" .Values.global ) }}
+{{- end }}
 {{- end -}}

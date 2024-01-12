@@ -48,29 +48,14 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
-      {{- if .Values.global.database.mongo.installed }}
-      - name: wait-for-mongo
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=mongodb-replicaset"
-      {{- end }}
-      {{- if .Values.global.database.timescaledb.installed }}
-      - name: wait-for-timescale
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=timescaledb-single-chart"
-      {{- end }}
-      {{- if .Values.global.database.redis.installed }}
-      - name: wait-for-redis
-        image: {{ include "common.images.image" (dict "imageRoot" .Values.waitForInitContainer.image "global" .Values.global) }}
-        imagePullPolicy: IfNotPresent
-        args:
-          - "pod"
-          - "-lapp=redis-sentinel"
+        {{- if .Values.global.database.mongo.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-mongo" "appName" "mongodb-replicaset") | nindent 8}}
+        {{- end }}
+        {{- if .Values.global.database.timescaledb.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-timescale" "appName" "timescaledb-single-chart") | nindent 8}}
+        {{- end }}
+        {{- if .Values.global.database.redis.installed }}
+          {{ include "harnesscommon.initContainer.waitForContainer" (dict "root" . "containerName" "wait-for-redis" "appName" "redis-sentinel") | nindent 8}}
         {{- end }}
       containers:
         - envFrom:
@@ -88,7 +73,7 @@ spec:
             {{- include "harnesscommon.dbconnectionv2.redisEnv" (dict "ctx" $ "userVariableName" "EVENTS_FRAMEWORK_REDIS_USERNAME" "passwordVariableName" "EVENTS_FRAMEWORK_REDIS_PASSWORD") | indent 12 }}
             {{- include "harnesscommon.dbconnectionv2.timescaleEnv" (dict "ctx" $) | indent 12 }}
             - name: TIMESCALEDB_URI
-              value: {{ include "harnesscommon.dbconnectionv2.timescaleConnection" (dict "protocol" "jdbc:postgresql" "database" "harness" "context" $) }}   
+              value: {{ include "harnesscommon.dbconnectionv2.timescaleConnection" (dict "protocol" "jdbc:postgresql" "database" "harness" "context" $) }}
             {{- include "harnesscommon.dbv3.mongoEnv" (dict "ctx" $ "database" "harness") | indent 12 }}
             {{- include "harnesscommon.dbv3.mongoConnectionEnv" (dict "ctx" $ "database" "harness" "connectionURIVariableName" "MONGO_URI") | indent 12 }}
             {{- if .Values.extraEnvVars }}

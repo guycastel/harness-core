@@ -62,7 +62,11 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "ng-manager.pullSecrets" -}}
-{{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.waitForInitContainer.image .Values.initContainer.image) "global" .Values.global ) }}
+{{- if .Values.waitForInitContainer }}
+    {{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.waitForInitContainer.image .Values.initContainer.image) "global" .Values.global ) }}
+{{- else }}
+    {{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.global.waitForInitContainer.image .Values.initContainer.image) "global" .Values.global ) }}
+{{- end }}
 {{- end -}}
 
 {{/*

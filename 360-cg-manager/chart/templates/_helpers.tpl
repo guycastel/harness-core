@@ -149,9 +149,12 @@ Create the name of the delegate upgrader image to use
 {{- end }}
 
 {{- define "harness-manager.pullSecrets" -}}
-{{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.waitForInitContainer.image) "global" .Values.global ) }}
+{{- if .Values.waitForInitContainer }}
+    {{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.waitForInitContainer.image) "global" .Values.global ) }}
+{{- else }}
+    {{ include "common.images.pullSecrets" (dict "images" (list .Values.image .Values.global.waitForInitContainer.image) "global" .Values.global ) }}
+{{- end }}
 {{- end -}}
-
 {{/*
 Manage Harness Manager Secrets
 

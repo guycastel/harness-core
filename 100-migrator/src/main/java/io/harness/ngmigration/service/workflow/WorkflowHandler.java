@@ -57,6 +57,7 @@ import io.harness.plancreator.execution.ExecutionElementConfig;
 import io.harness.plancreator.execution.ExecutionWrapperConfig;
 import io.harness.plancreator.stages.StageElementWrapperConfig;
 import io.harness.plancreator.stages.stage.AbstractStageNode;
+import io.harness.plancreator.stages.stage.StageInfoConfig;
 import io.harness.plancreator.steps.AbstractStepNode;
 import io.harness.plancreator.steps.StepGroupElementConfig;
 import io.harness.plancreator.steps.internal.PmsAbstractStepNode;
@@ -1061,11 +1062,32 @@ public abstract class WorkflowHandler {
                 .peek(phaseStep -> phaseStep.setName(prefix + "-" + phaseStep.getName()))
                 .map(phaseStep -> getStepGroup(migrationContext, context, phase, phaseStep, false))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList()));
+                .toList());
       }
     }
 
-    DeploymentStageConfig stageConfig = getDeploymentStageConfig(context, stepGroupWrappers, rollbackStepGroupWrappers);
+    StageInfoConfig stageConfig = null;
+    if (isEmpty(workflow.getServices())) {
+      stageConfig = CustomStageConfig.builder()
+                        .environment(EnvironmentYamlV2.builder()
+                                         .deployToAll(ParameterField.createValueField(false))
+                                         .environmentRef(ParameterField.createValueField(
+                                             MigratorUtility.getIdentifierWithScope(context.getMigratedEntities(),
+                                                 context.getWorkflow().getEnvId(), NGMigrationEntityType.ENVIRONMENT)))
+                                         .environmentInputs(getRuntimeInput())
+                                         .serviceOverrideInputs(getRuntimeInput())
+                                         .infrastructureDefinitions(
+                                             ParameterField.createExpressionField(true, "<+input>", null, false))
+                                         .build())
+                        .execution(ExecutionElementConfig.builder()
+                                       .steps(stepGroupWrappers)
+                                       .rollbackSteps(rollbackStepGroupWrappers)
+                                       .build())
+                        .build();
+    } else {
+      stageConfig = getDeploymentStageConfig(context, stepGroupWrappers, rollbackStepGroupWrappers);
+    }
+
     Map<String, Object> templateSpec =
         ImmutableMap.<String, Object>builder()
             .put("type", "Deployment")

@@ -476,3 +476,4 @@ io.harness.steps.http.v1.HttpOutcome
 io.harness.plancreator.steps.common.v1.StageElementParametersV1
 io.harness.steps.approval.step.jira.v1.JiraApprovalStepParameters
 io.harness.steps.wait.v1.WaitStepParameters
+io.harness.steps.approval.step.harness.v1.HarnessApprovalStepParameters

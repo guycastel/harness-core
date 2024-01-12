@@ -275,7 +275,10 @@ public class PmsOutcomeServiceImplTest extends OrchestrationTestBase {
     String nodeExecution1Id = generateUuid();
     String nodeExecution2Id = generateUuid();
 
-    Ambiance.Builder ambianceBuilder = Ambiance.newBuilder().setPlanExecutionId(planExecutionId).setPlanId(planId);
+    Ambiance.Builder ambianceBuilder = Ambiance.newBuilder()
+                                           .setPlanExecutionId(planExecutionId)
+                                           .setPlanId(planId)
+                                           .putSetupAbstractions("accountId", "ACCOUNT");
     Ambiance ambiance1 = ambianceBuilder.addLevels(Level.newBuilder().setRuntimeId(nodeExecution1Id).build()).build();
     Ambiance ambiance2 = ambianceBuilder.addLevels(Level.newBuilder().setRuntimeId(nodeExecution2Id).build()).build();
     DummyOrchestrationOutcome outcome1 = DummyOrchestrationOutcome.builder().test("test1").build();

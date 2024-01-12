@@ -59,6 +59,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -126,6 +127,10 @@ public class PmsOutcomeServiceImpl implements PmsOutcomeService {
 
   @Override
   public String consumeInternal(Ambiance ambiance, Level producedBy, String name, String value, String groupName) {
+    String accountId = AmbianceUtils.getAccountId(ambiance);
+    if (StringUtils.isBlank(accountId)) {
+      throw new OutcomeException(format("Account identifier empty for %s", value));
+    }
     try {
       return transactionHelper.performTransaction(() -> {
         OutcomeInstance instance = mongoTemplate.insert(
@@ -139,6 +144,7 @@ public class PmsOutcomeServiceImpl implements PmsOutcomeService {
                 .groupName(groupName)
                 .levelRuntimeIdIdx(ResolverUtils.prepareLevelRuntimeIdIdx(ambiance.getLevelsList()))
                 .fullyQualifiedName(ExpandedJsonFunctorUtils.generateFullyQualifiedName(ambiance, name))
+                .accountIdentifier(accountId)
                 .build());
         planExpansionService.addOutcomes(ambiance, name, instance.getOutcomeValue());
         return instance.getUuid();

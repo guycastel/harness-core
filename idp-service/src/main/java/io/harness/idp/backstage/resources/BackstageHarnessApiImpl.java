@@ -55,8 +55,8 @@ public class BackstageHarnessApiImpl implements BackstageHarnessApi {
   @IdpServiceAuthIfHasApiKey
   public Response backstageHarnessSyncForAccountEntity(
       @Valid BackstageHarnessSyncRequest body, @AccountIdentifier String harnessAccount) {
-    boolean result = backstageService.sync(
-        harnessAccount, body.getEntityIdentifier(), body.getAction().value(), body.getSyncMode().value());
+    boolean result = backstageService.sync(harnessAccount, body.getEntityIdentifier(), body.getAction().value(),
+        body.getSyncMode().value(), body.getUser());
     return responseOnResult(result);
   }
 

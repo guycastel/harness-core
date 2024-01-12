@@ -15,4 +15,7 @@ message IdpCatalogEntitiesSyncCaptureEvent {
   string entity_uid = 2;
   string action = 3;
   string sync_mode = 4;
+  string user_uuid = 5;
+  string user_name = 6;
+  string user_email = 7;
 }

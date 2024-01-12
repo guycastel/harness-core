@@ -18,6 +18,7 @@ import io.harness.eventsframework.api.Producer;
 import io.harness.eventsframework.producer.Message;
 import io.harness.eventsframework.schemas.idp.IdpCatalogEntitiesSyncCaptureEvent;
 import io.harness.eventsframework.schemas.idp.IdpLicenseUsageCaptureEvent;
+import io.harness.spec.server.idp.v1.model.User;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -61,14 +62,15 @@ public class IdpServiceMiscRedisProducer {
     }
   }
 
-  public void publishIDPCatalogEntitiesSyncCaptureToRedis(String accountIdentifier, String entityUid, String action) {
+  public void publishIDPCatalogEntitiesSyncCaptureToRedis(
+      String accountIdentifier, String entityUid, String action, User user) {
     try {
       String eventId = idpCatalogEntitiesSyncCaptureEventProducer.send(
           Message.newBuilder()
               .putAllMetadata(
                   Map.of("accountIdentifier", accountIdentifier, EventsFrameworkMetadataConstants.ENTITY_TYPE,
                       IDP_CATALOG_ENTITIES_SYNC_CAPTURE_EVENT, EventsFrameworkMetadataConstants.ACTION, action))
-              .setData(getIdpCatalogEntitiesSyncCaptureEventData(accountIdentifier, entityUid, action))
+              .setData(getIdpCatalogEntitiesSyncCaptureEventData(accountIdentifier, entityUid, action, user))
               .build());
       log.info(
           "Produced event {} to redis for IDPCatalogEntitiesSyncCapture accountIdentifier {} entityUid {}, action {}",
@@ -94,13 +96,19 @@ public class IdpServiceMiscRedisProducer {
   }
 
   private ByteString getIdpCatalogEntitiesSyncCaptureEventData(
-      String accountIdentifier, String entityUid, String action) {
-    return IdpCatalogEntitiesSyncCaptureEvent.newBuilder()
-        .setAccountIdentifier(accountIdentifier)
-        .setEntityUid(entityUid)
-        .setAction(action)
-        .setSyncMode("sync")
-        .build()
-        .toByteString();
+      String accountIdentifier, String entityUid, String action, User user) {
+    IdpCatalogEntitiesSyncCaptureEvent.Builder payloadBuilder = IdpCatalogEntitiesSyncCaptureEvent.newBuilder()
+                                                                    .setAccountIdentifier(accountIdentifier)
+                                                                    .setEntityUid(entityUid)
+                                                                    .setAction(action)
+                                                                    .setSyncMode("sync");
+
+    if (user != null) {
+      payloadBuilder.setUserName(user.getName());
+      payloadBuilder.setUserUuid(user.getUuid());
+      payloadBuilder.setUserEmail(user.getEmail());
+    }
+
+    return payloadBuilder.build().toByteString();
   }
 }

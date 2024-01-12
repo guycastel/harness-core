@@ -22,6 +22,7 @@ import static io.harness.springdata.PersistenceUtils.DEFAULT_RETRY_POLICY;
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
 import io.harness.clients.BackstageResourceClient;
+import io.harness.context.GlobalContextData;
 import io.harness.exception.UnexpectedException;
 import io.harness.idp.backstage.beans.BackstageCatalogEntityTypes;
 import io.harness.idp.backstage.beans.BackstageScaffolderTask;
@@ -40,8 +41,12 @@ import io.harness.idp.events.producers.IdpServiceMiscRedisProducer;
 import io.harness.idp.namespace.beans.entity.NamespaceEntity;
 import io.harness.idp.namespace.repositories.NamespaceRepository;
 import io.harness.idp.namespace.service.NamespaceService;
+import io.harness.manage.GlobalContextManager;
 import io.harness.outbox.api.OutboxService;
+import io.harness.security.PrincipalContextData;
+import io.harness.security.dto.UserPrincipal;
 import io.harness.spec.server.idp.v1.model.BackstageHarnessSyncRequest;
+import io.harness.spec.server.idp.v1.model.User;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -98,7 +103,7 @@ public class BackstageServiceImpl implements BackstageService {
       List<BackstageCatalogEntity> backstageCatalogEntities = convert(response, BackstageCatalogEntity.class);
       backstageCatalogEntities = filter(backstageCatalogEntities);
       syncInternal(
-          accountIdentifier, "", BackstageHarnessSyncRequest.ActionEnum.UPSERT.value(), backstageCatalogEntities);
+          accountIdentifier, "", BackstageHarnessSyncRequest.ActionEnum.UPSERT.value(), backstageCatalogEntities, null);
     } catch (Exception ex) {
       log.error("Error in IdpCatalogEntitiesAsHarnessEntities sync for accountIdentifier = {} Error = {}",
           accountIdentifier, ex.getMessage(), ex);
@@ -108,12 +113,12 @@ public class BackstageServiceImpl implements BackstageService {
   }
 
   @Override
-  public boolean sync(String accountIdentifier, String entityUid, String action, String syncMode) {
+  public boolean sync(String accountIdentifier, String entityUid, String action, String syncMode, User user) {
     switch (BackstageHarnessSyncRequest.SyncModeEnum.fromValue(syncMode)) {
       case SYNC:
-        return syncInSynchronousMode(accountIdentifier, entityUid, action);
+        return syncInSynchronousMode(accountIdentifier, entityUid, action, user);
       case ASYNC:
-        return syncInAsynchronousMode(accountIdentifier, entityUid, action);
+        return syncInAsynchronousMode(accountIdentifier, entityUid, action, user);
       default:
         throw new UnexpectedException("Unsupported sync mode for syncing IdpCatalogEntitiesAsHarnessEntities");
     }
@@ -159,7 +164,7 @@ public class BackstageServiceImpl implements BackstageService {
   }
 
   private void syncInternal(String accountIdentifier, String entityUid, String action,
-      List<BackstageCatalogEntity> backstageCatalogEntities) {
+      List<BackstageCatalogEntity> backstageCatalogEntities, User user) {
     if (backstageCatalogEntities.isEmpty()) {
       return;
     }
@@ -173,7 +178,7 @@ public class BackstageServiceImpl implements BackstageService {
     Failsafe.with(transactionRetryPolicy).get(() -> transactionTemplate.execute(status -> {
       savedBackstageCatalogEntities.set(backstageCatalogEntityRepository.saveAll(backstageCatalogEntities));
       if (StringUtils.isNotBlank(entityUid)) {
-        publishAuditEventForUpsert(accountIdentifier, entityUid, entitiesList);
+        publishAuditEventForUpsert(accountIdentifier, entityUid, entitiesList, user);
       }
       return true;
     }));
@@ -187,35 +192,51 @@ public class BackstageServiceImpl implements BackstageService {
   }
 
   private void publishAuditEventForUpsert(String accountIdentifier, String entityUid,
-      List<Pair<BackstageCatalogEntity, BackstageCatalogEntity>> entitiesList) {
+      List<Pair<BackstageCatalogEntity, BackstageCatalogEntity>> entitiesList, User user) {
     for (Pair<BackstageCatalogEntity, BackstageCatalogEntity> entityPair : entitiesList) {
       BackstageCatalogEntity oldEntity = entityPair.getFirst();
       BackstageCatalogEntity newEntity = entityPair.getSecond();
+      boolean updated = oldEntity != null && !oldEntity.getYaml().equals(newEntity.getYaml());
 
-      if (oldEntity == null) {
-        boolean producerResult = idpEntityCrudStreamProducer.publishAsyncScoreComputationChangeEventToRedis(
-            accountIdentifier, null, entityUid);
-        if (!producerResult) {
-          log.error(
-              "Error in producing event for async score computation. AccountIdentifier = {} BackstageCatalogEntityUid = {}",
-              accountIdentifier, entityUid);
-        }
-        if (shouldPublishAudit(newEntity)) {
-          outboxService.save(
-              new BackstageCatalogEntityCreateEvent(accountIdentifier, newEntity.getEntityUid(), newEntity.getYaml()));
-        }
-      } else if (!oldEntity.getYaml().equals(newEntity.getYaml())) {
-        if (shouldPublishAudit(newEntity)) {
+      GlobalContextData currentPrincipalContext = GlobalContextManager.get(PrincipalContextData.PRINCIPAL_CONTEXT);
+      if (user != null && StringUtils.isNotBlank(user.getUuid())) {
+        GlobalContextManager.upsertGlobalContextRecord(
+            PrincipalContextData.builder()
+                .principal(new UserPrincipal(user.getUuid(), user.getEmail(), user.getName(), accountIdentifier))
+                .build());
+      }
+
+      try {
+        if (oldEntity == null) {
+          boolean producerResult = idpEntityCrudStreamProducer.publishAsyncScoreComputationChangeEventToRedis(
+              accountIdentifier, null, entityUid);
+          if (!producerResult) {
+            log.error(
+                "Error in producing event for async score computation. AccountIdentifier = {} BackstageCatalogEntityUid = {}",
+                accountIdentifier, entityUid);
+          }
+          if (shouldPublishAudit(newEntity)) {
+            outboxService.save(new BackstageCatalogEntityCreateEvent(
+                accountIdentifier, newEntity.getEntityUid(), newEntity.getYaml()));
+          }
+        } else if (updated && shouldPublishAudit(newEntity)) {
           outboxService.save(new BackstageCatalogEntityUpdateEvent(
               accountIdentifier, newEntity.getEntityUid(), oldEntity.getYaml(), newEntity.getYaml()));
         }
-        handleEntityDeletionIfRequired(accountIdentifier, oldEntity, newEntity);
+      } catch (Exception e) {
+        log.error("Error publishing audit event for EntityUid {}.", entityUid, e);
+      } finally {
+        GlobalContextManager.upsertGlobalContextRecord(currentPrincipalContext);
+      }
+
+      if (updated) {
+        handleEntityDeletionIfRequired(accountIdentifier, oldEntity, newEntity, user);
       }
     }
   }
 
   private void handleEntityDeletionIfRequired(
-      String accountIdentifier, BackstageCatalogEntity oldEntity, BackstageCatalogEntity newEntity) {
+      String accountIdentifier, BackstageCatalogEntity oldEntity, BackstageCatalogEntity newEntity, User user) {
     if (GROUP.equals(BackstageCatalogEntityTypes.fromString(oldEntity.getKind()))
         || USER.equals(BackstageCatalogEntityTypes.fromString(oldEntity.getKind()))) {
       Set<Relation> oldRelations = oldEntity.getRelations();
@@ -227,13 +248,13 @@ public class BackstageServiceImpl implements BackstageService {
           String kind = BackstageCatalogEntityTypes.fromString(target.getKind()).kind;
           String entityUidToDelete = getEntityUniqueId(kind, target.getNamespace(), target.getName());
           handleCreateOrUpdateOrUpsertAction(
-              accountIdentifier, entityUidToDelete, BackstageHarnessSyncRequest.ActionEnum.UPSERT.value());
+              accountIdentifier, entityUidToDelete, BackstageHarnessSyncRequest.ActionEnum.UPSERT.value(), user);
         }
       }
     }
   }
 
-  private boolean syncInSynchronousMode(String accountIdentifier, String entityUid, String action) {
+  private boolean syncInSynchronousMode(String accountIdentifier, String entityUid, String action, User user) {
     try {
       log.info("Syncing IDP catalog entities as Harness entities for accountIdentifier = {} EntityUid = {} Action = {}",
           accountIdentifier, entityUid, action);
@@ -241,10 +262,10 @@ public class BackstageServiceImpl implements BackstageService {
         case CREATE:
         case UPDATE:
         case UPSERT:
-          handleCreateOrUpdateOrUpsertAction(accountIdentifier, entityUid, action);
+          handleCreateOrUpdateOrUpsertAction(accountIdentifier, entityUid, action, user);
           break;
         case DELETE:
-          handleDeleteAction(accountIdentifier, entityUid);
+          handleDeleteAction(accountIdentifier, entityUid, user);
           break;
         default:
           throw new UnexpectedException(
@@ -259,8 +280,8 @@ public class BackstageServiceImpl implements BackstageService {
     return true;
   }
 
-  private boolean syncInAsynchronousMode(String accountIdentifier, String entityUid, String action) {
-    idpServiceMiscRedisProducer.publishIDPCatalogEntitiesSyncCaptureToRedis(accountIdentifier, entityUid, action);
+  private boolean syncInAsynchronousMode(String accountIdentifier, String entityUid, String action, User user) {
+    idpServiceMiscRedisProducer.publishIDPCatalogEntitiesSyncCaptureToRedis(accountIdentifier, entityUid, action, user);
     return true;
   }
 
@@ -308,7 +329,8 @@ public class BackstageServiceImpl implements BackstageService {
     });
   }
 
-  private void handleCreateOrUpdateOrUpsertAction(String accountIdentifier, String entityUid, String action) {
+  private void handleCreateOrUpdateOrUpsertAction(
+      String accountIdentifier, String entityUid, String action, User user) {
     Object response = null;
     try {
       response = getGeneralResponse(backstageResourceClient.getCatalogEntityByName(accountIdentifier, entityUid));
@@ -316,17 +338,18 @@ public class BackstageServiceImpl implements BackstageService {
       log.error("Error in fetching catalog entity by name for account = {} entityUid = {} Error = {}",
           accountIdentifier, entityUid, ex.getMessage(), ex);
       if (ex.getMessage().equals(ENTITY_NOT_FOUND_MAPPED_ERROR)) {
-        syncInSynchronousMode(accountIdentifier, entityUid, BackstageHarnessSyncRequest.ActionEnum.DELETE.value());
+        syncInSynchronousMode(
+            accountIdentifier, entityUid, BackstageHarnessSyncRequest.ActionEnum.DELETE.value(), user);
         return;
       }
     }
     BackstageCatalogEntity backstageCatalogEntity = readValueForObject(response, BackstageCatalogEntity.class);
     List<BackstageCatalogEntity> backstageCatalogEntities = Collections.singletonList(backstageCatalogEntity);
     backstageCatalogEntities = filter(backstageCatalogEntities);
-    syncInternal(accountIdentifier, entityUid, action, backstageCatalogEntities);
+    syncInternal(accountIdentifier, entityUid, action, backstageCatalogEntities, user);
   }
 
-  private void handleDeleteAction(String accountIdentifier, String entityUid) {
+  private void handleDeleteAction(String accountIdentifier, String entityUid, User user) {
     log.info(
         "Delete action received in IdpCatalogEntitiesAsHarnessEntities sync for accountIdentifier = {}, entityUid = {}",
         accountIdentifier, entityUid);
@@ -338,8 +361,21 @@ public class BackstageServiceImpl implements BackstageService {
       Failsafe.with(transactionRetryPolicy).get(() -> transactionTemplate.execute(status -> {
         backstageCatalogEntityRepository.delete(backstageCatalogEntityExisting);
         if (shouldPublishAudit(backstageCatalogEntityExisting)) {
-          outboxService.save(new BackstageCatalogEntityDeleteEvent(accountIdentifier,
-              backstageCatalogEntityExisting.getEntityUid(), backstageCatalogEntityExisting.getYaml()));
+          GlobalContextData currentPrincipalContext = GlobalContextManager.get(PrincipalContextData.PRINCIPAL_CONTEXT);
+          if (user != null && StringUtils.isNotBlank(user.getUuid())) {
+            GlobalContextManager.upsertGlobalContextRecord(
+                PrincipalContextData.builder()
+                    .principal(new UserPrincipal(user.getUuid(), user.getEmail(), user.getName(), accountIdentifier))
+                    .build());
+          }
+          try {
+            outboxService.save(new BackstageCatalogEntityDeleteEvent(accountIdentifier,
+                backstageCatalogEntityExisting.getEntityUid(), backstageCatalogEntityExisting.getYaml()));
+          } catch (Exception e) {
+            log.error("Error publishing audit event for EntityUid {}.", entityUid, e);
+          } finally {
+            GlobalContextManager.upsertGlobalContextRecord(currentPrincipalContext);
+          }
         }
         return true;
       }));

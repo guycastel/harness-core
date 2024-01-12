@@ -3930,6 +3930,8 @@ components:
           enum:
             - sync
             - async
+        user:
+          $ref: '#/components/schemas/User'
       required:
         - entity_identifier
         - action

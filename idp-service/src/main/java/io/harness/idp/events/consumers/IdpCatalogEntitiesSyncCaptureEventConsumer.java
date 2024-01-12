@@ -22,6 +22,7 @@ import io.harness.exception.UnexpectedException;
 import io.harness.idp.backstage.service.BackstageService;
 import io.harness.idp.events.eventlisteners.eventhandler.utils.ResourceLocker;
 import io.harness.queue.QueueController;
+import io.harness.spec.server.idp.v1.model.User;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -75,9 +76,13 @@ public class IdpCatalogEntitiesSyncCaptureEventConsumer extends AbstractIdpServi
   protected void processInternal(ByteString data) throws Exception {
     IdpCatalogEntitiesSyncCaptureEvent idpCatalogEntitiesSyncCaptureEvent =
         IdpCatalogEntitiesSyncCaptureEvent.parseFrom(data);
+    User user = new User();
+    user.setUuid(idpCatalogEntitiesSyncCaptureEvent.getUserUuid());
+    user.setEmail(idpCatalogEntitiesSyncCaptureEvent.getUserEmail());
+    user.setName(idpCatalogEntitiesSyncCaptureEvent.getUserName());
     boolean result = backstageService.sync(idpCatalogEntitiesSyncCaptureEvent.getAccountIdentifier(),
         idpCatalogEntitiesSyncCaptureEvent.getEntityUid(), idpCatalogEntitiesSyncCaptureEvent.getAction(),
-        idpCatalogEntitiesSyncCaptureEvent.getSyncMode());
+        idpCatalogEntitiesSyncCaptureEvent.getSyncMode(), user);
     if (!result) {
       throw new UnexpectedException("Error in syncing catalog entity as harness entity for given action, sync mode");
     }

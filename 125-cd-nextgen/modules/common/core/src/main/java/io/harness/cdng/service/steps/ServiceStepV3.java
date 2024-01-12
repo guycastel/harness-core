@@ -387,9 +387,6 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
       }
     }
 
-    // Adding telemetry event
-    stepsInstrumentationHelper.publishStepEvent(ambiance,
-        StepExecutionTelemetryEventDTO.builder().stepType(SERVICE).properties(telemetryEventPropertiesMap).build());
     serviceStepsHelper.checkForAccessOrThrow(ambiance, secretNGVariables);
 
     serviceStepV3Helper.resolve(ambiance, envToEnvVariables, envToSvcVariables);
@@ -418,7 +415,11 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
         ServiceStepV3Constants.SERVICE_CONNECTION_STRINGS_SWEEPING_OUTPUT);
 
     serviceStepOverrideHelper.prepareAndSaveFinalServiceHooksMetadataToSweepingOutput(
-        servicePartResponse.getNgServiceConfig(), ambiance, ServiceStepV3Constants.SERVICE_HOOKS_SWEEPING_OUTPUT);
+        servicePartResponse.getNgServiceConfig(), ambiance, ServiceStepV3Constants.SERVICE_HOOKS_SWEEPING_OUTPUT,
+        telemetryEventPropertiesMap);
+
+    stepsInstrumentationHelper.publishStepEvent(ambiance,
+        StepExecutionTelemetryEventDTO.builder().stepType(SERVICE).properties(telemetryEventPropertiesMap).build());
   }
 
   private String getEnvRefOrId(String envRef, ParameterField<String> envGroupRef, String envId) {
@@ -592,9 +593,9 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
       }
 
       serviceStepOverrideHelper.prepareAndSaveFinalServiceHooksMetadataToSweepingOutput(
-          servicePartResponse.getNgServiceConfig(), ambiance, ServiceStepV3Constants.SERVICE_HOOKS_SWEEPING_OUTPUT);
+          servicePartResponse.getNgServiceConfig(), ambiance, ServiceStepV3Constants.SERVICE_HOOKS_SWEEPING_OUTPUT,
+          telemetryEventPropertiesMap);
 
-      // Sending telemetry event data for overrides
       telemetryEventPropertiesMap.put(SERVICE_REF, parameters.getServiceRef().getValue());
       stepsInstrumentationHelper.publishStepEvent(ambiance,
           StepExecutionTelemetryEventDTO.builder().stepType(SERVICE).properties(telemetryEventPropertiesMap).build());

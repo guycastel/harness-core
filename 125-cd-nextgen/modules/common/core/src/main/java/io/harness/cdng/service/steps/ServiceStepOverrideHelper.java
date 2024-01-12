@@ -7,6 +7,10 @@
 
 package io.harness.cdng.service.steps;
 
+import static io.harness.cdng.hooks.ServiceHookConstants.POST_HOOK;
+import static io.harness.cdng.hooks.ServiceHookConstants.PRE_HOOK;
+import static io.harness.cdng.hooks.ServiceHookConstants.SERVICE_HOOK_ACTIONS;
+import static io.harness.cdng.hooks.ServiceHookConstants.SERVICE_HOOK_TYPES;
 import static io.harness.cdng.service.steps.constants.ServiceOverrideConstants.overrideMapper;
 import static io.harness.cdng.service.steps.constants.ServiceStepConstants.ENVIRONMENT;
 import static io.harness.cdng.service.steps.constants.ServiceStepConstants.ENVIRONMENT_GLOBAL_OVERRIDES;
@@ -36,6 +40,7 @@ import io.harness.cdng.azure.webapp.steps.NgConnectionStringsSweepingOutput;
 import io.harness.cdng.configfile.ConfigFileWrapper;
 import io.harness.cdng.configfile.steps.NgConfigFilesMetadataSweepingOutput;
 import io.harness.cdng.hooks.ServiceHook;
+import io.harness.cdng.hooks.ServiceHookAction;
 import io.harness.cdng.hooks.ServiceHookWrapper;
 import io.harness.cdng.hooks.steps.ServiceHooksMetadataSweepingOutput;
 import io.harness.cdng.manifest.steps.output.NgManifestsMetadataSweepingOutput;
@@ -433,8 +438,8 @@ public class ServiceStepOverrideHelper {
     return configuration;
   }
 
-  public void prepareAndSaveFinalServiceHooksMetadataToSweepingOutput(
-      @NonNull NGServiceConfig serviceV2Config, Ambiance ambiance, String serviceHooksSweepingOutputName) {
+  public void prepareAndSaveFinalServiceHooksMetadataToSweepingOutput(@NonNull NGServiceConfig serviceV2Config,
+      Ambiance ambiance, String serviceHooksSweepingOutputName, HashMap<String, Object> telemetryEventPropertiesMap) {
     NGServiceV2InfoConfig ngServiceV2InfoConfig = serviceV2Config.getNgServiceV2InfoConfig();
     if (ngServiceV2InfoConfig == null) {
       throw new InvalidRequestException(SERVICE_CONFIGURATION_NOT_FOUND);
@@ -444,11 +449,33 @@ public class ServiceStepOverrideHelper {
     ServiceSpec serviceSpec = serviceV2Config.getNgServiceV2InfoConfig().getServiceDefinition().getServiceSpec();
     final Map<String, ServiceHookWrapper> serviceHooks = getServiceHooks(serviceSpec);
     finalServiceHooks = new ArrayList<>(serviceHooks.values());
+    populateServiceHooksTelemetryProperties(telemetryEventPropertiesMap, finalServiceHooks);
 
     final ServiceHooksMetadataSweepingOutput serviceHooksSweepingOutput =
         ServiceHooksMetadataSweepingOutput.builder().finalServiceHooks(finalServiceHooks).build();
     sweepingOutputService.consume(
         ambiance, serviceHooksSweepingOutputName, serviceHooksSweepingOutput, StepCategory.STAGE.name());
+  }
+
+  private void populateServiceHooksTelemetryProperties(
+      HashMap<String, Object> telemetryEventPropertiesMap, List<ServiceHookWrapper> finalServiceHooks) {
+    Set<String> serviceHookActions = new HashSet<>();
+    Set<String> serviceHookTypes = new HashSet<>();
+    finalServiceHooks.forEach(serviceHookWrapper -> {
+      serviceHookActions.addAll(serviceHookWrapper.getHook()
+                                    .getActions()
+                                    .stream()
+                                    .map(ServiceHookAction::getDisplayName)
+                                    .collect(Collectors.toList()));
+      if (serviceHookWrapper.getPostHook() != null) {
+        serviceHookTypes.add(POST_HOOK);
+      }
+      if (serviceHookWrapper.getPreHook() != null) {
+        serviceHookTypes.add(PRE_HOOK);
+      }
+    });
+    telemetryEventPropertiesMap.put(SERVICE_HOOK_ACTIONS, serviceHookActions);
+    telemetryEventPropertiesMap.put(SERVICE_HOOK_TYPES, serviceHookTypes);
   }
 
   // This is for overrides V1 design (& ServiceStepV3 where service config is present)

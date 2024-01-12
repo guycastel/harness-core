@@ -16,4 +16,6 @@ public class ServiceHookConstants {
   public static final String STEADY_STATE_CHECK = "SteadyStateCheck";
   public static final String PRE_HOOK = "PreHook";
   public static final String POST_HOOK = "PostHook";
+  public static final String SERVICE_HOOK_ACTIONS = "service_hook_actions";
+  public static final String SERVICE_HOOK_TYPES = "service_hook_types";
 }

@@ -50,6 +50,7 @@ public class ResourceTypeConstants {
   public static final String CHAOS_INFRASTRUCTURE = "CHAOS_INFRASTRUCTURE";
   public static final String CHAOS_EXPERIMENT = "CHAOS_EXPERIMENT";
   public static final String CHAOS_GAMEDAY = "CHAOS_GAMEDAY";
+  public static final String CHAOS_PROBE = "CHAOS_PROBE";
   public static final String SERVICE_LEVEL_OBJECTIVE = "SERVICE_LEVEL_OBJECTIVE";
   public static final String STO_TARGET = "STO_TARGET";
   public static final String STO_EXEMPTION = "STO_EXEMPTION";

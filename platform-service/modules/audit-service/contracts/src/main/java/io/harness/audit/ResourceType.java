@@ -44,6 +44,7 @@ public enum ResourceType {
   CHAOS_INFRASTRUCTURE(ResourceTypeConstants.CHAOS_INFRASTRUCTURE),
   CHAOS_EXPERIMENT(ResourceTypeConstants.CHAOS_EXPERIMENT),
   CHAOS_GAMEDAY(ResourceTypeConstants.CHAOS_GAMEDAY),
+  CHAOS_PROBE(ResourceTypeConstants.CHAOS_PROBE),
   STO_TARGET(ResourceTypeConstants.STO_TARGET),
   STO_EXEMPTION(ResourceTypeConstants.STO_EXEMPTION),
   SERVICE_LEVEL_OBJECTIVE(ResourceTypeConstants.SERVICE_LEVEL_OBJECTIVE),

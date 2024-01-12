@@ -12,6 +12,7 @@ import static io.harness.cdng.service.steps.constants.ServiceStepConstants.ENV_G
 import static io.harness.cdng.service.steps.constants.ServiceStepConstants.ENV_REF;
 import static io.harness.cdng.service.steps.constants.ServiceStepConstants.ENV_VARIABLES_PATTERN_REGEX;
 import static io.harness.cdng.service.steps.constants.ServiceStepConstants.OVERRIDES_COMMAND_UNIT;
+import static io.harness.cdng.service.steps.constants.ServiceStepConstants.SERVICE;
 import static io.harness.cdng.service.steps.constants.ServiceStepConstants.SERVICE_CONFIGURATION_NOT_FOUND;
 import static io.harness.cdng.service.steps.constants.ServiceStepConstants.SERVICE_STEP_COMMAND_UNIT;
 import static io.harness.cdng.service.steps.constants.ServiceStepConstants.SERVICE_VARIABLES_PATTERN_REGEX;
@@ -19,6 +20,7 @@ import static io.harness.cdng.service.steps.constants.ServiceStepV3Constants.SER
 import static io.harness.data.structure.CollectionUtils.emptyIfNull;
 import static io.harness.data.structure.EmptyPredicate.isEmpty;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
+import static io.harness.telemetry.helpers.overrides.OverrideInstrumentConstants.SERVICE_REF;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -102,6 +104,9 @@ import io.harness.steps.SdkCoreStepUtils;
 import io.harness.steps.StepUtils;
 import io.harness.steps.environment.EnvironmentOutcome;
 import io.harness.tasks.ResponseData;
+import io.harness.telemetry.helpers.StepExecutionTelemetryEventDTO;
+import io.harness.telemetry.helpers.StepsInstrumentationHelper;
+import io.harness.telemetry.helpers.overrides.OverrideInstrumentationHelper;
 import io.harness.utils.IdentifierRefHelper;
 import io.harness.utils.NGFeatureFlagHelperService;
 import io.harness.utils.YamlPipelineUtils;
@@ -146,16 +151,16 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
   @Inject @Named("PRIVILEGED") private AccessControlClient accessControlClient;
   @Inject private ServiceCustomSweepingOutputHelper serviceCustomSweepingOutputHelper;
   @Inject private ServiceEntityYamlSchemaHelper serviceEntityYamlSchemaHelper;
-
   @Inject private ServiceOverrideUtilityFacade serviceOverrideUtilityFacade;
   @Inject private ServiceOverrideV2ValidationHelper overrideV2ValidationHelper;
   @Inject private ServiceStepV3Helper serviceStepV3Helper;
   @Inject private InfrastructureEntityService infrastructureEntityService;
   @Inject private NGFeatureFlagHelperService ngFeatureFlagHelperService;
+  @Inject private OverrideInstrumentationHelper overrideInstrumentationHelper;
+  @Inject private StepsInstrumentationHelper stepsInstrumentationHelper;
 
   private static final Pattern serviceVariablePattern = Pattern.compile(SERVICE_VARIABLES_PATTERN_REGEX);
   private static final Pattern envVariablePattern = Pattern.compile(ENV_VARIABLES_PATTERN_REGEX);
-  private static final String OVERRIDE_PROJECT_SETTING_IDENTIFIER = "service_override_v2";
 
   @Override
   public Class<ServiceStepV3Parameters> getStepParametersClass() {
@@ -312,6 +317,7 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
 
     Map<String, Map<String, Object>> envToEnvVariables = new HashMap<>();
     Map<String, Map<String, Object>> envToSvcVariables = new HashMap<>();
+
     List<NGVariable> svcOverrideVariables;
     List<NGVariable> secretNGVariables = new ArrayList<>();
     if (isEmpty(parameters.getEnvRefs())) {
@@ -324,6 +330,9 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
     List<Environment> environments = getEnvironmentsFromEnvRef(ambiance, envRefs);
 
     EnvironmentStepsUtils.checkForAllEnvsAccessOrThrow(accessControlClient, ambiance, environments);
+
+    HashMap<String, Object> telemetryEventPropertiesMap = new HashMap<>();
+    telemetryEventPropertiesMap.put(SERVICE_REF, parameters.getServiceRef().getValue());
 
     log.info("Starting execution for Environments: [{}]", Arrays.toString(environments.toArray()));
     for (Environment environment : environments) {
@@ -358,12 +367,15 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
       final Optional<NGServiceOverridesEntity> ngServiceOverridesEntity = serviceOverrideService.get(accountId,
           AmbianceUtils.getOrgIdentifier(ambiance), AmbianceUtils.getProjectIdentifier(ambiance),
           environment.fetchRef(), parameters.getServiceRef().getValue());
+
       NGServiceOverrideConfig ngServiceOverrides;
       if (ngServiceOverridesEntity.isPresent()) {
         ngServiceOverrides = mergeSvcOverrideInputs(ngServiceOverridesEntity.get().getYaml(),
             parameters.getEnvToSvcOverrideInputs().get(
                 getEnvRefOrId(environment.fetchRef(), parameters.getEnvGroupRef(), environment.getIdentifier())));
 
+        overrideInstrumentationHelper.updateTelemetryMapForOverrideV1MultipleEnvs(
+            ngServiceOverrides, ngEnvironmentConfig, telemetryEventPropertiesMap, environment.fetchRef());
         svcOverrideVariables = ngServiceOverrides.getServiceOverrideInfoConfig().getVariables();
         if (svcOverrideVariables != null) {
           secretNGVariables.addAll(
@@ -375,6 +387,9 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
       }
     }
 
+    // Adding telemetry event
+    stepsInstrumentationHelper.publishStepEvent(ambiance,
+        StepExecutionTelemetryEventDTO.builder().stepType(SERVICE).properties(telemetryEventPropertiesMap).build());
     serviceStepsHelper.checkForAccessOrThrow(ambiance, secretNGVariables);
 
     serviceStepV3Helper.resolve(ambiance, envToEnvVariables, envToSvcVariables);
@@ -535,12 +550,16 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
       serviceStepV3Helper.processServiceAndEnvironmentVariables(ambiance, servicePartResponse, serviceStepLogCallback,
           environmentOutcome, isOverridesV2enabled, mergedOverrideV2Configs);
 
+      HashMap<String, Object> telemetryEventPropertiesMap;
+
       if (isOverridesV2enabled) {
         NGServiceV2InfoConfig ngServiceV2InfoConfig =
             servicePartResponse.getNgServiceConfig().getNgServiceV2InfoConfig();
         if (ngServiceV2InfoConfig == null) {
           throw new InvalidRequestException(SERVICE_CONFIGURATION_NOT_FOUND);
         }
+        telemetryEventPropertiesMap =
+            overrideInstrumentationHelper.updateTelemetryMapForOverrideV2(mergedOverrideV2Configs);
         final String scopedEnvironmentRef =
             IdentifierRefHelper.getRefFromIdentifierOrRef(accountId, environment.get().getOrgIdentifier(),
                 environment.get().getProjectIdentifier(), environment.get().getIdentifier());
@@ -553,6 +572,8 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
         serviceStepOverrideHelper.saveFinalConnectionStringsToSweepingOutputV2(ngServiceV2InfoConfig,
             mergedOverrideV2Configs, ambiance, ServiceStepV3Constants.SERVICE_CONNECTION_STRINGS_SWEEPING_OUTPUT);
       } else {
+        telemetryEventPropertiesMap =
+            overrideInstrumentationHelper.updateTelemetryMapForOverrideV1(ngServiceOverrides, ngEnvironmentConfig);
         serviceStepOverrideHelper.prepareAndSaveFinalManifestMetadataToSweepingOutput(
             servicePartResponse.getNgServiceConfig(), ngServiceOverrides, ngEnvironmentConfig, ambiance,
             ServiceStepV3Constants.SERVICE_MANIFESTS_SWEEPING_OUTPUT);
@@ -572,6 +593,11 @@ public class ServiceStepV3 implements ChildrenExecutable<ServiceStepV3Parameters
 
       serviceStepOverrideHelper.prepareAndSaveFinalServiceHooksMetadataToSweepingOutput(
           servicePartResponse.getNgServiceConfig(), ambiance, ServiceStepV3Constants.SERVICE_HOOKS_SWEEPING_OUTPUT);
+
+      // Sending telemetry event data for overrides
+      telemetryEventPropertiesMap.put(SERVICE_REF, parameters.getServiceRef().getValue());
+      stepsInstrumentationHelper.publishStepEvent(ambiance,
+          StepExecutionTelemetryEventDTO.builder().stepType(SERVICE).properties(telemetryEventPropertiesMap).build());
     }
   }
 

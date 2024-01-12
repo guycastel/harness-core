@@ -110,6 +110,7 @@ java_library(
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/repositories/polling:module",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/repositories/telemetry:module",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/telemetry/beans:module",
+        "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/telemetry/helpers/overrides:module",
         "//125-cd-nextgen/modules/common/core/src/main/java/io/harness/utils:module",
         "//125-cd-nextgen/modules/gitops/core/src/main/java/io/harness/cdng/gitops/steps:module",
         "//125-cd-nextgen/src/main/java/io/harness/cd:module",

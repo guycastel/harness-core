@@ -13,6 +13,7 @@ import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.exception.WingsException.USER;
 
 import io.harness.configuration.DeployMode;
+import io.harness.data.structure.EmptyPredicate;
 import io.harness.exception.InvalidRequestException;
 import io.harness.security.EncryptionUtils;
 
@@ -59,6 +60,9 @@ public class LicenseUtils {
    * @return whether the account is expired or not
    */
   public boolean isActive(LicenseInfo licenseInfo, Duration expiredBefore) {
+    if (isEmpty(licenseInfo.getAccountStatus())) {
+      return false;
+    }
     switch (licenseInfo.getAccountStatus()) {
       // account can be marked as active even for NG license
       case AccountStatus.ACTIVE:

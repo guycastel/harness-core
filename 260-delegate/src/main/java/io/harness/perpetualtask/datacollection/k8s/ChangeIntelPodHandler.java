@@ -55,7 +55,7 @@ public class ChangeIntelPodHandler extends BaseChangeHandler<V1Pod> {
       // https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1PodStatus.md
       if (newResource.getStatus().getPhase().equals(RUNNING_STATUS)) {
         if (!newResource.getMetadata().getNamespace().equals("kube-system")) {
-          log.info("New pod added: {}", yaml);
+          log.debug("New pod added: {}", yaml);
         }
       }
     }
@@ -74,7 +74,7 @@ public class ChangeIntelPodHandler extends BaseChangeHandler<V1Pod> {
 
   @Override
   void processAndSendDeletedEvent(V1Pod newResource, String oldYaml) {
-    log.info("Deleted pod yaml {}", oldYaml);
+    log.debug("Deleted pod yaml {}", oldYaml);
   }
 
   @Override

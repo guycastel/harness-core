@@ -16,6 +16,7 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.data.structure.EmptyPredicate;
 import io.harness.data.validator.Trimmed;
 import io.harness.mongo.index.CompoundMongoIndex;
+import io.harness.mongo.index.FdIndex;
 import io.harness.mongo.index.FdTtlIndex;
 import io.harness.mongo.index.MongoIndex;
 import io.harness.mongo.index.SortCompoundMongoIndex;
@@ -91,6 +92,8 @@ public class ExecutionSweepingOutputInstance implements PersistentEntity, UuidAc
   String groupName;
 
   String fullyQualifiedName;
+
+  @FdIndex String accountIdentifier;
 
   public String getOutputValueJson() {
     if (!EmptyPredicate.isEmpty(valueOutput)) {

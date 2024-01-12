@@ -6,6 +6,7 @@
  */
 
 package io.harness.engine.pms.data;
+
 import static io.harness.data.structure.UUIDGenerator.generateUuid;
 
 import static java.lang.String.format;
@@ -36,6 +37,7 @@ import io.harness.springdata.PersistenceUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.result.UpdateResult;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -48,7 +50,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.apache.commons.jexl3.JexlException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -266,6 +267,7 @@ public class PmsSweepingOutputServiceImpl implements PmsSweepingOutputService {
     try {
       ExecutionSweepingOutputInstance instance = mongoTemplate.insert(
           ExecutionSweepingOutputInstance.builder()
+              .accountIdentifier(AmbianceUtils.getAccountId(ambiance))
               .uuid(generateUuid())
               .planExecutionId(ambiance.getPlanExecutionId())
               .stageExecutionId(ambiance.getStageExecutionId())

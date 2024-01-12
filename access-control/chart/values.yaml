@@ -105,6 +105,7 @@ global:
   monitoring:
     enabled: false
     port: 8889
+    managedPlatform: ""
     path: /metrics
   ingress:
     # -- create ingress objects

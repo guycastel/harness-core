@@ -26,6 +26,11 @@ global:
           csiSecretDriver: false
   useExternalSecrets: false
   loadbalancerURL: ""
+  monitoring:
+    enabled: false
+    managedPlatform: ""
+    port: 8889
+    path: /metrics
   database:
     postgres:
       ## - installed = true if installed within cluster

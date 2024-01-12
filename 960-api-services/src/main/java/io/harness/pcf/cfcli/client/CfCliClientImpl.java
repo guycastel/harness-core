@@ -13,8 +13,6 @@ import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 import static io.harness.logging.CommandExecutionStatus.RUNNING;
 import static io.harness.logging.LogLevel.ERROR;
 import static io.harness.logging.LogLevel.WARN;
-import static io.harness.pcf.PcfUtils.logCliCommand;
-import static io.harness.pcf.PcfUtils.logCliCommandFailure;
 import static io.harness.pcf.model.PcfConstants.CF_DOCKER_CREDENTIALS;
 import static io.harness.pcf.model.PcfConstants.CF_HOME;
 import static io.harness.pcf.model.PcfConstants.CF_PASSWORD;
@@ -75,8 +73,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -198,21 +194,9 @@ public class CfCliClientImpl implements CfCliClient {
   @VisibleForTesting
   ProcessResult getProcessResult(String command, Map<String, String> environmentMapForPcfExecutor, int timeOutInMins,
       LogCallback logCallback) throws IOException, InterruptedException, TimeoutException {
-    Instant start = Instant.now();
     ProcessExecutor processExecutor =
         createProcessExecutorForCfTask(timeOutInMins, command, environmentMapForPcfExecutor, logCallback);
-    ProcessResult processResult = processExecutor.execute();
-    Instant end = Instant.now();
-    if (processResult != null) {
-      if (processResult.getExitValue() == 0) {
-        logCliCommand(command, Duration.between(start, end).toMillis());
-      } else {
-        logCliCommandFailure(
-            command, Duration.between(start, end).toMillis(), processResult.getExitValue(), processResult.outputUTF8());
-      }
-    }
-
-    return processResult;
+    return processExecutor.execute();
   }
 
   private String constructCfPushCommand(CfCreateApplicationRequestData requestData, String finalFilePath) {

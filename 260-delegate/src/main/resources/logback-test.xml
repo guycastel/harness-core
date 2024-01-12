@@ -56,7 +56,6 @@
 
     <logger name="software.wings" level="${LOGGING_LEVEL:-INFO}"/>
     <logger name="org.zeroturnaround" level="WARN"/>
-    <logger name="io.harness.pcf" level="${LOGGING_LEVEL_PCF:-INFO}"/>
     <logger name="io.harness.event.client.impl" level="${LOGGING_LEVEL_EVENT_CLIENT:-INFO}"/>
     <logger name="io.github.resilience4j" level="WARN"/>
 

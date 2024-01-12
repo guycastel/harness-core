@@ -1,6 +1,6 @@
 openapi: 3.0.0
 x-stoplight:
-  id: qry690w2easfo
+  id: o1wya2mkwupxx
 info:
   title: Harness NextGen Software Delivery Platform API Reference
   version: '1.0'
@@ -77,7 +77,7 @@ paths:
         - Account Template
       description: Update Git details for multiple version.
       x-stoplight:
-        id: tog1x9p2m2dy5
+        id: aq4yncugtvz9i
     parameters:
       - $ref: '#/components/parameters/Template'
   '/v1/templates/{template}':
@@ -199,7 +199,7 @@ paths:
         - Org Template
       description: Update Git details for multiple version.
       x-stoplight:
-        id: xu5qlm73hydwx
+        id: 1h3jzdzd6sk7r
     parameters:
       - $ref: '#/components/parameters/Template'
       - $ref: '#/components/parameters/Org'
@@ -354,8 +354,6 @@ paths:
       summary: Update Git details
       operationId: update-git-metadata-details-project
       parameters:
-        - $ref: '#/components/parameters/Org'
-        - $ref: '#/components/parameters/Project'
         - $ref: '#/components/parameters/AccountHeaderParam'
       requestBody:
         $ref: '#/components/requestBodies/TemplateUpdateGitMetadataRequestBody'
@@ -366,7 +364,7 @@ paths:
         - Project Template
       description: Update Git details for multiple version.
       x-stoplight:
-        id: 9ta5osrcrp83u
+        id: 59vfuu9mx2jc5
     parameters:
       - $ref: '#/components/parameters/Template'
       - $ref: '#/components/parameters/Org'
@@ -582,7 +580,7 @@ paths:
           $ref: '#/components/responses/TemplateSchemaResponse'
       operationId: get-template-schema
       x-stoplight:
-        id: h6h9r4i2dcor0
+        id: bjyego3xs3ge3
       description: Gets Templates Schema
       parameters:
         - schema:
@@ -626,7 +624,7 @@ paths:
           $ref: '#/components/responses/TemplateInputSchemaDetailsResponseBody'
       operationId: get-inputs-schema
       x-stoplight:
-        id: pqgesg6op1rb1
+        id: hrqrew0tuzkwc
       parameters:
         - $ref: '#/components/parameters/AccountHeaderParam'
         - schema:
@@ -656,7 +654,7 @@ paths:
           $ref: '#/components/responses/TemplateInputSchemaDetailsResponseBody'
       operationId: get-acc-templates-inputs-schema
       x-stoplight:
-        id: 21m2y3edtnhla
+        id: 4toqapxxmib02
       description: get inputs schema for account level templates
       parameters:
         - $ref: '#/components/parameters/AccountHeaderParam'
@@ -675,7 +673,7 @@ paths:
           $ref: '#/components/responses/TemplateInputSchemaDetailsResponseBody'
       operationId: get-org-templates-inputs-schema
       x-stoplight:
-        id: w181v2ceicvz6
+        id: e38q1vmlguapq
       x-internal: true
       description: get inputs schema for org level templates
       parameters:
@@ -695,7 +693,7 @@ paths:
           $ref: '#/components/responses/TemplateInputSchemaDetailsResponseBody'
       operationId: get-project-templates-inputs-schema
       x-stoplight:
-        id: 9lff7z2spnh4w
+        id: f4a7kpera0wcl
       parameters:
         - $ref: '#/components/parameters/AccountHeaderParam'
       description: get inputs schema for project level templates
@@ -705,7 +703,7 @@ components:
     TemplateResponse:
       title: templateResponse
       x-stoplight:
-        id: f4ndtnn4ympdy
+        id: f3nh5aiag9y99
       type: object
       description: Default response when a template is returned
       x-examples:
@@ -866,7 +864,7 @@ components:
     TemplateMetadataSummaryResponse:
       title: TemplateMetadataSummaryResponse
       x-stoplight:
-        id: nscqj4urwiqnf
+        id: imn3zct0xrede
       type: object
       x-examples:
         example-1:
@@ -993,7 +991,7 @@ components:
     TemplateWithInputsResponse:
       title: templateWithInputsResponse
       x-stoplight:
-        id: 6fzq3le3gyie2
+        id: dzhqqslahrpr0
       type: object
       x-examples:
         example-1:
@@ -1061,7 +1059,7 @@ components:
     TemplateMetaDataList:
       title: TemplateMetaDataList
       x-stoplight:
-        id: k684ta51ybafb
+        id: 0kacfj5bak521
       type: array
       items:
         $ref: '#/components/schemas/TemplateMetadataSummaryResponse'
@@ -1097,7 +1095,7 @@ components:
     EntityGitDetails:
       title: entityGitDetails
       x-stoplight:
-        id: tswyoxlluku7h
+        id: dobs2881ha48x
       type: object
       description: Git Experience related details of the Entity.
       x-examples:
@@ -1134,7 +1132,7 @@ components:
     GitFindDetails:
       title: GitFindDetails
       x-stoplight:
-        id: gqzd5g4smch1i
+        id: psec6hc2r0z24
       type: object
       x-examples:
         example-1:
@@ -1171,7 +1169,7 @@ components:
     GitCreateDetails:
       title: Create Git Details
       x-stoplight:
-        id: m4q2n9rjsrqre
+        id: 2li6agen2tpl1
       type: object
       description: Contains parameters related to creating an Entity for Git Experience.
       properties:
@@ -1215,7 +1213,7 @@ components:
     GitUpdateDetails:
       title: GitUpdateDetails
       x-stoplight:
-        id: 7k1zp5afx03m5
+        id: a91ahvmpffepf
       type: object
       description: Contains parameters related to Updating an Entity for Git Experience.
       x-examples:
@@ -1267,7 +1265,7 @@ components:
     TemplateUpdateRequestBody:
       title: TemplateUpdateRequestBody
       x-stoplight:
-        id: l48rfx4q8xoez
+        id: naql3v4dt9giy
       type: object
       x-examples:
         example-2:
@@ -1345,7 +1343,7 @@ components:
     TemplateCreateRequestBody:
       title: TemplateCreateRequestBody
       x-stoplight:
-        id: c0h9d4wu3gp1t
+        id: ccc6sojmme3p8
       type: object
       x-examples:
         example-2:
@@ -1425,7 +1423,7 @@ components:
     TemplateUpdateStableResponse:
       title: TemplateUpdateStableResponse
       x-stoplight:
-        id: u5l3jvjb83olc
+        id: 8o7rw82qh5qv7
       type: object
       properties:
         stable_version:
@@ -1436,7 +1434,7 @@ components:
     GitImportDetails:
       title: Git Import Details
       x-stoplight:
-        id: sehprm5mfy45y
+        id: 84alx63a9z1uy
       type: object
       description: Contains parameters related to importing an Entity for Git Experience.
       properties:
@@ -1453,7 +1451,7 @@ components:
     TemplateImportRequestDTO:
       title: Template Import Request DTO
       x-stoplight:
-        id: 63n2xm1nikjdq
+        id: pznd0zbbr7p0d
       type: object
       description: Information of Tempalte import request DTO
       properties:
@@ -1466,7 +1464,7 @@ components:
     TemplateImportRequestBody:
       title: TemplateImportRequestBody
       x-stoplight:
-        id: lix6vu1rny248
+        id: luj1uuxrtl0qv
       type: object
       description: Template Import Request Body
       properties:
@@ -1477,7 +1475,7 @@ components:
     TemplateImportResponseBody:
       title: TemplateImportResponseBody
       x-stoplight:
-        id: xw3yrxry48fu7
+        id: 0r4zvecl7hd3u
       type: object
       description: Contains the Template details for the given Template ID and version
       properties:
@@ -1488,41 +1486,41 @@ components:
     TemplateSchemaResponse:
       title: TemplateSchemaResponse
       x-stoplight:
-        id: n1td5vx0eu2vk
+        id: hpfy8zv38awnf
       type: object
       properties:
         data:
           type: object
           x-stoplight:
-            id: 99sossqbii1t8
+            id: cxrlzv96z6ala
     TemplateInputsSchemaRequestBody:
       title: TemplateInputsSchemaRequestBody
       x-stoplight:
-        id: wtnkdfjxlpbf9
+        id: utxrb8sm1hu1m
       type: object
       properties:
         template_yaml:
           type: string
           x-stoplight:
-            id: 0dygishjagf6i
+            id: b4eo3h63rwfxq
       x-internal: true
     TemplateInputSchemaDetailsResponseBody:
       title: TemplateInputSchemaDetailsResponseBody
       x-stoplight:
-        id: wvz1hgoax3ska
+        id: xq6rap2kycpus
       type: object
       properties:
         inputs:
           type: array
           x-stoplight:
-            id: 464f72eow2zn4
+            id: ovkk7fi54wwvd
           items:
             $ref: '#/components/schemas/TemplateYamlInputDetailsDTO'
       x-internal: true
     TemplateYamlInputDetailsDTO:
       title: TemplateYamlInputDetailsDTO
       x-stoplight:
-        id: g5ji5k9iuyk9l
+        id: n1unnpmti67cq
       type: object
       x-internal: true
       properties:
@@ -1531,38 +1529,38 @@ components:
         metadata:
           type: array
           x-stoplight:
-            id: 3qnzd0bsqj2ls
+            id: lhz0yu2q88lk2
           items:
             $ref: '#/components/schemas/TemplateYamlInputMetadataDTO'
     TemplateYamlInputDTO:
       title: TemplateYamlInputDTO
       x-stoplight:
-        id: zojl0rh1u9u81
+        id: 4m9rz7goep660
       type: object
       x-internal: true
       properties:
         name:
           type: string
           x-stoplight:
-            id: oepfx9e71dzj8
+            id: yry77k2ncuvk1
         type:
           $ref: '#/components/schemas/YamlInputType'
         description:
           type: string
           x-stoplight:
-            id: vdyum5jk9it57
+            id: ljkdmqap1bwp1
         required:
           type: boolean
           x-stoplight:
-            id: umadwvxy635o6
+            id: b7mc27s2cjmyg
         default:
           type: object
           x-stoplight:
-            id: u8zbjrv0hehch
+            id: inr2k7110j8v6
         allowed_values:
           type: array
           x-stoplight:
-            id: pv16b1m7i8qny
+            id: hhb8kgjxxl9i9
           items: {}
         execution:
           type: boolean
@@ -1571,7 +1569,7 @@ components:
     TemplateYamlInputMetadataDTO:
       title: TemplateYamlInputMetadataDTO
       x-stoplight:
-        id: ualwerzlsrm1a
+        id: 4tnoitask6s8z
       type: object
       x-internal: true
       properties:
@@ -1582,17 +1580,17 @@ components:
     InputDetailsDTO:
       title: InputDetailsDTO
       x-stoplight:
-        id: 1pwsuzht6te0l
+        id: i5tphvxpbnltx
       type: object
       x-internal: true
       properties:
         input_type:
           type: string
           x-stoplight:
-            id: x2gyzuy7skrlw
+            id: o468s4j4lm6cb
         entity_group:
           x-stoplight:
-            id: p9imuzgb7t32y
+            id: v9b66nmzcbb8q
           enum:
             - STAGE
             - STEP
@@ -1604,64 +1602,64 @@ components:
         stage_type:
           type: string
           x-stoplight:
-            id: ub8c360xgz03j
+            id: v85vy36iyn8i7
     RuntimeInputDependencyDetailsDTO:
       title: RuntimeInputDependencyDetailsDTO
       x-stoplight:
-        id: n8vk0pc2nad3z
+        id: eswmldrduss90
       type: object
       x-internal: true
       properties:
         field_name:
           type: string
           x-stoplight:
-            id: lspf0jnh5w2l3
+            id: qhb4l9jni6lb0
         input_name:
           type: string
           x-stoplight:
-            id: tcgmg70o492mo
+            id: 10j7hdpql2hl4
     FixedValueFieldDependencyDetailsDTO:
       title: FixedValueFieldDependencyDetailsDTO
       x-stoplight:
-        id: stlkmcdnxr18s
+        id: 715xsjlfcaujh
       type: object
       x-internal: true
       properties:
         field_name:
           type: string
           x-stoplight:
-            id: qh0pclbjju6jt
+            id: me1c1r98s8u18
         field_input_type:
           type: string
           x-stoplight:
-            id: zfomitzu7f1im
+            id: w65wi9ilft7x2
         field_value:
           type: object
           x-stoplight:
-            id: cz4447uq4hsa0
+            id: 1yxuhfw2h1apm
     YamlInputDependencyDetailsDTO:
       title: YamlInputDependencyDetailsDTO
       x-stoplight:
-        id: sl4wcsg8oqg9v
+        id: yw6w0ra440ihw
       type: object
       x-internal: true
       properties:
         required_runtime_inputs:
           type: array
           x-stoplight:
-            id: s7xwk2kcpgfy9
+            id: ja2a0utiu0fy4
           items:
             $ref: '#/components/schemas/RuntimeInputDependencyDetailsDTO'
         required_fixed_values:
           type: array
           x-stoplight:
-            id: f1fuo7tkrhfbc
+            id: 0vxnkf7qcu0ay
           items:
             $ref: '#/components/schemas/FixedValueFieldDependencyDetailsDTO'
     YamlInputType:
       title: YamlInputType
       x-stoplight:
-        id: pp5fe7khunidf
+        id: wfr40uy01ybqw
       x-internal: true
       description: ''
       enum:
@@ -1673,34 +1671,34 @@ components:
     TemplateUpdateGitMetadataRequest:
       title: TemplateUpdateGitMetadataRequest
       x-stoplight:
-        id: wdpzwf5cvc42j
+        id: oncztjr3yt1v9
       type: object
       description: Lists down request params for template update git details request
       properties:
         version:
           type: string
           x-stoplight:
-            id: 79rrzmtkuum7w
+            id: dwsta3ltxn5d6
         git_details:
           $ref: '#/components/schemas/GitDetailsMetadata'
     GitDetailsMetadata:
       title: GitDetailsMetadata
       x-stoplight:
-        id: xmwhsx3n9xspz
+        id: 6kuoihhpbg79y
       type: object
       properties:
         file_path:
           type: string
           x-stoplight:
-            id: uuwrwacmycuiq
+            id: zbb0endkjn6qt
         repo_name:
           type: string
           x-stoplight:
-            id: y8zpewva1udkw
+            id: z0rf0plpb19zg
         connector_ref:
           type: string
           x-stoplight:
-            id: 8bcrgefkubqwn
+            id: zla5pumxfv3hw
       description: Git Details
   securitySchemes:
     x-api-key:
@@ -2517,6 +2515,6 @@ components:
               status:
                 type: boolean
                 x-stoplight:
-                  id: lnqiaqy3xo6xg
+                  id: 8ltkjqppobw04
 security:
   - x-api-key: []

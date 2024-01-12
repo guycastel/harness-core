@@ -18,7 +18,6 @@ import io.harness.annotations.dev.ProductModule;
 import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplSpec;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Builder;
 import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
@@ -29,12 +28,6 @@ public class ArtifactTriggerConfig implements NGTriggerYamlSimplSpec, BuildAware
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = EXTERNAL_PROPERTY, property = "type", visible = true)
   ArtifactTypeSpec spec;
-
-  @Builder
-  public ArtifactTriggerConfig(ArtifactType type, ArtifactTypeSpec spec) {
-    this.type = type;
-    this.spec = spec;
-  }
 
   @Override
   public String fetchBuildType() {

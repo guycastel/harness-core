@@ -21,7 +21,6 @@ import io.harness.ngtriggers.beans.source.v1.artifact.BuildStoreTypeSpec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Builder;
 import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
@@ -34,11 +33,5 @@ public class BuildStore {
 
   public String fetchConnectorRef() {
     return spec.fetchConnectorRef();
-  }
-
-  @Builder
-  public BuildStore(BuildStoreType type, BuildStoreTypeSpec spec) {
-    this.type = type;
-    this.spec = spec;
   }
 }

@@ -74,16 +74,16 @@ public class AMIRegistrySpec implements ArtifactTypeSpec {
 
   @Override
   public List<TriggerEventDataCondition> fetchEventDataConditions() {
-    return conditions.getEvent();
+    return conditions != null ? conditions.getEvent() : null;
   }
 
   @Override
   public List<TriggerEventDataCondition> fetchMetaDataConditions() {
-    return conditions.getMetadata();
+    return conditions != null ? conditions.getMetadata() : null;
   }
 
   @Override
   public String fetchJexlArtifactConditions() {
-    return conditions.getJexl();
+    return conditions != null ? conditions.getJexl() : null;
   }
 }

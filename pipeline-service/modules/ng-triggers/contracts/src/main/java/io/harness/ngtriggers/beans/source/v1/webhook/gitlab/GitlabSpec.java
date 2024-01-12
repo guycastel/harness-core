@@ -24,7 +24,6 @@ import io.harness.ngtriggers.beans.source.webhook.v2.git.PayloadAware;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
@@ -37,11 +36,6 @@ public class GitlabSpec implements WebhookTriggerYamlSimplSpec {
 
   @JsonTypeInfo(use = NAME, property = "type", include = EXTERNAL_PROPERTY, visible = true) GitlabEventSpec spec;
 
-  @Builder
-  public GitlabSpec(GitlabTriggerEvent type, GitlabEventSpec spec) {
-    this.type = type;
-    this.spec = spec;
-  }
   @Override
   public GitAware fetchGitAware() {
     return spec;

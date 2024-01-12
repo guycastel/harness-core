@@ -24,7 +24,6 @@ import io.harness.ngtriggers.beans.source.webhook.v2.git.PayloadAware;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
@@ -36,12 +35,6 @@ public class HarnessSpec implements WebhookTriggerYamlSimplSpec {
   HarnessTriggerEvent type;
 
   @JsonTypeInfo(use = NAME, property = "type", include = EXTERNAL_PROPERTY, visible = true) HarnessEventSpec spec;
-
-  @Builder
-  public HarnessSpec(HarnessTriggerEvent type, HarnessEventSpec spec) {
-    this.type = type;
-    this.spec = spec;
-  }
 
   @Override
   public GitAware fetchGitAware() {

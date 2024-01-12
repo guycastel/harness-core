@@ -18,7 +18,6 @@ import io.harness.annotations.dev.ProductModule;
 import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplSpec;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Builder;
 import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
@@ -29,10 +28,4 @@ public class ScheduledTriggerYamlSimplConfig implements NGTriggerYamlSimplSpec {
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = EXTERNAL_PROPERTY, property = "type", visible = true)
   ScheduledTriggerYamlSimplSpec spec;
-
-  @Builder
-  public ScheduledTriggerYamlSimplConfig(String type, ScheduledTriggerYamlSimplSpec spec) {
-    this.type = type;
-    this.spec = spec;
-  }
 }

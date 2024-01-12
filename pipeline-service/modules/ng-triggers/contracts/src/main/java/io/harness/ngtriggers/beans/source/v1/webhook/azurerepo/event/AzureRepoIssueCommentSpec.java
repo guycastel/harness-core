@@ -69,17 +69,17 @@ public class AzureRepoIssueCommentSpec implements AzureRepoEventSpec {
 
   @Override
   public List<TriggerEventDataCondition> fetchHeaderConditions() {
-    return conditions.getHeader();
+    return conditions != null ? conditions.getHeader() : null;
   }
 
   @Override
   public List<TriggerEventDataCondition> fetchPayloadConditions() {
-    return conditions.getPayload();
+    return conditions != null ? conditions.getPayload() : null;
   }
 
   @Override
   public String fetchJexlCondition() {
-    return conditions.getJexl();
+    return conditions != null ? conditions.getJexl() : null;
   }
 
   @Override

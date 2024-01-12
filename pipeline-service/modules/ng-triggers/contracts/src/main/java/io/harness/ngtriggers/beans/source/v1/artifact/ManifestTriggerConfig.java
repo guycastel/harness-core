@@ -18,7 +18,6 @@ import io.harness.annotations.dev.ProductModule;
 import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplSpec;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Builder;
 import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
@@ -29,12 +28,6 @@ public class ManifestTriggerConfig implements NGTriggerYamlSimplSpec, BuildAware
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = EXTERNAL_PROPERTY, property = "type", visible = true)
   ManifestTypeSpec spec;
-
-  @Builder
-  public ManifestTriggerConfig(ManifestType type, ManifestTypeSpec spec) {
-    this.type = type;
-    this.spec = spec;
-  }
 
   @Override
   public String fetchBuildType() {

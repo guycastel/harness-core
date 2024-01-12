@@ -18,15 +18,12 @@ import io.harness.annotations.dev.OwnedBy;
 import io.harness.annotations.dev.ProductModule;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import javax.validation.constraints.Pattern;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
-@JsonTypeName("spec")
 @Value
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @OwnedBy(PIPELINE)
@@ -40,13 +37,4 @@ public class NGTriggerYamlSimplSource {
   // will manually input it
   String webhook;
   @JsonTypeInfo(use = NAME, property = "type", include = EXTERNAL_PROPERTY, visible = true) NGTriggerYamlSimplSpec spec;
-
-  @Builder
-  public NGTriggerYamlSimplSource(
-      NGTriggerYamlSimplType type, NGTriggerYamlSimplSpec spec, String interval, String webhook) {
-    this.type = type;
-    this.spec = spec;
-    this.interval = interval;
-    this.webhook = webhook;
-  }
 }

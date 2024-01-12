@@ -17,7 +17,6 @@ import io.harness.annotations.dev.ProductModule;
 import io.harness.ngtriggers.beans.source.v1.NGTriggerYamlSimplSpec;
 
 import java.util.List;
-import lombok.Builder;
 import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
@@ -27,14 +26,6 @@ public class MultiRegionArtifactTriggerConfig implements NGTriggerYamlSimplSpec,
   ArtifactType type;
   List<ArtifactTypeSpecWrapper> sources;
   Conditions conditions;
-
-  @Builder
-  public MultiRegionArtifactTriggerConfig(
-      ArtifactType type, List<ArtifactTypeSpecWrapper> sources, Conditions conditions) {
-    this.type = type;
-    this.sources = sources;
-    this.conditions = conditions;
-  }
 
   @Override
   public String fetchBuildType() {

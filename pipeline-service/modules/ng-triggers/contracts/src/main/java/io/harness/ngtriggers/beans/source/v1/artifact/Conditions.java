@@ -16,12 +16,10 @@ import io.harness.ngtriggers.conditionchecker.ConditionOperator;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.Builder;
 import lombok.Value;
 
 @CodePulse(module = ProductModule.CDS, unitCoverageRequired = true, components = {HarnessModuleComponent.CDS_TRIGGERS})
 @Value
-@Builder
 public class Conditions {
   List<TriggerEventDataCondition> event;
   List<TriggerEventDataCondition> metadata;

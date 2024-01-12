@@ -272,7 +272,13 @@ public class InitializeTaskStepV2 extends CiAsyncExecutable {
             "Failed to process execution as ciExecutionMetadata is null for stageExecutionId Id: %s , It generally happens for aborted executions",
             ambiance.getStageExecutionId()));
       }
-      taskId = executeBuild(ambiance, stepParameters);
+
+      try {
+        taskId = executeBuild(ambiance, stepParameters);
+      } catch (Throwable t) {
+        log.error("Exception while executing initialise step", t);
+        throw t;
+      }
     }
 
     AsyncExecutableResponse.Builder responseBuilder =

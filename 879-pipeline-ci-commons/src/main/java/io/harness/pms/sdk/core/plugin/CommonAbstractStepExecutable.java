@@ -183,14 +183,19 @@ public abstract class CommonAbstractStepExecutable extends CiAsyncExecutable {
 
     StageInfraDetails stageInfraDetails = getStageInfra(ambiance);
     StageInfraDetails.Type stageInfraType = stageInfraDetails.getType();
-    if (stageInfraType == StageInfraDetails.Type.K8) {
-      return executeK8AsyncAfterRbac(ambiance, completeStepIdentifier, runtimeId, ciStepInfo, stepParametersName,
-          accountId, logKey, timeoutInMillis, stringTimeout, (K8StageInfraDetails) stageInfraDetails, stageDetails);
-    } else if (stageInfraType == StageInfraDetails.Type.VM || stageInfraType == StageInfraDetails.Type.DLITE_VM) {
-      return executeVmAsyncAfterRbac(ambiance, completeStepIdentifier, stepIdentifier, runtimeId, ciStepInfo, accountId,
-          logKey, timeoutInMillis, stringTimeout, stageInfraDetails, stageDetails);
-    } else {
-      throw new CIStageExecutionException(format("Invalid infra type: %s", stageInfraType));
+    try {
+      if (stageInfraType == StageInfraDetails.Type.K8) {
+        return executeK8AsyncAfterRbac(ambiance, completeStepIdentifier, runtimeId, ciStepInfo, stepParametersName,
+            accountId, logKey, timeoutInMillis, stringTimeout, (K8StageInfraDetails) stageInfraDetails, stageDetails);
+      } else if (stageInfraType == StageInfraDetails.Type.VM || stageInfraType == StageInfraDetails.Type.DLITE_VM) {
+        return executeVmAsyncAfterRbac(ambiance, completeStepIdentifier, stepIdentifier, runtimeId, ciStepInfo,
+            accountId, logKey, timeoutInMillis, stringTimeout, stageInfraDetails, stageDetails);
+      } else {
+        throw new CIStageExecutionException(format("Invalid infra type: %s", stageInfraType));
+      }
+    } catch (Throwable t) {
+      log.error("Exception occurred while executing step", t);
+      throw t;
     }
   }
 

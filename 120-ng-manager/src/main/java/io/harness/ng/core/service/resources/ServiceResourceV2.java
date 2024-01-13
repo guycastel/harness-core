@@ -15,6 +15,7 @@ import static io.harness.pms.rbac.NGResourceType.SERVICE;
 import static io.harness.rbac.CDNGRbacPermissions.SERVICE_CREATE_PERMISSION;
 import static io.harness.rbac.CDNGRbacPermissions.SERVICE_UPDATE_PERMISSION;
 import static io.harness.rbac.CDNGRbacPermissions.SERVICE_VIEW_PERMISSION;
+import static io.harness.springdata.SpringDataMongoUtils.getCaseSensitiveExactMatchRegex;
 import static io.harness.springdata.SpringDataMongoUtils.populateInFilter;
 import static io.harness.utils.PageUtils.getNGPageResponse;
 
@@ -485,7 +486,7 @@ public class ServiceResourceV2 {
         searchTerm, type, gitOpsEnabled, includeAllServicesAccessibleAtScope, repoName);
     Pageable pageRequest;
     if (isNotEmpty(serviceIdentifiers)) {
-      criteria.and(ServiceEntityKeys.identifier).in(serviceIdentifiers);
+      criteria.and(ServiceEntityKeys.identifier).regex(getCaseSensitiveExactMatchRegex(serviceIdentifiers));
     }
 
     if (isEmpty(sort)) {

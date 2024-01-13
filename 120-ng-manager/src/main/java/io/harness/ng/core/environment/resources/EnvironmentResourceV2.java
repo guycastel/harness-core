@@ -25,6 +25,7 @@ import static io.harness.rbac.CDNGRbacPermissions.ENVIRONMENT_DELETE_PERMISSION;
 import static io.harness.rbac.CDNGRbacPermissions.ENVIRONMENT_UPDATE_PERMISSION;
 import static io.harness.rbac.CDNGRbacPermissions.ENVIRONMENT_VIEW_PERMISSION;
 import static io.harness.rbac.CDNGRbacPermissions.SERVICE_UPDATE_PERMISSION;
+import static io.harness.springdata.SpringDataMongoUtils.getCaseSensitiveExactMatchRegex;
 import static io.harness.springdata.SpringDataMongoUtils.populateInFilter;
 import static io.harness.utils.IdentifierRefHelper.MAX_RESULT_THRESHOLD_FOR_SPLIT;
 import static io.harness.utils.PageUtils.getNGPageResponse;
@@ -510,7 +511,7 @@ public class EnvironmentResourceV2 {
     Pageable pageRequest;
 
     if (isNotEmpty(envIdentifiers)) {
-      criteria.and(EnvironmentKeys.identifier).in(envIdentifiers);
+      criteria.and(EnvironmentKeys.identifier).regex(getCaseSensitiveExactMatchRegex(envIdentifiers));
     }
     if (isEmpty(sort)) {
       pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, EnvironmentKeys.createdAt));

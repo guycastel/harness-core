@@ -11,6 +11,7 @@ import static io.harness.annotations.dev.HarnessTeam.PL;
 import static io.harness.data.structure.EmptyPredicate.isNotEmpty;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import io.harness.annotations.dev.OwnedBy;
 
@@ -77,5 +78,9 @@ public class SpringDataMongoUtils {
 
   public String getPatternForMatchingAnyOneOf(List<String> wordsToBeMatched) {
     return StringUtils.collectionToDelimitedString(wordsToBeMatched, "|");
+  }
+
+  public String getCaseSensitiveExactMatchRegex(List<String> identifiers) {
+    return "^(" + join(identifiers, "|") + ")$";
   }
 }

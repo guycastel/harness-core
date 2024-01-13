@@ -64,6 +64,7 @@ import io.harness.ng.core.events.ServiceCreateEvent;
 import io.harness.ng.core.service.dto.ServiceResponseDTO;
 import io.harness.ng.core.service.entity.ArtifactSourcesResponseDTO;
 import io.harness.ng.core.service.entity.ServiceEntity;
+import io.harness.ng.core.service.entity.ServiceEntity.ServiceEntityKeys;
 import io.harness.ng.core.service.entity.ServiceInputsMergedResponseDto;
 import io.harness.ng.core.service.entity.ServiceMoveConfigOperationDTO;
 import io.harness.ng.core.service.entity.ServiceMoveConfigResponse;
@@ -91,6 +92,7 @@ import io.harness.repositories.service.spring.ServiceRepository;
 import io.harness.rule.Owner;
 import io.harness.rule.OwnerRule;
 import io.harness.spec.server.ng.v1.model.ManifestsResponseDTO;
+import io.harness.springdata.SpringDataMongoUtils;
 import io.harness.template.remote.TemplateResourceClient;
 import io.harness.utils.NGFeatureFlagHelperService;
 import io.harness.utils.PageUtils;
@@ -102,6 +104,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -550,6 +553,104 @@ public class ServiceEntityServiceImplTest extends CDNGEntitiesTestBase {
     Page<ServiceEntity> list = serviceEntityService.list(criteriaFromServiceFilter, pageRequest);
     assertThat(list.getContent()).isNotNull();
     assertThat(list.getContent().size()).isZero();
+  }
+
+  @Test
+  @Owner(developers = TATHAGAT)
+  @Category(UnitTests.class)
+  public void testListServicesWithIdentifiersCriteria() {
+    ServiceEntity serviceEntity1 = ServiceEntity.builder()
+                                       .accountId("ACCOUNT_ID")
+                                       .identifier("IDENTIFIER_1")
+                                       .orgIdentifier("ORG_ID")
+                                       .projectIdentifier("PROJECT_ID")
+                                       .name("Service")
+                                       .build();
+
+    ServiceEntity serviceEntity2 = ServiceEntity.builder()
+                                       .accountId("ACCOUNT_ID")
+                                       .identifier("IDENTIFIER_2")
+                                       .orgIdentifier("ORG_ID")
+                                       .projectIdentifier("PROJECT_ID")
+                                       .name("Service")
+                                       .build();
+
+    ServiceEntity serviceEntity1LowerCase = ServiceEntity.builder()
+                                                .accountId("ACCOUNT_ID")
+                                                .identifier("identifier_1")
+                                                .orgIdentifier("ORG_ID")
+                                                .projectIdentifier("PROJECT_ID")
+                                                .name("Service")
+                                                .build();
+
+    ServiceEntity serviceEntity2LowerCase = ServiceEntity.builder()
+                                                .accountId("ACCOUNT_ID")
+                                                .identifier("identifier_2")
+                                                .orgIdentifier("ORG_ID")
+                                                .projectIdentifier("PROJECT_ID")
+                                                .name("Service")
+                                                .build();
+
+    ServiceEntity serviceEntityCheckFuzzy = ServiceEntity.builder()
+                                                .accountId("ACCOUNT_ID")
+                                                .identifier("identifier")
+                                                .orgIdentifier("ORG_ID")
+                                                .projectIdentifier("PROJECT_ID")
+                                                .name("Service")
+                                                .build();
+    // Create operations
+    serviceEntityService.create(serviceEntity1);
+    serviceEntityService.create(serviceEntity2);
+    serviceEntityService.create(serviceEntity1LowerCase);
+    serviceEntityService.create(serviceEntity2LowerCase);
+    serviceEntityService.create(serviceEntityCheckFuzzy);
+
+    // pattern 1
+    Criteria criteriaFromServiceFilter =
+        CoreCriteriaUtils.createCriteriaForGetList("ACCOUNT_ID", "ORG_ID", "PROJECT_ID");
+    Criteria criteria1 =
+        new Criteria()
+            .and(ServiceEntityKeys.identifier)
+            .regex(SpringDataMongoUtils.getCaseSensitiveExactMatchRegex(Arrays.asList("IDENTIFIER_1", "IDENTIFIER_2")));
+    criteria1.andOperator(criteriaFromServiceFilter);
+    Pageable pageRequest = PageUtils.getPageRequest(0, 10, null);
+    Page<ServiceEntity> serviceListPaged = serviceEntityService.list(criteria1, pageRequest);
+    assertThat(serviceListPaged.getContent()).isNotNull();
+    assertThat(serviceListPaged.getContent().size()).isEqualTo(2);
+    assertThat(serviceListPaged.get().map(ServiceEntity::getIdentifier).collect(Collectors.toList()))
+        .containsExactlyInAnyOrder("IDENTIFIER_1", "IDENTIFIER_2");
+
+    // pattern 2
+    Criteria criteria2 =
+        new Criteria()
+            .and(ServiceEntityKeys.identifier)
+            .regex(SpringDataMongoUtils.getCaseSensitiveExactMatchRegex(Arrays.asList("identifier_1", "identifier_2")));
+    criteria2.andOperator(criteriaFromServiceFilter);
+    serviceListPaged = serviceEntityService.list(criteria2, pageRequest);
+    assertThat(serviceListPaged.getContent()).isNotNull();
+    assertThat(serviceListPaged.getContent().size()).isEqualTo(2);
+    assertThat(serviceListPaged.get().map(ServiceEntity::getIdentifier).collect(Collectors.toList()))
+        .containsExactlyInAnyOrder("identifier_1", "identifier_2");
+
+    // pattern 3
+    Criteria criteria3 = new Criteria()
+                             .and(ServiceEntityKeys.identifier)
+                             .regex(SpringDataMongoUtils.getCaseSensitiveExactMatchRegex(List.of("identifier")));
+    criteria3.andOperator(criteriaFromServiceFilter);
+    serviceListPaged = serviceEntityService.list(criteria3, pageRequest);
+    assertThat(serviceListPaged.getContent()).isNotNull();
+    assertThat(serviceListPaged.getContent().size()).isEqualTo(1);
+    assertThat(serviceListPaged.get().map(ServiceEntity::getIdentifier).collect(Collectors.toList()))
+        .containsExactlyInAnyOrder("identifier");
+
+    // pattern 4
+    Criteria criteria4 = new Criteria()
+                             .and(ServiceEntityKeys.identifier)
+                             .regex(SpringDataMongoUtils.getCaseSensitiveExactMatchRegex(Collections.EMPTY_LIST));
+    criteria4.andOperator(criteriaFromServiceFilter);
+    serviceListPaged = serviceEntityService.list(criteria4, pageRequest);
+    assertThat(serviceListPaged.getContent()).isNotNull();
+    assertThat(serviceListPaged.getContent().size()).isEqualTo(0);
   }
 
   @Test

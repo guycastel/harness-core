@@ -23,6 +23,7 @@ java_library(
         "//950-events-framework:module",
         "//950-ng-authentication-service:module",
         "//950-wait-engine:module",
+        "//955-account-mgmt:module",
         "//955-alert-beans:module",
         "//955-delegate-beans:module",
         "//957-cg-beans:module",

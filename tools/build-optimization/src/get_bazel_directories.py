@@ -38,4 +38,3 @@ def get_bazel_directories(import_paths):
 
     return list(bazel_directories)
 
-print(find_build_bazel_path("/Users/pankajkumar/Desktop/harness-core/970-grpc/src/main/java/io/harness/grpc/client/SCMGrpcInterceptor.java"))

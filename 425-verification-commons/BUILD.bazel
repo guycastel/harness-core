@@ -12,19 +12,11 @@ HarnessTeam = "CV"
 
 java_library(
     name = "module",
-    srcs = glob(["src/main/java/**/*.java"]),
     visibility = ["//visibility:public"],
-    deps = [
-        "//:lombok",
-        "//870-cg-orchestration:module",
-        "//960-persistence:module",
-        "//980-commons:module",
-        "@maven//:com_fasterxml_jackson_core_jackson_annotations",
-        "@maven//:com_github_reinert_jjschema",
-        "@maven//:com_google_code_findbugs_annotations",
-        "@maven//:com_google_guava_guava",
-        "@maven//:com_google_inject_guice",
-        "@maven//:dev_morphia_morphia_core",
+    exports = [
+        "//425-verification-commons/src/main/java/io/harness/cv:module",
+        "//425-verification-commons/src/main/java/io/harness/serializer:module",
+        "//425-verification-commons/src/main/java/io/harness/serializer/morphia:module",
     ],
 )
 

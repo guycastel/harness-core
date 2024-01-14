@@ -12,7 +12,6 @@ import static io.harness.springdata.PersistenceUtils.DEFAULT_RETRY_POLICY;
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
-import io.harness.idp.common.CommonUtils;
 import io.harness.idp.k8s.client.K8sClient;
 import io.harness.idp.namespace.service.NamespaceService;
 import io.harness.idp.settings.beans.entity.BackstagePermissionsEntity;
@@ -93,6 +92,14 @@ public class BackstagePermissionsServiceImpl implements BackstagePermissionsServ
       outboxService.save(new PermissionsCreateEvent(accountIdentifier, savedBackstagePermissions));
       return savedBackstagePermissions;
     }));
+  }
+
+  @Override
+  public void findAndSyncPermissions(String accountIdentifier) {
+    Optional<BackstagePermissionsEntity> permissionsEntity =
+        backstagePermissionsRepository.findByAccountIdentifier(accountIdentifier);
+    permissionsEntity.map(BackstagePermissionsMapper::toDTO)
+        .ifPresent(backstagePermissions -> updateConfigMap(backstagePermissions, accountIdentifier));
   }
 
   private void updateConfigMap(BackstagePermissions backstagePermissions, String accountIdentifier) {

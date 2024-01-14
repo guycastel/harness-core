@@ -71,6 +71,7 @@ import io.harness.idp.pipeline.registrar.IdpStepRegistrar;
 import io.harness.idp.provision.jobs.DefaultProvisioningForDevSpaces;
 import io.harness.idp.scorecard.scores.iteratorhandler.ScoreComputationHandler;
 import io.harness.idp.scorecard.scores.jobs.StatsComputeDailyRunJob;
+import io.harness.idp.settings.jobs.BackstagePermissionsSyncJob;
 import io.harness.idp.user.jobs.UserSyncJob;
 import io.harness.licensing.usage.resources.LicenseUsageResource;
 import io.harness.maintenance.MaintenanceController;
@@ -297,6 +298,7 @@ public class IdpApplication extends Application<IdpConfiguration> {
 
   private void registerManagedJobs(Environment environment, Injector injector) {
     environment.lifecycle().manage(injector.getInstance(BackstageEnvVariablesSyncJob.class));
+    environment.lifecycle().manage(injector.getInstance(BackstagePermissionsSyncJob.class));
     environment.lifecycle().manage(injector.getInstance(UserSyncJob.class));
     environment.lifecycle().manage(injector.getInstance(ConfigPurgeJob.class));
     environment.lifecycle().manage(injector.getInstance(DefaultProvisioningForDevSpaces.class));

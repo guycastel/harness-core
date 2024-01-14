@@ -15,4 +15,5 @@ public interface BackstagePermissionsService {
   Optional<BackstagePermissions> findByAccountIdentifier(String accountIdentifier);
   BackstagePermissions updatePermissions(BackstagePermissions backstagePermissions, String accountIdentifier);
   BackstagePermissions createPermissions(BackstagePermissions backstagePermissions, String accountIdentifier);
+  void findAndSyncPermissions(String accountIdentifier);
 }

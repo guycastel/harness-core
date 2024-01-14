@@ -5,13 +5,12 @@
  * https://polyformproject.org/wp-content/uploads/2020/05/PolyForm-Free-Trial-1.0.0.txt.
  */
 
-package io.harness.idp.envvariable.jobs;
+package io.harness.idp.settings.jobs;
 
 import io.harness.annotations.dev.HarnessTeam;
 import io.harness.annotations.dev.OwnedBy;
-import io.harness.idp.envvariable.service.BackstageEnvVariableService;
 import io.harness.idp.namespace.service.NamespaceService;
-import io.harness.spec.server.idp.v1.model.BackstageEnvVariable;
+import io.harness.idp.settings.service.BackstagePermissionsService;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
@@ -27,24 +26,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Singleton
 @OwnedBy(HarnessTeam.IDP)
-public class BackstageEnvVariablesSyncJob implements Managed {
+public class BackstagePermissionsSyncJob implements Managed {
   private static final long DELAY_IN_MINUTES = TimeUnit.HOURS.toMinutes(24);
   private ScheduledExecutorService executorService;
-  private final BackstageEnvVariableService backstageEnvVariableService;
+  private final BackstagePermissionsService backstagePermissionsService;
   private final NamespaceService namespaceService;
 
   @Inject
-  public BackstageEnvVariablesSyncJob(@Named("backstageEnvVariableSyncer") ScheduledExecutorService executorService,
-      BackstageEnvVariableService backstageEnvVariableService, NamespaceService namespaceService) {
+  public BackstagePermissionsSyncJob(@Named("backstagePermissionsSyncer") ScheduledExecutorService executorService,
+      BackstagePermissionsService backstagePermissionsService, NamespaceService namespaceService) {
     this.executorService = executorService;
-    this.backstageEnvVariableService = backstageEnvVariableService;
+    this.backstagePermissionsService = backstagePermissionsService;
     this.namespaceService = namespaceService;
   }
 
   @Override
   public void start() throws Exception {
     executorService = Executors.newSingleThreadScheduledExecutor(
-        new ThreadFactoryBuilder().setNameFormat("backstage-env-variable-sync-job").build());
+        new ThreadFactoryBuilder().setNameFormat("backstage-permissions-sync-job").build());
     executorService.scheduleWithFixedDelay(this::run, 0, DELAY_IN_MINUTES, TimeUnit.MINUTES);
   }
 
@@ -55,15 +54,15 @@ public class BackstageEnvVariablesSyncJob implements Managed {
   }
 
   public void run() {
-    log.info("Backstage env variables sync job started");
+    log.info("Backstage permissions sync job started");
     List<String> accountIds = namespaceService.getAccountIds();
     accountIds.forEach(account -> {
       try {
-        backstageEnvVariableService.findAndSync(account);
+        backstagePermissionsService.findAndSyncPermissions(account);
       } catch (Exception e) {
-        log.error("Could not sync backstage env variables for account {}", account, e);
+        log.error("Could not sync backstage permissions for account {}", account, e);
       }
     });
-    log.info("Backstage env variables sync job completed");
+    log.info("Backstage permissions sync job completed");
   }
 }
